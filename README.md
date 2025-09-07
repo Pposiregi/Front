@@ -1,97 +1,36 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🐾 FitPet - Android Front
 
-# Getting Started
+> 당신의 건강 습관을 펫과 함께 키워나가는 헬스케어 앱  
+> React Native 기반 Android 프론트엔드 프로젝트
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 👥 팀원
 
-## Step 1: Start Metro
+김규리
+[![규리 GitHub](https://img.shields.io/badge/GitHub-kimkyury-181717?style=flat-square&logo=github)](https://github.com/kimkyury)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+이상현
+[![상현 GitHub](https://img.shields.io/badge/GitHub-sanghyun-181717?style=flat-square&logo=github)](https://github.com/Leesanghyun1212)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 📌 프로젝트 소개
 
-```sh
-# Using npm
-npm start
+FitPet은 **사용자의 건강 데이터를 펫과 연동**하여 즐겁게 관리할 수 있는 헬스케어
+앱입니다.  
+걸음수, GPS 이동, 식단, 인바디 기록 등을 기반으로 펫이 성장하고 변화합니다.
 
-# OR using Yarn
-yarn start
+- OAuth/기본 회원가입 (성별, 나이 입력)
+- 체중/근육량/체지방률 기록 및 목표 설정
+- 스마트폰/워치 연동 걸음수 수집
+- GPS 기반 땅따먹기 게임 감성의 걷기
+- 미션/배지/랭킹을 통한 동기부여
+- 펫 진화 및 커스터마이징
+
+---
+
+## 🚀 실행 방법
+
+### 1. 프로젝트 클론
+
+```bash
+git clone https://github.com/Pposiregi/Front
+cd FitPet-Android
 ```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
