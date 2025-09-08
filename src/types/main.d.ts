@@ -1,4 +1,4 @@
-export interface MainResponse {
+declare interface MainResponse {
     user: {
         user_id: string;
         nick_name: string;

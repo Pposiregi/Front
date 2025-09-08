@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, ActivityIndicator } from "react-native";
-import { useMainData } from "../../hooks/useMainData";
-import { StepProgress } from "../../components/StepProgress";
-import { PetAvatar } from "../../components/PetAvatar";
+import { useMainData } from "@hooks/useMainData";
+import { StepProgress } from "@components/StepProgress";
+
 
 export const MainScreen = () => {
     const { data, loading } = useMainData("u12345");

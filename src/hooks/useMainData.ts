@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { getMainData } from "../api/mainApi";
-import { MainResponse } from "../types/main.d";
 
 export const useMainData = (userId: string) => {
     const [data, setData] = useState<MainResponse | null>(null);
