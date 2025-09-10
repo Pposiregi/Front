@@ -114,12 +114,6 @@ const SocialLogin = () => {
               signOut();
             }}
           >
-            <Text style={styles.text}>임시 로그아웃</Text>
-          </Pressable>
-          <Pressable
-            style={styles.kakaoButton}
-            onPress={() => handleLogin(signInWithKakao)}
-          >
             <Image
               source={require('../assets/images/kakao_icon.png')}
               style={styles.kakaoIcon}

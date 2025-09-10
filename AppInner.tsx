@@ -51,9 +51,8 @@ function AppInner() {
         // 앱에 저장되 있는 리프레쉬 토큰을 기반으로 로그인 유지 로직
         const platform = await AsyncStorage.getItem('platform');
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
-        console.log('리프레쉬있나?', refreshToken);
         if (!refreshToken) {
-          console.error(`[AuthError] 토큰 값이 없습니다.`);
+          console.error(`[AuthError] 로그인 기록이 없어 토큰 값이 없습니다.`);
           return;
         }
         if (!platform || (platform !== 'kakao' && platform !== 'google')) {
