@@ -9,7 +9,6 @@ const tokenRefreshers = {
       client_id: KAKAO_CLIENT_ID,
       refresh_token: refreshToken,
     }).toString();
-    console.log('파람확인:', params);
     const res = await axios.post(
       'https://kauth.kakao.com/oauth/token',
       params,

@@ -82,21 +82,6 @@ const SocialLogin = () => {
       })
     );
   };
-
-  // 임시 로그아웃
-  const signOut = async () => {
-    try {
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
-      await EncryptedStorage.removeItem('refreshToken');
-      await AsyncStorage.removeItem('platform');
-      console.log('로그아웃');
-      Alert.alert('로그아웃');
-    } catch (err) {
-      console.error('로그아웃 에러', err);
-    }
-  };
-
   return (
     <View style={styles.container}>
       {loading ? (
