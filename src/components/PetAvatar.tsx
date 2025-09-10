@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, TouchableOpacity } from 'react-native';
+import styles from '@styles/PetAvatar.styles';
 
 type Props = { uri: string; expression?: string; onPress?: () => void };
 
@@ -16,10 +17,3 @@ export const PetAvatar = ({ uri, expression: _expression, onPress }: Props) => {
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  image: {
-    width: 250,
-    height: 500,
-  },
-});

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
 
 type Props = {
@@ -27,23 +28,3 @@ export const StepProgress = ({ title, current, goal, unit }: Props) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
-    width: 160,
-    height: 80,
-    marginRight: 10,
-  },
-  title: {
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  text: {
-    marginTop: 4,
-    fontSize: 12,
-    textAlign: 'right',
-  },
-});

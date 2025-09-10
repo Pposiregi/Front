@@ -5,11 +5,11 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import { PetAvatar } from '@components/PetAvatar';
+import styles from '@styles/MainPage.styles';
 
 export const MainScreen = () => {
   const { data, loading } = useMainData('u12345');
@@ -43,6 +43,7 @@ export const MainScreen = () => {
 
       {/* 펫 아바타 */}
       <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
+
       {/* Start Button */}
       <TouchableOpacity style={styles.startButton}>
         <Text style={styles.startText}>START</Text>
@@ -58,45 +59,3 @@ export const MainScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFA64D',
-    paddingTop: 20,
-    paddingBottom: 60, // space for bottom nav
-  },
-  progressRow: {
-    paddingHorizontal: 16,
-  },
-  message: {
-    textAlign: 'center',
-    marginVertical: 16,
-    fontSize: 18,
-  },
-  startButton: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 40,
-    paddingVertical: 10,
-    borderRadius: 20,
-    alignSelf: 'center',
-    marginTop: 20,
-  },
-  startText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-  },
-  navIcon: {
-    fontSize: 24,
-  },
-});
