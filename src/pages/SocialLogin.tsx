@@ -109,10 +109,8 @@ const SocialLogin = () => {
         <>
           <Text style={styles.mainText}>함께 달릴 준비 되셨나요?</Text>
           <Pressable
-            style={styles.googleButton}
-            onPress={() => {
-              signOut();
-            }}
+            style={styles.kakaoButton}
+            onPress={() => handleLogin(signInWithKakao)}
           >
             <Image
               source={require('../assets/images/kakao_icon.png')}
