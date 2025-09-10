@@ -20,7 +20,7 @@ const tokenRefreshers = {
     );
     return {
       accessToken: res.data.access_token,
-      refreshToken: res.data.refresh_token,
+      refreshToken: res.data.refresh_token ?? refreshToken, // 새로 리프레쉬 토큰이 오면 갱신 없으면 그대로
     };
   },
   google: async (refreshToken: string) => {
@@ -32,7 +32,7 @@ const tokenRefreshers = {
     });
     return {
       accessToken: res.data.access_token,
-      refreshToken: res.data.refresh_token,
+      refreshToken: res.data.refresh_token ?? refreshToken,
     };
   },
 };
