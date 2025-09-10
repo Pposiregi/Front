@@ -1,4 +1,12 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, { useState } from 'react';
 import {
   login,
@@ -10,110 +18,126 @@ import {
   getProfile,
 } from '@react-native-seoul/kakao-login';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { RootState } from '../store/reducer';
 import { useAppDispatch } from '../store';
 import userSlice from '../slices/user';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string>('');
-  //카카오 로그인
-  const signInWithKakao = async (): Promise<void> => {
-    try {
-      const token = await login(); // 카카오에서 토큰 받아옴
-      const profile = await getProfile(); // 카카오에서 사용자 정보 받아옴
 
-      // 앱 껏다 켜도 로그인 유지 위해 리프레쉬 토큰을 EncryptedStorage에 저장
-      await EncryptedStorage.setItem('refreshToken', token.refreshToken);
-      dispatch(
-        userSlice.actions.setUser({
-          email: profile.email,
-          accessToken: token.accessToken,
-          platform: 'kakao',
-        })
-      );
+  // 로그인 및 로딩 상태를 관리하는 함수
+  const handleLogin = async (loginFunction: () => Promise<void>) => {
+    try {
+      setLoading(true);
+      await loginFunction();
     } catch (err) {
-      console.error('login err', err);
+      console.error('로그인 에러', err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // 카카오 로그인
+  const signInWithKakao = async (): Promise<void> => {
+    const token = await login();
+    const profile = await getProfile();
+
+    await EncryptedStorage.setItem('refreshToken', token.refreshToken);
+    await AsyncStorage.setItem('platform', 'kakao');
+
+    dispatch(
+      userSlice.actions.setUser({
+        email: profile.email,
+        accessToken: token.accessToken,
+      })
+    );
+  };
+
   // 구글 로그인
   const signInWithGoogle = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const profile = await GoogleSignin.signIn(); // 1. 구글에 로그인
-      // 2. 1에서 받은 authCode + clientId 를 활용하여 토큰 가져오기
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
-        method: 'POST',
-        body: JSON.stringify({
-          code: profile.data?.serverAuthCode,
-          clientId: GOOGLE_CLIENT_ID,
-          clientSecret: GOOGLE_CLIENT_SECRET,
-          grant_type: 'authorization_code',
-        }),
-      });
-      // 3. 받아온 json 파일 풀기
-      const token = await res.json();
-      console.log('data확인', token);
-      await EncryptedStorage.setItem('refreshToken', token.refresh_token);
-      dispatch(
-        userSlice.actions.setUser({
-          email: profile.data?.user.email,
-          accessToken: token.access_token,
-          platform: 'google',
-        })
-      );
-    } catch (err) {
-      console.error('login err', err);
-    }
+    await GoogleSignin.hasPlayServices();
+    const profile = await GoogleSignin.signIn();
+
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
+      method: 'POST',
+      body: JSON.stringify({
+        code: profile.data?.serverAuthCode,
+        clientId: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+      }),
+    });
+    const token = await res.json();
+
+    await EncryptedStorage.setItem('refreshToken', token.refresh_token);
+    await AsyncStorage.setItem('platform', 'google');
+    dispatch(
+      userSlice.actions.setUser({
+        email: profile.data?.user.email,
+        accessToken: token.access_token,
+      })
+    );
   };
+
   // 임시 로그아웃
   const signOut = async () => {
     try {
-      await GoogleSignin.revokeAccess(); // 기존 토큰 무효화
-      GoogleSignin.signOut();
+      await GoogleSignin.revokeAccess();
+      await GoogleSignin.signOut();
+      await EncryptedStorage.removeItem('refreshToken');
+      await AsyncStorage.removeItem('platform');
       console.log('로그아웃');
+      Alert.alert('로그아웃');
     } catch (err) {
-      console.error('login err', err);
+      console.error('로그아웃 에러', err);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.mainText}>함께 달릴 준비 되셨나요?</Text>
-      <Pressable
-        style={styles.googleButton}
-        onPress={() => {
-          signOut();
-        }}
-      >
-        <Text style={styles.text}>임시 로그아웃</Text>
-      </Pressable>
-      <Pressable
-        style={styles.kakaoButton}
-        onPress={() => {
-          signInWithKakao();
-        }}
-      >
-        <Image
-          source={require('../assets/images/kakao_icon.png')}
-          style={styles.kakaoIcon}
-        />
-        <Text style={styles.text}>카카오 계정으로 계속</Text>
-      </Pressable>
-      <Pressable
-        style={styles.googleButton}
-        onPress={() => {
-          signInWithGoogle();
-        }}
-      >
-        <Image
-          source={require('../assets/images/google_icon.png')}
-          style={styles.googleIcon}
-        />
-        <Text style={styles.text}>구글 계정으로 계속</Text>
-      </Pressable>
+      {loading ? (
+        // loading이 true일 때 로딩 스피너를 보여줍니다.
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color='#000000' />
+        </View>
+      ) : (
+        // loading이 false일 때 버튼들을 보여줍니다.
+        <>
+          <Text style={styles.mainText}>함께 달릴 준비 되셨나요?</Text>
+          <Pressable
+            style={styles.googleButton}
+            onPress={() => {
+              signOut();
+            }}
+          >
+            <Text style={styles.text}>임시 로그아웃</Text>
+          </Pressable>
+          <Pressable
+            style={styles.kakaoButton}
+            onPress={() => handleLogin(signInWithKakao)}
+          >
+            <Image
+              source={require('../assets/images/kakao_icon.png')}
+              style={styles.kakaoIcon}
+            />
+            <Text style={styles.text}>카카오 계정으로 계속</Text>
+          </Pressable>
+          <Pressable
+            style={styles.googleButton}
+            onPress={() => handleLogin(signInWithGoogle)}
+          >
+            <Image
+              source={require('../assets/images/google_icon.png')}
+              style={styles.googleIcon}
+            />
+            <Text style={styles.text}>구글 계정으로 계속</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 };
@@ -171,6 +195,12 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     fontFamily: 'GowunDodum',
-    fontWeight: 800,
+    fontWeight: '800',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
   },
 });

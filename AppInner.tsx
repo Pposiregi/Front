@@ -13,9 +13,11 @@ import { useEffect, useState } from 'react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
-import axios from 'axios';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CLIENT_ID, KAKAO_CLIENT_ID } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import tokenRefreshers from './src/utils/auth';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -38,48 +40,56 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
-  const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
+  const isLoggedIn = useSelector(
+    (state: RootState) => !!state.user.accessToken
+  );
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
     const getTokenAndRefresh = async () => {
       try {
-        // 리프레쉬 토큰을 기반으로 로그인 유지 로직
+        // 앱에 저장되 있는 리프레쉬 토큰을 기반으로 로그인 유지 로직
+        const platform = await AsyncStorage.getItem('platform');
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        console.log('리프레쉬있나?', refreshToken);
         if (!refreshToken) {
+          console.error(`[AuthError] 토큰 값이 없습니다.`);
           return;
         }
-        const params = new URLSearchParams({
-          grant_type: 'refresh_token',
-          client_id: KAKAO_CLIENT_ID,
-          refresh_token: refreshToken,
-        }).toString();
-        const res = await axios.post(
-          'https://kauth.kakao.com/oauth/token',
-          params,
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-            },
-          }
-        );
-        // 토큰 발급 성공시 갱신
-        if (res.data.refresh_token) {
-          await EncryptedStorage.setItem(
-            'refreshToken',
-            res.data.refresh_token
-          );
+        if (!platform || (platform !== 'kakao' && platform !== 'google')) {
+          console.error(`[AuthError] 지원하지않는 플랫폼 요청 : ${platform}`);
+          return;
+        }
+        //플랫폼 들고오기
+        const platformRefresher =
+          tokenRefreshers[platform as keyof typeof tokenRefreshers];
+        // 해당 플랫폼의 토큰 갱신 함수 호출
+        const { accessToken, refreshToken: newRefreshToken } =
+          await platformRefresher(refreshToken);
+        // 리프레쉬 토큰 재발급시 갱신
+        if (newRefreshToken) {
+          await EncryptedStorage.setItem('refreshToken', newRefreshToken);
         }
         dispatch(
           userSlice.actions.setUser({
-            accessToken: res.data.access_token,
+            accessToken: accessToken,
           })
         );
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(true);
       }
     };
     getTokenAndRefresh();
   }, [dispatch]);
+  if (!loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' color='#000000' />
+      </View>
+    );
+  }
   return (
     <NavigationContainer>
       {isLoggedIn ? (
@@ -122,5 +132,14 @@ function AppInner() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+  },
+});
 
 export default AppInner;
