@@ -40,9 +40,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
-  const isLoggedIn = useSelector(
-    (state: RootState) => !!state.user.accessToken
-  );
+  const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
