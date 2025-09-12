@@ -11,7 +11,7 @@ import { StepProgress } from '@components/StepProgress';
 import { PetAvatar } from '@components/PetAvatar';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
-
+import { useMissions } from '@hooks/useMissions';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -20,6 +20,9 @@ import { getMissions } from './missions';
 export const MainScreen = () => {
   // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
   const { data, loading } = useMainData('u12345');
+
+  // 위치 변화를 구독하여 좌표를 얻음
+  const position = useMissions();
 
   // 데이터 로딩 중일 경우 스피너 표시
   if (loading) return <ActivityIndicator size='large' />;
@@ -58,6 +61,15 @@ export const MainScreen = () => {
       <TouchableOpacity style={styles.startButton}>
         <Text style={styles.startText}>START</Text>
       </TouchableOpacity>
+
+      {/* 현재 위치 좌표 표시 (디버그용) */}
+      <Text>
+        {position
+          ? `${position.coords.latitude.toFixed(
+              5
+            )}, ${position.coords.longitude.toFixed(5)}`
+          : '위치를 가져오는 중...'}
+      </Text>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>

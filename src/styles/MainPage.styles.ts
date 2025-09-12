@@ -12,7 +12,12 @@ export default StyleSheet.create({
   progressRow: {
     paddingHorizontal: 16,
   },
+  missionCard: {
+    marginRight: 12,
+    alignItems: 'center',
+  },
   message: {
+    fontFamily: 'JUA',
     textAlign: 'center',
     marginVertical: 16,
     fontSize: 18,
@@ -26,6 +31,7 @@ export default StyleSheet.create({
     marginTop: 20,
   },
   startText: {
+    fontFamily: 'JUA',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -41,5 +47,10 @@ export default StyleSheet.create({
   },
   navIcon: {
     fontSize: 24,
+  },
+  removeText: {
+    marginTop: 4,
+    color: '#fff',
+    fontSize: 12,
   },
 });
