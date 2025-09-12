@@ -10,37 +10,28 @@ import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import { PetAvatar } from '@components/PetAvatar';
 import styles from '@styles/MainPage.styles';
+import { getMissions } from './missions';
 
+/**
+ * 메인 화면 컴포넌트
+ * - 사용자 데이터 로딩
+ * - 미션 목록을 가로 스크롤로 표시
+ */
 export const MainScreen = () => {
+  // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
   const { data, loading } = useMainData('u12345');
 
+  // 데이터 로딩 중일 경우 스피너 표시
   if (loading) return <ActivityIndicator size='large' />;
-  const missions = [
-    {
-      id: 'walk',
-      title: `${data!.daily_walk.goal_step}보 걷기`,
-      current: data!.daily_walk.step,
-      goal: data!.daily_walk.goal_step,
-      unit: '보',
-    },
-    {
-      id: 'run',
-      title: '3km 달리기',
-      current: data!.daily_walk.distance_km,
-      goal: 3,
-      unit: 'km',
-    },
-    {
-      id: 'cal',
-      title: '100kcal 소모',
-      current: data!.daily_walk.burn_calories,
-      goal: 100,
-      unit: 'kcal',
-    },
-  ];
+
+  // 미션 가져오는 척
+  const missions = getMissions(data!);
 
   return (
     <View style={styles.container}>
+      {/*
+        미션 진행 상황을 가로 스크롤로 표시 
+      */}
       <FlatList
         data={missions}
         horizontal
@@ -57,7 +48,7 @@ export const MainScreen = () => {
         contentContainerStyle={styles.progressRow}
       />
 
-      {/* 안내 메시지 */}
+      {/* 안내 메시지, from Server */}
       <Text style={styles.message}>{data!.ui.message}</Text>
 
       {/* 펫 아바타 */}
