@@ -3,7 +3,7 @@ import {
   View,
   Text,
   ActivityIndicator,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
@@ -15,28 +15,47 @@ export const MainScreen = () => {
   const { data, loading } = useMainData('u12345');
 
   if (loading) return <ActivityIndicator size='large' />;
+  const missions = [
+    {
+      id: 'walk',
+      title: `${data!.daily_walk.goal_step}보 걷기`,
+      current: data!.daily_walk.step,
+      goal: data!.daily_walk.goal_step,
+      unit: '보',
+    },
+    {
+      id: 'run',
+      title: '3km 달리기',
+      current: data!.daily_walk.distance_km,
+      goal: 3,
+      unit: 'km',
+    },
+    {
+      id: 'cal',
+      title: '100kcal 소모',
+      current: data!.daily_walk.burn_calories,
+      goal: 100,
+      unit: 'kcal',
+    },
+  ];
 
   return (
     <View style={styles.container}>
-      {/* Progress Cards */}
-      <ScrollView
+      <FlatList
+        data={missions}
         horizontal
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <StepProgress
+            title={item.title}
+            current={item.current}
+            goal={item.goal}
+            unit={item.unit}
+          />
+        )}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.progressRow}
-      >
-        <StepProgress
-          title={`${data!.daily_walk.goal_step}보 걷기`}
-          current={data!.daily_walk.step}
-          goal={data!.daily_walk.goal_step}
-          unit='보'
-        />
-        <StepProgress
-          title='3km 달리기'
-          current={data!.daily_walk.distance_km}
-          goal={3}
-          unit='km'
-        />
-      </ScrollView>
+      />
 
       {/* 안내 메시지 */}
       <Text style={styles.message}>{data!.ui.message}</Text>
