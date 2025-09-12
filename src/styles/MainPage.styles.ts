@@ -1,12 +1,10 @@
--0;
-
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFA64D',
-    paddingTop: 20,
+    backgroundColor: '#fabe4e',
+    paddingTop: 40,
     paddingBottom: 60, // space for bottom nav
   },
   progressRow: {
@@ -17,10 +15,19 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   message: {
+    top: 0,
     fontFamily: 'JUA',
     textAlign: 'center',
-    marginVertical: 16,
-    fontSize: 18,
+    textAlignVertical: 'top',
+    color: '#fff',
+    marginBottom: 570,
+    fontSize: 24,
+  },
+  tokkiBackground: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   startButton: {
     backgroundColor: '#fff',
@@ -28,7 +35,7 @@ export default StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     alignSelf: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   startText: {
     fontFamily: 'JUA',

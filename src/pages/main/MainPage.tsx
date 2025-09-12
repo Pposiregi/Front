@@ -5,13 +5,14 @@ import {
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
-import { PetAvatar } from '@components/PetAvatar';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import { useMissions } from '@hooks/useMissions';
+import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -35,42 +36,49 @@ export const MainScreen = () => {
       {/*
         미션 진행 상황을 가로 스크롤로 표시 
       */}
-      <FlatList
-        data={missions}
-        horizontal
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <StepProgress
-            title={item.title}
-            current={item.current}
-            goal={item.goal}
-            unit={item.unit}
-          />
-        )}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.progressRow}
-      />
+      <View style={{ height: 100, marginBottom: 20 }}>
+        <FlatList
+          data={missions}
+          horizontal
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <StepProgress
+              title={item.title}
+              current={item.current}
+              goal={item.goal}
+              unit={item.unit}
+            />
+          )}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.progressRow}
+        />
+      </View>
 
-      {/* 안내 메시지, from Server */}
-      <Text style={styles.message}>{data!.ui.message}</Text>
+      {/* 토끼 배경 이미지와 함께 메시지 및 버튼 표시 */}
+      <ImageBackground
+        source={TokkiImage}
+        style={styles.tokkiBackground}
+        resizeMode='cover'
+      >
+        <Text style={styles.message}>{data!.ui.message}</Text>
 
-      {/* 펫 아바타 */}
+        {/* 펫 아바타 
       <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
+    */}
+        {/* Start Button */}
+        <TouchableOpacity style={styles.startButton}>
+          <Text style={styles.startText}>START</Text>
+        </TouchableOpacity>
 
-      {/* Start Button */}
-      <TouchableOpacity style={styles.startButton}>
-        <Text style={styles.startText}>START</Text>
-      </TouchableOpacity>
-
-      {/* 현재 위치 좌표 표시 (디버그용) */}
-      <Text>
-        {position
-          ? `${position.coords.latitude.toFixed(
-              5
-            )}, ${position.coords.longitude.toFixed(5)}`
-          : '위치를 가져오는 중...'}
-      </Text>
-
+        {/* 현재 위치 좌표 표시 (디버그용) */}
+        <Text>
+          {position
+            ? `${position.coords.latitude.toFixed(
+                5
+              )}, ${position.coords.longitude.toFixed(5)}`
+            : '위치를 가져오는 중...'}
+        </Text>
+      </ImageBackground>
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <Text style={styles.navIcon}>👣</Text>
