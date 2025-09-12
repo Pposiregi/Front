@@ -2,6 +2,7 @@ import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, KAKAO_CLIENT_ID } from '@env';
 import axios from 'axios';
 
 // 플랫폼별 토큰 갱신 로직을 담은 함수들
+// 나중에는 서버에서 해달라고 요청해야 할 듯 함!!
 const tokenRefreshers = {
   kakao: async (refreshToken: string) => {
     const params = new URLSearchParams({
@@ -26,7 +27,7 @@ const tokenRefreshers = {
   google: async (refreshToken: string) => {
     const res = await axios.post('https://oauth2.googleapis.com/token', {
       client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
+      client_secret: GOOGLE_CLIENT_SECRET, // 비밀번호 구글 API 연동 비밀 키
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
     });

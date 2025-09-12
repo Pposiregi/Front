@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   Pressable,
   StyleSheet,
@@ -10,7 +11,6 @@ import {
 import React, { useState } from 'react';
 import {
   login,
-  logout,
   getProfile as getKakaoProfile,
   shippingAddresses as getKakaoShippingAddresses,
   serviceTerms as getKakaoServiceTerms,
@@ -23,11 +23,18 @@ import userSlice from '../slices/user';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+
+type RootStackParamList = {
+  Index: { email: string; platform: string; accessToken: string };
+  Main: undefined;
+};
 
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string>('');
 
   // 로그인 및 로딩 상태를 관리하는 함수
   const handleLogin = async (loginFunction: () => Promise<void>) => {
@@ -41,6 +48,45 @@ const SocialLogin = () => {
     }
   };
 
+  // 서버에 소셜 로그인 + 최초 로그인 체크 요청 함수
+  const firstLoginCheck = async (
+    email: string,
+    platform: string,
+    accessToken: string
+  ) => {
+    try {
+      // 후에는 서버에게 post 보내서 db에서 isNewUser(신규회원 확인) 값 받아오기
+      // const res = await axios.post(
+      //   'https://your-server.com/auth/social-login',
+      //   {
+      //     email,
+      //     platform,
+      //     accessToken,
+      //   }
+      // );
+      // const { isNewUser } = res.data;
+      const testNewUser = true;
+      // 신규 유저면 SignUp으로 이동
+      if (testNewUser) {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Index',
+              params: { email, platform, accessToken },
+            },
+          ],
+        });
+      } else {
+        // 기존 유저면 리덕스에 정보 저장
+        dispatch(userSlice.actions.setUser({ email, accessToken }));
+      }
+      console.log('완료');
+    } catch (err) {
+      console.error('서버 로그인 처리 실패', err);
+    }
+  };
+
   // 카카오 로그인
   const signInWithKakao = async (): Promise<void> => {
     const token = await login();
@@ -48,13 +94,8 @@ const SocialLogin = () => {
 
     await EncryptedStorage.setItem('refreshToken', token.refreshToken);
     await AsyncStorage.setItem('platform', 'kakao');
-
-    dispatch(
-      userSlice.actions.setUser({
-        email: profile.email,
-        accessToken: token.accessToken,
-      })
-    );
+    await AsyncStorage.setItem('email', profile.email);
+    await firstLoginCheck(profile.email, 'kakao', token.accessToken);
   };
 
   // 구글 로그인
@@ -75,11 +116,11 @@ const SocialLogin = () => {
 
     await EncryptedStorage.setItem('refreshToken', token.refresh_token);
     await AsyncStorage.setItem('platform', 'google');
-    dispatch(
-      userSlice.actions.setUser({
-        email: profile.data?.user.email,
-        accessToken: token.access_token,
-      })
+    await AsyncStorage.setItem('email', profile.data?.user.email!);
+    await firstLoginCheck(
+      profile.data?.user.email!,
+      'google',
+      token.accessToken
     );
   };
   return (
@@ -121,6 +162,7 @@ const SocialLogin = () => {
 
 export default SocialLogin;
 
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     height: '100%',
@@ -129,21 +171,21 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   mainText: {
-    fontSize: 49,
+    fontSize: 50,
     textAlign: 'center',
     paddingHorizontal: 30,
-    marginBottom: 170,
+    marginBottom: height * 0.23,
     fontFamily: 'JUA',
   },
   kakaoButton: {
     backgroundColor: '#FDDC3F',
     borderRadius: 40,
     borderWidth: 1,
-    width: 250,
-    height: 40,
-    paddingHorizontal: 7,
+    width: width * 0.7,
+    height: height * 0.05,
+    paddingHorizontal: width * 0.02,
     paddingVertical: 7,
-    marginTop: 10,
+    marginTop: height * 0.015,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -156,11 +198,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 40,
     borderWidth: 1,
-    width: 250,
-    height: 40,
-    paddingHorizontal: 10,
+    width: width * 0.7,
+    height: height * 0.05,
+    paddingHorizontal: width * 0.03,
     paddingVertical: 7,
-    marginTop: 10,
+    marginTop: height * 0.015,
     flexDirection: 'row',
     alignItems: 'center',
   },

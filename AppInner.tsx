@@ -18,6 +18,7 @@ import { GOOGLE_CLIENT_ID } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import Index from './src/pages/SignUpFlow/Index';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -29,8 +30,9 @@ export type LoggedInParamList = {
 
 export type RootStackParamList = {
   SocialLogin: undefined;
-  SignUp: undefined;
+  Index: { email: string; platform: string; accessToken: string };
 };
+
 GoogleSignin.configure({
   webClientId: GOOGLE_CLIENT_ID,
   offlineAccess: true,
@@ -125,6 +127,11 @@ function AppInner() {
             name='SocialLogin'
             component={SocialLogin}
             options={{ headerShown: false }} // 헤더안보임
+          />
+          <Stack.Screen
+            name='Index'
+            component={Index}
+            options={{ headerShown: false, animation: 'slide_from_right' }}
           />
         </Stack.Navigator>
       )}
