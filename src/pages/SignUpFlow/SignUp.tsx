@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
-import PagerView from 'react-native-pager-view';
 
-const SignUp = () => {
+//props로 받아오기 위해 작성
+type SignUpProps = {
+  onNext: () => void;
+};
+
+const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
   const [agreeAll, setAgreeAll] = useState(false);
   const [locationAgree, setLocationAgree] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const [privacyAgree, setPrivacyAgree] = useState(false);
   const [pushAgree, setPushAgree] = useState(false);
 
@@ -61,6 +64,7 @@ const SignUp = () => {
             !(locationAgree && privacyAgree) && { backgroundColor: '#ccc' },
           ]}
           disabled={!(locationAgree && privacyAgree)}
+          onPress={onNext}
         >
           <Text style={styles.startButtonText}>시작하기</Text>
         </Pressable>

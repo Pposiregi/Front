@@ -1,24 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import SignUp from './SignUp';
 import SignUp2 from './SignUp2';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SignUp3 from './SignUp3';
 
 const Index = () => {
+  //현재 페이지 주소 나타냄
+  const pagerRef = useRef<PagerView>(null);
+  const [currentPage, setCurrentPage] = useState(0);
   useEffect(() => {
+    // 뒤로가기 동작 막음
     const backAction = () => {
-      // 뒤로가기 동작 막음
       return true;
     };
-
+    // 안드로이드 하드웨어 뒤로가기도 막음
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction
     );
-
     return () => backHandler.remove();
   }, []);
-  const [currentPage, setCurrentPage] = useState(0);
+  // 회원가입 진행중이라는 상태 저장 완료되면 false로 교체
+  useEffect(() => {
+    const SignUpInProgress = async () => {
+      try {
+        await AsyncStorage.setItem('isSignUpInProgress', 'true');
+      } catch (err) {
+        console.error('회원가입 상태 저장 실패', err);
+      }
+    };
+    SignUpInProgress();
+  }, []);
+
+  // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
+  const goToNextPage = () => {
+    const totalPages = 3;
+    if (pagerRef.current && currentPage < totalPages - 1) {
+      pagerRef.current.setPage(currentPage + 1);
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -29,7 +52,7 @@ const Index = () => {
       </View>
 
       <View style={styles.dotContainer}>
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2].map((i) => (
           <View
             key={i}
             style={[styles.dot, currentPage === i && styles.activeDot]}
@@ -39,10 +62,13 @@ const Index = () => {
       <PagerView
         style={styles.pagerView}
         initialPage={0}
+        scrollEnabled={false}
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
+        ref={pagerRef}
       >
-        <SignUp key='1' />
-        <SignUp2 key='2' />
+        <SignUp key='1' onNext={goToNextPage} />
+        <SignUp2 key='2' onNext={goToNextPage} />
+        <SignUp3 key='3' />
       </PagerView>
     </View>
   );

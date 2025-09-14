@@ -25,11 +25,7 @@ import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-
-type RootStackParamList = {
-  Index: { email: string; platform: string; accessToken: string };
-  Main: undefined;
-};
+import { RootStackParamList } from '../../AppInner';
 
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
@@ -55,7 +51,8 @@ const SocialLogin = () => {
     accessToken: string
   ) => {
     try {
-      // 후에는 서버에게 post 보내서 db에서 isNewUser(신규회원 확인) 값 받아오기
+      // 후에는 서버에게 post 보내서 db에서 사용자 있는지(신규회원 확인) 값 받아오기
+      // 이때 서버에게 요청이 성공하면 돌아오는 accessToken을 리덕스에 저장해서 사용하는것이 좋을것 같음!
       // const res = await axios.post(
       //   'https://your-server.com/auth/social-login',
       //   {
@@ -66,22 +63,17 @@ const SocialLogin = () => {
       // );
       // const { isNewUser } = res.data;
       const testNewUser = true;
-      // 신규 유저면 SignUp으로 이동
+      // 신규 유저이거나 회원가입 미완료 사용자면 SignUp으로 이동
       if (testNewUser) {
         navigation.reset({
           index: 0,
           routes: [
             {
               name: 'Index',
-              params: { email, platform, accessToken },
             },
           ],
         });
-      } else {
-        // 기존 유저면 리덕스에 정보 저장
-        dispatch(userSlice.actions.setUser({ email, accessToken }));
       }
-      console.log('완료');
     } catch (err) {
       console.error('서버 로그인 처리 실패', err);
     }
@@ -95,6 +87,7 @@ const SocialLogin = () => {
     await EncryptedStorage.setItem('refreshToken', token.refreshToken);
     await AsyncStorage.setItem('platform', 'kakao');
     await AsyncStorage.setItem('email', profile.email);
+
     await firstLoginCheck(profile.email, 'kakao', token.accessToken);
   };
 
@@ -102,7 +95,7 @@ const SocialLogin = () => {
   const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
     const profile = await GoogleSignin.signIn();
-
+    console.log('프로필', profile);
     const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
       method: 'POST',
       body: JSON.stringify({

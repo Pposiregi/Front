@@ -30,7 +30,7 @@ export type LoggedInParamList = {
 
 export type RootStackParamList = {
   SocialLogin: undefined;
-  Index: { email: string; platform: string; accessToken: string };
+  Index: undefined;
 };
 
 GoogleSignin.configure({
@@ -42,9 +42,22 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
+  // 앱 재시작시 로직
+  const [isSignUpInProgress, setIsSignUpInProgress] = useState(false);
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
   );
+  useEffect(() => {
+    const signUpInProgress = async () => {
+      try {
+        const value = await AsyncStorage.getItem('isSignUpInProgress');
+        setIsSignUpInProgress(value === 'true');
+      } catch (err) {
+        console.error('회원가입 상태 불러오기 실패', err);
+      }
+    };
+    signUpInProgress();
+  }, []);
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -62,6 +75,7 @@ function AppInner() {
           return;
         }
         //플랫폼 들고오기
+        // 후에 tokenRefreshers함수는 서버에게 요청하는걸로 변경
         const platformRefresher =
           tokenRefreshers[platform as keyof typeof tokenRefreshers];
         // 해당 플랫폼의 토큰 갱신 함수 호출
@@ -93,7 +107,7 @@ function AppInner() {
   }
   return (
     <NavigationContainer>
-      {isLoggedIn ? (
+      {isLoggedIn && !isSignUpInProgress ? (
         <Tab.Navigator>
           <Tab.Screen
             name='Main'
