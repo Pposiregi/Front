@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Dimensions } from 'react-native';
 import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
 
@@ -19,11 +19,17 @@ type Props = {
  */
 export const StepProgress = ({ title, current, goal, unit }: Props) => {
   const progress = current / goal;
+  const { width: SCREEN_WIDTH } = Dimensions.get('window');
+  const cardWidth = Math.max(
+    150,
+    Math.min(220, Math.round(SCREEN_WIDTH * 0.4))
+  );
+  const barWidth = Math.max(100, cardWidth - 20); // padding 고려
 
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{title}</Text>
-      <Progress.Bar progress={progress} width={120} color='#7450FF' />
+      <Progress.Bar progress={progress} width={barWidth} color='#7450FF' />
       <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
     </View>
   );

@@ -36,7 +36,7 @@ export const MainScreen = () => {
       {/*
         미션 진행 상황을 가로 스크롤로 표시 
       */}
-      <View style={{ height: 100, marginBottom: 20 }}>
+      <View style={styles.progressContainer}>
         <FlatList
           data={missions}
           horizontal
@@ -62,14 +62,6 @@ export const MainScreen = () => {
       >
         <Text style={styles.message}>{data!.ui.message}</Text>
 
-        {/* 펫 아바타 
-      <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
-    */}
-        {/* Start Button */}
-        <TouchableOpacity style={styles.startButton}>
-          <Text style={styles.startText}>START</Text>
-        </TouchableOpacity>
-
         {/* 현재 위치 좌표 표시 (디버그용) */}
         <Text>
           {position
@@ -78,6 +70,18 @@ export const MainScreen = () => {
               )}, ${position.coords.longitude.toFixed(5)}`
             : '위치를 가져오는 중...'}
         </Text>
+
+        {/* 펫 아바타 
+      <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
+    */}
+        {/* Start Button - 하단 배치 */}
+        <TouchableOpacity
+          style={styles.startButton}
+          accessibilityRole='button'
+          accessibilityLabel='산책 시작'
+        >
+          <Text style={styles.startText}>START</Text>
+        </TouchableOpacity>
       </ImageBackground>
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
