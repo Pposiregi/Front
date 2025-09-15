@@ -14,7 +14,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import {
   containsBannedWord,
   isValidDate,
-  isValidheight,
+  isValidHeight,
   isValidNickname,
   isValidWeight,
 } from '../../utils/validation';
@@ -111,7 +111,7 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
     }
 
     // 몸무게 검증
-    if (!isValidheight(height)) {
+    if (!isValidHeight(height)) {
       return Alert.alert('알림', '올바른 키를 입력해주세요.');
     }
     // 모든 체크 통과

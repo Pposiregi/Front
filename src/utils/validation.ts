@@ -68,7 +68,7 @@ export const isValidWeight = (weight: string) => {
 // 키 정규식
 const heightRegex = /^[0-9]{1,3}$/;
 
-export const isValidheight = (height: string) => {
+export const isValidHeight = (height: string) => {
   if (!heightRegex.test(height)) return false;
 
   const num = parseInt(height, 10);
@@ -77,14 +77,14 @@ export const isValidheight = (height: string) => {
   return true;
 };
 
-// 체지방률 정규식
-const pbfRegex = /^(?:[5-9]|1[0-9]|2[0-9]|3[0-9]|40)(?:\\.[0-9])?$/;
+// 체지방률 정규식 소수점 한 자리 허용
+const pbfRegex = /^(?:[5-9](?:\.\d)?|[1-4]\d(?:\.\d)?|50(?:\.0)?)$/;
 
 export const isValidPbf = (pbf: string) => {
   if (!pbfRegex.test(pbf)) return false;
 
   const num = parseFloat(pbf);
-  if (isNaN(num) || num < 5.0 || num > 50.0) return false; // (5~50%)
+  if (isNaN(num) || num < 5.0 || num > 50.0) return false; //(5~50%)
 
   return true;
 };
