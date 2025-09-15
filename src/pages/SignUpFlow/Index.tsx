@@ -5,11 +5,14 @@ import SignUp from './SignUp';
 import SignUp2 from './SignUp2';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignUp3 from './SignUp3';
+import { useAppDispatch } from '../../store';
+import userSlice from '../../slices/user';
 
 const Index = () => {
   //현재 페이지 주소 나타냄
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const dispatch = useAppDispatch();
   useEffect(() => {
     // 뒤로가기 동작 막음
     const backAction = () => {
@@ -22,17 +25,17 @@ const Index = () => {
     );
     return () => backHandler.remove();
   }, []);
-  // 회원가입 진행중이라는 상태 저장 완료되면 false로 교체
   useEffect(() => {
-    const SignUpInProgress = async () => {
+    const startSignUpInProgress = async () => {
       try {
         await AsyncStorage.setItem('isSignUpInProgress', 'true');
+        dispatch(userSlice.actions.setSignUpInProgress(true));
       } catch (err) {
         console.error('회원가입 상태 저장 실패', err);
       }
     };
-    SignUpInProgress();
-  }, []);
+    startSignUpInProgress();
+  }, [dispatch]);
 
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  pagerView: { flex: 0.9 },
+  pagerView: { flex: 1 },
   textContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -96,7 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: height * 0.03,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   dot: {
     width: 16,

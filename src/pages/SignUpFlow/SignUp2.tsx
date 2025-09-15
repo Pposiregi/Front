@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -117,9 +118,14 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
         <View style={styles.container}>
           <Text style={styles.title}>사용자님을 더 잘 알고 싶어요!</Text>
           <Text style={styles.subtitle}>
-            함께할 준비가 되셨다면, 간단한 정보를 알려주세요.
+            함께할 준비가 되셨다면, 간단한 정보를 {'\n'}알려주세요.
           </Text>
-          <Text style={styles.label}>닉네임</Text>
+          <Text style={styles.requiredInfo}>
+            * 표시가 있는 항목은 필수 입력입니다.
+          </Text>
+          <Text style={styles.label}>
+            닉네임<Text style={styles.required}> *</Text>
+          </Text>
           <TextInput
             style={styles.textInput}
             onChangeText={onChangeNickName}
@@ -128,7 +134,9 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
             ref={nameRef}
             onSubmitEditing={() => yearRef.current?.focus()}
           ></TextInput>
-          <Text style={styles.label}>생년월일</Text>
+          <Text style={styles.label}>
+            생년월일<Text style={styles.required}> *</Text>
+          </Text>
           <View style={styles.textInputView}>
             <TextInput
               style={styles.textInputBirth}
@@ -160,7 +168,9 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
               maxLength={2}
             ></TextInput>
           </View>
-          <Text style={styles.label}>성별</Text>
+          <Text style={styles.label}>
+            성별<Text style={styles.required}> *</Text>
+          </Text>
           <View style={styles.optionContainer}>
             {/* 남성 */}
             <TouchableOpacity
@@ -184,7 +194,9 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
               <Text style={styles.gender_label}>여성</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.label}>신체정보</Text>
+          <Text style={styles.label}>
+            신체정보<Text style={styles.required}> *</Text>
+          </Text>
           <View style={styles.weightContainer}>
             <TextInput
               style={styles.weightInput}
@@ -204,7 +216,7 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
               placeholderTextColor='#666'
               keyboardType='number-pad'
               maxLength={3}
-              ref={weightRef}
+              ref={heightref}
             />
             <Text style={styles.unit}>cm</Text>
           </View>
@@ -228,12 +240,13 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
 };
 
 export default SignUp2;
-
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    marginTop: -height * 0.02,
     backgroundColor: '#fff',
   },
   title: {
@@ -241,12 +254,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginVertical: 10,
     fontFamily: 'JUA',
-    marginTop: 60,
+    marginTop: height * 0.07,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'thin',
-    marginBottom: 30,
+    marginBottom: 10,
+    fontFamily: 'JUA',
+  },
+  requiredInfo: {
+    fontSize: 14,
+    color: '#FF6347',
+    marginBottom: height * 0.04,
     fontFamily: 'JUA',
   },
   label: {
@@ -255,20 +274,23 @@ const styles = StyleSheet.create({
     fontFamily: 'JUA',
     marginLeft: 4,
   },
+  required: {
+    color: 'red',
+  },
   textInput: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: 30,
+    marginBottom: height * 0.03,
     fontSize: 16,
   },
   textInputView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 30,
+    marginHorizontal: width * 0.08,
   },
   textInputBirth: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginBottom: 30,
-    width: 60,
+    width: width * 0.18,
     textAlign: 'center',
     fontSize: 16,
   },
@@ -302,9 +324,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6347',
     padding: 15,
     borderRadius: 8,
-    marginTop: 50,
+    marginTop: height * 0.05,
     alignItems: 'center',
-    width: 150,
+    width: width * 0.4,
+    marginBottom: height * 0.1,
   },
   startButtonText: {
     color: '#fff',
@@ -315,7 +338,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderColor: '#ccc',
     marginBottom: 30,
-    height: 50, // 높이 고정
+    height: height * 0.06, // 높이 고정
   },
   weightInput: {
     flex: 1,
@@ -324,7 +347,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    width: 150,
   },
   unit: {
     fontSize: 20,

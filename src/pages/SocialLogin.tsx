@@ -26,13 +26,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../AppInner';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/reducer';
 
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
 
-  // 로그인 및 로딩 상태를 관리하는 함수
+  const handleReset = async () => {
+    try {
+      console.log('초기화 버튼 클릭: 초기화 시작');
+
+      // 저장소의 모든 데이터 삭제
+      await AsyncStorage.clear();
+      await EncryptedStorage.clear();
+
+      console.log('저장소 초기화 완료');
+
+      // 리덕스 상태를 초기화
+      dispatch(userSlice.actions.resetUser());
+      console.log('리덕스 resetUser 액션 디스패치 완료');
+
+      // 앱을 로그인 화면으로 강제 리셋 (가장 확실한 방법)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'SocialLogin' }],
+      });
+      console.log('앱 초기 화면으로 강제 리셋');
+    } catch (e) {
+      console.error('초기화 실패', e);
+    }
+  };
+
+  // 로딩 상태를 관리하는 함수
   const handleLogin = async (loginFunction: () => Promise<void>) => {
     try {
       setLoading(true);
@@ -88,6 +115,13 @@ const SocialLogin = () => {
     await AsyncStorage.setItem('platform', 'kakao');
     await AsyncStorage.setItem('email', profile.email);
 
+    dispatch(
+      userSlice.actions.setUser({
+        accessToken: token.accessToken,
+        email: profile.email,
+      })
+    );
+
     await firstLoginCheck(profile.email, 'kakao', token.accessToken);
   };
 
@@ -95,7 +129,6 @@ const SocialLogin = () => {
   const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
     const profile = await GoogleSignin.signIn();
-    console.log('프로필', profile);
     const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
       method: 'POST',
       body: JSON.stringify({
@@ -110,6 +143,13 @@ const SocialLogin = () => {
     await EncryptedStorage.setItem('refreshToken', token.refresh_token);
     await AsyncStorage.setItem('platform', 'google');
     await AsyncStorage.setItem('email', profile.data?.user.email!);
+
+    dispatch(
+      userSlice.actions.setUser({
+        accessToken: token.access_token,
+        email: profile.data?.user.email!,
+      })
+    );
     await firstLoginCheck(
       profile.data?.user.email!,
       'google',
@@ -127,6 +167,9 @@ const SocialLogin = () => {
         // loading이 false일 때 버튼들을 보여줍니다.
         <>
           <Text style={styles.mainText}>함께 달릴 준비 되셨나요?</Text>
+          <Pressable style={styles.kakaoButton} onPress={handleReset}>
+            <Text style={styles.text}>앱 초기화 (테스트용)</Text>
+          </Pressable>
           <Pressable
             style={styles.kakaoButton}
             onPress={() => handleLogin(signInWithKakao)}

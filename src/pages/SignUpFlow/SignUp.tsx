@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
 //props로 받아오기 위해 작성
@@ -74,13 +81,14 @@ const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
 };
 
 export default SignUp;
-
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     backgroundColor: '#fff',
+    paddingTop: height * 0.07,
   },
   title: {
     fontSize: 22,

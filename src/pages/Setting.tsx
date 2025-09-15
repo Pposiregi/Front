@@ -19,6 +19,7 @@ function Setting() {
       //저장된 값들 삭제
       await EncryptedStorage.removeItem('refreshToken');
       await AsyncStorage.removeItem('platform');
+      await AsyncStorage.removeItem('isSignUpInProgress');
 
       //리덕스 초기화
       dispatch(
@@ -40,6 +41,7 @@ function Setting() {
       //저장된 값들 삭제
       await EncryptedStorage.removeItem('refreshToken');
       await AsyncStorage.removeItem('platform');
+      await AsyncStorage.removeItem('isSignUpInProgress');
 
       //리덕스 초기화
       dispatch(

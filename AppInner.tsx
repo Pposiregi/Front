@@ -42,30 +42,33 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
+  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
   // 앱 재시작시 로직
-  const [isSignUpInProgress, setIsSignUpInProgress] = useState(false);
+
+  // 리덕스에 accessToken이 존재하는지 여부로 로그인 여부 판단
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
   );
-  useEffect(() => {
-    const signUpInProgress = async () => {
-      try {
-        const value = await AsyncStorage.getItem('isSignUpInProgress');
-        setIsSignUpInProgress(value === 'true');
-      } catch (err) {
-        console.error('회원가입 상태 불러오기 실패', err);
-      }
-    };
-    signUpInProgress();
-  }, []);
-  const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
+  // 리덕스에 isSignUpInProgress 존재하는지 여부로 회원가입 여부 판단
+  const isSignUpInProgress = useSelector(
+    (state: RootState) => state.user.isSignUpInProgress
+  );
+  console.log('isLoggedIn 값 : ', isLoggedIn);
+  console.log('isSignUpInProgress 값 : ', isSignUpInProgress);
   useEffect(() => {
     const getTokenAndRefresh = async () => {
       try {
+        // 저장소에서 회원가입 여부 상태 가져옴
+        const signUpInProgressValue = await AsyncStorage.getItem(
+          'isSignUpInProgress'
+        );
+        const isSignUp = signUpInProgressValue === 'true'; // 저장소에는 boolean 저장이 안되므로 string을 boolean으로 바꿔줌
+        dispatch(userSlice.actions.setSignUpInProgress(isSignUp)); // 리덕스에 갱신
+
         // 앱에 저장되 있는 리프레쉬 토큰을 기반으로 로그인 유지 로직
-        const platform = await AsyncStorage.getItem('platform');
-        const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        const platform = await AsyncStorage.getItem('platform'); // 플랫폼 값 들고오기
+        const refreshToken = await EncryptedStorage.getItem('refreshToken'); // 리프레쉬토큰
         if (!refreshToken) {
           console.error(`[AuthError] 로그인 기록이 없어 토큰 값이 없습니다.`);
           return;
