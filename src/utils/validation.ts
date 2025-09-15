@@ -76,3 +76,15 @@ export const isValidheight = (height: string) => {
 
   return true;
 };
+
+// 체지방률 정규식
+const pbfRegex = /^(?:[5-9]|1[0-9]|2[0-9]|3[0-9]|40)(?:\\.[0-9])?$/;
+
+export const isValidPbf = (pbf: string) => {
+  if (!pbfRegex.test(pbf)) return false;
+
+  const num = parseFloat(pbf);
+  if (isNaN(num) || num < 5.0 || num > 50.0) return false; // (5~50%)
+
+  return true;
+};

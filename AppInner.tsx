@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from './src/store/reducer';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,7 +10,6 @@ import Health from './src/pages/Health';
 import Mission from './src/pages/Mission';
 import Meal from './src/pages/Meal';
 import Setting from './src/pages/Setting';
-import { useEffect, useState } from 'react';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
@@ -42,113 +42,117 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
-  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  // 앱 재시작시 로직
+  const [loading, setLoading] = useState(true);
 
-  // 리덕스에 accessToken이 존재하는지 여부로 로그인 여부 판단
+  // Redux 상태를 선택
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
   );
-  // 리덕스에 isSignUpInProgress 존재하는지 여부로 회원가입 여부 판단
   const isSignUpInProgress = useSelector(
     (state: RootState) => state.user.isSignUpInProgress
   );
-  console.log('isLoggedIn 값 : ', isLoggedIn);
-  console.log('isSignUpInProgress 값 : ', isSignUpInProgress);
+
   useEffect(() => {
-    const getTokenAndRefresh = async () => {
+    const checkAuthStatus = async () => {
       try {
-        // 저장소에서 회원가입 여부 상태 가져옴
+        // AsyncStorage에서 회원가입 상태를 가져와 리덕스에 동기화
         const signUpInProgressValue = await AsyncStorage.getItem(
           'isSignUpInProgress'
         );
-        const isSignUp = signUpInProgressValue === 'true'; // 저장소에는 boolean 저장이 안되므로 string을 boolean으로 바꿔줌
-        dispatch(userSlice.actions.setSignUpInProgress(isSignUp)); // 리덕스에 갱신
+        const isSignUp = signUpInProgressValue === 'true';
+        dispatch(userSlice.actions.setSignUpInProgress(isSignUp));
 
-        // 앱에 저장되 있는 리프레쉬 토큰을 기반으로 로그인 유지 로직
-        const platform = await AsyncStorage.getItem('platform'); // 플랫폼 값 들고오기
-        const refreshToken = await EncryptedStorage.getItem('refreshToken'); // 리프레쉬토큰
-        if (!refreshToken) {
-          console.error(`[AuthError] 로그인 기록이 없어 토큰 값이 없습니다.`);
-          return;
+        // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
+        const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const platform = await AsyncStorage.getItem('platform');
+          if (platform) {
+            const platformRefresher =
+              tokenRefreshers[platform as keyof typeof tokenRefreshers];
+            const { accessToken, refreshToken: newRefreshToken } =
+              await platformRefresher(refreshToken);
+            if (newRefreshToken) {
+              await EncryptedStorage.setItem('refreshToken', newRefreshToken);
+            }
+            // 로그인 상태를 리덕스에 동기화
+            dispatch(userSlice.actions.setUser({ accessToken }));
+          }
         }
-        if (!platform || (platform !== 'kakao' && platform !== 'google')) {
-          console.error(`[AuthError] 지원하지않는 플랫폼 요청 : ${platform}`);
-          return;
-        }
-        //플랫폼 들고오기
-        // 후에 tokenRefreshers함수는 서버에게 요청하는걸로 변경
-        const platformRefresher =
-          tokenRefreshers[platform as keyof typeof tokenRefreshers];
-        // 해당 플랫폼의 토큰 갱신 함수 호출
-        const { accessToken, refreshToken: newRefreshToken } =
-          await platformRefresher(refreshToken);
-        // 리프레쉬 토큰 재발급시 갱신
-        if (newRefreshToken) {
-          await EncryptedStorage.setItem('refreshToken', newRefreshToken);
-        }
-        dispatch(
-          userSlice.actions.setUser({
-            accessToken: accessToken,
-          })
-        );
       } catch (err) {
-        console.error(err);
+        console.error(`[AuthError] 인증 상태 확인 실패:`, err);
       } finally {
-        setLoading(true);
+        // 4. 모든 비동기 작업이 완료된 후 로딩 상태를 false로 변경
+        setLoading(false);
       }
     };
-    getTokenAndRefresh();
+
+    checkAuthStatus();
   }, [dispatch]);
-  if (!loading) {
+
+  // 로딩 중일 때는 로딩 화면만 렌더링
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#000000' />
       </View>
     );
   }
+
+  // 최종 상태를 기준으로 내비게이션 결정
+  console.log('Final isLoggedIn 값:', isLoggedIn);
+  console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
+
   return (
     <NavigationContainer>
-      {isLoggedIn && !isSignUpInProgress ? (
-        <Tab.Navigator>
-          <Tab.Screen
-            name='Main'
-            component={Main}
-            options={{ title: '메인' }}
-          />
-          <Tab.Screen
-            name='Health'
-            component={Health}
-            options={{ title: '헬스' }}
-          />
-          <Tab.Screen
-            name='Mission'
-            component={Mission}
-            options={{ title: '미션' }}
-          />
-          <Tab.Screen
-            name='Meal'
-            component={Meal}
-            options={{ title: '식사' }}
-          />
-          <Tab.Screen
-            name='Setting'
-            component={Setting}
-            options={{ title: '설정' }}
-          />
-        </Tab.Navigator>
+      {isLoggedIn ? (
+        // 로그인 상태일 때
+        isSignUpInProgress ? (
+          // 회원가입 진행 중일 때 -> Index 화면으로 이동
+          <Stack.Navigator>
+            <Stack.Screen
+              name='Index'
+              component={Index}
+              options={{ headerShown: false, animation: 'slide_from_right' }}
+            />
+          </Stack.Navigator>
+        ) : (
+          // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
+          <Tab.Navigator>
+            <Tab.Screen
+              name='Main'
+              component={Main}
+              options={{ title: '메인' }}
+            />
+            <Tab.Screen
+              name='Health'
+              component={Health}
+              options={{ title: '헬스' }}
+            />
+            <Tab.Screen
+              name='Mission'
+              component={Mission}
+              options={{ title: '미션' }}
+            />
+            <Tab.Screen
+              name='Meal'
+              component={Meal}
+              options={{ title: '식사' }}
+            />
+            <Tab.Screen
+              name='Setting'
+              component={Setting}
+              options={{ title: '설정' }}
+            />
+          </Tab.Navigator>
+        )
       ) : (
+        // 로그인 상태가 아닐 때 -> SocialLogin 화면으로 이동
         <Stack.Navigator>
           <Stack.Screen
             name='SocialLogin'
             component={SocialLogin}
-            options={{ headerShown: false }} // 헤더안보임
-          />
-          <Stack.Screen
-            name='Index'
-            component={Index}
-            options={{ headerShown: false, animation: 'slide_from_right' }}
+            options={{ headerShown: false }}
           />
         </Stack.Navigator>
       )}

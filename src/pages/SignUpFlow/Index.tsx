@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import PagerView from 'react-native-pager-view';
 import SignUp from './SignUp';
 import SignUp2 from './SignUp2';
@@ -37,6 +44,30 @@ const Index = () => {
     startSignUpInProgress();
   }, [dispatch]);
 
+  // 서버에 보낼 사용자 정보 저장
+  const [formData, setFormData] = useState({
+    // SignUp 정보
+    permissions: {
+      locationAgree: false,
+      privacyAgree: false,
+      pushAgree: false,
+    },
+    // SignUp2 정보
+    nickName: '',
+    birth: { year: '', month: '', day: '' },
+    gender: null as 'male' | 'female' | null,
+    weight: '',
+    height: '',
+    // SignUp3 정보
+    targetWeight: '',
+    currentPbf: '',
+    targetPbf: '',
+  });
+  const handleNext = (data: Partial<typeof formData>) => {
+    setFormData((prev) => ({ ...prev, ...data }));
+    goToNextPage();
+  };
+
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
     const totalPages = 3;
@@ -44,6 +75,37 @@ const Index = () => {
       pagerRef.current.setPage(currentPage + 1);
       setCurrentPage(currentPage + 1);
     }
+  };
+
+  const handleFinish = async (data: Partial<typeof formData>) => {
+    const finalFormData = { ...formData, ...data };
+    console.log('검증', finalFormData);
+    // AsyncStorage, Redux 업데이트
+    try {
+      await AsyncStorage.setItem('isSignUpInProgress', 'false');
+      dispatch(userSlice.actions.setSignUpInProgress(false));
+    } catch (err) {
+      console.error('회원가입 상태 업데이트 실패', err);
+    }
+
+    // // 서버에 최종 데이터 전송
+    // try {
+    //   const res = await fetch('https://your-server.com/signup', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(finalFormData),
+    //   });
+    //   if (!res.ok) throw new Error('회원가입 실패');
+    //   const result = await res.json();
+    //   console.log('회원가입 성공:', result);
+    //   // 여기서 다음 화면 이동 가능
+    // } catch (err) {
+    //   console.error(err);
+    //   Alert.alert(
+    //     '오류',
+    //     '회원가입 중 문제가 발생했습니다. 다시 시도해 주세요.'
+    //   );
+    // }
   };
 
   return (
@@ -69,9 +131,9 @@ const Index = () => {
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
         ref={pagerRef}
       >
-        <SignUp key='1' onNext={goToNextPage} />
-        <SignUp2 key='2' onNext={goToNextPage} />
-        <SignUp3 key='3' />
+        <SignUp key='1' onNext={handleNext} />
+        <SignUp2 key='2' onNext={handleNext} />
+        <SignUp3 key='3' onFinish={handleFinish} />
       </PagerView>
     </View>
   );

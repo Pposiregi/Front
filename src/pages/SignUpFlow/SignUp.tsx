@@ -11,7 +11,13 @@ import CheckBox from '@react-native-community/checkbox';
 
 //props로 받아오기 위해 작성
 type SignUpProps = {
-  onNext: () => void;
+  onNext: (data: {
+    permissions: {
+      locationAgree: boolean;
+      privacyAgree: boolean;
+      pushAgree: boolean;
+    };
+  }) => void;
 };
 
 const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
@@ -71,7 +77,15 @@ const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
             !(locationAgree && privacyAgree) && { backgroundColor: '#ccc' },
           ]}
           disabled={!(locationAgree && privacyAgree)}
-          onPress={onNext}
+          onPress={() =>
+            onNext({
+              permissions: {
+                locationAgree,
+                privacyAgree,
+                pushAgree,
+              },
+            })
+          }
         >
           <Text style={styles.startButtonText}>시작하기</Text>
         </Pressable>

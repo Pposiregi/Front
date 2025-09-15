@@ -20,15 +20,25 @@ import {
 } from '../../utils/validation';
 
 type SignUp2Props = {
-  onNext: () => void;
+  onNext: (data: {
+    nickName: string;
+    birth: {
+      year: string;
+      month: string;
+      day: string;
+    };
+    gender: 'male' | 'female';
+    weight: string;
+    height: string;
+  }) => void;
 };
 
 const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
-  const [selected, setSelected] = useState<'male' | 'female' | null>(null);
   const [nickName, setNickName] = useState('');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const nameRef = useRef<TextInput | null>(null);
@@ -65,6 +75,7 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
       return Alert.alert('알림', '출생 월을 입력해주세요.');
     if (!day || !day.trim())
       return Alert.alert('알림', '출생 일을 입력해주세요.');
+    if (!gender) return Alert.alert('알림', '성별을 선택해주세요.');
     if (!weight || !weight.trim())
       return Alert.alert('알림', '몸무게를 입력해주세요.');
     if (!height || !height.trim())
@@ -104,11 +115,21 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
       return Alert.alert('알림', '올바른 키를 입력해주세요.');
     }
     // 모든 체크 통과
-    onNext();
-  }, [nickName, year, month, day, selected, weight, height]);
+    onNext({
+      nickName,
+      birth: {
+        year,
+        month,
+        day,
+      },
+      gender,
+      weight,
+      height,
+    });
+  }, [nickName, year, month, day, gender, weight, height]);
 
   const canGoNext =
-    nickName && year && month && day && selected && weight && height;
+    nickName && year && month && day && gender && weight && height;
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
@@ -175,10 +196,10 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
             {/* 남성 */}
             <TouchableOpacity
               style={styles.optionContainer}
-              onPress={() => setSelected('male')}
+              onPress={() => setGender('male')}
             >
               <View style={styles.radioOuter}>
-                {selected === 'male' && <View style={styles.radioInner} />}
+                {gender === 'male' && <View style={styles.radioInner} />}
               </View>
               <Text style={styles.gender_label}>남성</Text>
             </TouchableOpacity>
@@ -186,10 +207,10 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
             {/* 여성 */}
             <TouchableOpacity
               style={styles.optionContainer}
-              onPress={() => setSelected('female')}
+              onPress={() => setGender('female')}
             >
               <View style={styles.radioOuter}>
-                {selected === 'female' && <View style={styles.radioInner} />}
+                {gender === 'female' && <View style={styles.radioInner} />}
               </View>
               <Text style={styles.gender_label}>여성</Text>
             </TouchableOpacity>

@@ -1,6 +1,6 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import {
+  Alert,
   Dimensions,
   Pressable,
   ScrollView,
@@ -10,22 +10,51 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { RootStackParamList } from '../../../AppInner';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userSlice from '../../slices/user';
 import { useAppDispatch } from '../../store';
+import { isValidPbf, isValidWeight } from '../../utils/validation';
 
-function SignUp3() {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [weight, setWeight] = useState('');
+type SignUp3Props = {
+  onFinish: (data: {
+    targetWeight: string;
+    currentPbf: string;
+    targetPbf: string;
+  }) => void;
+};
+const SignUp3: React.FC<SignUp3Props> = ({ onFinish }) => {
+  const [targetWeight, setTargetWeight] = useState('');
   const [currentPbf, setcurrentPbf] = useState('');
   const [targetPbf, setTargetPbf] = useState('');
-  const allEmpty = !weight && !currentPbf && !targetPbf;
-  const dispatch = useAppDispatch();
-  const onSubmit = async () => {
-    await AsyncStorage.setItem('isSignUpInProgress', 'false');
-    dispatch(userSlice.actions.setSignUpInProgress(false));
-  };
+  const targetWeightRef = useRef<TextInput | null>(null);
+  const currentPbfRef = useRef<TextInput | null>(null);
+  const targetPbfRef = useRef<TextInput | null>(null);
+  const allEmpty = !targetWeight && !currentPbf && !targetPbf;
+  // 제출 버튼을 눌렀을 때 실행될 함수
+  const onSubmit = useCallback(() => {
+    // 모든 값이 비어있을 때 (건너뛰기)
+    if (allEmpty) {
+      onFinish({ targetWeight, currentPbf, targetPbf });
+      return;
+    }
+
+    // 입력된 값이 하나라도 있을 때, 유효성 검사 실행
+    if (targetWeight && !isValidWeight(targetWeight)) {
+      Alert.alert('알림', '목표 체중을 올바르게 입력해주세요.');
+      return;
+    }
+    if (currentPbf && !isValidPbf(currentPbf)) {
+      Alert.alert('알림', '현재 체지방률을 올바르게 입력해주세요.');
+      return;
+    }
+    if (targetPbf && !isValidPbf(targetPbf)) {
+      Alert.alert('알림', '목표 체지방률을 올바르게 입력해주세요.');
+      return;
+    }
+
+    // 모든 유효성 검사 통과
+    onFinish({ targetWeight, currentPbf, targetPbf });
+  }, [targetWeight, currentPbf, targetPbf, allEmpty, onFinish]);
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
@@ -48,7 +77,9 @@ function SignUp3() {
               placeholder='목표 체중을 입력하세요.'
               placeholderTextColor='#666'
               keyboardType='numeric'
-              onChangeText={setWeight}
+              onChangeText={setTargetWeight}
+              ref={targetWeightRef}
+              onSubmitEditing={() => currentPbfRef.current?.focus()}
             />
             <Text style={styles.unit}>kg</Text>
           </View>
@@ -60,6 +91,8 @@ function SignUp3() {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setcurrentPbf}
+              ref={currentPbfRef}
+              onSubmitEditing={() => targetPbfRef.current?.focus()}
             />
             <Text style={styles.unit}>%</Text>
           </View>
@@ -71,24 +104,12 @@ function SignUp3() {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setTargetPbf}
+              ref={targetPbfRef}
             />
             <Text style={styles.unit}>%</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Pressable
-              style={[styles.startButton]}
-              onPress={() => {
-                if (allEmpty) {
-                  // 다 비었을때
-                  console.log('건너뛰기');
-                  onSubmit();
-                } else {
-                  // 입력이 한개라도 있을때
-                  console.log('제출');
-                  onSubmit();
-                }
-              }}
-            >
+            <Pressable style={[styles.startButton]} onPress={onSubmit}>
               <Text style={styles.startButtonText}>
                 {allEmpty ? '건너뛰기' : '시작하기'}
               </Text>
@@ -98,7 +119,7 @@ function SignUp3() {
       </ScrollView>
     </KeyboardAwareScrollView>
   );
-}
+};
 
 export default SignUp3;
 const { width, height } = Dimensions.get('window');

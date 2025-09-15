@@ -78,31 +78,25 @@ const SocialLogin = () => {
     accessToken: string
   ) => {
     try {
-      // 후에는 서버에게 post 보내서 db에서 사용자 있는지(신규회원 확인) 값 받아오기
-      // 이때 서버에게 요청이 성공하면 돌아오는 accessToken을 리덕스에 저장해서 사용하는것이 좋을것 같음!
-      // const res = await axios.post(
-      //   'https://your-server.com/auth/social-login',
-      //   {
-      //     email,
-      //     platform,
-      //     accessToken,
-      //   }
-      // );
-      // const { isNewUser } = res.data;
-      const testNewUser = true;
-      // 신규 유저이거나 회원가입 미완료 사용자면 SignUp으로 이동
-      if (testNewUser) {
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'Index',
-            },
-          ],
-        });
+      // 임시 로직: 서버 응답 대신 `AsyncStorage`를 사용
+      const isUserLoggedInBefore = await AsyncStorage.getItem(
+        `hasLoggedIn_${email}`
+      );
+      const isNewUser = !isUserLoggedInBefore;
+
+      // 최종적으로 Redux에 로그인 상태와 회원가입 필요 상태를 저장
+      dispatch(userSlice.actions.setUser({ accessToken, email }));
+
+      if (isNewUser) {
+        await AsyncStorage.setItem(`hasLoggedIn_${email}`, 'true');
+        dispatch(userSlice.actions.setSignUpInProgress(true));
+      } else {
+        dispatch(userSlice.actions.setSignUpInProgress(false));
       }
     } catch (err) {
       console.error('서버 로그인 처리 실패', err);
+      // 실패 시 로그인 화면으로 복귀
+      dispatch(userSlice.actions.resetUser());
     }
   };
 
@@ -113,14 +107,6 @@ const SocialLogin = () => {
 
     await EncryptedStorage.setItem('refreshToken', token.refreshToken);
     await AsyncStorage.setItem('platform', 'kakao');
-    await AsyncStorage.setItem('email', profile.email);
-
-    dispatch(
-      userSlice.actions.setUser({
-        accessToken: token.accessToken,
-        email: profile.email,
-      })
-    );
 
     await firstLoginCheck(profile.email, 'kakao', token.accessToken);
   };
@@ -142,18 +128,11 @@ const SocialLogin = () => {
 
     await EncryptedStorage.setItem('refreshToken', token.refresh_token);
     await AsyncStorage.setItem('platform', 'google');
-    await AsyncStorage.setItem('email', profile.data?.user.email!);
 
-    dispatch(
-      userSlice.actions.setUser({
-        accessToken: token.access_token,
-        email: profile.data?.user.email!,
-      })
-    );
     await firstLoginCheck(
       profile.data?.user.email!,
       'google',
-      token.accessToken
+      token.access_token
     );
   };
   return (
