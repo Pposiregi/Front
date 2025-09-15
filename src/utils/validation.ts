@@ -1,7 +1,7 @@
 //닉네임 정규식
 const nicknameRegex = /^(?!.*  )(?! )[가-힣a-zA-Z0-9]{2,10}(?<! )$/;
 
-const bannedWords = ['시발', 'Fuck', '개새끼'];
+const bannedWords = ['시발', 'fuck', '개새끼'];
 
 export const isValidNickname = (nickname: string) => {
   return nicknameRegex.test(nickname) && !containsBannedWord(nickname);
@@ -68,10 +68,10 @@ export const isValidWeight = (weight: string) => {
 // 키 정규식
 const heightRegex = /^[0-9]{1,3}$/;
 
-export const isValidheight = (weight: string) => {
-  if (!heightRegex.test(weight)) return false;
+export const isValidheight = (height: string) => {
+  if (!heightRegex.test(height)) return false;
 
-  const num = parseInt(weight, 10);
+  const num = parseInt(height, 10);
   if (isNaN(num) || num <= 100 || num > 250) return false; // (100~250cm)
 
   return true;
