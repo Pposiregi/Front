@@ -24,8 +24,9 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../../AppInner';
+import type { NavigationProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import type { RootStackParamList } from '../../AppInner';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/reducer';
 
