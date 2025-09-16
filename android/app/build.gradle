@@ -71,7 +71,14 @@ def enableProguardInReleaseBuilds = false
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
-
+// 로컬 프로퍼티 불러오기
+def localProps = new Properties()
+def localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { stream ->
+        localProps.load(stream)
+    }
+}
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -84,6 +91,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        //카카오 API 키 입력
+        manifestPlaceholders = [KAKAO_SCHEME: localProps['KAKAO_SCHEME']]
+        resValue "string", "kakao_app_key", localProps['KAKAO_APP_KEY']
     }
     signingConfigs {
         debug {
