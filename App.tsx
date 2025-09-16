@@ -1,37 +1,14 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { Provider } from 'react-redux';
+import store from './src/store';
+import AppInner from './AppInner';
 
-import { useEffect } from 'react';
-import {
-  StatusBar,
-  useColorScheme,
-  PermissionsAndroid,
-  Platform,
-} from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import SplashScreen from 'react-native-splash-screen';
-import { MainScreen } from '@pages/main/MainPage'; // alias 적용된 import
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-  useEffect(() => {
-    SplashScreen.hide();
-    if (Platform.OS === 'android') {
-      PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      ).catch((err) => {
-        console.warn('Permission error', err);
-      });
-    }
-  }, []);
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <MainScreen />
-    </SafeAreaProvider>
+    //useSelector 사용 위해 Provider로 감싼 후 AppInner.tsx로 이동
+    <Provider store={store}>
+      <AppInner />
+    </Provider>
   );
 }
 
