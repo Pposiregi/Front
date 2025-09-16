@@ -27,8 +27,6 @@ import axios from 'axios';
 import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/reducer';
 
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
