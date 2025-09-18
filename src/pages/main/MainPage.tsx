@@ -11,6 +11,7 @@ import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
+import useStepCount from '@hooks/useStepCount';
 import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
 /**
  * 메인 화면 컴포넌트
@@ -20,13 +21,20 @@ import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 �
 export const MainScreen = () => {
   // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
   const { data, loading } = useMainData('u12345');
+  const { stepCount, isAvailable } = useStepCount();
 
   // 위치 변화를 구독하여 좌표를 얻음
   // 데이터 로딩 중일 경우 스피너 표시
   if (loading) return <ActivityIndicator size='large' />;
 
   // 미션 가져오는 척
-  const missions = getMissions(data!);
+  const missions = getMissions(data!, {
+    stepOverride: isAvailable ? stepCount : undefined,
+  });
+
+  const displayedSteps = isAvailable
+    ? stepCount
+    : data?.daily_walk.step ?? 0;
 
   return (
     <View style={styles.container}>
@@ -57,7 +65,14 @@ export const MainScreen = () => {
         style={styles.tokkiBackground}
         resizeMode='cover'
       >
-        <Text style={styles.message}>{data!.ui.message}</Text>
+        <Text style={styles.message}>
+          {`${displayedSteps.toLocaleString()}보 걸었어요!`}
+        </Text>
+        {!isAvailable && (
+          <Text style={styles.stepFallback}>
+            디바이스 걸음 센서를 찾을 수 없어 서버 데이터를 표시해요.
+          </Text>
+        )}
 
         {/* 펫 아바타 
       <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />

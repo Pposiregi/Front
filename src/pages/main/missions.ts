@@ -15,12 +15,18 @@ export type Mission = {
 /**
  * 서버에서 받은 메인 응답 데이터를 화면용 미션 배열로 변환
  */
-export const getMissions = (data: MainResponse): Mission[] => [
+export const getMissions = (
+  data: MainResponse,
+  options?: { stepOverride?: number }
+): Mission[] => [
   {
     id: 'walk',
     // 목표 걸음 수를 제목으로 사용 (예: '5000보 걷기')
     title: `${data.daily_walk.goal_step}보 걷기`,
-    current: data.daily_walk.step,
+    current:
+      typeof options?.stepOverride === 'number'
+        ? options.stepOverride
+        : data.daily_walk.step,
     goal: data.daily_walk.goal_step,
     unit: '보',
   },
