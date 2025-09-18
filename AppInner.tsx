@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/Index';
+import SplashScreen from 'react-native-splash-screen';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -83,6 +84,7 @@ function AppInner() {
         console.error(`[AuthError] 인증 상태 확인 실패:`, err);
       } finally {
         // 4. 모든 비동기 작업이 완료된 후 로딩 상태를 false로 변경
+        SplashScreen.hide();
         setLoading(false);
       }
     };

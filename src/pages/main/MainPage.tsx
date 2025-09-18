@@ -11,7 +11,6 @@ import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
-import { useMissions } from '@hooks/useMissions';
 import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
 /**
  * 메인 화면 컴포넌트
@@ -23,8 +22,6 @@ export const MainScreen = () => {
   const { data, loading } = useMainData('u12345');
 
   // 위치 변화를 구독하여 좌표를 얻음
-  const position = useMissions();
-
   // 데이터 로딩 중일 경우 스피너 표시
   if (loading) return <ActivityIndicator size='large' />;
 
@@ -62,15 +59,6 @@ export const MainScreen = () => {
       >
         <Text style={styles.message}>{data!.ui.message}</Text>
 
-        {/* 현재 위치 좌표 표시 (디버그용) */}
-        <Text>
-          {position
-            ? `${position.coords.latitude.toFixed(
-                5
-              )}, ${position.coords.longitude.toFixed(5)}`
-            : '위치를 가져오는 중...'}
-        </Text>
-
         {/* 펫 아바타 
       <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
     */}
@@ -83,13 +71,8 @@ export const MainScreen = () => {
           <Text style={styles.startText}>START</Text>
         </TouchableOpacity>
       </ImageBackground>
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <Text style={styles.navIcon}>👣</Text>
-        <Text style={styles.navIcon}>🍽️</Text>
-        <Text style={styles.navIcon}>🦴</Text>
-        <Text style={styles.navIcon}>👤</Text>
-      </View>
     </View>
   );
 };
+
+export default MainScreen;
