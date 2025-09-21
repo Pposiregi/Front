@@ -1,43 +1,19 @@
 {
-    "extends": "@react-native/typescript-config",
-    "compilerOptions": {
-        "baseUrl": "./src",
-        "paths": {
-            "@components/*": [
-                "components/*"
-            ],
-            "@pages/*": [
-                "pages/*"
-            ],
-            "@hooks/*": [
-                "hooks/*"
-            ],
-            "@utils/*": [
-                "utils/*"
-            ],
-            "@slices/*": [
-                "slices/*"
-            ],
-            "@assets/*": [
-                "assets/*"
-            ],
-            "@styles/*": [
-                "styles/*"
-            ],
-            "@store/*": [
-                "store/*"
-            ],
-            "@types/*": [
-                "types/*"
-            ]
-        }
-    },
-    "include": [
-        "**/*.ts",
-        "**/*.tsx"
-    ],
-    "exclude": [
-        "**/node_modules",
-        "**/Pods"
-    ]
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
+      "@hooks/*": ["hooks/*"],
+      "@utils/*": ["utils/*"],
+      "@slices/*": ["slices/*"],
+      "@assets/*": ["assets/*"],
+      "@styles/*": ["styles/*"],
+      "@store/*": ["store/*"],
+      "@types/*": ["types/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "src/types/images.d.ts"],
+  "exclude": ["**/node_modules", "**/Pods"]
 }
