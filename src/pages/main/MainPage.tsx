@@ -18,10 +18,10 @@ import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 �
  * - 사용자 데이터 로딩
  * - 미션 목록을 가로 스크롤로 표시
  */
-export const MainScreen = () => {
+export const MainPage = () => {
   // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
   const { data, loading } = useMainData('u12345');
-  const { stepCount, isAvailable } = useStepCount();
+  const { stepCount, isAvailable } = useStepCount(); //
 
   // 위치 변화를 구독하여 좌표를 얻음
   // 데이터 로딩 중일 경우 스피너 표시
@@ -32,9 +32,7 @@ export const MainScreen = () => {
     stepOverride: isAvailable ? stepCount : undefined,
   });
 
-  const displayedSteps = isAvailable
-    ? stepCount
-    : data?.daily_walk.step ?? 0;
+  const displayedSteps = isAvailable ? stepCount : data?.daily_walk.step ?? 0;
 
   return (
     <View style={styles.container}>
@@ -90,4 +88,4 @@ export const MainScreen = () => {
   );
 };
 
-export default MainScreen;
+export default MainPage;
