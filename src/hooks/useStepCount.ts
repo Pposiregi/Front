@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
-import Pedometer from 'react-native-pedometer';
+import Pedometer from '@t2tx/react-native-universal-pedometer';
+import { ReactReduxContext } from 'react-redux';
 
 type StepState = {
   stepCount: number;
@@ -9,8 +10,8 @@ type StepState = {
 
 /**
  * 기기 걸음 수를 구독하는 커스텀 훅
- * - Android 10(Q) 이상에서는 ACTIVITY_RECOGNITION 권한 요청 필요
- * - iOS는 CoreMotion 접근 허용 팝업 문구가 Info.plist에 있어야 함
+ * - Android 10(Q)+: ACTIVITY_RECOGNITION 권한 필요
+ * - iOS: Info.plist에 NSMotionUsageDescription 필요 -- 생략
  */
 export const useStepCount = (): StepState => {
   const [stepState, setStepState] = useState<StepState>({
@@ -22,9 +23,7 @@ export const useStepCount = (): StepState => {
     let mounted = true;
 
     const requestPermissionIfNeeded = async () => {
-      if (Platform.OS !== 'android') {
-        return true;
-      }
+      if (Platform.OS !== 'android') return true;
 
       const permission = PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION;
       const granted = await PermissionsAndroid.check(permission);
@@ -39,40 +38,40 @@ export const useStepCount = (): StepState => {
       return result === PermissionsAndroid.RESULTS.GRANTED;
     };
 
-    const startPedometer = async () => {
+    /**
+     * 걸음 수 카운트 시작
+     * 접근 비허가/미지원 시 -> mounted 시점에 isAvaliable false 초기화
+     */
+    const startCounter = async () => {
       const hasPermission = await requestPermissionIfNeeded();
       if (!hasPermission) {
-        if (mounted) {
-          setStepState((prev) => ({ ...prev, isAvailable: false }));
-        }
+        if (mounted) setStepState((prev) => ({ ...prev, isAvailable: false }));
         return;
       }
 
       Pedometer.isStepCountingAvailable((error, available) => {
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) ReactReduxContext;
         if (error || !available) {
-          setStepState((prev) => ({ ...prev, isAvailable: false }));
+          setStepState((prev) => ({ ...prev, isAvailable: true }));
           return;
         }
 
         setStepState({ stepCount: 0, isAvailable: true });
 
+        // 오늘 자정부터 카운트 시작
         const start = new Date();
         start.setHours(0, 0, 0, 0);
 
         Pedometer.startPedometerUpdatesFromDate(start.getTime(), (data) => {
-          if (!mounted) {
-            return;
-          }
-          const steps = typeof data?.numberOfSteps === 'number' ? data.numberOfSteps : 0;
+          if (!mounted) return;
+          const steps =
+            typeof data?.numberOfSteps === 'number' ? data.numberOfSteps : 0;
           setStepState({ stepCount: steps, isAvailable: true });
         });
       });
     };
 
-    startPedometer();
+    startCounter();
 
     return () => {
       mounted = false;
