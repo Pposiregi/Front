@@ -25,6 +25,9 @@ export const useStepCount = (): StepState => {
     const requestPermissionIfNeeded = async () => {
       if (Platform.OS !== 'android') return true;
 
+      // Android 10(API 29) 미만에서는 권한이 필요하지 않음
+      if (Platform.Version < 29) return true;
+
       const permission = PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION;
       const granted = await PermissionsAndroid.check(permission);
       if (granted) return true;
