@@ -1,21 +1,36 @@
-import React from "react";
-import { View, Text } from "react-native";
-import * as Progress from "react-native-progress";
+import React from 'react';
+import { View, Text, Dimensions } from 'react-native';
+import styles from '@styles/StepProgress.styles';
+import * as Progress from 'react-native-progress';
 
-type Props = { step: number; goal: number };
+type Props = {
+  title: string;
+  current: number;
+  goal: number;
+  unit?: string;
+};
 
-/***
- * StepProgress Component
- * @param step - 현재 걸음 수
- * @param goal - 목표 걸음 수   
+/**
+ * Progress card used on the main page
+ * @param title - card title (ex: "15000보 걷기")
+ * @param current - current progress value
+ * @param goal - goal value
+ * @param unit - optional unit string (ex: "보", "km")
  */
-export const StepProgress = ({ step, goal }: Props) => {
-    const progress = step / goal;
+export const StepProgress = ({ title, current, goal, unit }: Props) => {
+  const progress = current / goal;
+  const { width: SCREEN_WIDTH } = Dimensions.get('window');
+  const cardWidth = Math.max(
+    150,
+    Math.min(220, Math.round(SCREEN_WIDTH * 0.4))
+  );
+  const barWidth = Math.max(100, cardWidth - 20); // padding 고려
 
-    return (
-        <View style={{ alignItems: "center", marginVertical: 10 }}>
-            <Progress.Bar progress={progress} width={200} color="#FF9900" />
-            <Text>{`${step} / ${goal} 보`}</Text>
-        </View>
-    );
+  return (
+    <View style={styles.card}>
+      <Text style={styles.title}>{title}</Text>
+      <Progress.Bar progress={progress} width={barWidth} color='#7450FF' />
+      <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
+    </View>
+  );
 };

@@ -19,6 +19,7 @@
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/native-stack": "^7.3.26",
     "@reduxjs/toolkit": "^2.9.0",
+    "@t2tx/react-native-universal-pedometer": "^2.0.3",
     "axios": "^1.11.0",
     "react": "19.1.0",
     "react-native": "0.81.1",
@@ -26,11 +27,11 @@
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-pager-view": "^6.9.1",
+    "react-native-progress": "^5.0.1",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.16.0",
-    "react-redux": "^9.2.0",
-    "react-native-progress": "^5.0.1",
-    "react-native-splash-screen": "^3.3.0"
+    "react-native-splash-screen": "^3.3.0",
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

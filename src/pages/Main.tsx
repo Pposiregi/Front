@@ -1,12 +1,8 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import MainPage from '@pages/main/MainPage';
 
 function Main() {
-  return (
-    <View>
-      <Text>주문</Text>
-    </View>
-  );
+  return <MainPage />;
 }
 
 export default Main;

@@ -1,7 +1,8 @@
-import React from "react";
-import { Image, TouchableOpacity } from "react-native";
+import React from 'react';
+import { Image, TouchableOpacity } from 'react-native';
+import styles from '@styles/PetAvatar.styles';
 
-type Props = { uri: string; expression: string; onPress?: () => void };
+type Props = { uri: string; expression?: string; onPress?: () => void };
 
 /***
  * PetAvatar Component
@@ -9,14 +10,10 @@ type Props = { uri: string; expression: string; onPress?: () => void };
  * @param expression - 펫 감정 (현재 미사용)
  * @param onPress - 클릭 시 호출되는 함수
  */
-export const PetAvatar = ({ uri, expression, onPress }: Props) => {
-    return (
-        <TouchableOpacity onPress={onPress}>
-            <Image
-                source={{ uri }}
-                style={{ width: 250, height: 250 }}
-                resizeMode="contain"
-            />
-        </TouchableOpacity>
-    );
+export const PetAvatar = ({ uri, expression: _expression, onPress }: Props) => {
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <Image source={{ uri }} style={styles.image} resizeMode='contain' />
+    </TouchableOpacity>
+  );
 };
