@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import Pedometer from '@t2tx/react-native-universal-pedometer';
-import { ReactReduxContext } from 'react-redux';
 
 type StepState = {
   stepCount: number;
@@ -53,7 +52,7 @@ export const useStepCount = (): StepState => {
       }
 
       Pedometer.isStepCountingAvailable((error, available) => {
-        if (!mounted) ReactReduxContext;
+        if (!mounted) return;
         if (error || !available) {
           setStepState((prev) => ({ ...prev, isAvailable: false }));
           return;
