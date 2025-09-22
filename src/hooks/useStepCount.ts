@@ -55,7 +55,7 @@ export const useStepCount = (): StepState => {
       Pedometer.isStepCountingAvailable((error, available) => {
         if (!mounted) ReactReduxContext;
         if (error || !available) {
-          setStepState((prev) => ({ ...prev, isAvailable: true }));
+          setStepState((prev) => ({ ...prev, isAvailable: false }));
           return;
         }
 
