@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import Pedometer from '@t2tx/react-native-universal-pedometer';
-import { ReactReduxContext } from 'react-redux';
 
 type StepState = {
   stepCount: number;
@@ -24,6 +23,9 @@ export const useStepCount = (): StepState => {
 
     const requestPermissionIfNeeded = async () => {
       if (Platform.OS !== 'android') return true;
+
+      // Android 10(API 29) 미만에서는 권한이 필요하지 않음
+      if (Platform.Version < 29) return true;
 
       const permission = PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION;
       const granted = await PermissionsAndroid.check(permission);
@@ -50,9 +52,9 @@ export const useStepCount = (): StepState => {
       }
 
       Pedometer.isStepCountingAvailable((error, available) => {
-        if (!mounted) ReactReduxContext;
+        if (!mounted) return;
         if (error || !available) {
-          setStepState((prev) => ({ ...prev, isAvailable: true }));
+          setStepState((prev) => ({ ...prev, isAvailable: false }));
           return;
         }
 

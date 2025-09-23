@@ -24,11 +24,13 @@ export const MainPage = () => {
   const { stepCount, isAvailable } = useStepCount(); //
 
   // 위치 변화를 구독하여 좌표를 얻음
-  // 데이터 로딩 중일 경우 스피너 표시
-  if (loading) return <ActivityIndicator size='large' />;
+  // 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
+  if (loading || !data) {
+    return <ActivityIndicator size='large' />;
+  }
 
   // 미션 가져오는 척
-  const missions = getMissions(data!, {
+  const missions = getMissions(data, {
     stepOverride: isAvailable ? stepCount : undefined,
   });
 
