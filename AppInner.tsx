@@ -20,6 +20,7 @@ import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/Index';
 import SplashScreen from 'react-native-splash-screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -106,59 +107,64 @@ function AppInner() {
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
 
   return (
-    <NavigationContainer>
-      {isLoggedIn ? (
-        // 로그인 상태일 때
-        isSignUpInProgress ? (
-          // 회원가입 진행 중일 때 -> Index 화면으로 이동
+    <SafeAreaView
+      edges={['top']}
+      style={{ flex: 1, backgroundColor: 'red', paddingTop: 10 }}
+    >
+      <NavigationContainer>
+        {isLoggedIn ? (
+          // 로그인 상태일 때
+          isSignUpInProgress ? (
+            // 회원가입 진행 중일 때 -> Index 화면으로 이동
+            <Stack.Navigator>
+              <Stack.Screen
+                name='Index'
+                component={Index}
+                options={{ headerShown: false, animation: 'slide_from_right' }}
+              />
+            </Stack.Navigator>
+          ) : (
+            // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
+            <Tab.Navigator>
+              <Tab.Screen
+                name='Main'
+                component={Main}
+                options={{ headerShown: false }}
+              />
+              <Tab.Screen
+                name='Health'
+                component={Health}
+                options={{ headerShown: false }}
+              />
+              <Tab.Screen
+                name='Mission'
+                component={Mission}
+                options={{ headerShown: false }}
+              />
+              <Tab.Screen
+                name='Meal'
+                component={Meal}
+                options={{ headerShown: false }}
+              />
+              <Tab.Screen
+                name='Setting'
+                component={Setting}
+                options={{ headerShown: false }}
+              />
+            </Tab.Navigator>
+          )
+        ) : (
+          // 로그인 상태가 아닐 때 -> SocialLogin 화면으로 이동
           <Stack.Navigator>
             <Stack.Screen
-              name='Index'
-              component={Index}
-              options={{ headerShown: false, animation: 'slide_from_right' }}
+              name='SocialLogin'
+              component={SocialLogin}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
-        ) : (
-          // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
-          <Tab.Navigator>
-            <Tab.Screen
-              name='Main'
-              component={Main}
-              options={{ title: '메인' }}
-            />
-            <Tab.Screen
-              name='Health'
-              component={Health}
-              options={{ title: '헬스' }}
-            />
-            <Tab.Screen
-              name='Mission'
-              component={Mission}
-              options={{ title: '미션' }}
-            />
-            <Tab.Screen
-              name='Meal'
-              component={Meal}
-              options={{ title: '식사' }}
-            />
-            <Tab.Screen
-              name='Setting'
-              component={Setting}
-              options={{ title: '설정' }}
-            />
-          </Tab.Navigator>
-        )
-      ) : (
-        // 로그인 상태가 아닐 때 -> SocialLogin 화면으로 이동
-        <Stack.Navigator>
-          <Stack.Screen
-            name='SocialLogin'
-            component={SocialLogin}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
-      )}
-    </NavigationContainer>
+        )}
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }
 
