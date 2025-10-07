@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="FitPet-GPX"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+                         http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <name>FitPet Sasang 200m Run Adjusted</name>
+    <trkseg>
+      <!--
+        200m를 40초(약 4m/s)로 달리는 가벼운 조깅 따라하기
+        - time: 참고값
+        - 4초 간격, 18m 구간의 트랙 포인트, 해발 데이터 추가
+        - 사상 기준
+      -->
+      <trkpt lat="35.162000" lon="128.985000">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:00Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.985200">
+        <ele>8.1</ele>
+        <time>2025-10-07T07:00:04Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.985400">
+        <ele>8.2</ele>
+        <time>2025-10-07T07:00:08Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.985600">
+        <ele>8.1</ele>
+        <time>2025-10-07T07:00:12Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.985800">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:16Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.986000">
+        <ele>7.9</ele>
+        <time>2025-10-07T07:00:20Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.986200">
+        <ele>7.8</ele>
+        <time>2025-10-07T07:00:24Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.986400">
+        <ele>7.9</ele>
+        <time>2025-10-07T07:00:28Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.986600">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:32Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.986800">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:36Z</time>
+      </trkpt>
+      <trkpt lat="35.162000" lon="128.987000">
+        <ele>8.1</ele>
+        <time>2025-10-07T07:00:40Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
