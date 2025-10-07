@@ -6,16 +6,7 @@ import {
   type Permission,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-
-export type LatLng = {
-  latitude: number;
-  longitude: number;
-};
-
-export type MapRegion = LatLng & {
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
+import type { LatLng, MapRegion } from '@shared-types/location';
 
 const DEFAULT_REGION: MapRegion = {
   latitude: 37.5665,
@@ -32,7 +23,7 @@ type TrackingState = {
 
 /**
  * 안드로이드에서 위치 추적을 위해 필요한 런타임 권한 집합.
- * 값이 `undefined`인 항목도 있을 수 있으므로 실제 사용 전에 필터한다.
+ * 값이 undefined인 항목도 있음 -> 실제 사용 전에 필터링
  */
 const ANDROID_PERMISSIONS = [
   PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -40,7 +31,7 @@ const ANDROID_PERMISSIONS = [
 ].filter((permission): permission is Permission => Boolean(permission));
 
 /**
- * 지정한 권한 가운데 거부된 항목만 다시 요청하고, 모든 권한이 허용됐는지 반환한다.
+ * 지정한 필수권한 가운데 거부된 항목 재요청
  */
 const requestAndroidPermissions = async () => {
   const ungranted: Permission[] = [];
@@ -60,6 +51,7 @@ const requestAndroidPermissions = async () => {
   );
 };
 
+/* ios SKIP!! */
 const requestIOSPermission = async () => {
   try {
     type IOSAuthStatus =
@@ -69,9 +61,9 @@ const requestIOSPermission = async () => {
       | 'disabled'
       | 'authorized';
 
-    const status = (await Geolocation.requestAuthorization?.(
-      'whenInUse'
-    )) as IOSAuthStatus | undefined;
+    const status = (await Geolocation.requestAuthorization?.('whenInUse')) as
+      | IOSAuthStatus
+      | undefined;
     if (!status) return true;
     return status === 'granted' || status === 'authorized';
   } catch (error) {
@@ -89,7 +81,8 @@ export const useRouteTracking = () => {
   const watchIdRef = useRef<number | null>(null);
 
   /**
-   * 백그라운드에서 돌아가는 위치 워치(Geolocation.watchPosition)를 안전하게 해제한다.
+   * Resurce Deallocation
+   * 백그라운드에서 돌아가는 위치 워치(Geolocation.watchPosition) 자원해제
    */
   const clearWatch = useCallback(() => {
     if (watchIdRef.current !== null) {
