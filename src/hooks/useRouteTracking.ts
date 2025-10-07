@@ -8,11 +8,13 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 import type { LatLng, MapRegion } from '@shared-types/location';
 
+// 초기 지도 위치 (서울 시청)
 const DEFAULT_REGION: MapRegion = {
+  // 앱이 실행 중인 플랫폼에서 제공하는 좌표로 갱신되면 즉시 덮어쓴다.
   latitude: 37.5665,
   longitude: 126.978,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01,
+  latitudeDelta: 0.015,
+  longitudeDelta: 0.015,
 };
 
 type TrackingState = {

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,22 @@ export const MainPage = () => {
   const { stepCount, isAvailable } = useStepCount(); //
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
+
+  const mapRef = useRef<MapView | null>(null);
+
+  useEffect(() => {
+    if (!isTracking) return;
+    if (path.length === 0) return;
+    mapRef.current?.animateToRegion?.(
+      {
+        latitude: region.latitude,
+        longitude: region.longitude,
+        latitudeDelta: region.latitudeDelta,
+        longitudeDelta: region.longitudeDelta,
+      },
+      500
+    );
+  }, [isTracking, path, region]);
 
   const handleToggleTracking = useCallback(async () => {
     if (isTracking) {
@@ -76,10 +92,10 @@ export const MainPage = () => {
       {isTracking ? (
         <View style={styles.mapContainer}>
           <MapView
+            ref={mapRef}
             style={styles.map}
             provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
             initialRegion={region}
-            region={region}
             showsUserLocation
             followsUserLocation
           >
