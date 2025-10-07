@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   ImageBackground,
+  Platform,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
@@ -13,6 +14,8 @@ import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
 import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
+import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useRouteTracking } from '@hooks/useRouteTracking';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -22,6 +25,17 @@ export const MainPage = () => {
   // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
   const { data, loading } = useMainData('u12345');
   const { stepCount, isAvailable } = useStepCount(); //
+  const { isTracking, path, region, startTracking, stopTracking } =
+    useRouteTracking();
+
+  const handleToggleTracking = useCallback(async () => {
+    if (isTracking) {
+      stopTracking();
+      return;
+    }
+
+    await startTracking();
+  }, [isTracking, startTracking, stopTracking]);
 
   // 위치 변화를 구독하여 좌표를 얻음
   // 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
@@ -59,33 +73,57 @@ export const MainPage = () => {
         />
       </View>
 
-      {/* 토끼 배경 이미지와 함께 메시지 및 버튼 표시 */}
-      <ImageBackground
-        source={TokkiImage}
-        style={styles.tokkiBackground}
-        resizeMode='cover'
-      >
-        <Text style={styles.message}>
-          {`${displayedSteps.toLocaleString()}보 걸었어요!`}
-        </Text>
-        {!isAvailable && (
-          <Text style={styles.stepFallback}>
-            디바이스 걸음 센서를 찾을 수 없어 서버 데이터를 표시해요.
-          </Text>
-        )}
-
-        {/* 펫 아바타 
-      <PetAvatar uri={data!.pet.image_uri} expression={data!.pet.expression} />
-    */}
-        {/* Start Button - 하단 배치 */}
-        <TouchableOpacity
-          style={styles.startButton}
-          accessibilityRole='button'
-          accessibilityLabel='산책 시작'
+      {isTracking ? (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+            initialRegion={region}
+            region={region}
+            showsUserLocation
+            followsUserLocation
+          >
+            {path.length > 1 && (
+              <Polyline
+                coordinates={path}
+                strokeColor='#7450FF'
+                strokeWidth={4}
+              />
+            )}
+          </MapView>
+          <View style={styles.mapOverlay}>
+            <Text style={styles.overlayText}>
+              경로 추적 중 · {path.length.toLocaleString()} 포인트
+            </Text>
+          </View>
+        </View>
+      ) : (
+        // 토끼 배경 이미지와 함께 메시지 표시
+        <ImageBackground
+          source={TokkiImage}
+          style={styles.tokkiBackground}
+          resizeMode='cover'
         >
-          <Text style={styles.startText}>START</Text>
-        </TouchableOpacity>
-      </ImageBackground>
+          <Text style={styles.message}>
+            {`${displayedSteps.toLocaleString()}보 걸었어요!`}
+          </Text>
+          {!isAvailable && (
+            <Text style={styles.stepFallback}>
+              디바이스 걸음 센서를 찾을 수 없어 서버 데이터를 표시해요.
+            </Text>
+          )}
+        </ImageBackground>
+      )}
+
+      {/* Start / End Button */}
+      <TouchableOpacity
+        style={styles.startButton}
+        accessibilityRole='button'
+        accessibilityLabel={isTracking ? '산책 종료' : '산책 시작'}
+        onPress={handleToggleTracking}
+      >
+        <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
