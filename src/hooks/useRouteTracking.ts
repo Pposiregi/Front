@@ -8,14 +8,20 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 import type { LatLng, MapRegion } from '@shared-types/location';
 
-// 초기 지도 위치 (서울 시청)
+// 초기 지도 위치 (서울 시청 근방) — 실제 위치를 받으면 곧바로 덮어쓴다.
 const DEFAULT_REGION: MapRegion = {
-  // 앱이 실행 중인 플랫폼에서 제공하는 좌표로 갱신되면 즉시 덮어쓴다.
   latitude: 37.5665,
   longitude: 126.978,
-  latitudeDelta: 0.015,
-  longitudeDelta: 0.015,
+  latitudeDelta: 0.008,
+  longitudeDelta: 0.008,
 };
+
+// 추적 시 카메라가 유지할 확대 수준 (약 400m 너비)
+const TRACKING_REGION_DELTA = 0.004;
+// 위치 샘플 사이 간격이 너무 크면 폴리라인이 안 그려질 수 있어 최소 이동 거리를 낮춘다.
+const WATCH_DISTANCE_FILTER_METERS = 0;
+// GPS가 수십 cm 단위로 튀는 것을 방지하기 위한 최소 거리
+const MIN_POINT_DISTANCE_METERS = 0.1;
 
 type TrackingState = {
   isTracking: boolean;
@@ -81,6 +87,8 @@ export const useRouteTracking = () => {
     region: DEFAULT_REGION,
   });
   const watchIdRef = useRef<number | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastUpdateRef = useRef<number | null>(null);
 
   /**
    * Resurce Deallocation
@@ -98,6 +106,13 @@ export const useRouteTracking = () => {
     Geolocation.stopObserving?.();
   }, []);
 
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearInterval(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  }, []);
+
   /**
    * 플랫폼별 위치 권한을 요청하고, 허용 여부를 boolean으로 반환한다.
    */
@@ -110,25 +125,99 @@ export const useRouteTracking = () => {
   }, []);
 
   /**
+   * 두 좌표 사이 거리를 미터 단위로 계산한다. (하버사인)
+   */
+  const getDistanceMeters = useCallback((a: LatLng, b: LatLng) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const R = 6371e3; // 지구 반지름 (m)
+    const dLat = toRad(b.latitude - a.latitude);
+    const dLon = toRad(b.longitude - a.longitude);
+    const lat1 = toRad(a.latitude);
+    const lat2 = toRad(b.latitude);
+
+    const sinLat = Math.sin(dLat / 2);
+    const sinLon = Math.sin(dLon / 2);
+
+    const aVal =
+      sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+    const c = 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
+
+    return R * c;
+  }, []);
+
+  /**
    * 새 좌표를 수신하면 경로 배열과 카메라 중심(region)을 최신 값으로 갱신한다.
    */
-  const handlePosition = useCallback((latitude: number, longitude: number) => {
-    setState((prev) => {
-      const nextPath = [...prev.path, { latitude, longitude }];
-      const nextRegion: MapRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: prev.region.latitudeDelta,
-        longitudeDelta: prev.region.longitudeDelta,
-      };
+  const handlePosition = useCallback(
+    (latitude: number, longitude: number) => {
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        console.warn('Received invalid coordinate', { latitude, longitude });
+        return;
+      }
+      setState((prev) => {
+        const nextPoint: LatLng = { latitude, longitude };
+        const lastPoint = prev.path[prev.path.length - 1];
 
-      return {
-        ...prev,
-        path: nextPath,
-        region: nextRegion,
-      };
-    });
-  }, []);
+        if (lastPoint) {
+          const delta = getDistanceMeters(lastPoint, nextPoint);
+          // GPS 소수점 떨림(수십 cm)을 중복 포인트로 추가하지 않도록 필터링한다.
+          if (delta < MIN_POINT_DISTANCE_METERS) {
+            if (__DEV__) {
+              console.debug('[RouteTracking] ignore jitter', {
+                latitude,
+                longitude,
+                delta,
+              });
+            }
+            lastUpdateRef.current = Date.now();
+            return prev;
+          }
+        }
+
+        const nextPath = [...prev.path, nextPoint];
+        const nextRegion: MapRegion = {
+          latitude,
+          longitude,
+          latitudeDelta: TRACKING_REGION_DELTA,
+          longitudeDelta: TRACKING_REGION_DELTA,
+        };
+
+        if (__DEV__) {
+          console.debug('[RouteTracking] push point', {
+            latitude,
+            longitude,
+            nextLength: nextPath.length,
+          });
+        }
+
+        lastUpdateRef.current = Date.now();
+
+        return {
+          ...prev,
+          path: nextPath,
+          region: nextRegion,
+        };
+      });
+    },
+    [getDistanceMeters]
+  );
+
+  const requestSingleLocation = useCallback(() => {
+    Geolocation.getCurrentPosition(
+      (position) => {
+        handlePosition(position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        console.warn('현재 위치를 가져오지 못했습니다.', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+        forceRequestLocation: true,
+      }
+    );
+  }, [handlePosition]);
 
   /**
    * 권한을 확인한 뒤 현재 위치를 기준으로 워치를 등록하고, 추적 상태를 true로 만든다.
@@ -145,21 +234,9 @@ export const useRouteTracking = () => {
     }
 
     setState((prev) => ({ ...prev, isTracking: true, path: [] }));
+    lastUpdateRef.current = null;
 
-    Geolocation.getCurrentPosition(
-      (position) => {
-        handlePosition(position.coords.latitude, position.coords.longitude);
-      },
-      (error) => {
-        console.warn('현재 위치를 가져오지 못했습니다.', error);
-        Alert.alert('위치 오류', '현재 위치를 불러오지 못했습니다.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
-      }
-    );
+    requestSingleLocation();
 
     watchIdRef.current = Geolocation.watchPosition(
       (position) => {
@@ -170,25 +247,41 @@ export const useRouteTracking = () => {
       },
       {
         enableHighAccuracy: true,
-        // 위치가 약 10m 이상 이동하거나, 최대 3초 간격으로 콜백을 받는다.
-        // 걷기(1.4m/s)~러닝(4m/s) 페이스를 고려하면 3초면 4~12m를 이동하므로
-        // 실사용 시 지나치게 많은 샘플이 쌓이지 않으면서 경로가 끊기지 않는다.
-        distanceFilter: 10,
-        interval: 3000,
+        distanceFilter: WATCH_DISTANCE_FILTER_METERS,
+        interval: 2000,
         fastestInterval: 1000,
         showsBackgroundLocationIndicator: true,
       }
     );
 
+    refreshTimerRef.current = setInterval(() => {
+      if (watchIdRef.current === null) return;
+      const last = lastUpdateRef.current;
+      if (!last || Date.now() - last > 4000) {
+        if (__DEV__) {
+          console.debug('[RouteTracking] force single location');
+        }
+        requestSingleLocation();
+      }
+    }, 4000);
+
     return true;
-  }, [handlePosition, requestPermission]);
+  }, [handlePosition, requestPermission, requestSingleLocation]);
 
   const stopTracking = useCallback(() => {
     clearWatch();
+    clearRefreshTimer();
+    lastUpdateRef.current = null;
     setState((prev) => ({ ...prev, isTracking: false }));
-  }, [clearWatch]);
+  }, [clearRefreshTimer, clearWatch]);
 
-  useEffect(() => () => clearWatch(), [clearWatch]);
+  useEffect(
+    () => () => {
+      clearRefreshTimer();
+      clearWatch();
+    },
+    [clearRefreshTimer, clearWatch]
+  );
 
   return {
     isTracking: state.isTracking,

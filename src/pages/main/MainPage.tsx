@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -7,6 +13,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Platform,
+  Pressable,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
@@ -14,25 +21,99 @@ import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
 import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
-import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, {
+  Marker,
+  Polyline,
+  MapPolyline,
+  PROVIDER_GOOGLE,
+  Geojson,
+} from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
+import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
  * - 미션 목록을 가로 스크롤로 표시
  */
 export const MainPage = () => {
-  // 사용자 메인 데이터를 가져오는 척~ 커스텀 혹
+  // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
-  const { stepCount, isAvailable } = useStepCount(); //
+  // 걸음 수, [센서 접근 가능 -> 실시간 걸음수] / [센서 접근 불가능  -> GPS]
+  const { stepCount, isAvailable } = useStepCount();
+  // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
 
   const mapRef = useRef<MapView | null>(null);
+  const [mapLayout, setMapLayout] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
+  const polylinePoints = useMemo(
+    () =>
+      path.filter(
+        (point) =>
+          Number.isFinite(point.latitude) && Number.isFinite(point.longitude)
+      ),
+    [path]
+  );
+
+  const polylineGeoJSON = useMemo(() => {
+    if (polylinePoints.length < 2) return null;
+    return {
+      type: 'FeatureCollection' as const,
+      features: [
+        {
+          type: 'Feature' as const,
+          properties: {},
+          geometry: {
+            type: 'LineString' as const,
+            coordinates: polylinePoints.map((point) => [
+              point.longitude,
+              point.latitude,
+            ]),
+          },
+        },
+      ],
+    };
+  }, [polylinePoints]);
+
+  useEffect(() => {
+    if (__DEV__) {
+      console.debug('[MainPage] polylinePoints', polylinePoints.length);
+    }
+  }, [polylinePoints.length]);
+
+  useEffect(() => {
+    if (!__DEV__) return;
+    if (polylinePoints.length > 1) {
+      const first = polylinePoints[0];
+      const last = polylinePoints[polylinePoints.length - 1];
+      console.debug('[MainPage] will render polyline', {
+        count: polylinePoints.length,
+        first,
+        last,
+      });
+    }
+    if (polylineGeoJSON) {
+      console.debug('[MainPage] geojson ready', {
+        features: polylineGeoJSON.features.length,
+        coordinates: polylineGeoJSON.features[0]?.geometry.coordinates.length,
+      });
+    }
+  }, [polylinePoints, polylineGeoJSON]);
+
+  /* 지도 카메라 이동
+   * - isTracking: 추적 중일 때만 카메라 이동
+   * - path.length: 좌표가 하나도 없으면 이동하지 않음
+   * - region: region이 바뀔 때마다 카메라 이동
+   */
   useEffect(() => {
     if (!isTracking) return;
     if (path.length === 0) return;
+
+    // 추적 중 최신 좌표 갱신 -> 지도 카메라 위치 이동
     mapRef.current?.animateToRegion?.(
       {
         latitude: region.latitude,
@@ -44,7 +125,12 @@ export const MainPage = () => {
     );
   }, [isTracking, path, region]);
 
+  /* 산책 시작/종료 핸들러
+   * - isTracking이 true면 산책 중이므로 종료
+   * - isTracking이 false면 산책 전이므로 시작
+   */
   const handleToggleTracking = useCallback(async () => {
+    // 이미 추적 중이면 즉시 종료하고, 그렇지 않으면 권한 확인 후 추적을 시작한다.
     if (isTracking) {
       stopTracking();
       return;
@@ -53,14 +139,16 @@ export const MainPage = () => {
     await startTracking();
   }, [isTracking, startTracking, stopTracking]);
 
-  // 위치 변화를 구독하여 좌표를 얻음
-  // 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
+  /* 로딩 상태
+   * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
+   */
   if (loading || !data) {
     return <ActivityIndicator size='large' />;
   }
 
   // 미션 가져오는 척
   const missions = getMissions(data, {
+    // 실시간 걸음 수를 강제로 주입해 미션 진행률이 최신 상태로 계산되도록 한다. // TODO: 최적화를 위하여 앱 백그라운드 전환 시점에만
     stepOverride: isAvailable ? stepCount : undefined,
   });
 
@@ -72,6 +160,9 @@ export const MainPage = () => {
         미션 진행 상황을 가로 스크롤로 표시 
       */}
       <View style={styles.progressContainer}>
+        {/*
+          주간/일일 미션을 수평 스크롤 카드 형태로 표시
+        */}
         <FlatList
           data={missions}
           horizontal
@@ -90,26 +181,99 @@ export const MainPage = () => {
       </View>
 
       {isTracking ? (
-        <View style={styles.mapContainer}>
+        <View
+          style={styles.mapContainer}
+          onLayout={({ nativeEvent }) => {
+            const { width, height } = nativeEvent.layout;
+            setMapLayout({ width, height });
+          }}
+        >
           <MapView
             ref={mapRef}
             style={styles.map}
             provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
             initialRegion={region}
+            region={region}
             showsUserLocation
             followsUserLocation
           >
-            {path.length > 1 && (
-              <Polyline
-                coordinates={path}
+            {polylinePoints.length > 1 && (
+              <>
+                <Polyline
+                  key={`polyline-${polylinePoints.length}`}
+                  coordinates={polylinePoints}
+                  strokeColor='#7450FF'
+                  strokeWidth={6}
+                  lineCap='round'
+                  lineJoin='round'
+                />
+                <MapPolyline
+                  key={`map-polyline-${polylinePoints.length}`}
+                  coordinates={polylinePoints}
+                  strokeColor='#7450FF'
+                  strokeWidth={6}
+                  lineCap='round'
+                  lineJoin='round'
+                />
+              </>
+            )}
+            {polylineGeoJSON && (
+              <Geojson
+                geojson={polylineGeoJSON}
                 strokeColor='#7450FF'
-                strokeWidth={4}
+                strokeWidth={6}
               />
             )}
+            {__DEV__ && (
+              <Polyline
+                key='debug-sample'
+                coordinates={[
+                  {
+                    latitude: region.latitude + 0.001,
+                    longitude: region.longitude - 0.001,
+                  },
+                  { latitude: region.latitude, longitude: region.longitude },
+                  {
+                    latitude: region.latitude - 0.001,
+                    longitude: region.longitude + 0.001,
+                  },
+                ]}
+                strokeColor='rgba(0, 255, 0, 0.5)'
+                strokeWidth={4}
+                lineDashPattern={[6, 6]}
+              />
+            )}
+            {polylinePoints.length > 0 && (
+              // 가장 최근 좌표를 커스텀 마커로 강조해 현재 위치를 명시한다.
+              <Marker coordinate={polylinePoints[polylinePoints.length - 1]}>
+                <View style={styles.currentPin}>
+                  <View style={styles.currentPinInner} />
+                </View>
+              </Marker>
+            )}
           </MapView>
+          {mapLayout && polylinePoints.length > 1 && (
+            <MapOverlayPolyline
+              region={region}
+              coordinates={polylinePoints}
+              width={mapLayout.width}
+              height={mapLayout.height}
+            />
+          )}
+          <Pressable
+            style={styles.locateButton}
+            accessibilityRole='button'
+            accessibilityLabel='현재 위치로 이동'
+            onPress={() => {
+              if (!mapRef.current) return;
+              mapRef.current.animateToRegion?.(region, 500);
+            }}
+          >
+            <Text style={styles.locateText}>내 위치</Text>
+          </Pressable>
           <View style={styles.mapOverlay}>
             <Text style={styles.overlayText}>
-              경로 추적 중 · {path.length.toLocaleString()} 포인트
+              경로 추적 중 · {polylinePoints.length.toLocaleString()} 포인트
             </Text>
           </View>
         </View>
@@ -120,6 +284,7 @@ export const MainPage = () => {
           style={styles.tokkiBackground}
           resizeMode='cover'
         >
+          {/* 실시간 센서가 없으면 서버 데이터로 대체하되 항상 자연스러운 문장으로 안내한다. */}
           <Text style={styles.message}>
             {`${displayedSteps.toLocaleString()}보 걸었어요!`}
           </Text>
