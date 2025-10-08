@@ -50,6 +50,9 @@ export const MainPage = () => {
     height: number;
   } | null>(null);
 
+  /* 폴리라인 좌표 정제 및 GeoJSON 변환
+   * - 유효한 경계값 내의 Path만 필터링
+   */
   const polylinePoints = useMemo(
     () =>
       path.filter(
@@ -59,6 +62,9 @@ export const MainPage = () => {
     [path]
   );
 
+  /* GeoJSON 변환
+   * - polylinePoints가 2개 미만이면 null 반환
+   */
   const polylineGeoJSON = useMemo(() => {
     if (polylinePoints.length < 2) return null;
     return {
@@ -79,12 +85,17 @@ export const MainPage = () => {
     };
   }, [polylinePoints]);
 
+  /* 디버그용 로그 - Ployline Point 추가 시 확인 */
   useEffect(() => {
     if (__DEV__) {
       console.debug('[MainPage] polylinePoints', polylinePoints.length);
     }
   }, [polylinePoints.length]);
 
+  /* 디버그용 로그 - Polyline 및 GeoJSON 렌더링 정보 확인
+   * - 개발 모드에서만 실행
+   * - polylinePoints 또는 polylineGeoJSON이 변경될 때마다 실행
+   */
   useEffect(() => {
     if (!__DEV__) return;
     if (polylinePoints.length > 1) {
@@ -146,12 +157,13 @@ export const MainPage = () => {
     return <ActivityIndicator size='large' />;
   }
 
-  // 미션 가져오는 척
+  // 걸음 수 미션 목록
   const missions = getMissions(data, {
     // 실시간 걸음 수를 강제로 주입해 미션 진행률이 최신 상태로 계산되도록 한다. // TODO: 최적화를 위하여 앱 백그라운드 전환 시점에만
     stepOverride: isAvailable ? stepCount : undefined,
   });
 
+  // 표시할 걸음 수
   const displayedSteps = isAvailable ? stepCount : data?.daily_walk.step ?? 0;
 
   return (
@@ -199,14 +211,7 @@ export const MainPage = () => {
           >
             {polylinePoints.length > 1 && (
               <>
-                <Polyline
-                  key={`polyline-${polylinePoints.length}`}
-                  coordinates={polylinePoints}
-                  strokeColor='#7450FF'
-                  strokeWidth={6}
-                  lineCap='round'
-                  lineJoin='round'
-                />
+                {/* New Architecture 대응을 위한 MapPolyline – 동일한 좌표를 중복 전달 */}
                 <MapPolyline
                   key={`map-polyline-${polylinePoints.length}`}
                   coordinates={polylinePoints}
@@ -217,6 +222,7 @@ export const MainPage = () => {
                 />
               </>
             )}
+            {/* GeoJSON 렌더링 – 폴리라인을 피처 컬렉션으로 넘겨 백업 라인 제공 */}
             {polylineGeoJSON && (
               <Geojson
                 geojson={polylineGeoJSON}
@@ -224,6 +230,7 @@ export const MainPage = () => {
                 strokeWidth={6}
               />
             )}
+            {/* 개발 시 시각 확인용 가이드 라인 */}
             {__DEV__ && (
               <Polyline
                 key='debug-sample'
@@ -253,6 +260,7 @@ export const MainPage = () => {
             )}
           </MapView>
           {mapLayout && polylinePoints.length > 1 && (
+            // react-native-svg를 이용한 화면 좌표 기반 오버레이 폴리라인
             <MapOverlayPolyline
               region={region}
               coordinates={polylinePoints}
@@ -260,6 +268,7 @@ export const MainPage = () => {
               height={mapLayout.height}
             />
           )}
+          {/* 내 위치로 이동 버튼 */}
           <Pressable
             style={styles.locateButton}
             accessibilityRole='button'
@@ -284,7 +293,7 @@ export const MainPage = () => {
           style={styles.tokkiBackground}
           resizeMode='cover'
         >
-          {/* 실시간 센서가 없으면 서버 데이터로 대체하되 항상 자연스러운 문장으로 안내한다. */}
+          {/* 실시간 센서가 없으면 서버 데이터로 대체하되 안내문 출력. */}
           <Text style={styles.message}>
             {`${displayedSteps.toLocaleString()}보 걸었어요!`}
           </Text>
@@ -300,7 +309,7 @@ export const MainPage = () => {
       <TouchableOpacity
         style={styles.startButton}
         accessibilityRole='button'
-        accessibilityLabel={isTracking ? '산책 종료' : '산책 시작'}
+        accessibilityLabel={isTracking ? '산책 종료' : '산책 시작'} // 스크린리더
         onPress={handleToggleTracking}
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
