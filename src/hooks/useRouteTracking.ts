@@ -232,6 +232,10 @@ export const useRouteTracking = () => {
       return false;
     }
 
+    // 재시작 시 중복(빠른 토글 눌림으로 인한) 워치/타이머 누적을 방지하기 위해 기존 자원을 정리한다.
+    clearWatch();
+    clearRefreshTimer();
+
     setState((prev) => ({ ...prev, isTracking: true, path: [] }));
     lastUpdateRef.current = null;
 
@@ -265,7 +269,13 @@ export const useRouteTracking = () => {
     }, 4000);
 
     return true;
-  }, [handlePosition, requestPermission, requestSingleLocation]);
+  }, [
+    clearRefreshTimer,
+    clearWatch,
+    handlePosition,
+    requestPermission,
+    requestSingleLocation,
+  ]);
 
   const stopTracking = useCallback(() => {
     clearWatch();
