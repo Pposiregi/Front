@@ -21,13 +21,7 @@ import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
 import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
-import MapView, {
-  Marker,
-  Polyline,
-  MapPolyline,
-  PROVIDER_GOOGLE,
-  Geojson,
-} from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 /**
@@ -209,27 +203,6 @@ export const MainPage = () => {
             showsUserLocation
             followsUserLocation
           >
-            {polylinePoints.length > 1 && (
-              <>
-                {/* New Architecture 대응을 위한 MapPolyline – 동일한 좌표를 중복 전달 */}
-                <MapPolyline
-                  key={`map-polyline-${polylinePoints.length}`}
-                  coordinates={polylinePoints}
-                  strokeColor='#7450FF'
-                  strokeWidth={6}
-                  lineCap='round'
-                  lineJoin='round'
-                />
-              </>
-            )}
-            {/* GeoJSON 렌더링 – 폴리라인을 피처 컬렉션으로 넘겨 백업 라인 제공 */}
-            {polylineGeoJSON && (
-              <Geojson
-                geojson={polylineGeoJSON}
-                strokeColor='#7450FF'
-                strokeWidth={6}
-              />
-            )}
             {/* 개발 시 시각 확인용 가이드 라인 */}
             {__DEV__ && (
               <Polyline
