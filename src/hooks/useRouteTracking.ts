@@ -103,7 +103,6 @@ export const useRouteTracking = () => {
       }
       watchIdRef.current = null;
     }
-    Geolocation.stopObserving?.();
   }, []);
 
   const clearRefreshTimer = useCallback(() => {
