@@ -26,6 +26,7 @@ module.exports = {
           '@styles': './src/styles',
           '@store': './src/store',
           '@api': './src/api',
+          '@shared-types': './src/shared/types',
         },
       },
     ],

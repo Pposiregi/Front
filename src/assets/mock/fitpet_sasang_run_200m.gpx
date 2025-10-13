@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="FitPet-GPX"
+     xmlns="http://www.topografix.com/GPX/1/1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+                         http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <name>FitPet Sasang 200m Run Adjusted</name>
+    <trkseg>
+      <!--
+        약 220m 코스를 42초 동안 달리는 모의 데이터.
+        좌표는 부산 사상구 인근, 2초 간격으로 샘플링.
+      -->
+      <trkpt lat="35.151600" lon="128.997600">
+        <ele>7.8</ele>
+        <time>2025-10-07T07:00:00Z</time>
+      </trkpt>
+      <trkpt lat="35.151612" lon="128.997750">
+        <ele>7.9</ele>
+        <time>2025-10-07T07:00:02Z</time>
+      </trkpt>
+      <trkpt lat="35.151625" lon="128.997900">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:04Z</time>
+      </trkpt>
+      <trkpt lat="35.151640" lon="128.998050">
+        <ele>8.0</ele>
+        <time>2025-10-07T07:00:06Z</time>
+      </trkpt>
+      <trkpt lat="35.151655" lon="128.998200">
+        <ele>8.1</ele>
+        <time>2025-10-07T07:00:08Z</time>
+      </trkpt>
+      <trkpt lat="35.151670" lon="128.998350">
+        <ele>8.1</ele>
+        <time>2025-10-07T07:00:10Z</time>
+      </trkpt>
+      <trkpt lat="35.151684" lon="128.998500">
+        <ele>8.2</ele>
+        <time>2025-10-07T07:00:12Z</time>
+      </trkpt>
+      <trkpt lat="35.151700" lon="128.998650">
+        <ele>8.2</ele>
+        <time>2025-10-07T07:00:14Z</time>
+      </trkpt>
+      <trkpt lat="35.151718" lon="128.998800">
+        <ele>8.3</ele>
+        <time>2025-10-07T07:00:16Z</time>
+      </trkpt>
+      <trkpt lat="35.151735" lon="128.998950">
+        <ele>8.3</ele>
+        <time>2025-10-07T07:00:18Z</time>
+      </trkpt>
+      <trkpt lat="35.151752" lon="128.999100">
+        <ele>8.4</ele>
+        <time>2025-10-07T07:00:20Z</time>
+      </trkpt>
+      <trkpt lat="35.151770" lon="128.999240">
+        <ele>8.4</ele>
+        <time>2025-10-07T07:00:22Z</time>
+      </trkpt>
+      <trkpt lat="35.151790" lon="128.999380">
+        <ele>8.5</ele>
+        <time>2025-10-07T07:00:24Z</time>
+      </trkpt>
+      <trkpt lat="35.151810" lon="128.999520">
+        <ele>8.5</ele>
+        <time>2025-10-07T07:00:26Z</time>
+      </trkpt>
+      <trkpt lat="35.151830" lon="128.999660">
+        <ele>8.6</ele>
+        <time>2025-10-07T07:00:28Z</time>
+      </trkpt>
+      <trkpt lat="35.151852" lon="128.999800">
+        <ele>8.6</ele>
+        <time>2025-10-07T07:00:30Z</time>
+      </trkpt>
+      <trkpt lat="35.151875" lon="128.999940">
+        <ele>8.7</ele>
+        <time>2025-10-07T07:00:32Z</time>
+      </trkpt>
+      <trkpt lat="35.151900" lon="129.000080">
+        <ele>8.7</ele>
+        <time>2025-10-07T07:00:34Z</time>
+      </trkpt>
+      <trkpt lat="35.151925" lon="129.000220">
+        <ele>8.8</ele>
+        <time>2025-10-07T07:00:36Z</time>
+      </trkpt>
+      <trkpt lat="35.151950" lon="129.000360">
+        <ele>8.8</ele>
+        <time>2025-10-07T07:00:38Z</time>
+      </trkpt>
+      <trkpt lat="35.151975" lon="129.000500">
+        <ele>8.9</ele>
+        <time>2025-10-07T07:00:40Z</time>
+      </trkpt>
+      <trkpt lat="35.152000" lon="129.000640">
+        <ele>8.9</ele>
+        <time>2025-10-07T07:00:42Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

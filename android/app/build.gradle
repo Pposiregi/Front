@@ -92,7 +92,10 @@ android {
         versionCode 1
         versionName "1.0"
         //카카오 API 키 입력
-        manifestPlaceholders = [KAKAO_SCHEME: localProps['KAKAO_SCHEME']]
+        manifestPlaceholders = [
+            KAKAO_SCHEME: localProps['KAKAO_SCHEME'],
+            GOOGLE_MAPS_API_KEY: localProps['GOOGLE_MAPS_API_KEY'] ?: ""
+        ]
         resValue "string", "kakao_app_key", localProps['KAKAO_APP_KEY']
     }
     signingConfigs {
@@ -121,6 +124,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation project(':react-native-splash-screen')
+    implementation "com.google.android.gms:play-services-location:${rootProject.ext.playServicesLocationVersion}"
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
