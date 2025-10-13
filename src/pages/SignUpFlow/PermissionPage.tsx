@@ -10,7 +10,7 @@ import {
 import CheckBox from '@react-native-community/checkbox';
 
 //props로 받아오기 위해 작성
-type SignUpProps = {
+type PermissionProps = {
   onNext: (data: {
     permissions: {
       locationAgree: boolean;
@@ -20,7 +20,7 @@ type SignUpProps = {
   }) => void;
 };
 
-const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
+const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
   const [agreeAll, setAgreeAll] = useState(false);
   const [locationAgree, setLocationAgree] = useState(false);
   const [privacyAgree, setPrivacyAgree] = useState(false);
@@ -94,7 +94,7 @@ const SignUp: React.FC<SignUpProps> = ({ onNext }) => {
   );
 };
 
-export default SignUp;
+export default PermissionPage;
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
