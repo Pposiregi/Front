@@ -11,7 +11,8 @@
       "@assets/*": ["assets/*"],
       "@styles/*": ["styles/*"],
       "@store/*": ["store/*"],
-      "@types/*": ["types/*"]
+      "@types/*": ["types/*"],
+      "@shared-types/*": ["shared/types/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/types/images.d.ts"],
