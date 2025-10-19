@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
 //props로 받아오기 위해 작성

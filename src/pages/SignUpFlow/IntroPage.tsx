@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  BackHandler,
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch } from '../../store';

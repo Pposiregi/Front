@@ -10,9 +10,6 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import userSlice from '../../slices/user';
-import { useAppDispatch } from '../../store';
 import { isValidPbf, isValidWeight } from '../../utils/validation';
 
 type OptionalInfoProps = {

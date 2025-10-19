@@ -1,11 +1,377 @@
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ImageSourcePropType,
+  FlatList,
+  Modal,
+} from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MapOverlayPolyline from '@components/MapOverlayPolyline';
+import { LineChart } from 'react-native-chart-kit';
+import chartConfig from '@utils/chartConfig';
+import styles from '@styles/Mission.styles';
+import { width, height } from '@styles/Mission.styles';
+
+// 타입 정의
+type MissionData = {
+  date: string;
+  distanceKm: number;
+  burnCalories: number;
+  steps: number;
+};
+
+type Meal = {
+  mealId: string;
+  title: string;
+  imageUri: ImageSourcePropType; // 후에는 url로 교체
+  kcal: number;
+};
+
+// 목업 데이터
+const mockMissionData: MissionData = {
+  date: '2025-10-18',
+  distanceKm: 3.21,
+  burnCalories: 123,
+  steps: 4450,
+};
+const mockMissionData1: MissionData = {
+  date: '2025-10-11',
+  distanceKm: 6.42,
+  burnCalories: 246,
+  steps: 8900,
+};
+const mockMissionData2: MissionData = {
+  date: '2025-10-12',
+  distanceKm: 1.6,
+  burnCalories: 61,
+  steps: 2225,
+};
+const mockMissionData3: MissionData = {
+  date: '2025-10-13',
+  distanceKm: 3.21,
+  burnCalories: 123,
+  steps: 4450,
+};
+const mockMissionData4: MissionData = {
+  date: '2025-10-14',
+  distanceKm: 6.42,
+  burnCalories: 246,
+  steps: 8900,
+};
+const mockMissionData5: MissionData = {
+  date: '2025-10-15',
+  distanceKm: 1.6,
+  burnCalories: 61,
+  steps: 2225,
+};
+const mockMissionData6: MissionData = {
+  date: '2025-10-16',
+  distanceKm: 3.21,
+  burnCalories: 123,
+  steps: 4450,
+};
+
+const mockWeeklyMissionData: MissionData[] = [
+  mockMissionData, // 2025-10-17
+  mockMissionData1, // 2025-10-11
+  mockMissionData2, // 2025-10-12
+  mockMissionData3, // 2025-10-13
+  mockMissionData4, // 2025-10-14
+  mockMissionData5, // 2025-10-15
+  mockMissionData6, // 2025-10-16
+];
+
+const mockMeals: Meal[] = [
+  {
+    mealId: '1',
+    title: '연어 포케',
+    imageUri: require('../assets/images/mock_rice_1.png'),
+    kcal: 321,
+  },
+  {
+    mealId: '2',
+    title: '닭가슴살 샐러드',
+    imageUri: require('../assets/images/mock_rice_2.png'),
+    kcal: 287,
+  },
+];
 
 function Mission() {
+  const [missionData, setMissionData] = useState<MissionData | null>(null);
+  const [todayMeals, setTodayMeals] = useState<Meal[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [weeklyDistance, setWeeklyDistance] = useState<number | null>(null);
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: { data: number[] }[];
+  }>({
+    labels: [],
+    datasets: [{ data: [] }],
+  });
+  const mapRef = useRef<MapView | null>(null);
+  const [isToday, setIsToday] = useState<boolean>(false);
+  // 오늘 날짜 (yyyy-mm-dd)
+  const today = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    // 목업 데이터를 불러오는 것처럼 시뮬레이션
+    setTimeout(() => {
+      setMissionData(mockMissionData);
+      setTodayMeals(mockMeals);
+      calculateWeeklyData();
+      setLoading(false);
+    }, 800);
+  }, []);
+
+  // 주간 거리를 계산하고 그래프 데이터를 생성하는 함수
+  const calculateWeeklyData = () => {
+    const todayDate = new Date(today);
+
+    // 지난 7일 (오늘 포함 8일)의 날짜와 거리 맵 초기화
+    const dailyDataMap = new Map<string, number>();
+    const dates: string[] = [];
+
+    // 지난 7일의 날짜를 계산하여 초기화 (YYYY-MM-DD 형식)
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(todayDate);
+      date.setDate(todayDate.getDate() - i);
+      const dateString = date.toISOString().split('T')[0];
+      dates.push(dateString.substring(5, 10).replace('-', '/')); // MM/DD 형식으로 라벨 저장
+      dailyDataMap.set(dateString, 0);
+    }
+
+    let totalSteps = 0;
+
+    // 목업 데이터를 순회하며 7일 이내의 데이터만 집계
+    mockWeeklyMissionData.forEach((data) => {
+      if (dailyDataMap.has(data.date)) {
+        dailyDataMap.set(data.date, data.steps);
+        totalSteps += data.steps;
+      }
+    });
+
+    // 그래프 데이터셋 생성: dailyDataMap의 값(거리)을 배열로 변환
+    const dataValues = Array.from(dailyDataMap.values());
+
+    setWeeklyDistance(Math.round(totalSteps * 100) / 100);
+    setChartData({
+      labels: dates, // MM/DD 형식의 날짜 라벨
+      datasets: [
+        {
+          data: dataValues, // 7일간의 일별 러닝 거리
+        },
+      ],
+    });
+  };
+
+  useEffect(() => {
+    if (missionData) {
+      setIsToday(missionData.date === today);
+    }
+  }, [missionData]);
+
+  // 더미 경로 데이터 (DB에서 불러온다고 가정)
+  const dummyPath = [
+    { latitude: 35.1516, longitude: 128.9976 },
+    { latitude: 35.1498, longitude: 128.998 },
+    { latitude: 35.1485, longitude: 128.9984 },
+    { latitude: 35.1483, longitude: 129.0018 },
+    { latitude: 35.1485, longitude: 129.0035 },
+    { latitude: 35.1505, longitude: 129.0033 },
+    { latitude: 35.152, longitude: 129.0031 },
+    { latitude: 35.1521, longitude: 129.001 },
+    { latitude: 35.152, longitude: 128.9987 },
+  ];
+  // 경로 중 가운데 지점을 계산
+  const getCenter = (
+    coordinates: { latitude: number; longitude: number }[]
+  ) => {
+    const lats = coordinates.map((c) => c.latitude);
+    const lons = coordinates.map((c) => c.longitude);
+    const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
+    const latitudeDelta = Math.max(...lats) - Math.min(...lats) + 0.002;
+    const longitudeDelta = Math.max(...lons) - Math.min(...lons) + 0.002;
+    return { latitude, longitude, latitudeDelta, longitudeDelta };
+  };
+  // 가운데 지점
+  const CENTER_REGION = getCenter(dummyPath);
+
+  // 각 데이터를 다 받아오면 로딩을 끝내고 화면 띄움
+  useEffect(() => {
+    if (!loading && mapRef.current) {
+      mapRef.current.animateToRegion(CENTER_REGION, 10);
+    }
+  }, [loading]);
+
+  // 모달 관련 상태 추가
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+
+  // 이미지 클릭 핸들러
+  const handleImagePress = (meal: Meal) => {
+    setSelectedMeal(meal);
+    setIsModalVisible(true);
+  };
+
+  // 로딩중~~
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' color='#777' />
+        <Text>불러오는 중...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View>
-      <Text>주문</Text>
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView>
+        <View style={styles.runningCard}>
+          <Text style={styles.runningTitle}>오늘의 러닝</Text>
+          {loading ? (
+            <ActivityIndicator size='large' color='#0000ff' />
+          ) : isToday ? (
+            <View style={styles.cardColunm}>
+              <View style={styles.rowContainer}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statText}>
+                    거리: {missionData?.distanceKm} km
+                  </Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statText}>
+                    소모 칼로리: {missionData?.burnCalories} kcal
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.cardColunm}>
+              <View style={styles.statBox}>
+                <Text>오늘의 데이터가 없습니다.</Text>
+              </View>
+            </View>
+          )}
+          <View style={styles.rowContainer}>
+            {/* 현재 MapView props들 상태가 이상해서 일단 이렇게 둠 */}
+            <MapView
+              ref={mapRef}
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              scrollEnabled={false} // 드래그 이동 비활성화
+              zoomEnabled={false} // 핀치 줌 비활성화
+              rotateEnabled={false} // 회전 비활성화
+              pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
+              initialRegion={CENTER_REGION}
+            />
+            <MapOverlayPolyline
+              region={CENTER_REGION}
+              coordinates={dummyPath}
+              height={height * 0.4}
+              width={width * 0.8}
+            />
+          </View>
+        </View>
+        <View style={styles.mealRowContainer}>
+          <View style={styles.mealCard}>
+            <Text style={styles.mealTitle}>오늘의 식단</Text>
+            {/* 그리드 형태 이미지 */}
+            <FlatList
+              data={todayMeals}
+              keyExtractor={(item) => item.mealId}
+              numColumns={2} // 2장씩만
+              columnWrapperStyle={styles.mealColumnWrapper}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.mealGridItem}
+                  onPress={() => handleImagePress(item)}
+                >
+                  <Image source={item.imageUri} style={styles.mealImage} />
+                </TouchableOpacity>
+              )}
+            />
+            {/* <Text style={styles.mealKcalValueText}>
+              총 {calculateTotalKcal() ?? 0} kcal
+            </Text> */}
+          </View>
+
+          <View style={styles.mealCard}>
+            <Text style={styles.mealTitle}>이번주 걸음</Text>
+            {loading || chartData.labels.length === 0 ? (
+              <ActivityIndicator size='small' color='#555' />
+            ) : (
+              <View style={styles.weeklyStatBox}>
+                {/* 꼭짓점 그래프 */}
+                <View style={styles.chartMaskContainer}>
+                  <LineChart
+                    data={chartData}
+                    width={width * 0.59}
+                    height={80}
+                    yAxisLabel=''
+                    yAxisSuffix=''
+                    withHorizontalLabels={false}
+                    withVerticalLabels={false}
+                    fromZero={true}
+                    chartConfig={chartConfig}
+                    bezier // 부드럽게
+                    style={styles.lineChartShiftStyle}
+                  />
+                </View>
+                {/* 총 거리 텍스트 // 활성화 하면 카드 구조 변경 필요*/}
+                {/* <Text style={styles.weeklyStatText}>총 걸음 수</Text> */}
+                {/* <Text style={styles.weeklyValueText}>
+                  {weeklyDistance ?? 0} 걸음
+                </Text> */}
+                {/* <Text style={styles.weeklySubText}>
+                  {today.slice(5)} 기준 지난 7일간의 기록입니다.
+                </Text> */}
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+      {/* 이미지 확대 모달 */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType='fade'
+        onRequestClose={() => setIsModalVisible(false)} // 안드로이드 뒤로가기 버튼 처리
+      >
+        <TouchableOpacity
+          style={styles.modalBackground}
+          activeOpacity={1} // 배경 클릭 시 모달 닫히도록
+          onPress={() => setIsModalVisible(false)}
+        >
+          {selectedMeal && (
+            <View style={styles.modalContent}>
+              {/* 이미지 */}
+              <Image
+                source={selectedMeal.imageUri}
+                style={styles.fullScreenImage}
+                resizeMode='contain'
+              />
+              {/* 텍스트 컨테이너 */}
+              <View style={styles.modalTextContainer}>
+                <Text style={styles.modalTitleText}>{selectedMeal.title}</Text>
+                <Text style={styles.modalKcalText}>
+                  {selectedMeal.kcal} kcal
+                </Text>
+              </View>
+            </View>
+          )}
+        </TouchableOpacity>
+      </Modal>
+    </SafeAreaView>
   );
 }
 

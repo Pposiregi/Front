@@ -134,7 +134,7 @@ function AppInner() {
             <Tab.Screen
               name='Mission'
               component={Mission}
-              options={{ title: '미션' }}
+              options={{ headerShown: false }}
             />
             <Tab.Screen
               name='Meal'
