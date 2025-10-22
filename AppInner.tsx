@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SocialLogin from './src/pages/SocialLogin';
-import Main from './src/pages/Main';
 import Health from './src/pages/Health';
 import Mission from './src/pages/Mission';
 import Meal from './src/pages/Meal';
@@ -20,6 +19,8 @@ import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/Index';
 import SplashScreen from 'react-native-splash-screen';
+import MainPage from '@pages/main/MainPage';
+import MealPage from '@pages/meal/MealPage';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -56,37 +57,37 @@ function AppInner() {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        // AsyncStorage에서 회원가입 상태를 가져와 리덕스에 동기화
-        const signUpInProgressValue = await AsyncStorage.getItem(
-          'isSignUpInProgress'
-        );
-        const isSignUp = signUpInProgressValue === 'true';
-        dispatch(userSlice.actions.setSignUpInProgress(isSignUp));
+      // try {
+      //   // AsyncStorage에서 회원가입 상태를 가져와 리덕스에 동기화
+      //   const signUpInProgressValue = await AsyncStorage.getItem(
+      //     'isSignUpInProgress'
+      //   );
+      //   const isSignUp = signUpInProgressValue === 'true';
+      //   dispatch(userSlice.actions.setSignUpInProgress(isSignUp));
 
-        // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
-        const refreshToken = await EncryptedStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const platform = await AsyncStorage.getItem('platform');
-          if (platform) {
-            const platformRefresher =
-              tokenRefreshers[platform as keyof typeof tokenRefreshers];
-            const { accessToken, refreshToken: newRefreshToken } =
-              await platformRefresher(refreshToken);
-            if (newRefreshToken) {
-              await EncryptedStorage.setItem('refreshToken', newRefreshToken);
-            }
-            // 로그인 상태를 리덕스에 동기화
-            dispatch(userSlice.actions.setUser({ accessToken }));
-          }
-        }
-      } catch (err) {
-        console.error(`[AuthError] 인증 상태 확인 실패:`, err);
-      } finally {
-        // 4. 모든 비동기 작업이 완료된 후 로딩 상태를 false로 변경
-        SplashScreen.hide();
-        setLoading(false);
-      }
+      //   // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
+      //   const refreshToken = await EncryptedStorage.getItem('refreshToken');
+      //   if (refreshToken) {
+      //     const platform = await AsyncStorage.getItem('platform');
+      //     if (platform) {
+      //       const platformRefresher =
+      //         tokenRefreshers[platform as keyof typeof tokenRefreshers];
+      //       const { accessToken, refreshToken: newRefreshToken } =
+      //         await platformRefresher(refreshToken);
+      //       if (newRefreshToken) {
+      //         await EncryptedStorage.setItem('refreshToken', newRefreshToken);
+      //       }
+      //       // 로그인 상태를 리덕스에 동기화
+      //       dispatch(userSlice.actions.setUser({ accessToken }));
+      //     }
+      //   }
+      // } catch (err) {
+      //   console.error(`[AuthError] 인증 상태 확인 실패:`, err);
+      // } finally {
+      // 4. 모든 비동기 작업이 완료된 후 로딩 상태를 false로 변경
+      SplashScreen.hide();
+      setLoading(false);
+      // }
     };
 
     checkAuthStatus();
@@ -123,7 +124,7 @@ function AppInner() {
           <Tab.Navigator>
             <Tab.Screen
               name='Main'
-              component={Main}
+              component={MainPage}
               options={{ title: '메인' }}
             />
             <Tab.Screen
@@ -138,7 +139,7 @@ function AppInner() {
             />
             <Tab.Screen
               name='Meal'
-              component={Meal}
+              component={MealPage}
               options={{ title: '식사' }}
             />
             <Tab.Screen
