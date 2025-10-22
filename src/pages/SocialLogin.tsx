@@ -28,6 +28,8 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 
+const BYPASS_SOCIAL_LOGIN = true;
+
 const SocialLogin = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -59,13 +61,18 @@ const SocialLogin = () => {
   };
 
   // 로딩 상태를 관리하는 함수
-  const handleLogin = async (loginFunction: () => Promise<void>) => {
+  const handleLogin = async (
+    provider: 'kakao' | 'google',
+    loginFunction: () => Promise<void>
+  ) => {
     try {
+      console.log(`[social-login] ${provider} login flow start`);
       setLoading(true);
       await loginFunction();
     } catch (err) {
-      console.error('로그인 에러', err);
+      console.error(`[social-login] ${provider} login error`, err);
     } finally {
+      console.log(`[social-login] ${provider} login flow end`);
       setLoading(false);
     }
   };
@@ -101,6 +108,18 @@ const SocialLogin = () => {
 
   // 카카오 로그인
   const signInWithKakao = async (): Promise<void> => {
+    if (BYPASS_SOCIAL_LOGIN) {
+      console.warn('[kakao-login] bypass enabled, using mock credentials');
+      const mockEmail = 'dev-kakao@example.com';
+      const mockAccessToken = 'mock-kakao-access-token';
+      const mockRefreshToken = 'mock-kakao-refresh-token';
+
+      await EncryptedStorage.setItem('refreshToken', mockRefreshToken);
+      await AsyncStorage.setItem('platform', 'kakao');
+      await firstLoginCheck(mockEmail, 'kakao', mockAccessToken);
+      return;
+    }
+
     const token = await login();
     const profile = await getProfile();
 
@@ -112,8 +131,30 @@ const SocialLogin = () => {
 
   // 구글 로그인
   const signInWithGoogle = async () => {
+    if (BYPASS_SOCIAL_LOGIN) {
+      console.warn('[google-login] bypass enabled, using mock credentials');
+      const mockEmail = 'dev-google@example.com';
+      const mockAccessToken = 'mock-google-access-token';
+      const mockRefreshToken = 'mock-google-refresh-token';
+
+      await EncryptedStorage.setItem('refreshToken', mockRefreshToken);
+      await AsyncStorage.setItem('platform', 'google');
+      await firstLoginCheck(mockEmail, 'google', mockAccessToken);
+      return;
+    }
+
+    console.log('[google-login] checking play services');
     await GoogleSignin.hasPlayServices();
+
+    console.log('[google-login] initiating signIn');
     const profile = await GoogleSignin.signIn();
+    console.log('[google-login] signIn success', {
+      idToken: profile?.idToken ? '[present]' : '[missing]',
+      serverAuthCode: profile.data?.serverAuthCode ? '[present]' : '[missing]',
+      email: profile.data?.user.email,
+    });
+
+    console.log('[google-login] exchanging auth code for tokens');
     const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
       method: 'POST',
       body: JSON.stringify({
@@ -123,7 +164,15 @@ const SocialLogin = () => {
         grant_type: 'authorization_code',
       }),
     });
+    console.log('[google-login] token endpoint status', res.status);
     const token = await res.json();
+    console.log('[google-login] token exchange result', {
+      hasAccessToken: !!token?.access_token,
+      hasRefreshToken: !!token?.refresh_token,
+      expiresIn: token?.expires_in,
+      scope: token?.scope,
+      tokenType: token?.token_type,
+    });
 
     await EncryptedStorage.setItem('refreshToken', token.refresh_token);
     await AsyncStorage.setItem('platform', 'google');
@@ -150,7 +199,7 @@ const SocialLogin = () => {
           </Pressable>
           <Pressable
             style={styles.kakaoButton}
-            onPress={() => handleLogin(signInWithKakao)}
+            onPress={() => handleLogin('kakao', signInWithKakao)}
           >
             <Image
               source={require('../assets/images/kakao_icon.png')}
@@ -160,7 +209,7 @@ const SocialLogin = () => {
           </Pressable>
           <Pressable
             style={styles.googleButton}
-            onPress={() => handleLogin(signInWithGoogle)}
+            onPress={() => handleLogin('google', signInWithGoogle)}
           >
             <Image
               source={require('../assets/images/google_icon.png')}

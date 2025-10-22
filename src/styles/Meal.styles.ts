@@ -302,4 +302,163 @@ export default StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
   },
+  calendarHelperText: {
+    marginTop: 24,
+    textAlign: 'center',
+    color: '#7C8098',
+    fontSize: 14,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  modalContentWrapper: {
+    width: '88%',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingVertical: 24,
+    paddingHorizontal: 22,
+    ...baseShadow,
+  },
+  modalTitle: {
+    fontFamily: 'JUA',
+    fontSize: 20,
+    color: '#292C36',
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: '#9CA0AE',
+    marginTop: 4,
+  },
+  modalBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 12,
+  },
+  modalBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: '#FFE8B5',
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  modalBadgeLabel: {
+    fontFamily: 'JUA',
+    fontSize: 12,
+    color: '#6F4C00',
+  },
+  modalMealHistory: {
+    marginTop: 18,
+    borderRadius: 18,
+    backgroundColor: '#F6F7FC',
+    padding: 16,
+  },
+  modalHistoryTitle: {
+    fontFamily: 'JUA',
+    fontSize: 14,
+    color: '#5F6485',
+    marginBottom: 8,
+  },
+  modalHistoryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  modalHistoryName: {
+    fontSize: 14,
+    color: '#2E313D',
+  },
+  modalHistoryCalorie: {
+    fontSize: 12,
+    color: '#888DA0',
+  },
+  modalHistoryTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E5F1',
+  },
+  modalHistoryTotalLabel: {
+    fontFamily: 'JUA',
+    fontSize: 14,
+    color: '#4A4E66',
+  },
+  modalHistoryTotalValue: {
+    fontFamily: 'JUA',
+    fontSize: 14,
+    color: '#FF9157',
+  },
+  modalInputGroup: {
+    marginTop: 22,
+  },
+  modalInputLabel: {
+    fontSize: 13,
+    color: '#7C8098',
+    marginBottom: 6,
+  },
+  modalTextInput: {
+    borderWidth: 1,
+    borderColor: '#E3E5F0',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    fontSize: 14,
+    color: '#2B2B2B',
+    backgroundColor: '#FFFFFF',
+  },
+  modalInputRow: {
+    flexDirection: 'row',
+    marginTop: 16,
+  },
+  modalInputHalf: {
+    flex: 1,
+  },
+  modalInputHalfSpacing: {
+    marginLeft: 12,
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelButton: {
+    marginRight: 12,
+    backgroundColor: '#EEF1F8',
+  },
+  modalSaveButton: {
+    backgroundColor: '#FF9F43',
+  },
+  modalCancelLabel: {
+    fontFamily: 'JUA',
+    fontSize: 15,
+    color: '#7C8098',
+  },
+  modalSaveLabel: {
+    fontFamily: 'JUA',
+    fontSize: 15,
+    color: '#FFFFFF',
+  },
 });

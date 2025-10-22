@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Keyboard,
+  Modal,
   SafeAreaView,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
-  Image,
 } from 'react-native';
 import styles from '@styles/Meal.styles';
-import TokkiImage from '@assets/images/main_temp_tokki.png';
 
 type MealItem = {
   id: string;
@@ -39,21 +41,21 @@ const MEAL_LOG: Record<string, MealItem[]> = {
       id: '2025-08-02-lunch',
       name: '참치 샐러드',
       calories: 412,
-      tag: '김',
+      tag: '-',
     },
   ],
   '2025-08-05': [
     {
       id: '2025-08-05-breakfast',
-      name: '낮치와 포체 샐러드',
+      name: '포케 샐러드',
       calories: 400,
-      tag: '김',
+      tag: '-',
     },
     {
       id: '2025-08-05-lunch',
-      name: '낮치와 포체 샐러드',
+      name: '날치알 포케 샐러드',
       calories: 434,
-      tag: '김',
+      tag: '-',
     },
   ],
   '2025-08-08': [
@@ -146,6 +148,10 @@ function MealPage() {
   const [selectedDateKey, setSelectedDateKey] = useState(() =>
     formatDateKey(new Date(2025, 7, 5))
   );
+  const [isMealModalVisible, setMealModalVisible] = useState(false);
+  const [mealName, setMealName] = useState('');
+  const [mealCalories, setMealCalories] = useState('');
+  const [mealNote, setMealNote] = useState('');
 
   const weeks = useMemo(() => buildMonthMatrix(currentMonth), [currentMonth]);
   const selectedMeals = useMemo(
@@ -194,6 +200,22 @@ function MealPage() {
   const handleSelectDate = (dateKey: string | null) => {
     if (!dateKey) return;
     setSelectedDateKey(dateKey);
+    setMealModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setMealModalVisible(false);
+    setMealName('');
+    setMealCalories('');
+    setMealNote('');
+  };
+
+  const handleSaveMeal = () => {
+    // TODO: 식단 저장 로직 연결
+    setMealModalVisible(false);
+    setMealName('');
+    setMealCalories('');
+    setMealNote('');
   };
 
   return (
@@ -290,103 +312,128 @@ function MealPage() {
             </View>
           ))}
         </View>
-
-        <View style={[styles.catContainer, styles.sectionSpacing]}>
+        {/* 다른 토끼 이미지 넣어야함 */}
+        {/* <View style={[styles.catContainer, styles.sectionSpacing]}>
           <Image source={TokkiImage} style={styles.catImage} />
-        </View>
+        </View> */}
 
-        <View style={styles.detailContainer}>
-          <View style={styles.detailHeader}>
-            <Text style={styles.detailDate}>
-              {`${selectedDate.getFullYear()}년 ${
-                selectedDate.getMonth() + 1
-              }월 ${selectedDate.getDate()}일`}
-            </Text>
-            <Text style={styles.detailSubtitle}>오늘의 식단을 기록해요</Text>
-            {uniqueTags.length > 0 && (
-              <View style={styles.badgeRow}>
-                {uniqueTags.map((tag, index) => (
+        <Text style={styles.calendarHelperText}>
+          날짜를 선택해서 식단을 등록해보세요.
+        </Text>
+      </ScrollView>
+      <Modal
+        visible={isMealModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback onPress={handleCloseModal}>
+            <View style={styles.modalBackdrop} />
+          </TouchableWithoutFeedback>
+          <View style={styles.modalContentWrapper}>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  {`${selectedDate.getFullYear()}년 ${
+                    selectedDate.getMonth() + 1
+                  }월 ${selectedDate.getDate()}일`}
+                </Text>
+                <Text style={styles.modalSubtitle}>오늘의 식단을 기록해요</Text>
+
+                {uniqueTags.length > 0 && (
+                  <View style={styles.modalBadgeRow}>
+                    {uniqueTags.map((tag) => (
+                      <View key={`modal-tag-${tag}`} style={styles.modalBadge}>
+                        <Text style={styles.modalBadgeLabel}>{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {selectedMeals.length > 0 && (
+                  <View style={styles.modalMealHistory}>
+                    <Text style={styles.modalHistoryTitle}>기존 기록</Text>
+                    {selectedMeals.map((meal) => (
+                      <View key={meal.id} style={styles.modalHistoryRow}>
+                        <Text style={styles.modalHistoryName}>{meal.name}</Text>
+                        <Text style={styles.modalHistoryCalorie}>
+                          {meal.calories}kcal
+                        </Text>
+                      </View>
+                    ))}
+                    <View style={styles.modalHistoryTotal}>
+                      <Text style={styles.modalHistoryTotalLabel}>
+                        총 칼로리
+                      </Text>
+                      <Text style={styles.modalHistoryTotalValue}>
+                        {totalCalories}kcal
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.modalInputGroup}>
+                  <Text style={styles.modalInputLabel}>메뉴 이름</Text>
+                  <TextInput
+                    value={mealName}
+                    onChangeText={setMealName}
+                    placeholder='예) 닭가슴살 샐러드'
+                    style={styles.modalTextInput}
+                    placeholderTextColor='#B4B8C9'
+                  />
+                </View>
+
+                <View style={styles.modalInputRow}>
+                  <View style={styles.modalInputHalf}>
+                    <Text style={styles.modalInputLabel}>칼로리</Text>
+                    <TextInput
+                      value={mealCalories}
+                      onChangeText={setMealCalories}
+                      placeholder='예) 350'
+                      keyboardType='numeric'
+                      style={styles.modalTextInput}
+                      placeholderTextColor='#B4B8C9'
+                    />
+                  </View>
                   <View
-                    key={`tag-${tag}-${index}`}
                     style={[
-                      styles.badge,
-                      index < uniqueTags.length - 1
-                        ? styles.badgeSpacing
-                        : null,
+                      styles.modalInputHalf,
+                      styles.modalInputHalfSpacing,
                     ]}
                   >
-                    <Text style={styles.badgeLabel}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-
-          {selectedMeals.length > 0 ? (
-            <View style={styles.mealsSection}>
-              {selectedMeals.map((meal, index) => (
-                <View
-                  key={meal.id}
-                  style={[
-                    styles.mealRow,
-                    index > 0 ? styles.mealRowSpacing : null,
-                  ]}
-                >
-                  <View style={styles.mealImagePlaceholder}>
-                    <Text style={styles.mealPlaceholderText}>{meal.tag}</Text>
-                  </View>
-                  <View style={styles.mealInfo}>
-                    <Text style={[styles.mealName, styles.mealInfoSpacing]}>
-                      {meal.name}
-                    </Text>
-                    <Text style={styles.mealCalories}>{meal.calories}kcal</Text>
-                  </View>
-                  <View style={styles.mealActions}>
-                    <TouchableOpacity
-                      style={[styles.iconButton, styles.mealActionSpacing]}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.iconButtonLabel}>편</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.iconButton}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.iconButtonLabel}>촬</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.modalInputLabel}>메모</Text>
+                    <TextInput
+                      value={mealNote}
+                      onChangeText={setMealNote}
+                      placeholder='맛, 장소 등 메모'
+                      style={styles.modalTextInput}
+                      placeholderTextColor='#B4B8C9'
+                    />
                   </View>
                 </View>
-              ))}
-            </View>
-          ) : (
-            <View style={[styles.emptyState, styles.mealsSection]}>
-              <Text style={[styles.emptyStateTitle, styles.emptyStateSpacing]}>
-                아직 기록이 없어요
-              </Text>
-              <Text style={styles.emptyStateText}>
-                아래 입력창을 눌러 오늘의 식단을 추가해보세요.
-              </Text>
-            </View>
-          )}
 
-          <View style={[styles.addRow, styles.addRowSpacing]}>
-            <Text style={styles.addRowLabelPrimary}>메뉴, 이름 입력</Text>
-            <Text style={styles.addRowLabelSecondary}>칼로리 입력</Text>
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Text style={styles.iconButtonLabel}>+</Text>
-            </TouchableOpacity>
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalCancelButton]}
+                    activeOpacity={0.8}
+                    onPress={handleCloseModal}
+                  >
+                    <Text style={styles.modalCancelLabel}>닫기</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalSaveButton]}
+                    activeOpacity={0.8}
+                    onPress={handleSaveMeal}
+                  >
+                    <Text style={styles.modalSaveLabel}>저장</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>총 칼로리:</Text>
-            <Text style={styles.summaryValue}>{totalCalories}kcal</Text>
-          </View>
-
-          <TouchableOpacity style={styles.saveButton} activeOpacity={0.8}>
-            <Text style={styles.saveButtonText}>저장하기</Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </Modal>
     </SafeAreaView>
   );
 }
