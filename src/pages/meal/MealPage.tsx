@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Image,
   Keyboard,
   Modal,
   SafeAreaView,
@@ -10,63 +11,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
 import styles from '@styles/Meal.styles';
-
-type MealItem = {
-  id: string;
-  name: string;
-  calories: number;
-  tag: string;
-};
-
-type CalendarCell = {
-  key: string;
-  label: number | null;
-  dateKey: string | null;
-  isCurrentMonth: boolean;
-  indicators: string[];
-};
+import mealPlaceholderImage from '@assets/images/meal.png';
+import { MOCK_MEAL_LOG } from './meals';
+import type { MealCalendarCell, MealListItem, MealLog } from './types';
 
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
-
-const MEAL_LOG: Record<string, MealItem[]> = {
-  '2025-08-02': [
-    {
-      id: '2025-08-02-breakfast',
-      name: '포케 샐러드',
-      calories: 398,
-      tag: '김',
-    },
-    {
-      id: '2025-08-02-lunch',
-      name: '참치 샐러드',
-      calories: 412,
-      tag: '-',
-    },
-  ],
-  '2025-08-05': [
-    {
-      id: '2025-08-05-breakfast',
-      name: '포케 샐러드',
-      calories: 400,
-      tag: '-',
-    },
-    {
-      id: '2025-08-05-lunch',
-      name: '날치알 포케 샐러드',
-      calories: 434,
-      tag: '-',
-    },
-  ],
-  '2025-08-08': [
-    {
-      id: '2025-08-08-lunch',
-      name: '연어 포케',
-      calories: 420,
-      tag: '연',
-    },
-  ],
-};
 
 const formatDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -91,7 +42,29 @@ const parseDateKey = (dateKey: string) => {
   return new Date(year, month, day);
 };
 
-const buildMonthMatrix = (baseDate: Date): CalendarCell[][] => {
+const resolveMealImageSource = (meal: MealListItem): ImageSourcePropType => {
+  if (meal.imageSource) {
+    return meal.imageSource;
+  }
+  if (meal.imageUri) {
+    return { uri: meal.imageUri };
+  }
+  return mealPlaceholderImage;
+};
+
+const PLACEHOLDER_MEAL: MealListItem = {
+  mealId: 'placeholder',
+  title: '',
+  kcal: 0,
+  sequence: 0,
+  imageUri: '',
+  imageSource: mealPlaceholderImage,
+};
+
+const buildMonthMatrix = (
+  baseDate: Date,
+  mealLog: MealLog
+): MealCalendarCell[][] => {
   const year = baseDate.getFullYear();
   const month = baseDate.getMonth();
   const firstDay = new Date(year, month, 1);
@@ -99,7 +72,7 @@ const buildMonthMatrix = (baseDate: Date): CalendarCell[][] => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 
-  const weeks: CalendarCell[][] = [];
+  const weeks: MealCalendarCell[][] = [];
   for (let index = 0; index < totalCells; index += 1) {
     if (index % 7 === 0) {
       weeks.push([]);
@@ -113,23 +86,23 @@ const buildMonthMatrix = (baseDate: Date): CalendarCell[][] => {
         label: null,
         dateKey: null,
         isCurrentMonth: false,
-        indicators: [],
+        previewImage: null,
       });
       continue;
     }
 
     const currentDate = new Date(year, month, dayNumber);
     const dateKey = formatDateKey(currentDate);
-    const indicators = (MEAL_LOG[dateKey] ?? [])
-      .slice(0, 3)
-      .map((meal) => meal.tag || meal.name.charAt(0));
+    const mealsForDate = mealLog[dateKey] ?? [];
+    const previewImage =
+      mealsForDate.length > 0 ? resolveMealImageSource(mealsForDate[0]) : null;
 
     week.push({
       key: dateKey,
       label: dayNumber,
       dateKey,
       isCurrentMonth: true,
-      indicators,
+      previewImage,
     });
   }
 
@@ -149,33 +122,25 @@ function MealPage() {
     formatDateKey(new Date(2025, 7, 5))
   );
   const [isMealModalVisible, setMealModalVisible] = useState(false);
-  const [mealName, setMealName] = useState('');
+  const [mealTitle, setMealTitle] = useState('');
   const [mealCalories, setMealCalories] = useState('');
-  const [mealNote, setMealNote] = useState('');
 
-  const weeks = useMemo(() => buildMonthMatrix(currentMonth), [currentMonth]);
-  const selectedMeals = useMemo(
-    () => MEAL_LOG[selectedDateKey] ?? [],
+  const weeks = useMemo(
+    () => buildMonthMatrix(currentMonth, MOCK_MEAL_LOG),
+    [currentMonth]
+  );
+  const selectedMeals = useMemo<MealListItem[]>(
+    () => MOCK_MEAL_LOG[selectedDateKey] ?? [],
     [selectedDateKey]
   );
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
   );
-  const uniqueTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    selectedMeals.forEach((meal) => {
-      if (meal.tag) {
-        tagSet.add(meal.tag);
-      }
-    });
-    return Array.from(tagSet);
-  }, [selectedMeals]);
-
   const totalCalories = useMemo(
     () =>
       selectedMeals.reduce((sum, meal) => {
-        return sum + meal.calories;
+        return sum + meal.kcal;
       }, 0),
     [selectedMeals]
   );
@@ -205,18 +170,24 @@ function MealPage() {
 
   const handleCloseModal = () => {
     setMealModalVisible(false);
-    setMealName('');
+    setMealTitle('');
     setMealCalories('');
-    setMealNote('');
   };
 
   const handleSaveMeal = () => {
     // TODO: 식단 저장 로직 연결
     setMealModalVisible(false);
-    setMealName('');
+    setMealTitle('');
     setMealCalories('');
-    setMealNote('');
   };
+
+  const formattedModalDate = useMemo(() => {
+    return `${selectedDate.getFullYear()}년 ${
+      selectedDate.getMonth() + 1
+    }월 ${selectedDate.getDate()}일`;
+  }, [selectedDate]);
+
+  const photoMeals = selectedMeals.length > 0 ? selectedMeals : [PLACEHOLDER_MEAL];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -283,28 +254,20 @@ function MealPage() {
                         >
                           {cell.label}
                         </Text>
+                        {cell.previewImage ? (
+                          <Image
+                            source={cell.previewImage}
+                            style={styles.dayPreviewThumbnail}
+                            resizeMode='cover'
+                          />
+                        ) : (
+                          <View style={styles.dayPreviewPlaceholder}>
+                            <Text style={styles.dayPreviewPlaceholderText}>+</Text>
+                          </View>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <View style={styles.dayInner} />
-                    )}
-                    {cell.indicators.length > 0 && (
-                      <View style={styles.mealIndicatorRow}>
-                        {cell.indicators.map((indicator, indicatorIndex) => (
-                          <View
-                            key={`${cell.key}-indicator-${indicatorIndex}`}
-                            style={[
-                              styles.mealIndicator,
-                              indicatorIndex < cell.indicators.length - 1
-                                ? styles.mealIndicatorSpacing
-                                : null,
-                            ]}
-                          >
-                            <Text style={styles.mealIndicatorText}>
-                              {indicator}
-                            </Text>
-                          </View>
-                        ))}
-                      </View>
                     )}
                   </View>
                 );
@@ -334,101 +297,115 @@ function MealPage() {
           <View style={styles.modalContentWrapper}>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
-                  {`${selectedDate.getFullYear()}년 ${
-                    selectedDate.getMonth() + 1
-                  }월 ${selectedDate.getDate()}일`}
-                </Text>
-                <Text style={styles.modalSubtitle}>오늘의 식단을 기록해요</Text>
+                <View style={styles.modalHeaderSection}>
+                  <Text style={styles.modalTitle}>{formattedModalDate}</Text>
+                  <Text style={styles.modalSubtitle}>
+                    오늘의 식단을 기록해요!
+                  </Text>
+                </View>
 
-                {uniqueTags.length > 0 && (
-                  <View style={styles.modalBadgeRow}>
-                    {uniqueTags.map((tag) => (
-                      <View key={`modal-tag-${tag}`} style={styles.modalBadge}>
-                        <Text style={styles.modalBadgeLabel}>{tag}</Text>
+                <View style={styles.modalPhotoRow}>
+                  {photoMeals.map((meal) => {
+                    const imageSource = resolveMealImageSource(meal);
+                    return (
+                      <View
+                        key={`modal-photo-${meal.mealId}`}
+                        style={styles.modalPhotoCard}
+                      >
+                        <Image
+                          source={imageSource}
+                          style={styles.modalPhotoImage}
+                        />
                       </View>
-                    ))}
-                  </View>
-                )}
+                    );
+                  })}
+                </View>
 
-                {selectedMeals.length > 0 && (
-                  <View style={styles.modalMealHistory}>
-                    <Text style={styles.modalHistoryTitle}>기존 기록</Text>
-                    {selectedMeals.map((meal) => (
-                      <View key={meal.id} style={styles.modalHistoryRow}>
-                        <Text style={styles.modalHistoryName}>{meal.name}</Text>
-                        <Text style={styles.modalHistoryCalorie}>
-                          {meal.calories}kcal
-                        </Text>
+                <View style={styles.modalMealList}>
+                  {selectedMeals.map((meal) => {
+                    const imageSource = resolveMealImageSource(meal);
+                    return (
+                      <View
+                        key={`modal-meal-${meal.mealId}`}
+                        style={styles.modalMealRowContainer}
+                      >
+                        <TouchableOpacity
+                          style={styles.modalMealRemoveButton}
+                          activeOpacity={0.8}
+                          onPress={() => {}}
+                        >
+                          <Text style={styles.modalMealRemoveLabel}>-</Text>
+                        </TouchableOpacity>
+                        <View style={styles.modalMealRowContent}>
+                          <Text style={styles.modalMealRowName}>
+                            {meal.title}
+                          </Text>
+                          <Text style={styles.modalMealRowCalories}>
+                            {meal.kcal}kcal
+                          </Text>
+                        </View>
+                        <Image
+                          source={imageSource}
+                          style={styles.modalMealRowImage}
+                        />
+                        <View style={styles.modalMealDragHandle}>
+                          <Text style={styles.modalMealDragLabel}>≡</Text>
+                        </View>
                       </View>
-                    ))}
-                    <View style={styles.modalHistoryTotal}>
-                      <Text style={styles.modalHistoryTotalLabel}>
-                        총 칼로리
-                      </Text>
-                      <Text style={styles.modalHistoryTotalValue}>
-                        {totalCalories}kcal
-                      </Text>
-                    </View>
-                  </View>
-                )}
+                    );
+                  })}
+                </View>
 
-                <View style={styles.modalInputGroup}>
-                  <Text style={styles.modalInputLabel}>메뉴 이름</Text>
+                <View style={styles.modalAddRow}>
+                  <View style={styles.modalAddIcon}>
+                    <Text style={styles.modalAddIconLabel}>＋</Text>
+                  </View>
                   <TextInput
-                    value={mealName}
-                    onChangeText={setMealName}
-                    placeholder='예) 닭가슴살 샐러드'
-                    style={styles.modalTextInput}
+                    value={mealTitle}
+                    onChangeText={setMealTitle}
+                    placeholder='메뉴 이름 입력'
+                    style={styles.modalAddInput}
                     placeholderTextColor='#B4B8C9'
                   />
-                </View>
-
-                <View style={styles.modalInputRow}>
-                  <View style={styles.modalInputHalf}>
-                    <Text style={styles.modalInputLabel}>칼로리</Text>
-                    <TextInput
-                      value={mealCalories}
-                      onChangeText={setMealCalories}
-                      placeholder='예) 350'
-                      keyboardType='numeric'
-                      style={styles.modalTextInput}
-                      placeholderTextColor='#B4B8C9'
-                    />
-                  </View>
-                  <View
-                    style={[
-                      styles.modalInputHalf,
-                      styles.modalInputHalfSpacing,
-                    ]}
-                  >
-                    <Text style={styles.modalInputLabel}>메모</Text>
-                    <TextInput
-                      value={mealNote}
-                      onChangeText={setMealNote}
-                      placeholder='맛, 장소 등 메모'
-                      style={styles.modalTextInput}
-                      placeholderTextColor='#B4B8C9'
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.modalButtonRow}>
+                  <TextInput
+                    value={mealCalories}
+                    onChangeText={setMealCalories}
+                    placeholder='칼로리 입력'
+                    keyboardType='numeric'
+                    style={[styles.modalAddInput, styles.modalAddInputCalorie]}
+                    placeholderTextColor='#B4B8C9'
+                  />
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.modalCancelButton]}
+                    style={styles.modalCameraButton}
                     activeOpacity={0.8}
-                    onPress={handleCloseModal}
+                    onPress={() => {}}
                   >
-                    <Text style={styles.modalCancelLabel}>닫기</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modalButton, styles.modalSaveButton]}
-                    activeOpacity={0.8}
-                    onPress={handleSaveMeal}
-                  >
-                    <Text style={styles.modalSaveLabel}>저장</Text>
+                    <Text style={styles.modalCameraIcon}>📷</Text>
                   </TouchableOpacity>
                 </View>
+
+                <View style={styles.modalTotalRow}>
+                  <Text style={styles.modalTotalLabel}>총 칼로리:</Text>
+                  <Text style={styles.modalTotalValue}>
+                    {totalCalories}kcal
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.modalPrimaryButton}
+                  activeOpacity={0.85}
+                  onPress={handleSaveMeal}
+                >
+                  <Text style={styles.modalPrimaryButtonLabel}>저장하기</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalSecondaryButton}
+                  onPress={handleCloseModal}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.modalSecondaryButtonLabel}>닫기</Text>
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>
