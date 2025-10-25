@@ -8,9 +8,10 @@ const baseShadow = {
   elevation: 4,
 };
 
-const THUMB = 15; // 썸네일 박스 크기
-const ITEM = 20; // 각 이미지 크기
-const RADIUS = 5; // 이미지 모서리 반경
+const STACK_HEIGHT = 32; // 썸네일 영역 높이 TODO: 상대값으로 바꿔야하는가
+const STACK_ITEM_SIZE = 24; // 각 이미지 및 플레이스홀더 크기 TODO: 상대값으로 바꿔야하는가
+const STACK_ITEM_OFFSET = (STACK_HEIGHT - STACK_ITEM_SIZE) / 2;
+const STACK_ITEM_RADIUS = 8; // 이미지 모서리 반경
 
 export default StyleSheet.create({
   container: {
@@ -20,7 +21,7 @@ export default StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 12,
     paddingBottom: 40,
   },
   header: {
@@ -38,11 +39,14 @@ export default StyleSheet.create({
   headerButtonLabel: {
     fontFamily: 'JUA',
     fontSize: 20,
-    color: '#2B2B2B',
+    color: '#14151A',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   headerTitle: {
     fontFamily: 'JUA',
-    fontSize: 22,
+    fontSize: 27,
     color: '#2B2B2B',
   },
   headerSpacing: {
@@ -116,8 +120,16 @@ export default StyleSheet.create({
     borderWidth: 2,
     backgroundColor: '#EAF3FF',
   },
+  todayDayOutline: {
+    borderColor: '#FF9F43',
+    borderWidth: 2,
+    backgroundColor: '#FFF7EB',
+  },
   selectedDayNumber: {
     color: '#1D7ED8',
+  },
+  todayDayNumber: {
+    color: '#FF9F43',
   },
   dayPreviewThumbnail: {
     width: 28,
@@ -129,14 +141,15 @@ export default StyleSheet.create({
     backgroundColor: '#F4F6FB',
   },
   dayPreviewPlaceholder: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: STACK_ITEM_SIZE,
+    height: STACK_ITEM_SIZE,
+    borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 1,
     borderColor: '#E4E6F1',
     backgroundColor: '#F4F6FB',
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'center',
   },
   dayPreviewPlaceholderText: {
     fontSize: 14,
@@ -525,23 +538,24 @@ export default StyleSheet.create({
     color: '#8F94AB',
   },
   stackThumb: {
-    width: THUMB,
-    height: THUMB,
+    width: '100%',
+    height: STACK_HEIGHT,
     position: 'relative',
     justifyContent: 'center',
-    alignItems: 'flex-start', // 왼쪽 기준으로 겹침
+    alignItems: 'center',
     overflow: 'visible', // 겹쳐진 이미지가 밖으로 나가도 보이게
   },
   stackImage: {
     position: 'absolute',
-    width: ITEM,
-    height: ITEM,
-    borderRadius: RADIUS,
+    width: STACK_ITEM_SIZE,
+    height: STACK_ITEM_SIZE,
+    borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 2, // 겹침 경계 또렷하게
     borderColor: '#fff',
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
+    top: STACK_ITEM_OFFSET,
   },
 });

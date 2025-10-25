@@ -35,8 +35,9 @@ export const buildMonthMatrix = (
       week.push({
         key: `${idx}`, // 고유 키
         dateKey: null, // 날짜 키
+        dayNumber: null,
         isCurrentMonth: false, // 현재 달 여부
-        previewImage: [], // 미리보기 이미지
+        previewImage: null, // 미리보기 이미지
       });
       continue;
     }
@@ -51,6 +52,7 @@ export const buildMonthMatrix = (
     week.push({
       key: dateKey,
       dateKey,
+      dayNumber,
       isCurrentMonth: true,
       previewImage,
     });

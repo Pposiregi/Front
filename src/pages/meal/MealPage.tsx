@@ -17,12 +17,13 @@ const getMonthLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 
 function MealPage() {
+  const today = useMemo(() => new Date(), []);
+  const todayKey = useMemo(() => formatDateKey(today), [today]);
+
   const [currentMonth, setCurrentMonth] = useState(
-    () => new Date(2025, 7, 1) // 2025-08-01
+    () => new Date(today.getFullYear(), today.getMonth(), 1)
   );
-  const [selectedDateKey, setSelectedDateKey] = useState(() =>
-    formatDateKey(new Date(2025, 7, 5))
-  );
+  const [selectedDateKey, setSelectedDateKey] = useState(() => todayKey);
   const [isMealModalVisible, setMealModalVisible] = useState(false);
   const [mealTitle, setMealTitle] = useState('');
   const [mealCalories, setMealCalories] = useState('');
@@ -99,7 +100,7 @@ function MealPage() {
             onPress={() => handleChangeMonth(-1)}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerButtonLabel}>‹</Text>
+            <Text style={styles.headerButtonLabel}>{'<'}</Text>
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>{getDiaryTitle(currentMonth)}</Text>
@@ -110,7 +111,7 @@ function MealPage() {
             onPress={() => handleChangeMonth(1)}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerButtonLabel}>‹</Text>
+            <Text style={styles.headerButtonLabel}>{'>'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -142,6 +143,7 @@ function MealPage() {
             >
               {week.map((cell, cellIdx) => {
                 const isSelected = cell.dateKey === selectedDateKey;
+                const isToday = cell.dateKey === todayKey;
                 const showDay = cell.dateKey;
 
                 return (
@@ -152,6 +154,7 @@ function MealPage() {
                         style={[
                           styles.dayInner,
                           isSelected ? styles.selectedDayBackground : null,
+                          !isSelected && isToday ? styles.todayDayOutline : null,
                         ]}
                         onPress={() => handleSelectDate(cell.dateKey)}
                         activeOpacity={0.8}
@@ -162,10 +165,10 @@ function MealPage() {
                             styles.dayNumber,
                             cell.isCurrentMonth ? null : styles.dayNumberMuted,
                             isSelected ? styles.selectedDayNumber : null,
+                            !isSelected && isToday ? styles.todayDayNumber : null,
                           ]}
                         >
-                          {' '}
-                          짠
+                          {cell.dayNumber}
                         </Text>
 
                         {/* 식단 이미지가 있다면, 그 이미지를 겹쳐서 보여줘야한다 */}
