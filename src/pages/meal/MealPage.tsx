@@ -1,23 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Image,
-  Keyboard,
-  Modal,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import styles from '@styles/Meal.styles';
 import { MOCK_MEAL_LOG } from './meals';
 import type { MealListItem } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WEEKDAYS, PLACEHOLDER_MEAL } from './constant';
+import { WEEKDAYS } from './constant';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
-import { resolveMealImageSource } from '@utils/imageUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
+import MealModal from './MealModal';
 
 const MAX_STACK = 3;
 
@@ -98,9 +88,6 @@ function MealPage() {
       selectedDate.getMonth() + 1
     }월 ${selectedDate.getDate()}일`;
   }, [selectedDate]);
-
-  const photoMeals =
-    selectedMeals.length > 0 ? selectedMeals : [PLACEHOLDER_MEAL];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -224,133 +211,18 @@ function MealPage() {
       </ScrollView>
 
       {/* 식단 모달 추가 */}
-      <Modal
+      <MealModal
         visible={isMealModalVisible}
-        transparent
-        animationType='fade'
-        onRequestClose={handleCloseModal}
-      >
-        <View style={styles.modalContainer}>
-          <TouchableWithoutFeedback onPress={handleCloseModal}>
-            <View style={styles.modalBackdrop} />
-          </TouchableWithoutFeedback>
-          <View style={styles.modalContentWrapper}>
-            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeaderSection}>
-                  <Text style={styles.modalTitle}>{formattedModalDate}</Text>
-                  <Text style={styles.modalSubtitle}>
-                    오늘의 식단을 기록해요!
-                  </Text>
-                </View>
-
-                <View style={styles.modalPhotoRow}>
-                  {photoMeals.map((meal) => {
-                    const imageSource = resolveMealImageSource(meal);
-                    return (
-                      <View
-                        key={`modal-photo-${meal.mealId}`}
-                        style={styles.modalPhotoCard}
-                      >
-                        <Image
-                          source={imageSource}
-                          style={styles.modalPhotoImage}
-                        />
-                      </View>
-                    );
-                  })}
-                </View>
-
-                <View style={styles.modalMealList}>
-                  {selectedMeals.map((meal) => {
-                    const imageSource = resolveMealImageSource(meal);
-                    return (
-                      <View
-                        key={`modal-meal-${meal.mealId}`}
-                        style={styles.modalMealRowContainer}
-                      >
-                        <TouchableOpacity
-                          style={styles.modalMealRemoveButton}
-                          activeOpacity={0.8}
-                          onPress={() => {}}
-                        >
-                          <Text style={styles.modalMealRemoveLabel}>-</Text>
-                        </TouchableOpacity>
-                        <View style={styles.modalMealRowContent}>
-                          <Text style={styles.modalMealRowName}>
-                            {meal.title}
-                          </Text>
-                          <Text style={styles.modalMealRowCalories}>
-                            {meal.kcal}kcal
-                          </Text>
-                        </View>
-                        <Image
-                          source={imageSource}
-                          style={styles.modalMealRowImage}
-                        />
-                        <View style={styles.modalMealDragHandle}>
-                          <Text style={styles.modalMealDragLabel}>≡</Text>
-                        </View>
-                      </View>
-                    );
-                  })}
-                </View>
-
-                <View style={styles.modalAddRow}>
-                  <View style={styles.modalAddIcon}>
-                    <Text style={styles.modalAddIconLabel}>＋</Text>
-                  </View>
-                  <TextInput
-                    value={mealTitle}
-                    onChangeText={setMealTitle}
-                    placeholder='메뉴 이름 입력'
-                    style={styles.modalAddInput}
-                    placeholderTextColor='#B4B8C9'
-                  />
-                  <TextInput
-                    value={mealCalories}
-                    onChangeText={setMealCalories}
-                    placeholder='칼로리 입력'
-                    keyboardType='numeric'
-                    style={[styles.modalAddInput, styles.modalAddInputCalorie]}
-                    placeholderTextColor='#B4B8C9'
-                  />
-                  <TouchableOpacity
-                    style={styles.modalCameraButton}
-                    activeOpacity={0.8}
-                    onPress={() => {}}
-                  >
-                    <Text style={styles.modalCameraIcon}>📷</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.modalTotalRow}>
-                  <Text style={styles.modalTotalLabel}>총 칼로리:</Text>
-                  <Text style={styles.modalTotalValue}>
-                    {totalCalories}kcal
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.modalPrimaryButton}
-                  activeOpacity={0.85}
-                  onPress={handleSaveMeal}
-                >
-                  <Text style={styles.modalPrimaryButtonLabel}>저장하기</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.modalSecondaryButton}
-                  onPress={handleCloseModal}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.modalSecondaryButtonLabel}>닫기</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </View>
-      </Modal>
+        formattedDate={formattedModalDate}
+        selectedMeals={selectedMeals}
+        mealTitle={mealTitle}
+        mealCalories={mealCalories}
+        totalCalories={totalCalories}
+        onClose={handleCloseModal}
+        onSave={handleSaveMeal}
+        onChangeMealTitle={(value) => setMealTitle(value)}
+        onChangeMealCalories={(value) => setMealCalories(value)}
+      />
     </SafeAreaView>
   );
 }
