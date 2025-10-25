@@ -8,6 +8,10 @@ const baseShadow = {
   elevation: 4,
 };
 
+const THUMB = 15; // 썸네일 박스 크기
+const ITEM = 20; // 각 이미지 크기
+const RADIUS = 5; // 이미지 모서리 반경
+
 export default StyleSheet.create({
   container: {
     flex: 1,
@@ -83,6 +87,10 @@ export default StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  dayEmptySlot: {
+    width: 48,
+    height: 48,
   },
   dayInner: {
     width: 48,
@@ -515,5 +523,25 @@ export default StyleSheet.create({
   modalSecondaryButtonLabel: {
     fontSize: 14,
     color: '#8F94AB',
+  },
+  stackThumb: {
+    width: THUMB,
+    height: THUMB,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'flex-start', // 왼쪽 기준으로 겹침
+    overflow: 'visible', // 겹쳐진 이미지가 밖으로 나가도 보이게
+  },
+  stackImage: {
+    position: 'absolute',
+    width: ITEM,
+    height: ITEM,
+    borderRadius: RADIUS,
+    borderWidth: 2, // 겹침 경계 또렷하게
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
   },
 });

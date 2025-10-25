@@ -16,10 +16,8 @@ import type { MealListItem } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WEEKDAYS, PLACEHOLDER_MEAL } from './constant';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
-import { resolveMealImageSource } from '@utils/imageUtil';
+import { resolveMealImageSources } from '@utils/imageUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
-
-const MAX_STACK = 3;
 
 const getDiaryTitle = (date: Date) => `${date.getMonth() + 1}월의 식사일기`;
 
@@ -106,36 +104,29 @@ function MealPage() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.header, styles.headerSpacing]}>
-          {/*  TouchableOpacity : 이전 달로 이동 */}
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => handleChangeMonth(-1)}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerButtonLabel}>‹</Text>
+            <Text style={styles.headerButtonLabel}>{'<'}</Text>
           </TouchableOpacity>
-
           <Text style={styles.headerTitle}>{getDiaryTitle(currentMonth)}</Text>
-
-          {/*  TouchableOpacity : 다음 달로 이동 */}
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => handleChangeMonth(1)}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerButtonLabel}>‹</Text>
+            <Text style={styles.headerButtonLabel}>{'>'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.calendarContainer, styles.sectionSpacing]}>
-          {/* 달력 월 표시 */}
           <View style={styles.calendarMonthRow}>
             <Text style={styles.calendarMonthLabel}>
               {getMonthLabel(currentMonth)}
             </Text>
           </View>
-
-          {/* 요일 헤더 */}
           <View style={styles.weekHeaderRow}>
             {WEEKDAYS.map((weekday) => (
               <Text key={weekday} style={styles.weekDayLabel}>
@@ -143,8 +134,6 @@ function MealPage() {
               </Text>
             ))}
           </View>
-
-          {/* 달력 날짜 그리드 */}
           {weeks.map((week, weekIndex) => (
             <View
               key={`week-${weekIndex}`}
@@ -153,13 +142,11 @@ function MealPage() {
                 weekIndex === weeks.length - 1 ? { marginBottom: 0 } : null,
               ]}
             >
-              {week.map((cell, cellIdx) => {
+              {week.map((cell, cellIndex) => {
                 const isSelected = cell.dateKey === selectedDateKey;
-                const showDay = cell.dateKey;
-
+                const showDay = cell.label !== null && cell.dateKey;
                 return (
-                  <View key={`${cell.key}-${cellIdx}`} style={styles.dayCell}>
-                    {/* 날짜가 있는 셀인지 확인, 있을 경우에만 눌러서 모달 열기 가능 */}
+                  <View key={`${cell.key}-${cellIndex}`} style={styles.dayCell}>
                     {showDay ? (
                       <TouchableOpacity
                         style={[
@@ -169,43 +156,28 @@ function MealPage() {
                         onPress={() => handleSelectDate(cell.dateKey)}
                         activeOpacity={0.8}
                       >
-                        {/* 날짜 숫자 */}
                         <Text
                           style={[
                             styles.dayNumber,
-                            cell.isCurrentMonth ? null : styles.dayNumberMuted,
+                            !cell.isCurrentMonth ? styles.dayNumberMuted : null,
                             isSelected ? styles.selectedDayNumber : null,
                           ]}
                         >
-                          {' '}
-                          짠
+                          {cell.label}
                         </Text>
-
-                        {/* 식단 이미지가 있다면, 그 이미지를 겹쳐서 보여줘야한다 */}
-                        <View style={styles.stackThumb}>
-                          {Array.isArray(cell.previewImage) &&
-                          cell.previewImage.length > 0 ? (
-                            cell.previewImage
-                              .slice(0, MAX_STACK)
-                              .map((imgSrc, i) => (
-                                <Image
-                                  key={i}
-                                  source={imgSrc}
-                                  style={[
-                                    styles.stackImage,
-                                    { left: i * 10, zIndex: MAX_STACK - i }, // 살짝씩 오른쪽으로 가도록
-                                  ]}
-                                  resizeMode='cover'
-                                />
-                              ))
-                          ) : (
-                            <View style={styles.dayPreviewPlaceholder}>
-                              <Text style={styles.dayPreviewPlaceholderText}>
-                                ＋
-                              </Text>
-                            </View>
-                          )}
-                        </View>
+                        {cell.previewImage ? (
+                          <Image
+                            source={cell.previewImage}
+                            style={styles.dayPreviewThumbnail}
+                            resizeMode='cover'
+                          />
+                        ) : (
+                          <View style={styles.dayPreviewPlaceholder}>
+                            <Text style={styles.dayPreviewPlaceholderText}>
+                              +
+                            </Text>
+                          </View>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <View style={styles.dayEmptySlot} />
@@ -216,14 +188,15 @@ function MealPage() {
             </View>
           ))}
         </View>
-        {/* 할 수 있다면 이미지 넣기 */}
+        {/* 다른 토끼 이미지 넣어야함 */}
+        {/* <View style={[styles.catContainer, styles.sectionSpacing]}>
+          <Image source={TokkiImage} style={styles.catImage} />
+        </View> */}
 
         <Text style={styles.calendarHelperText}>
           날짜를 선택해서 식단을 등록해보세요.
         </Text>
       </ScrollView>
-
-      {/* 식단 모달 추가 */}
       <Modal
         visible={isMealModalVisible}
         transparent
@@ -263,7 +236,7 @@ function MealPage() {
 
                 <View style={styles.modalMealList}>
                   {selectedMeals.map((meal) => {
-                    const imageSource = resolveMealImageSource(meal);
+                    const imageSource = resolveMealImageSources(meal);
                     return (
                       <View
                         key={`modal-meal-${meal.mealId}`}
