@@ -17,11 +17,13 @@ const getMonthLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 
 /**
- * Render the meal diary page with month navigation, a calendar grid showing daily meal previews, and a modal for viewing/adding meals.
+ * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드,  
+ * 그리고 식단 조회/추가를 위한 모달이 포함된 식단 일지 페이지를 렌더링한다.
  *
- * The component manages current month navigation, selected date state, modal visibility, and temporary meal input fields; it derives the calendar matrix, selected meals, and total calories from mock data to populate the UI.
+ * 이 컴포넌트는 현재 월 이동, 선택된 날짜 상태, 모달 표시 여부, 임시 식단 입력 필드를 관리하며,  
+ * mock 데이터를 기반으로 캘린더 매트릭스, 선택된 식단, 총 칼로리를 계산하여 UI를 구성한다.
  *
- * @returns The React element representing the meal diary page.
+ * @returns 식단 일지 페이지를 나타내는 React 요소를 반환함
  */
 function MealPage() {
   const today = useMemo(() => new Date(), []);
