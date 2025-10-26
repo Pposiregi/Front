@@ -27,6 +27,21 @@ type MealModalProps = {
   onChangeMealCalories: (value: string) => void;
 };
 
+/**
+ * Render a modal for viewing and editing meals for a given date.
+ *
+ * @param visible - Controls modal visibility
+ * @param formattedDate - Date label displayed in the modal header
+ * @param selectedMeals - Array of meal items shown in the modal; when empty a placeholder meal is displayed
+ * @param mealTitle - Controlled value for the new-meal title input
+ * @param mealCalories - Controlled value for the new-meal calories input
+ * @param totalCalories - Sum of calories displayed in the modal footer
+ * @param onClose - Callback invoked to close the modal
+ * @param onSave - Callback invoked to persist changes
+ * @param onChangeMealTitle - Handler for changes to the new-meal title input
+ * @param onChangeMealCalories - Handler for changes to the new-meal calories input
+ * @returns The JSX element representing the meal editing modal
+ */
 function MealModal({
   visible,
   formattedDate,

@@ -16,6 +16,13 @@ const getDiaryTitle = (date: Date) => `${date.getMonth() + 1}월의 식사일기
 const getMonthLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 
+/**
+ * Render the meal diary page with month navigation, a calendar grid showing daily meal previews, and a modal for viewing/adding meals.
+ *
+ * The component manages current month navigation, selected date state, modal visibility, and temporary meal input fields; it derives the calendar matrix, selected meals, and total calories from mock data to populate the UI.
+ *
+ * @returns The React element representing the meal diary page.
+ */
 function MealPage() {
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => formatDateKey(today), [today]);
