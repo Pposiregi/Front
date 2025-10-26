@@ -28,19 +28,19 @@ type MealModalProps = {
 };
 
 /**
- * Render a modal for viewing and editing meals for a given date.
+ * 지정된 날짜의 식단을 조회하고 수정할 수 있는 모달을 렌더링한다.
  *
- * @param visible - Controls modal visibility
- * @param formattedDate - Date label displayed in the modal header
- * @param selectedMeals - Array of meal items shown in the modal; when empty a placeholder meal is displayed
- * @param mealTitle - Controlled value for the new-meal title input
- * @param mealCalories - Controlled value for the new-meal calories input
- * @param totalCalories - Sum of calories displayed in the modal footer
- * @param onClose - Callback invoked to close the modal
- * @param onSave - Callback invoked to persist changes
- * @param onChangeMealTitle - Handler for changes to the new-meal title input
- * @param onChangeMealCalories - Handler for changes to the new-meal calories input
- * @returns The JSX element representing the meal editing modal
+ * @param visible - 모달의 표시 여부를 제어함
+ * @param formattedDate - 모달 헤더에 표시될 날짜 문자열
+ * @param selectedMeals - 모달에 표시될 식단 항목 배열; 비어 있을 경우 기본(placeholder) 식단을 표시함
+ * @param mealTitle - 새 식단 제목 입력창의 제어된 값
+ * @param mealCalories - 새 식단 칼로리 입력창의 제어된 값
+ * @param totalCalories - 모달 하단에 표시되는 총 칼로리 합계
+ * @param onClose - 모달을 닫을 때 호출되는 콜백 함수
+ * @param onSave - 변경 사항을 저장할 때 호출되는 콜백 함수
+ * @param onChangeMealTitle - 새 식단 제목 입력값이 변경될 때 호출되는 핸들러
+ * @param onChangeMealCalories - 새 식단 칼로리 입력값이 변경될 때 호출되는 핸들러
+ * @returns 식단 수정 모달을 나타내는 JSX 요소를 반환함
  */
 function MealModal({
   visible,
