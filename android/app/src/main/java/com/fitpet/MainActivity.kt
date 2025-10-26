@@ -12,7 +12,7 @@ class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     SplashScreen.show(this)
     super.onCreate(savedInstanceState)
-    HealthConnectPermissionDelegate.setPermissionDelegate(this)
+    HealthConnectPermissionDelegate.setPermissionDelegate(this) // 2025.10.26 MAN]Health Connect 권한 위임 설정
   }
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule

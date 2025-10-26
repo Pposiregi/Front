@@ -5,10 +5,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SocialLogin from './src/pages/SocialLogin';
-import Main from './src/pages/Main';
+import Main from '@pages/main/MainPage';
+import Meal from '@pages/meal/MealPage';
 import Health from './src/pages/Health';
 import Mission from './src/pages/Mission';
-import Meal from './src/pages/Meal';
 import Setting from './src/pages/Setting';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
@@ -20,6 +20,9 @@ import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/Index';
 import SplashScreen from 'react-native-splash-screen';
+
+// 헬스 커넥트 권한 요청 훅
+import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 
 export type LoggedInParamList = {
   Main: undefined;
@@ -53,6 +56,11 @@ function AppInner() {
   const isSignUpInProgress = useSelector(
     (state: RootState) => state.user.isSignUpInProgress
   );
+
+  // 25.10.24, MAN: 헬스 커넥트 권한 요청 훅 사용
+  useHealthConnectPrompt({
+    enabled: !loading && isLoggedIn && !isSignUpInProgress,
+  });
 
   useEffect(() => {
     const checkAuthStatus = async () => {
