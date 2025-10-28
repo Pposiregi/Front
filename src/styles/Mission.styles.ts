@@ -95,7 +95,7 @@ export default StyleSheet.create({
   mealImage: {
     width: '100%',
     aspectRatio: 1,
-    borderRadius: 8,
+    borderRadius: 16,
   },
   mealKcal: {
     fontSize: 14,
@@ -181,5 +181,30 @@ export default StyleSheet.create({
     // 차트 자체를 음수로 이동시켜 Y축 라벨 공간을 메움
     marginLeft: -width * 0.18, // 차트 왼쪽 강제 이동
     marginBottom: -10, // X축 라벨 공간도 삭제
+  },
+  // 뱃지
+  badgeCard: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginBottom: 16,
+    elevation: 3,
+    marginHorizontal: 20,
+  },
+  badgeTitle: {
+    fontSize: 24,
+    fontFamily: 'JUA',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  badgeItem: {
+    marginRight: -3,
+  },
+  badgeIcon: {
+    width: 60,
+    height: 60,
+    marginBottom: 4,
   },
 });

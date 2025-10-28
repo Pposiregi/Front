@@ -93,7 +93,7 @@ function AppInner() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color='#000000' />     {' '}
+        <ActivityIndicator size='large' color='#000000' />
       </View>
     );
   } // 최종 상태를 기준으로 내비게이션 결정

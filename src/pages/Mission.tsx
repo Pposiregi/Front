@@ -35,58 +35,24 @@ type Meal = {
   kcal: number;
 };
 
-// 목업 데이터
-const mockMissionData: MissionData = {
-  date: '2025-10-18',
-  distanceKm: 3.21,
-  burnCalories: 123,
-  steps: 4450,
-};
-const mockMissionData1: MissionData = {
-  date: '2025-10-11',
-  distanceKm: 6.42,
-  burnCalories: 246,
-  steps: 8900,
-};
-const mockMissionData2: MissionData = {
-  date: '2025-10-12',
-  distanceKm: 1.6,
-  burnCalories: 61,
-  steps: 2225,
-};
-const mockMissionData3: MissionData = {
-  date: '2025-10-13',
-  distanceKm: 3.21,
-  burnCalories: 123,
-  steps: 4450,
-};
-const mockMissionData4: MissionData = {
-  date: '2025-10-14',
-  distanceKm: 6.42,
-  burnCalories: 246,
-  steps: 8900,
-};
-const mockMissionData5: MissionData = {
-  date: '2025-10-15',
-  distanceKm: 1.6,
-  burnCalories: 61,
-  steps: 2225,
-};
-const mockMissionData6: MissionData = {
-  date: '2025-10-16',
-  distanceKm: 3.21,
-  burnCalories: 123,
-  steps: 4450,
+type Badge = {
+  badgeId: number;
+  title: string;
+  type: 'STEP' | 'RUN' | 'MISSION' | 'ATTENDANCE' | 'EAT_KCAL';
+  tier: 'BRONZE' | 'SILVER' | 'GOLD';
+  iconUrl: ImageSourcePropType; // require 또는 URL
+  createdAt: string;
 };
 
+// 목업 데이터
 const mockWeeklyMissionData: MissionData[] = [
-  mockMissionData, // 2025-10-17
-  mockMissionData1, // 2025-10-11
-  mockMissionData2, // 2025-10-12
-  mockMissionData3, // 2025-10-13
-  mockMissionData4, // 2025-10-14
-  mockMissionData5, // 2025-10-15
-  mockMissionData6, // 2025-10-16
+  { date: '2025-10-22', distanceKm: 6.42, burnCalories: 246, steps: 8900 },
+  { date: '2025-10-23', distanceKm: 1.6, burnCalories: 61, steps: 2225 },
+  { date: '2025-10-24', distanceKm: 3.21, burnCalories: 123, steps: 4450 },
+  { date: '2025-10-25', distanceKm: 6.42, burnCalories: 246, steps: 8900 },
+  { date: '2025-10-26', distanceKm: 1.6, burnCalories: 61, steps: 2225 },
+  { date: '2025-10-27', distanceKm: 3.21, burnCalories: 123, steps: 4450 },
+  { date: '2025-10-28', distanceKm: 3.21, burnCalories: 123, steps: 8900 },
 ];
 
 const mockMeals: Meal[] = [
@@ -103,6 +69,96 @@ const mockMeals: Meal[] = [
     kcal: 287,
   },
 ];
+
+const mockBadges: Badge[] = [
+  {
+    badgeId: 1,
+    title: '최초 10000보 달성',
+    type: 'STEP',
+    tier: 'BRONZE',
+    iconUrl: require('../assets/images/step_bronze.png'),
+    createdAt: '2025-10-10T12:34:56Z',
+  },
+  {
+    badgeId: 2,
+    title: '주간 100000보 달성',
+    type: 'MISSION',
+    tier: 'GOLD',
+    iconUrl: require('../assets/images/mission_gold.png'),
+    createdAt: '2025-10-12T09:00:00Z',
+  },
+  {
+    badgeId: 2,
+    title: '주간 100000보 달성',
+    type: 'MISSION',
+    tier: 'GOLD',
+    iconUrl: require('../assets/images/mission_gold.png'),
+    createdAt: '2025-10-12T09:00:00Z',
+  },
+  {
+    badgeId: 2,
+    title: '주간 100000보 달성',
+    type: 'MISSION',
+    tier: 'GOLD',
+    iconUrl: require('../assets/images/mission_gold.png'),
+    createdAt: '2025-10-12T09:00:00Z',
+  },
+  {
+    badgeId: 2,
+    title: '주간 100000보 달성',
+    type: 'MISSION',
+    tier: 'GOLD',
+    iconUrl: require('../assets/images/mission_gold.png'),
+    createdAt: '2025-10-12T09:00:00Z',
+  },
+  {
+    badgeId: 2,
+    title: '주간 100000보 달성',
+    type: 'MISSION',
+    tier: 'GOLD',
+    iconUrl: require('../assets/images/mission_gold.png'),
+    createdAt: '2025-10-12T09:00:00Z',
+  },
+];
+
+type ItemModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  imageUri: ImageSourcePropType;
+  extraText?: string;
+};
+
+const ItemModal = ({
+  visible,
+  onClose,
+  title,
+  imageUri,
+  extraText,
+}: ItemModalProps) => (
+  <Modal
+    visible={visible}
+    transparent
+    animationType='fade'
+    onRequestClose={onClose}
+  >
+    <TouchableOpacity
+      style={styles.modalBackground}
+      activeOpacity={1}
+      onPress={onClose}
+    >
+      <View style={styles.modalContent}>
+        <Image
+          source={imageUri}
+          style={styles.fullScreenImage}
+          resizeMode='contain'
+        />
+        <Text style={styles.modalTitleText}>{title}</Text>
+        {extraText && <Text style={{ textAlign: 'center' }}>{extraText}</Text>}
+      </View>
+    </TouchableOpacity>
+  </Modal>
+);
 
 function Mission() {
   const [missionData, setMissionData] = useState<MissionData | null>(null);
@@ -124,7 +180,7 @@ function Mission() {
   useEffect(() => {
     // 목업 데이터를 불러오는 것처럼 시뮬레이션
     setTimeout(() => {
-      setMissionData(mockMissionData);
+      setMissionData(mockWeeklyMissionData[mockWeeklyMissionData.length - 1]);
       setTodayMeals(mockMeals);
       calculateWeeklyData();
       setLoading(false);
@@ -177,7 +233,6 @@ function Mission() {
       setIsToday(missionData.date === today);
     }
   }, [missionData]);
-
   // 더미 경로 데이터 (DB에서 불러온다고 가정)
   const dummyPath = [
     { latitude: 35.1516, longitude: 128.9976 },
@@ -213,13 +268,20 @@ function Mission() {
   }, [loading]);
 
   // 모달 관련 상태 추가
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isMealModalVisible, setIsMealModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [isBadgeModalVisible, setIsBadgeModalVisible] = useState(false);
+  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
   // 이미지 클릭 핸들러
-  const handleImagePress = (meal: Meal) => {
+  const handleMealPress = (meal: Meal) => {
     setSelectedMeal(meal);
-    setIsModalVisible(true);
+    setIsMealModalVisible(true);
+  };
+
+  const handleBadgePress = (badge: Badge) => {
+    setSelectedBadge(badge);
+    setIsBadgeModalVisible(true);
   };
 
   // 로딩중~~
@@ -294,7 +356,7 @@ function Mission() {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.mealGridItem}
-                  onPress={() => handleImagePress(item)}
+                  onPress={() => handleMealPress(item)}
                 >
                   <Image source={item.imageUri} style={styles.mealImage} />
                 </TouchableOpacity>
@@ -339,38 +401,48 @@ function Mission() {
             )}
           </View>
         </View>
+        {/* 뱃지 카드 */}
+        <View style={styles.badgeCard}>
+          <View>
+            <Text style={styles.badgeTitle}>나의 뱃지들</Text>
+          </View>
+          <FlatList
+            data={mockBadges}
+            numColumns={5}
+            keyExtractor={(item) => item.badgeId.toString()}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.badgeItem}
+                onPress={() => handleBadgePress(item)} // 클릭 시 모달 열기
+              >
+                <Image source={item.iconUrl} style={styles.badgeIcon} />
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       </ScrollView>
-      {/* 이미지 확대 모달 */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType='fade'
-        onRequestClose={() => setIsModalVisible(false)} // 안드로이드 뒤로가기 버튼 처리
-      >
-        <TouchableOpacity
-          style={styles.modalBackground}
-          activeOpacity={1} // 배경 클릭 시 모달 닫히도록
-          onPress={() => setIsModalVisible(false)}
-        >
-          {selectedMeal && (
-            <View style={styles.modalContent}>
-              {/* 이미지 */}
-              <Image
-                source={selectedMeal.imageUri}
-                style={styles.fullScreenImage}
-                resizeMode='contain'
-              />
-              {/* 텍스트 컨테이너 */}
-              <View style={styles.modalTextContainer}>
-                <Text style={styles.modalTitleText}>{selectedMeal.title}</Text>
-                <Text style={styles.modalKcalText}>
-                  {selectedMeal.kcal} kcal
-                </Text>
-              </View>
-            </View>
-          )}
-        </TouchableOpacity>
-      </Modal>
+      {/* 범용 모달 */}
+      {selectedMeal && (
+        <ItemModal
+          visible={isMealModalVisible}
+          onClose={() => setIsMealModalVisible(false)}
+          title={selectedMeal.title}
+          imageUri={selectedMeal.imageUri}
+          extraText={`${selectedMeal.kcal} kcal`}
+        />
+      )}
+      {selectedBadge && (
+        <ItemModal
+          visible={isBadgeModalVisible}
+          onClose={() => setIsBadgeModalVisible(false)}
+          title={selectedBadge.title}
+          imageUri={selectedBadge.iconUrl}
+          extraText={`${selectedBadge.type} / ${selectedBadge.tier}\n${new Date(
+            selectedBadge.createdAt
+          ).toLocaleDateString()}`}
+        />
+      )}
     </SafeAreaView>
   );
 }
