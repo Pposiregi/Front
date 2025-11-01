@@ -87,38 +87,6 @@ const mockBadges: Badge[] = [
     iconUrl: require('../assets/images/mission_gold.png'),
     createdAt: '2025-10-12T09:00:00Z',
   },
-  {
-    badgeId: 2,
-    title: '주간 100000보 달성',
-    type: 'MISSION',
-    tier: 'GOLD',
-    iconUrl: require('../assets/images/mission_gold.png'),
-    createdAt: '2025-10-12T09:00:00Z',
-  },
-  {
-    badgeId: 2,
-    title: '주간 100000보 달성',
-    type: 'MISSION',
-    tier: 'GOLD',
-    iconUrl: require('../assets/images/mission_gold.png'),
-    createdAt: '2025-10-12T09:00:00Z',
-  },
-  {
-    badgeId: 2,
-    title: '주간 100000보 달성',
-    type: 'MISSION',
-    tier: 'GOLD',
-    iconUrl: require('../assets/images/mission_gold.png'),
-    createdAt: '2025-10-12T09:00:00Z',
-  },
-  {
-    badgeId: 2,
-    title: '주간 100000보 달성',
-    type: 'MISSION',
-    tier: 'GOLD',
-    iconUrl: require('../assets/images/mission_gold.png'),
-    createdAt: '2025-10-12T09:00:00Z',
-  },
 ];
 
 type ItemModalProps = {
@@ -404,7 +372,7 @@ function Mission() {
         {/* 뱃지 카드 */}
         <View style={styles.badgeCard}>
           <View>
-            <Text style={styles.badgeTitle}>나의 뱃지들</Text>
+            <Text style={styles.badgeTitle}>나의 뱃지 목록</Text>
           </View>
           <FlatList
             data={mockBadges}
