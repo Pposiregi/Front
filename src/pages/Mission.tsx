@@ -149,7 +149,6 @@ function Mission() {
     datasets: [{ data: [] }],
   });
   const mapRef = useRef<MapView | null>(null);
-  const hasMapMoved = useRef(false);
   const [isToday, setIsToday] = useState<boolean>(false);
   // 오늘 날짜 (yyyy-mm-dd)
   const today = new Date().toISOString().split('T')[0];
@@ -239,21 +238,16 @@ function Mission() {
 
   // 각 데이터를 다 받아오면 로딩을 끝내고 화면 이동
   useEffect(() => {
-    if (
-      !loading &&
-      mapRef.current &&
-      dummyPath.length > 0 &&
-      !hasMapMoved.current
-    ) {
-      hasMapMoved.current = true;
+    if (!loading && mapRef.current && dummyPath.length > 0) {
       const timer = setTimeout(() => {
         if (mapRef.current) {
           mapRef.current.animateToRegion(CENTER_REGION, 0);
         }
-      }, 1000); // 1000ms 지연 (네이티브 뷰 준비 시간 확보)
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [loading]);
+  }, [loading, CENTER_REGION]);
+
   // 모달 관련 상태 추가
   const [isMealModalVisible, setIsMealModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -319,6 +313,7 @@ function Mission() {
             zoomEnabled={false} // 핀치 줌 비활성화
             rotateEnabled={false} // 회전 비활성화
             pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
+            region={CENTER_REGION}
           />
           <MapOverlayPolyline
             region={CENTER_REGION}
