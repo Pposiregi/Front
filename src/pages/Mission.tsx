@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapOverlayPolyline from '@components/MapOverlayPolyline';
+import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 import { LineChart } from 'react-native-chart-kit';
 import chartConfig from '@utils/chartConfig';
 import styles from '@styles/Mission.styles';
@@ -399,7 +399,7 @@ function Mission() {
     <SafeAreaView style={styles.safeArea}>
       <FlatList
         data={[]}
-        renderItem={null}
+        renderItem={() => null}
         ListHeaderComponent={HeaderContent} // 여기에 UI를 넣어줌
         keyExtractor={() => 'header'}
       />

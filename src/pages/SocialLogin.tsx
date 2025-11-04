@@ -114,7 +114,6 @@ const SocialLogin = () => {
   const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
     const profile = await GoogleSignin.signIn();
-    console.log('프로필', profile);
     // const idToken= profile.data?.idToken 아이디 토큰
     const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
       method: 'POST',
@@ -126,7 +125,6 @@ const SocialLogin = () => {
       }),
     });
     const token = await res.json();
-    console.log('res', res);
     await EncryptedStorage.setItem('refreshToken', token.refresh_token);
     await AsyncStorage.setItem('platform', 'google');
 
