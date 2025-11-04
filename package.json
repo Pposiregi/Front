@@ -12,6 +12,8 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/checkbox": "^0.5.20",
+    "@react-native-firebase/app": "^23.5.0",
+    "@react-native-firebase/messaging": "^23.5.0",
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-native-seoul/kakao-login": "^5.4.1",
     "@react-native/new-app-screen": "0.81.1",

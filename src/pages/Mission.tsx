@@ -44,15 +44,22 @@ type Badge = {
   createdAt: string;
 };
 
+// 목업 date에 쓰이는 오늘 기준 지난 7일 계산
+const getDateString = (daysAgo: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString().split('T')[0];
+};
+
 // 목업 데이터
 const mockWeeklyMissionData: MissionData[] = [
-  { date: '2025-10-22', distanceKm: 6.42, burnCalories: 246, steps: 8900 },
-  { date: '2025-10-23', distanceKm: 1.6, burnCalories: 61, steps: 2225 },
-  { date: '2025-10-24', distanceKm: 3.21, burnCalories: 123, steps: 4450 },
-  { date: '2025-10-25', distanceKm: 6.42, burnCalories: 246, steps: 8900 },
-  { date: '2025-10-26', distanceKm: 1.6, burnCalories: 61, steps: 2225 },
-  { date: '2025-10-27', distanceKm: 3.21, burnCalories: 123, steps: 4450 },
-  { date: '2025-10-28', distanceKm: 3.21, burnCalories: 123, steps: 8900 },
+  { date: getDateString(6), distanceKm: 6.42, burnCalories: 246, steps: 8900 },
+  { date: getDateString(5), distanceKm: 1.6, burnCalories: 61, steps: 2225 },
+  { date: getDateString(4), distanceKm: 3.21, burnCalories: 123, steps: 4450 },
+  { date: getDateString(3), distanceKm: 6.42, burnCalories: 246, steps: 8900 },
+  { date: getDateString(2), distanceKm: 1.6, burnCalories: 61, steps: 2225 },
+  { date: getDateString(1), distanceKm: 3.21, burnCalories: 123, steps: 4450 },
+  { date: getDateString(0), distanceKm: 3.21, burnCalories: 123, steps: 8900 },
 ];
 
 const mockMeals: Meal[] = [
@@ -97,6 +104,7 @@ type ItemModalProps = {
   extraText?: string;
 };
 
+// 모달 통합
 const ItemModal = ({
   visible,
   onClose,
@@ -141,6 +149,7 @@ function Mission() {
     datasets: [{ data: [] }],
   });
   const mapRef = useRef<MapView | null>(null);
+  const hasMapMoved = useRef(false);
   const [isToday, setIsToday] = useState<boolean>(false);
   // 오늘 날짜 (yyyy-mm-dd)
   const today = new Date().toISOString().split('T')[0];
@@ -228,13 +237,23 @@ function Mission() {
   // 가운데 지점
   const CENTER_REGION = getCenter(dummyPath);
 
-  // 각 데이터를 다 받아오면 로딩을 끝내고 화면 띄움
+  // 각 데이터를 다 받아오면 로딩을 끝내고 화면 이동
   useEffect(() => {
-    if (!loading && mapRef.current) {
-      mapRef.current.animateToRegion(CENTER_REGION, 10);
+    if (
+      !loading &&
+      mapRef.current &&
+      dummyPath.length > 0 &&
+      !hasMapMoved.current
+    ) {
+      hasMapMoved.current = true;
+      const timer = setTimeout(() => {
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(CENTER_REGION, 0);
+        }
+      }, 1000); // 1000ms 지연 (네이티브 뷰 준비 시간 확보)
+      return () => clearTimeout(timer);
     }
   }, [loading]);
-
   // 모달 관련 상태 추가
   const [isMealModalVisible, setIsMealModalVisible] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -262,135 +281,135 @@ function Mission() {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        <View style={styles.runningCard}>
-          <Text style={styles.runningTitle}>오늘의 러닝</Text>
-          {loading ? (
-            <ActivityIndicator size='large' color='#0000ff' />
-          ) : isToday ? (
-            <View style={styles.cardColunm}>
-              <View style={styles.rowContainer}>
-                <View style={styles.statBox}>
-                  <Text style={styles.statText}>
-                    거리: {missionData?.distanceKm} km
-                  </Text>
-                </View>
-                <View style={styles.statBox}>
-                  <Text style={styles.statText}>
-                    소모 칼로리: {missionData?.burnCalories} kcal
-                  </Text>
-                </View>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.cardColunm}>
+  const HeaderContent = () => (
+    <View>
+      {/* 오늘의 러닝 카드 섹션 */}
+      <View style={styles.runningCard}>
+        <Text style={styles.runningTitle}>오늘의 러닝</Text>
+        {loading ? (
+          <ActivityIndicator size='large' color='#0000ff' />
+        ) : isToday ? (
+          <View style={styles.cardColunm}>
+            <View style={styles.rowContainer}>
               <View style={styles.statBox}>
-                <Text>오늘의 데이터가 없습니다.</Text>
+                <Text style={styles.statText}>
+                  거리: {missionData?.distanceKm} km
+                </Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statText}>
+                  소모 칼로리: {missionData?.burnCalories} kcal
+                </Text>
               </View>
             </View>
-          )}
-          <View style={styles.rowContainer}>
-            {/* 현재 MapView props들 상태가 이상해서 일단 이렇게 둠 */}
-            <MapView
-              ref={mapRef}
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              scrollEnabled={false} // 드래그 이동 비활성화
-              zoomEnabled={false} // 핀치 줌 비활성화
-              rotateEnabled={false} // 회전 비활성화
-              pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
-              initialRegion={CENTER_REGION}
-            />
-            <MapOverlayPolyline
-              region={CENTER_REGION}
-              coordinates={dummyPath}
-              height={height * 0.4}
-              width={width * 0.8}
-            />
           </View>
+        ) : (
+          <View style={styles.cardColunm}>
+            <View style={styles.statBox}>
+              <Text>오늘의 데이터가 없습니다.</Text>
+            </View>
+          </View>
+        )}
+        <View style={styles.rowContainer}>
+          <MapView
+            ref={mapRef}
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            scrollEnabled={false} // 드래그 이동 비활성화
+            zoomEnabled={false} // 핀치 줌 비활성화
+            rotateEnabled={false} // 회전 비활성화
+            pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
+          />
+          <MapOverlayPolyline
+            region={CENTER_REGION}
+            coordinates={dummyPath}
+            height={height * 0.4}
+            width={width * 0.8}
+          />
         </View>
-        <View style={styles.mealRowContainer}>
-          <View style={styles.mealCard}>
-            <Text style={styles.mealTitle}>오늘의 식단</Text>
-            {/* 그리드 형태 이미지 */}
-            <FlatList
-              data={todayMeals}
-              keyExtractor={(item) => item.mealId}
-              numColumns={2} // 2장씩만
-              columnWrapperStyle={styles.mealColumnWrapper}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.mealGridItem}
-                  onPress={() => handleMealPress(item)}
-                >
-                  <Image source={item.imageUri} style={styles.mealImage} />
-                </TouchableOpacity>
-              )}
-            />
-            {/* <Text style={styles.mealKcalValueText}>
-              총 {calculateTotalKcal() ?? 0} kcal
-            </Text> */}
-          </View>
+      </View>
 
-          <View style={styles.mealCard}>
-            <Text style={styles.mealTitle}>이번주 걸음</Text>
-            {loading || chartData.labels.length === 0 ? (
-              <ActivityIndicator size='small' color='#555' />
-            ) : (
-              <View style={styles.weeklyStatBox}>
-                {/* 꼭짓점 그래프 */}
-                <View style={styles.chartMaskContainer}>
-                  <LineChart
-                    data={chartData}
-                    width={width * 0.59}
-                    height={80}
-                    yAxisLabel=''
-                    yAxisSuffix=''
-                    withHorizontalLabels={false}
-                    withVerticalLabels={false}
-                    fromZero={true}
-                    chartConfig={chartConfig}
-                    bezier // 부드럽게
-                    style={styles.lineChartShiftStyle}
-                  />
-                </View>
-                {/* 총 거리 텍스트 // 활성화 하면 카드 구조 변경 필요*/}
-                {/* <Text style={styles.weeklyStatText}>총 걸음 수</Text> */}
-                {/* <Text style={styles.weeklyValueText}>
-                  {weeklyDistance ?? 0} 걸음
-                </Text> */}
-                {/* <Text style={styles.weeklySubText}>
-                  {today.slice(5)} 기준 지난 7일간의 기록입니다.
-                </Text> */}
-              </View>
-            )}
-          </View>
-        </View>
-        {/* 뱃지 카드 */}
-        <View style={styles.badgeCard}>
-          <View>
-            <Text style={styles.badgeTitle}>나의 뱃지 목록</Text>
-          </View>
+      {/* 식단 및 주간 걸음 섹션 */}
+      <View style={styles.mealRowContainer}>
+        <View style={styles.mealCard}>
+          <Text style={styles.mealTitle}>오늘의 식단</Text>
           <FlatList
-            data={mockBadges}
-            numColumns={5}
-            keyExtractor={(item) => item.badgeId.toString()}
-            showsHorizontalScrollIndicator={false}
+            data={todayMeals}
+            keyExtractor={(item) => item.mealId}
+            numColumns={2}
+            columnWrapperStyle={styles.mealColumnWrapper}
+            scrollEnabled={false}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.badgeItem}
-                onPress={() => handleBadgePress(item)} // 클릭 시 모달 열기
+                style={styles.mealGridItem}
+                onPress={() => handleMealPress(item)}
               >
-                <Image source={item.iconUrl} style={styles.badgeIcon} />
+                <Image source={item.imageUri} style={styles.mealImage} />
               </TouchableOpacity>
             )}
           />
         </View>
-      </ScrollView>
-      {/* 범용 모달 */}
+
+        <View style={styles.mealCard}>
+          <Text style={styles.mealTitle}>이번주 걸음</Text>
+          {loading || chartData.labels.length === 0 ? (
+            <ActivityIndicator size='small' color='#555' />
+          ) : (
+            <View style={styles.weeklyStatBox}>
+              <View style={styles.chartMaskContainer}>
+                <LineChart
+                  data={chartData}
+                  width={width * 0.59}
+                  height={80}
+                  yAxisLabel=''
+                  yAxisSuffix=''
+                  withHorizontalLabels={false}
+                  withVerticalLabels={false}
+                  fromZero={true}
+                  chartConfig={chartConfig}
+                  bezier
+                  style={styles.lineChartShiftStyle}
+                />
+              </View>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* 뱃지 카드 섹션  */}
+      <View style={styles.badgeCard}>
+        <View>
+          <Text style={styles.badgeTitle}>나의 뱃지 목록</Text>
+        </View>
+        <FlatList
+          data={mockBadges}
+          numColumns={5}
+          keyExtractor={(item) => item.badgeId.toString()}
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.badgeItem}
+              onPress={() => handleBadgePress(item)}
+            >
+              <Image source={item.iconUrl} style={styles.badgeIcon} />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </View>
+  );
+  // scrollView와 FlatList를 동시에 쓰면 문제가 있을 수 있다고 하여 FlatList만을 사용하여 스크롤 구현
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <FlatList
+        data={[]}
+        renderItem={null}
+        ListHeaderComponent={HeaderContent} // 여기에 UI를 넣어줌
+        keyExtractor={() => 'header'}
+      />
+
+      {/* 모달 */}
       {selectedMeal && (
         <ItemModal
           visible={isMealModalVisible}
