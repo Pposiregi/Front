@@ -1,19 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  BackHandler,
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import SignUp from './SignUp';
-import SignUp2 from './SignUp2';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SignUp3 from './SignUp3';
 import { useAppDispatch } from '../../store';
 import userSlice from '../../slices/user';
+import OptionalInfoPage from './OptionalInfoPage';
+import PermissionPage from './PermissionPage';
+import UserInfoPage from './UserInfoPage';
 
 const Index = () => {
   //현재 페이지 주소 나타냄
@@ -131,9 +124,9 @@ const Index = () => {
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
         ref={pagerRef}
       >
-        <SignUp key='1' onNext={handleNext} />
-        <SignUp2 key='2' onNext={handleNext} />
-        <SignUp3 key='3' onFinish={handleFinish} />
+        <PermissionPage key='1' onNext={handleNext} />
+        <UserInfoPage key='2' onNext={handleNext} />
+        <OptionalInfoPage key='3' onFinish={handleFinish} />
       </PagerView>
     </View>
   );

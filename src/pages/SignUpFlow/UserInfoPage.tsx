@@ -19,7 +19,7 @@ import {
   isValidWeight,
 } from '../../utils/validation';
 
-type SignUp2Props = {
+type UserInfoProps = {
   onNext: (data: {
     nickName: string;
     birth: {
@@ -33,7 +33,7 @@ type SignUp2Props = {
   }) => void;
 };
 
-const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
+const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
   const [nickName, setNickName] = useState('');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
@@ -260,7 +260,7 @@ const SignUp2: React.FC<SignUp2Props> = ({ onNext }) => {
   );
 };
 
-export default SignUp2;
+export default UserInfoPage;
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
