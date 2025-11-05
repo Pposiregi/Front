@@ -18,7 +18,7 @@ import { GOOGLE_CLIENT_ID } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import Index from './src/pages/SignUpFlow/Index';
+import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
 
 // 헬스 커넥트 권한 요청 훅
@@ -47,9 +47,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppInner() {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Redux 상태를 선택
 
-  // Redux 상태를 선택
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
   );
@@ -70,9 +69,8 @@ function AppInner() {
           'isSignUpInProgress'
         );
         const isSignUp = signUpInProgressValue === 'true';
-        dispatch(userSlice.actions.setSignUpInProgress(isSignUp));
+        dispatch(userSlice.actions.setSignUpInProgress(isSignUp)); // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
 
-        // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
           const platform = await AsyncStorage.getItem('platform');
@@ -83,8 +81,7 @@ function AppInner() {
               await platformRefresher(refreshToken);
             if (newRefreshToken) {
               await EncryptedStorage.setItem('refreshToken', newRefreshToken);
-            }
-            // 로그인 상태를 리덕스에 동기화
+            } // 로그인 상태를 리덕스에 동기화
             dispatch(userSlice.actions.setUser({ accessToken }));
           }
         }
@@ -98,18 +95,16 @@ function AppInner() {
     };
 
     checkAuthStatus();
-  }, [dispatch]);
+  }, [dispatch]); // 로딩 중일 때는 로딩 화면만 렌더링
 
-  // 로딩 중일 때는 로딩 화면만 렌더링
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#000000' />
       </View>
     );
-  }
+  } // 최종 상태를 기준으로 내비게이션 결정
 
-  // 최종 상태를 기준으로 내비게이션 결정
   console.log('Final isLoggedIn 값:', isLoggedIn);
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
 
@@ -142,7 +137,7 @@ function AppInner() {
             <Tab.Screen
               name='Mission'
               component={Mission}
-              options={{ title: '미션' }}
+              options={{ headerShown: false }}
             />
             <Tab.Screen
               name='Meal'
