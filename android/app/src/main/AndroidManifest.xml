@@ -6,6 +6,12 @@
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
      <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
     
+    <!-- Health Connect, Background 걸음 수 체크용 -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <!-- 디버그에서 write 권한 쓰기 위함 -->
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+
+
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"

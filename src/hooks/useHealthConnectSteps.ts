@@ -7,6 +7,7 @@ import {
   getGrantedPermissions,
   getSdkStatus,
   initialize,
+  insertRecords,
   requestPermission,
 } from 'react-native-health-connect';
 import { formatDateKey } from '@utils/dateUtil';
@@ -29,6 +30,7 @@ type UseHealthConnectStepsResult = {
   syncing: boolean;
   lastSyncedMilestone: number;
   error: string | null;
+  debugInsertSteps?: (count: number) => Promise<void>;
 };
 
 const STORAGE_KEY_PREFIX = 'healthConnect:lastMilestone';
@@ -40,6 +42,10 @@ const buildStorageKey = (userId: string, dateKey: string) =>
 
 const REQUIRED_PERMISSIONS = [
   { accessType: 'read' as const, recordType: 'Steps' as const },
+];
+
+const WRITE_PERMISSIONS = [
+  { accessType: 'write' as const, recordType: 'Steps' as const },
 ];
 
 const getStartOfDayIsoString = (date: Date) => {
@@ -168,7 +174,10 @@ const useHealthConnectSteps = ({
       return permissionGranted;
     } catch (permissionError) {
       if (__DEV__) {
-        console.log('[HealthConnect] permission request failed', permissionError);
+        console.log(
+          '[HealthConnect] permission request failed',
+          permissionError
+        );
       }
       setError('Health Connect 권한 요청에 실패했습니다.');
       return false;
@@ -244,6 +253,16 @@ const useHealthConnectSteps = ({
       const lastSyncedMilestone = lastMilestoneRef.current;
 
       if (milestoneIndex <= lastSyncedMilestone) {
+        if (__DEV__) {
+          console.log(
+            '[HealthConnect] no new milestone',
+            JSON.stringify({
+              totalSteps,
+              milestoneIndex,
+              lastSyncedMilestone,
+            })
+          );
+        }
         return;
       }
 
@@ -267,6 +286,9 @@ const useHealthConnectSteps = ({
           source: 'health_connect',
           milestones,
         };
+        if (__DEV__) {
+          console.log('[HealthConnect] synced milestones', payload);
+        }
         await sendMilestonesToBackend(payload);
         lastMilestoneRef.current = milestoneIndex;
         await persistMilestone(dateKey, milestoneIndex);
@@ -276,7 +298,9 @@ const useHealthConnectSteps = ({
         console.log('[HealthConnect] sync failed', syncError);
       }
       setError(
-        syncError instanceof Error ? syncError.message : 'Health Connect 동기화 실패'
+        syncError instanceof Error
+          ? syncError.message
+          : 'Health Connect 동기화 실패'
       );
     } finally {
       setSyncing(false);
@@ -320,9 +344,69 @@ const useHealthConnectSteps = ({
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
     return () => subscription.remove();
   }, [enabled, syncSteps, userId]);
+
+  const debugInsertSteps = useCallback(
+    async (count: number) => {
+      if (!__DEV__) return;
+      if (!enabled || !userId) {
+        console.log('[HealthConnect][debug] disabled or missing user');
+        return;
+      }
+
+      const ready = await ensureHealthConnectReady();
+      if (!ready) return;
+
+      try {
+        const granted = await getGrantedPermissions();
+        const hasWrite =
+          granted?.some(
+            (permission) =>
+              'recordType' in permission &&
+              permission.recordType === 'Steps' &&
+              permission.accessType === 'write'
+          ) ?? false;
+
+        if (!hasWrite) {
+          const result = await requestPermission([
+            ...REQUIRED_PERMISSIONS,
+            ...WRITE_PERMISSIONS,
+          ]);
+          const writeGranted = result.some(
+            (permission) =>
+              'recordType' in permission &&
+              permission.recordType === 'Steps' &&
+              permission.accessType === 'write'
+          );
+          if (!writeGranted) {
+            console.log('[HealthConnect][debug] write permission denied');
+            return;
+          }
+        }
+
+        const end = new Date();
+        const start = new Date(end.getTime() - 5 * 60 * 1000);
+        await insertRecords([
+          {
+            recordType: 'Steps',
+            count,
+            startTime: start.toISOString(),
+            endTime: end.toISOString(),
+          },
+        ]);
+        console.log(`[HealthConnect][debug] inserted ${count} steps`);
+        await syncSteps();
+      } catch (debugError) {
+        console.log('[HealthConnect][debug] insert failed', debugError);
+      }
+    },
+    [enabled, ensureHealthConnectReady, syncSteps, userId]
+  );
 
   return {
     steps,
@@ -330,8 +414,8 @@ const useHealthConnectSteps = ({
     syncing,
     lastSyncedMilestone: lastMilestoneRef.current,
     error,
+    debugInsertSteps: __DEV__ ? debugInsertSteps : undefined,
   };
 };
 
 export default useHealthConnectSteps;
-

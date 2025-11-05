@@ -40,6 +40,7 @@ export const MainPage = () => {
   const healthConnect = useHealthConnectSteps({
     enabled: !!data,
     userId: data?.user.user_id ?? null,
+    syncIntervalMs: 10_000,
   });
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
@@ -306,6 +307,34 @@ export const MainPage = () => {
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
       </TouchableOpacity>
+      {/* 헬스 커넥트 디버그용 걸음수 삽입 버튼 */}
+      {__DEV__ && healthConnect.debugInsertSteps && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            padding: 12,
+            borderRadius: 8,
+            rowGap: 8,
+          }}
+        >
+          <Text style={{ color: '#fff', marginBottom: 4 }}>HC Debug</Text>
+          <TouchableOpacity
+            style={{ padding: 8, backgroundColor: '#4CAF50', borderRadius: 4 }}
+            onPress={() => healthConnect.debugInsertSteps?.(100)}
+          >
+            <Text style={{ color: '#fff' }}>+100 steps</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ padding: 8, backgroundColor: '#2196F3', borderRadius: 4 }}
+            onPress={() => healthConnect.debugInsertSteps?.(1000)}
+          >
+            <Text style={{ color: '#fff' }}>+1000 steps</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
