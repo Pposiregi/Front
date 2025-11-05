@@ -10,19 +10,16 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import userSlice from '../../slices/user';
-import { useAppDispatch } from '../../store';
 import { isValidPbf, isValidWeight } from '../../utils/validation';
 
-type SignUp3Props = {
+type OptionalInfoProps = {
   onFinish: (data: {
     targetWeight: string;
     currentPbf: string;
     targetPbf: string;
   }) => void;
 };
-const SignUp3: React.FC<SignUp3Props> = ({ onFinish }) => {
+const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
   const [targetWeight, setTargetWeight] = useState('');
   const [currentPbf, setcurrentPbf] = useState('');
   const [targetPbf, setTargetPbf] = useState('');
@@ -121,7 +118,7 @@ const SignUp3: React.FC<SignUp3Props> = ({ onFinish }) => {
   );
 };
 
-export default SignUp3;
+export default OptionalInfoPage;
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
