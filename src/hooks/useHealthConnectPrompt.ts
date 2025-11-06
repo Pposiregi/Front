@@ -6,12 +6,24 @@ import {
   initialize,
 } from 'react-native-health-connect';
 
+/**
+ * 안드로이드에서 Health Connect 앱의 설치 및 업데이트를 사용자에게 요청하는 훅
+ * 사실, Android 14 이상에서는 Health Connect가 기본 내장되어 있지만,
+ * 하위 버전에서는 별도의 설치가 필요하다.
+ *
+ * @param enabled 훅이 활성화될지 여부를 결정하는 플래그
+ * @returns noting
+ */
+
+// HealthConnect 옵션 타입
 type UseHealthConnectPromptOptions = {
   enabled: boolean;
 };
 
+// HealthConnect 설치요구 타입
 export type HealthConnectRequirement = 'install' | 'update' | null;
 
+// HealthConnect 반환 타입
 type UseHealthConnectPromptResult = {
   isHealthConnectReady: boolean;
   isCheckingStatus: boolean;
@@ -21,14 +33,6 @@ type UseHealthConnectPromptResult = {
   needsUserAction: boolean;
 };
 
-/**
- * 안드로이드에서 Health Connect 앱의 설치 및 업데이트를 사용자에게 요청하는 훅
- * 사실, Android 14 이상에서는 Health Connect가 기본 내장되어 있지만,
- * 하위 버전에서는 별도의 설치가 필요하다.
- *
- * @param enabled 훅이 활성화될지 여부를 결정하는 플래그
- * @returns noting
- */
 const alertTitle = 'Health Connect 설치 필요';
 const installMessage =
   'FitPet의 주요 기능을 사용하려면 Health Connect 앱 설치가 필요합니다. 지금 설치하시겠어요?';
@@ -113,8 +117,10 @@ const useHealthConnectPrompt = ({
         return;
       }
 
+      // 설치 또는 업데이트 필요
       const nextRequirement =
-        status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
+        status ===
+        SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
           ? 'update'
           : 'install';
 
@@ -156,11 +162,9 @@ const useHealthConnectPrompt = ({
       });
       setIsReady(true);
       setRequirement(null);
-      setIsChecking(false);
       return;
     }
 
-    setIsReady(false);
     checkStatus();
   }, [checkStatus, enabled]);
 
