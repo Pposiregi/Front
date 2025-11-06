@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, AppState, Linking, Platform } from 'react-native';
 import {
   SdkAvailabilityStatus,
   getSdkStatus,
@@ -8,6 +8,17 @@ import {
 
 type UseHealthConnectPromptOptions = {
   enabled: boolean;
+};
+
+export type HealthConnectRequirement = 'install' | 'update' | null;
+
+type UseHealthConnectPromptResult = {
+  isHealthConnectReady: boolean;
+  isCheckingStatus: boolean;
+  requirement: HealthConnectRequirement;
+  openStore: () => Promise<void>;
+  retryCheck: () => void;
+  needsUserAction: boolean;
 };
 
 /**
@@ -52,71 +63,140 @@ const openStorePage = async () => {
  * @param param0  enabled: 훅 활성화 여부
  * @returns  nothing
  */
-const useHealthConnectPrompt = ({ enabled }: UseHealthConnectPromptOptions) => {
+const useHealthConnectPrompt = ({
+  enabled,
+}: UseHealthConnectPromptOptions): UseHealthConnectPromptResult => {
   const hasPromptedRef = useRef(false);
+  const [requirement, setRequirement] =
+    useState<HealthConnectRequirement>(null);
+  const [isReady, setIsReady] = useState(!enabled);
+  const [isChecking, setIsChecking] = useState(false);
+  const logSkip = (context: Record<string, unknown>) => {
+    if (__DEV__) {
+      console.log('[HealthConnect] prompt skipped', JSON.stringify(context));
+    }
+  };
 
-  useEffect(() => {
-    if (!enabled || Platform.OS !== 'android' || hasPromptedRef.current) {
-      if (__DEV__) {
-        console.log(
-          '[HealthConnect] prompt skipped',
-          JSON.stringify({
-            enabled,
-            platform: Platform.OS,
-            alreadyPrompted: hasPromptedRef.current,
-          })
-        );
-      }
+  const openStore = useCallback(async () => {
+    await openStorePage();
+  }, []);
+
+  const checkStatus = useCallback(async () => {
+    if (!enabled || Platform.OS !== 'android') {
+      setIsReady(true);
+      setRequirement(null);
+      setIsChecking(false);
       return;
     }
 
-    /**
-     *  Health Connect SDK 상태를 확인하고,
-     *  필요시 사용자에게 설치 또는 업데이트를 요청하는 함수
-     * @returns  nothing
-     */
-    const ensureHealthConnect = async () => {
-      try {
-        const status = await getSdkStatus();
+    setIsChecking(true);
+
+    if (__DEV__) {
+      console.log('[HealthConnect] status check started');
+    }
+
+    try {
+      const status = await getSdkStatus();
+      if (__DEV__) {
+        console.log('[HealthConnect] SDK status', status);
+      }
+
+      if (status === SdkAvailabilityStatus.SDK_AVAILABLE) {
+        const initialized = await initialize();
         if (__DEV__) {
-          console.log('[HealthConnect] SDK status', status);
+          console.log('[HealthConnect] initialize result', initialized);
         }
 
-        if (status === SdkAvailabilityStatus.SDK_AVAILABLE) {
-          const initialized = await initialize();
-          if (__DEV__) {
-            console.log('[HealthConnect] initialize result', initialized);
-          }
-          return;
-        }
+        setIsReady(Boolean(initialized));
+        setRequirement(null);
+        hasPromptedRef.current = false;
+        return;
+      }
 
+      const nextRequirement =
+        status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
+          ? 'update'
+          : 'install';
+
+      setRequirement(nextRequirement);
+      setIsReady(false);
+
+      if (!hasPromptedRef.current) {
         hasPromptedRef.current = true;
-
         const message =
-          status ===
-          SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
-            ? updateMessage
-            : installMessage;
+          nextRequirement === 'update' ? updateMessage : installMessage;
 
         Alert.alert(alertTitle, message, [
-          { text: '나중에', style: 'cancel' },
           {
-            text: '설치/업데이트',
+            text: '스토어 이동',
             onPress: () => {
               openStorePage();
             },
           },
         ]);
-      } catch (error) {
-        if (__DEV__) {
-          console.log('[HealthConnect] status check error', error);
-        }
-        console.warn('[HealthConnect] 상태 확인 실패', error);
       }
-    };
-
-    ensureHealthConnect();
+    } catch (error) {
+      if (__DEV__) {
+        console.log('[HealthConnect] status check error', error);
+      }
+      console.warn('[HealthConnect] 상태 확인 실패', error);
+      setRequirement('install');
+      setIsReady(false);
+    } finally {
+      setIsChecking(false);
+    }
   }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled) {
+      logSkip({
+        enabled,
+        platform: Platform.OS,
+        alreadyPrompted: hasPromptedRef.current,
+      });
+      setIsReady(true);
+      setRequirement(null);
+      setIsChecking(false);
+      return;
+    }
+
+    setIsReady(false);
+    checkStatus();
+  }, [checkStatus, enabled]);
+
+  useEffect(() => {
+    if (!enabled || Platform.OS !== 'android') {
+      return;
+    }
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        hasPromptedRef.current = false;
+        checkStatus();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [checkStatus, enabled]);
+
+  const result = useMemo<UseHealthConnectPromptResult>(
+    () => ({
+      isHealthConnectReady: isReady,
+      isCheckingStatus: isChecking,
+      requirement,
+      retryCheck: () => {
+        hasPromptedRef.current = false;
+        checkStatus();
+      },
+      openStore,
+      needsUserAction: !isReady && !isChecking && requirement !== null,
+    }),
+    [checkStatus, isChecking, isReady, openStore, requirement]
+  );
+
+  return result;
 };
 
 export default useHealthConnectPrompt;
