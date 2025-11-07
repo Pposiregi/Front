@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, AppState, Linking, Platform } from 'react-native';
+import { AppState, Linking, Platform } from 'react-native';
 import {
   SdkAvailabilityStatus,
   getSdkStatus,
@@ -33,11 +33,6 @@ type UseHealthConnectPromptResult = {
   needsUserAction: boolean;
 };
 
-const alertTitle = 'Health Connect 설치 필요';
-const installMessage =
-  'FitPet의 주요 기능을 사용하려면 Health Connect 앱 설치가 필요합니다. 지금 설치하시겠어요?';
-const updateMessage =
-  'FitPet의 주요 기능을 사용하려면 Health Connect 앱을 최신 버전으로 업데이트해야 합니다. 지금 이동할까요?';
 const marketUrl = 'market://details?id=com.google.android.apps.healthdata';
 const webUrl =
   'https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata';
@@ -126,21 +121,6 @@ const useHealthConnectPrompt = ({
 
       setRequirement(nextRequirement);
       setIsReady(false);
-
-      if (!hasPromptedRef.current) {
-        hasPromptedRef.current = true;
-        const message =
-          nextRequirement === 'update' ? updateMessage : installMessage;
-
-        Alert.alert(alertTitle, message, [
-          {
-            text: '스토어 이동',
-            onPress: () => {
-              openStorePage();
-            },
-          },
-        ]);
-      }
     } catch (error) {
       if (__DEV__) {
         console.log('[HealthConnect] status check error', error);

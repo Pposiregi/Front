@@ -40,7 +40,7 @@ export const MainPage = () => {
   const healthConnect = useHealthConnectSteps({
     enabled: !!data,
     userId: data?.user.user_id ?? null,
-    syncIntervalMs: 60_0000, // 1분초마다 동기화
+    syncIntervalMs: 6_0000, // 60초 마다 동기화
   });
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =

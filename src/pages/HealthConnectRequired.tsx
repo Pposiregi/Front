@@ -38,7 +38,7 @@ const HealthConnectRequired = ({
 
       <View style={styles.actions}>
         <Pressable style={styles.primaryButton} onPress={onOpenStore}>
-          <Text style={styles.primaryLabel}>GoogleStore 이동</Text>
+          <Text style={styles.primaryLabel}>Google Play Store 이동</Text>
         </Pressable>
         <Pressable
           style={styles.secondaryButton}
