@@ -1,6 +1,7 @@
 package com.fitpet
 
 import android.app.Application
+import android.util.Log
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -9,6 +10,9 @@ import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.google.firebase.messaging.FirebaseMessaging
+
+private const val FCM_TAG = "FitpetFCM"
 
 class MainApplication : Application(), ReactApplication {
 
@@ -34,5 +38,13 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
+    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+      if (!task.isSuccessful) {
+        Log.w(FCM_TAG, "Fetching FCM registration token failed", task.exception)
+        return@addOnCompleteListener
+      }
+      val token = task.result
+      Log.d(FCM_TAG, "Current FCM registration token: $token")
+    }
   }
 }

@@ -6,6 +6,12 @@
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
      <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
     
+    <!-- Health Connect, Background 걸음 수 체크용 -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <!-- 디버그에서 write 권한 쓰기 위함 -->
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+
+
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
@@ -42,5 +48,34 @@
                 android:scheme="${KAKAO_SCHEME}" />
         </intent-filter>
       </activity>
+
+      <service
+        android:name=".firebase.MyFirebaseMessagingService"
+        android:exported="false">
+        <intent-filter>
+          <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+      </service>
+
+      <!-- Health Connect 온보딩 진입 지점 (Android 13 이하 APK 버전) -->
+      <activity
+        android:name=".healthconnect.OnboardingActivity"
+        android:exported="true"
+        android:permission="com.google.android.apps.healthdata.permission.START_ONBOARDING">
+        <intent-filter>
+          <action android:name="androidx.health.ACTION_SHOW_ONBOARDING" />
+        </intent-filter>
+      </activity>
+
+      <!-- Android 14 이상 플랫폼 Health Connect 온보딩 진입 지점 -->
+      <activity-alias
+        android:name=".healthconnect.UAndAboveOnboardingActivity"
+        android:exported="true"
+        android:permission="android.permission.health.START_ONBOARDING"
+        android:targetActivity=".healthconnect.OnboardingActivity">
+        <intent-filter>
+          <action android:name="android.health.connect.action.SHOW_ONBOARDING" />
+        </intent-filter>
+      </activity-alias>
     </application>
 </manifest>

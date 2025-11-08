@@ -24,6 +24,7 @@ import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 �
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
+import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -34,6 +35,13 @@ export const MainPage = () => {
   const { data, loading } = useMainData('u12345');
   // 걸음 수, [센서 접근 가능 -> 실시간 걸음수] / [센서 접근 불가능  -> GPS]
   const { stepCount, isAvailable } = useStepCount();
+
+  // 헬스 커넥트 걸음 수 동기화 훅
+  const healthConnect = useHealthConnectSteps({
+    enabled: !!data,
+    userId: data?.user.user_id ?? null,
+    syncIntervalMs: 6_0000, // 60초 마다 동기화
+  });
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
@@ -151,14 +159,21 @@ export const MainPage = () => {
     return <ActivityIndicator size='large' />;
   }
 
-  // 걸음 수 미션 목록
+  // 표시할 걸음 수
+  const stepOverride =
+    typeof healthConnect.steps === 'number'
+      ? healthConnect.steps
+      : isAvailable
+      ? stepCount
+      : undefined;
+
   const missions = getMissions(data, {
-    // 실시간 걸음 수를 강제로 주입해 미션 진행률이 최신 상태로 계산되도록 한다. // TODO: 최적화를 위하여 앱 백그라운드 전환 시점에만
-    stepOverride: isAvailable ? stepCount : undefined,
+    // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
+    stepOverride,
   });
 
   // 표시할 걸음 수
-  const displayedSteps = isAvailable ? stepCount : data?.daily_walk.step ?? 0;
+  const displayedSteps = stepOverride ?? data?.daily_walk.step ?? 0;
 
   return (
     <View style={styles.container}>
@@ -287,6 +302,34 @@ export const MainPage = () => {
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
       </TouchableOpacity>
+      {/* 헬스 커넥트 디버그용 걸음수 삽입 버튼 */}
+      {__DEV__ && healthConnect.debugInsertSteps && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            padding: 12,
+            borderRadius: 8,
+            rowGap: 8,
+          }}
+        >
+          <Text style={{ color: '#fff', marginBottom: 4 }}>HC Debug</Text>
+          <TouchableOpacity
+            style={{ padding: 8, backgroundColor: '#4CAF50', borderRadius: 4 }}
+            onPress={() => healthConnect.debugInsertSteps?.(100)}
+          >
+            <Text style={{ color: '#fff' }}>+100 steps</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ padding: 8, backgroundColor: '#2196F3', borderRadius: 4 }}
+            onPress={() => healthConnect.debugInsertSteps?.(1000)}
+          >
+            <Text style={{ color: '#fff' }}>+1000 steps</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };

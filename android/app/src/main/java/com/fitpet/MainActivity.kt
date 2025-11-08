@@ -4,13 +4,15 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
-import android.os.Bundle;
-import org.devio.rn.splashscreen.SplashScreen;
+import android.os.Bundle
+import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
+import org.devio.rn.splashscreen.SplashScreen
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
-    SplashScreen.show(this) 
+    SplashScreen.show(this)
     super.onCreate(savedInstanceState)
+    HealthConnectPermissionDelegate.setPermissionDelegate(this) // 2025.10.26 MAN]Health Connect 권한 위임 설정
   }
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
