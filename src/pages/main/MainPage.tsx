@@ -173,12 +173,7 @@ export const MainPage = () => {
   });
 
   // 표시할 걸음 수
-  const displayedSteps =
-    typeof healthConnect.steps === 'number'
-      ? healthConnect.steps
-      : isAvailable
-      ? stepCount
-      : data?.daily_walk.step ?? 0;
+  const displayedSteps = stepOverride ?? data?.daily_walk.step ?? 0;
 
   return (
     <View style={styles.container}>

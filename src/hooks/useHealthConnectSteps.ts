@@ -312,7 +312,17 @@ const useHealthConnectSteps = ({
       setSteps(totalSteps);
 
       // 마일스톤 계산 및 백엔드 전송
-      const milestoneIndex = Math.floor(totalSteps / milestoneSize);
+      const normalizedMilestoneSize =
+        typeof milestoneSize === 'number' && milestoneSize > 0
+          ? milestoneSize
+          : DEFAULT_MILESTONE;
+      if (__DEV__ && normalizedMilestoneSize !== milestoneSize) {
+        console.warn(
+          '[HealthConnect] milestoneSize must be > 0. Falling back to default.',
+          { milestoneSize, fallback: normalizedMilestoneSize }
+        );
+      }
+      const milestoneIndex = Math.floor(totalSteps / normalizedMilestoneSize);
       const lastSyncedMilestone = lastMilestoneRef.current;
 
       // 새로운 마일스톤이 없으면 종료
@@ -339,7 +349,7 @@ const useHealthConnectSteps = ({
       ) {
         milestones.push({
           milestone,
-          stepCount: milestone * milestoneSize,
+          stepCount: milestone * normalizedMilestoneSize,
           recordedAt: now.toISOString(),
         });
       }
