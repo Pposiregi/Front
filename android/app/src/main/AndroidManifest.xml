@@ -48,5 +48,26 @@
                 android:scheme="${KAKAO_SCHEME}" />
         </intent-filter>
       </activity>
+
+      <!-- Health Connect 온보딩 진입 지점 (Android 13 이하 APK 버전) -->
+      <activity
+        android:name=".healthconnect.OnboardingActivity"
+        android:exported="true"
+        android:permission="com.google.android.apps.healthdata.permission.START_ONBOARDING">
+        <intent-filter>
+          <action android:name="androidx.health.ACTION_SHOW_ONBOARDING" />
+        </intent-filter>
+      </activity>
+
+      <!-- Android 14 이상 플랫폼 Health Connect 온보딩 진입 지점 -->
+      <activity-alias
+        android:name=".healthconnect.UAndAboveOnboardingActivity"
+        android:exported="true"
+        android:permission="android.permission.health.START_ONBOARDING"
+        android:targetActivity=".healthconnect.OnboardingActivity">
+        <intent-filter>
+          <action android:name="android.health.connect.action.SHOW_ONBOARDING" />
+        </intent-filter>
+      </activity-alias>
     </application>
 </manifest>

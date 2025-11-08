@@ -282,14 +282,18 @@ const useHealthConnectSteps = ({
       }
 
       // Health Connect 준비 상태 확인
+      // 안드로이드가 아니며, SDK가 준비되지 않은 경우 종료
       const ready = await ensureHealthConnectReady();
       if (!ready) {
+        console.log('>>> [HealthConnect] not ready');
         return;
       }
 
       // 권한 확인 및 요청
+      // HealthConnect 설치와 SDK가 준비되어있는 상태
       const permissionGranted = await ensurePermissions();
       if (!permissionGranted) {
+        console.log('>>> [HealthConnect] permission not granted');
         return;
       }
 
@@ -302,8 +306,9 @@ const useHealthConnectSteps = ({
         await loadMilestoneFromStorage(dateKey);
       }
 
-      // 오늘의 총 걸음 수 조회
+      // 오늘의 총 걸음 수 조회, syncIntervalMs 간격으로 조회
       const totalSteps = await fetchDailySteps();
+      console.log('>>> [HealthConnect] 오늘의 총 걸음 수:', totalSteps);
       setSteps(totalSteps);
 
       // 마일스톤 계산 및 백엔드 전송

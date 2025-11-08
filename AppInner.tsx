@@ -105,6 +105,7 @@ function AppInner() {
   }, [dispatch]); // 로딩 중일 때는 로딩 화면만 렌더링
 
   if (loading) {
+    console.log('>>> Rendering loading indicator');
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#000000' />
@@ -113,7 +114,12 @@ function AppInner() {
   }
 
   // Health Connect 필수 체크 (로그인 완료 후)
+  console.log('>>> Final isHealthConnectReady 값:', isHealthConnectReady);
+  console.log('>>> Final isCheckingHealthConnect 값:', isCheckingHealthConnect);
+  console.log('>>> Final isLoggedIn 값:', isLoggedIn);
+  console.log('>>> Final isSignUpInProgress 값:', isSignUpInProgress);
   if (isLoggedIn && !isSignUpInProgress && !isHealthConnectReady) {
+    console.log('>>> Rendering HealthConnectRequired ');
     if (isCheckingHealthConnect) {
       return (
         <View style={styles.loadingContainer}>
