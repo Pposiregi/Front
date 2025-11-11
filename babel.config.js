@@ -27,6 +27,7 @@ module.exports = {
           '@store': './src/store',
           '@api': './src/api',
           '@shared-types': './src/shared/types',
+          '@navigation': './src/navigation',
         },
       },
     ],

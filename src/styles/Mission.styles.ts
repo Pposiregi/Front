@@ -13,11 +13,6 @@ export default StyleSheet.create({
     height: height * 0.4,
     width: width * 0.8,
   },
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-    marginTop: 20,
-  },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -173,14 +168,12 @@ export default StyleSheet.create({
     marginTop: 5,
   },
   chartMaskContainer: {
-    width: width * 0.5 - 60,
     overflow: 'hidden', // 벗어난 영역 삭제
   },
   lineChartShiftStyle: {
-    borderRadius: 10,
     // 차트 자체를 음수로 이동시켜 Y축 라벨 공간을 메움
-    marginLeft: -width * 0.18, // 차트 왼쪽 강제 이동
-    marginBottom: -10, // X축 라벨 공간도 삭제
+    marginLeft: -width * 0.09, // 차트 왼쪽 강제 이동
+    marginBottom: -20, // X축 라벨 공간도 삭제
   },
   // 뱃지
   badgeCard: {

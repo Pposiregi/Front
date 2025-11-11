@@ -8,7 +8,7 @@ import OptionalInfoPage from './OptionalInfoPage';
 import PermissionPage from './PermissionPage';
 import UserInfoPage from './UserInfoPage';
 
-const Index = () => {
+const IntroPage = () => {
   //현재 페이지 주소 나타냄
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -132,7 +132,7 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default IntroPage;
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {

@@ -13,7 +13,8 @@
       "@store/*": ["store/*"],
       "@api/*": ["api/*"],
       "@types/*": ["types/*"],
-      "@shared-types/*": ["shared/types/*"]
+      "@shared-types/*": ["shared/types/*"],
+      "@navigation/": ["navigation/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/types/images.d.ts"],

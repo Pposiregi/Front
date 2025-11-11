@@ -136,7 +136,7 @@ const ItemModal = ({
   </Modal>
 );
 
-function Mission() {
+function AchievementPage() {
   const [missionData, setMissionData] = useState<MissionData | null>(null);
   const [todayMeals, setTodayMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -323,10 +323,9 @@ function Mission() {
           />
         </View>
       </View>
-
-      {/* 식단 및 주간 걸음 섹션 */}
       <View style={styles.mealRowContainer}>
-        <View style={styles.mealCard}>
+        {/* 식단 및 주간 걸음 섹션 11/09일 폐기*/}
+        {/* <View style={styles.mealCard}>
           <Text style={styles.mealTitle}>오늘의 식단</Text>
           <FlatList
             data={todayMeals}
@@ -343,34 +342,31 @@ function Mission() {
               </TouchableOpacity>
             )}
           />
-        </View>
+        </View> */}
 
         <View style={styles.mealCard}>
           <Text style={styles.mealTitle}>이번주 걸음</Text>
           {loading || chartData.labels.length === 0 ? (
             <ActivityIndicator size='small' color='#555' />
           ) : (
-            <View style={styles.weeklyStatBox}>
-              <View style={styles.chartMaskContainer}>
-                <LineChart
-                  data={chartData}
-                  width={width * 0.59}
-                  height={80}
-                  yAxisLabel=''
-                  yAxisSuffix=''
-                  withHorizontalLabels={false}
-                  withVerticalLabels={false}
-                  fromZero={true}
-                  chartConfig={chartConfig}
-                  bezier
-                  style={styles.lineChartShiftStyle}
-                />
-              </View>
+            <View style={styles.chartMaskContainer}>
+              <LineChart
+                data={chartData}
+                width={width * 0.9}
+                height={150}
+                yAxisLabel=''
+                yAxisSuffix=''
+                withHorizontalLabels={false}
+                withVerticalLabels={false}
+                fromZero={true}
+                chartConfig={chartConfig}
+                bezier
+                style={styles.lineChartShiftStyle}
+              />
             </View>
           )}
         </View>
       </View>
-
       {/* 뱃지 카드 섹션  */}
       <View style={styles.badgeCard}>
         <View>
@@ -396,7 +392,7 @@ function Mission() {
   );
   // scrollView와 FlatList를 동시에 쓰면 문제가 있을 수 있다고 하여 FlatList만을 사용하여 스크롤 구현
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View>
       <FlatList
         data={[]}
         renderItem={() => null}
@@ -405,7 +401,7 @@ function Mission() {
       />
 
       {/* 모달 */}
-      {selectedMeal && (
+      {/* {selectedMeal && (
         <ItemModal
           visible={isMealModalVisible}
           onClose={() => setIsMealModalVisible(false)}
@@ -413,7 +409,7 @@ function Mission() {
           imageUri={selectedMeal.imageUri}
           extraText={`${selectedMeal.kcal} kcal`}
         />
-      )}
+      )} */}
       {selectedBadge && (
         <ItemModal
           visible={isBadgeModalVisible}
@@ -425,8 +421,8 @@ function Mission() {
           ).toLocaleDateString()}`}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
-export default Mission;
+export default AchievementPage;
