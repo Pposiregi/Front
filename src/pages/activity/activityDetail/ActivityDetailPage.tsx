@@ -134,8 +134,8 @@ const ActivityDetailPage = () => {
           <MapOverlayPolyline
             region={CENTER_REGION}
             coordinates={detailData.routeLogs}
-            height={SCREEN_WIDTH * 0.4}
-            width={SCREEN_HEIGHT * 0.8}
+            height={SCREEN_HEIGHT * 0.4}
+            width={SCREEN_WIDTH * 0.8}
           />
         </View>
         <Text style={styles.header}>활동 상세 기록</Text>

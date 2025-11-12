@@ -55,7 +55,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   map: {
-    height: SCREEN_WIDTH * 0.4,
-    width: SCREEN_HEIGHT * 0.8,
+    height: SCREEN_HEIGHT * 0.4,
+    width: SCREEN_WIDTH * 0.8,
   },
 });
