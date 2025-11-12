@@ -1,17 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import chartConfig from '@utils/chartConfig';
 import React, { useEffect, useState, useMemo } from 'react';
-import {
-  ActivityIndicator,
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { ActivityDetailNavigationProp, ChartData, GPS_SESSION } from './types';
-import { mock_daily_workout, mock_data_by_month } from './Mock';
+import { mock_daily_workout, mock_data_by_month } from './mock';
 import { styles } from '@styles/Activity.styles';
 import { SCREEN_WIDTH } from '@styles/dimensions';
 
