@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Dimensions,
-  StyleSheet,
   Text,
   View,
   ActivityIndicator,
-  ScrollView,
   TouchableOpacity,
   Image,
   ImageSourcePropType,
@@ -13,19 +10,15 @@ import {
   Modal,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
-import { LineChart } from 'react-native-chart-kit';
-import chartConfig from '@utils/chartConfig';
 import styles from '@styles/Mission.styles';
-import { width, height } from '@styles/Mission.styles';
 
 // 타입 정의
 type MissionData = {
   date: string;
   distanceKm: number;
   burnCalories: number;
-  steps: number;
+  step: number;
 };
 
 type Meal = {
@@ -53,13 +46,13 @@ const getDateString = (daysAgo: number): string => {
 
 // 목업 데이터
 const mockWeeklyMissionData: MissionData[] = [
-  { date: getDateString(6), distanceKm: 6.42, burnCalories: 246, steps: 8900 },
-  { date: getDateString(5), distanceKm: 1.6, burnCalories: 61, steps: 2225 },
-  { date: getDateString(4), distanceKm: 3.21, burnCalories: 123, steps: 4450 },
-  { date: getDateString(3), distanceKm: 6.42, burnCalories: 246, steps: 8900 },
-  { date: getDateString(2), distanceKm: 1.6, burnCalories: 61, steps: 2225 },
-  { date: getDateString(1), distanceKm: 3.21, burnCalories: 123, steps: 4450 },
-  { date: getDateString(0), distanceKm: 3.21, burnCalories: 123, steps: 8900 },
+  { date: getDateString(6), distanceKm: 6.42, burnCalories: 246, step: 8900 },
+  { date: getDateString(5), distanceKm: 1.6, burnCalories: 61, step: 2225 },
+  { date: getDateString(4), distanceKm: 3.21, burnCalories: 123, step: 4450 },
+  { date: getDateString(3), distanceKm: 6.42, burnCalories: 246, step: 8900 },
+  { date: getDateString(2), distanceKm: 1.6, burnCalories: 61, step: 2225 },
+  { date: getDateString(1), distanceKm: 3.21, burnCalories: 123, step: 4450 },
+  { date: getDateString(0), distanceKm: 3.21, burnCalories: 123, step: 8900 },
 ];
 
 const mockMeals: Meal[] = [
@@ -158,51 +151,9 @@ function AchievementPage() {
     setTimeout(() => {
       setMissionData(mockWeeklyMissionData[mockWeeklyMissionData.length - 1]);
       setTodayMeals(mockMeals);
-      calculateWeeklyData();
       setLoading(false);
     }, 800);
   }, []);
-
-  // 주간 거리를 계산하고 그래프 데이터를 생성하는 함수
-  const calculateWeeklyData = () => {
-    const todayDate = new Date(today);
-
-    // 지난 7일 (오늘 포함 8일)의 날짜와 거리 맵 초기화
-    const dailyDataMap = new Map<string, number>();
-    const dates: string[] = [];
-
-    // 지난 7일의 날짜를 계산하여 초기화 (YYYY-MM-DD 형식)
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(todayDate);
-      date.setDate(todayDate.getDate() - i);
-      const dateString = date.toISOString().split('T')[0];
-      dates.push(dateString.substring(5, 10).replace('-', '/')); // MM/DD 형식으로 라벨 저장
-      dailyDataMap.set(dateString, 0);
-    }
-
-    let totalSteps = 0;
-
-    // 목업 데이터를 순회하며 7일 이내의 데이터만 집계
-    mockWeeklyMissionData.forEach((data) => {
-      if (dailyDataMap.has(data.date)) {
-        dailyDataMap.set(data.date, data.steps);
-        totalSteps += data.steps;
-      }
-    });
-
-    // 그래프 데이터셋 생성: dailyDataMap의 값(거리)을 배열로 변환
-    const dataValues = Array.from(dailyDataMap.values());
-
-    setWeeklyDistance(Math.round(totalSteps * 100) / 100);
-    setChartData({
-      labels: dates, // MM/DD 형식의 날짜 라벨
-      datasets: [
-        {
-          data: dataValues, // 7일간의 일별 러닝 거리
-        },
-      ],
-    });
-  };
 
   useEffect(() => {
     if (missionData) {
@@ -277,96 +228,6 @@ function AchievementPage() {
 
   const HeaderContent = () => (
     <View>
-      {/* 오늘의 러닝 카드 섹션 */}
-      <View style={styles.runningCard}>
-        <Text style={styles.runningTitle}>오늘의 러닝</Text>
-        {loading ? (
-          <ActivityIndicator size='large' color='#0000ff' />
-        ) : isToday ? (
-          <View style={styles.cardColunm}>
-            <View style={styles.rowContainer}>
-              <View style={styles.statBox}>
-                <Text style={styles.statText}>
-                  거리: {missionData?.distanceKm} km
-                </Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statText}>
-                  소모 칼로리: {missionData?.burnCalories} kcal
-                </Text>
-              </View>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.cardColunm}>
-            <View style={styles.statBox}>
-              <Text>오늘의 데이터가 없습니다.</Text>
-            </View>
-          </View>
-        )}
-        <View style={styles.rowContainer}>
-          <MapView
-            ref={mapRef}
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            scrollEnabled={false} // 드래그 이동 비활성화
-            zoomEnabled={false} // 핀치 줌 비활성화
-            rotateEnabled={false} // 회전 비활성화
-            pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
-            region={CENTER_REGION}
-          />
-          <MapOverlayPolyline
-            region={CENTER_REGION}
-            coordinates={dummyPath}
-            height={height * 0.4}
-            width={width * 0.8}
-          />
-        </View>
-      </View>
-      <View style={styles.mealRowContainer}>
-        {/* 식단 및 주간 걸음 섹션 11/09일 폐기*/}
-        {/* <View style={styles.mealCard}>
-          <Text style={styles.mealTitle}>오늘의 식단</Text>
-          <FlatList
-            data={todayMeals}
-            keyExtractor={(item) => item.mealId}
-            numColumns={2}
-            columnWrapperStyle={styles.mealColumnWrapper}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.mealGridItem}
-                onPress={() => handleMealPress(item)}
-              >
-                <Image source={item.imageUri} style={styles.mealImage} />
-              </TouchableOpacity>
-            )}
-          />
-        </View> */}
-
-        <View style={styles.mealCard}>
-          <Text style={styles.mealTitle}>이번주 걸음</Text>
-          {loading || chartData.labels.length === 0 ? (
-            <ActivityIndicator size='small' color='#555' />
-          ) : (
-            <View style={styles.chartMaskContainer}>
-              <LineChart
-                data={chartData}
-                width={width * 0.9}
-                height={150}
-                yAxisLabel=''
-                yAxisSuffix=''
-                withHorizontalLabels={false}
-                withVerticalLabels={false}
-                fromZero={true}
-                chartConfig={chartConfig}
-                bezier
-                style={styles.lineChartShiftStyle}
-              />
-            </View>
-          )}
-        </View>
-      </View>
       {/* 뱃지 카드 섹션  */}
       <View style={styles.badgeCard}>
         <View>

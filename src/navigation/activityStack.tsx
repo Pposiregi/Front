@@ -1,11 +1,12 @@
-import ActivityDetailPage from '@pages/activity/ActivityDetailPage';
+import ActivityDetailPage from '@pages/activity/activityDetail/ActivityDetailPage';
 import ActivityPage from '@pages/activity/ActivityPage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View } from 'react-native';
 
 export type ActivityStackParamList = {
   ActivityPage: undefined;
-  ActivityDetailPage: undefined;
+  ActivityDetailPage: {
+    sessionId: string;
+  };
 };
 const Stack = createNativeStackNavigator<ActivityStackParamList>();
 const activityStack = () => {
@@ -19,7 +20,7 @@ const activityStack = () => {
       <Stack.Screen
         name='ActivityDetailPage'
         component={ActivityDetailPage}
-        options={{ headerShown: false }}
+        options={{ headerShown: true, title: '활동 상세 정보' }}
       />
     </Stack.Navigator>
   );

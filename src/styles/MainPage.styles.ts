@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
 // 화면 크기 기반 반응형 사이즈 계산
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_NAV_HEIGHT = 60;
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
   80,

@@ -14,7 +14,7 @@
       "@api/*": ["api/*"],
       "@types/*": ["types/*"],
       "@shared-types/*": ["shared/types/*"],
-      "@navigation/": ["navigation/*"]
+      "@navigation/*": ["navigation/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/types/images.d.ts"],
