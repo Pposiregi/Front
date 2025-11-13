@@ -28,7 +28,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 
-const SocialLogin = () => {
+const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loading, setLoading] = useState(false);
@@ -174,7 +174,7 @@ const SocialLogin = () => {
   );
 };
 
-export default SocialLogin;
+export default SocialLoginPage;
 
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({

@@ -7,7 +7,7 @@ import { useAppDispatch } from '../store';
 import userSlice from '../slices/user';
 import { logout } from '@react-native-seoul/kakao-login';
 
-function Setting() {
+function ProfilePage() {
   const dispatch = useAppDispatch();
   // 임시 구글 로그아웃
   const googleSignOut = async () => {
@@ -79,7 +79,7 @@ function Setting() {
   );
 }
 
-export default Setting;
+export default ProfilePage;
 
 const styles = StyleSheet.create({
   googleButton: {

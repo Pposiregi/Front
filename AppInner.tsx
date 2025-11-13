@@ -4,12 +4,12 @@ import { RootState } from './src/store/reducer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SocialLogin from './src/pages/SocialLogin';
+import SocialLogin from './src/pages/SocialLoginPage';
+import activityStack from './src/navigation/activityStack';
 import Main from '@pages/main/MainPage';
 import Meal from '@pages/meal/MealPage';
-import Health from './src/pages/Health';
-import Mission from './src/pages/Mission';
-import Setting from './src/pages/Setting';
+import Achievement from '@pages/AchievementPage';
+import Profile from '@pages/ProfilePage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
@@ -26,16 +26,16 @@ import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 import HealthConnectRequired from '@pages/HealthConnectRequired';
 
 export type LoggedInParamList = {
-  Main: undefined;
-  Health: undefined;
+  Activity: undefined;
   Meal: undefined;
-  Mission: undefined;
-  Setting: undefined;
+  Main: undefined;
+  Achievement: undefined;
+  Profile: undefined;
 };
 
 export type RootStackParamList = {
   SocialLogin: undefined;
-  Index: undefined;
+  Intro: undefined;
 };
 
 GoogleSignin.configure({
@@ -146,41 +146,41 @@ function AppInner() {
       {isLoggedIn ? (
         // 로그인 상태일 때
         isSignUpInProgress ? (
-          // 회원가입 진행 중일 때 -> Index 화면으로 이동
+          // 회원가입 진행 중일 때 -> Intro 화면으로 이동
           <Stack.Navigator>
             <Stack.Screen
-              name='Index'
+              name='Intro'
               component={Index}
               options={{ headerShown: false, animation: 'slide_from_right' }}
             />
           </Stack.Navigator>
         ) : (
           // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
-          <Tab.Navigator>
+          <Tab.Navigator initialRouteName='Main'>
             <Tab.Screen
-              name='Main'
-              component={Main}
-              options={{ title: '메인' }}
-            />
-            <Tab.Screen
-              name='Health'
-              component={Health}
-              options={{ title: '헬스' }}
-            />
-            <Tab.Screen
-              name='Mission'
-              component={Mission}
+              name='Activity'
+              component={activityStack}
               options={{ headerShown: false }}
             />
             <Tab.Screen
               name='Meal'
               component={Meal}
-              options={{ title: '식사' }}
+              options={{ headerShown: false }}
             />
             <Tab.Screen
-              name='Setting'
-              component={Setting}
-              options={{ title: '설정' }}
+              name='Main'
+              component={Main}
+              options={{ headerShown: false }}
+            />
+            <Tab.Screen
+              name='Achievement'
+              component={Achievement}
+              options={{ headerShown: false }}
+            />
+            <Tab.Screen
+              name='Profile'
+              component={Profile}
+              options={{ headerShown: false }}
             />
           </Tab.Navigator>
         )
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
   },
 });
 
