@@ -70,6 +70,9 @@ export default StyleSheet.create({
     fontSize: 18,
     color: '#2B2B2B',
   },
+  calendarLoadingIndicator: {
+    marginLeft: 8,
+  },
   weekHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -336,6 +339,12 @@ export default StyleSheet.create({
     color: '#7C8098',
     fontSize: 14,
   },
+  calendarErrorText: {
+    marginTop: 16,
+    textAlign: 'center',
+    color: '#D9534F',
+    fontSize: 13,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -395,6 +404,23 @@ export default StyleSheet.create({
   modalMealList: {
     marginTop: 4,
   },
+  modalMealLoadingContainer: {
+    minHeight: 96,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalEmptyText: {
+    textAlign: 'center',
+    color: '#9DA2B5',
+    fontSize: 13,
+    marginTop: 8,
+  },
+  modalErrorText: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#D9534F',
+    fontSize: 12,
+  },
   modalMealRowContainer: {
     position: 'relative',
     flexDirection: 'row',
@@ -417,6 +443,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+  },
+  modalMealRemoveButtonDisabled: {
+    opacity: 0.5,
   },
   modalMealRemoveLabel: {
     fontFamily: 'JUA',

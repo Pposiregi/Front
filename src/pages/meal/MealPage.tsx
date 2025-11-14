@@ -1,13 +1,23 @@
-import React, { useMemo, useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import styles from '@styles/Meal.styles';
-import { MOCK_MEAL_LOG } from './meals';
 import type { MealListItem } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WEEKDAYS } from './constant';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
 import MealModal from './MealModal';
+import { createMeal, deleteMeal } from '@api/mealApi';
+import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
+import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
 
 const MAX_STACK = 3;
 
@@ -15,6 +25,15 @@ const getDiaryTitle = (date: Date) => `${date.getMonth() + 1}월의 식사일기
 
 const getMonthLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+
+const getNextSequence = (meals: MealListItem[]) => {
+  if (meals.length === 0) return 1;
+  return (
+    meals.reduce((max, meal) => {
+      return Math.max(max, meal.sequence);
+    }, 0) + 1
+  );
+};
 
 /**
  * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드,  
@@ -36,26 +55,48 @@ function MealPage() {
   const [isMealModalVisible, setMealModalVisible] = useState(false);
   const [mealTitle, setMealTitle] = useState('');
   const [mealCalories, setMealCalories] = useState('');
+  const [isSavingMeal, setIsSavingMeal] = useState(false);
+  const [deletingMealId, setDeletingMealId] = useState<string | null>(null);
+
+  const {
+    previewMap: calendarPreview,
+    isLoading: isCalendarLoading,
+    error: calendarError,
+    refresh: refreshCalendar,
+  } = useMealCalendarPreview(currentMonth);
+
+  const isDetailEnabled = isMealModalVisible && Boolean(selectedDateKey);
+  const {
+    detail: selectedDayDetail,
+    isLoading: isMealDetailLoading,
+    error: dayDetailError,
+    refetch: refetchDayDetail,
+    reset: resetDayDetail,
+  } = useMealDayDetail(selectedDateKey, isDetailEnabled);
 
   const weeks = useMemo(
-    () => buildMonthMatrix(currentMonth, MOCK_MEAL_LOG),
-    [currentMonth]
+    () => buildMonthMatrix(currentMonth, calendarPreview),
+    [currentMonth, calendarPreview]
   );
   const selectedMeals = useMemo<MealListItem[]>(
-    () => MOCK_MEAL_LOG[selectedDateKey] ?? [],
-    [selectedDateKey]
+    () =>
+      selectedDayDetail?.mealList
+        ? [...selectedDayDetail.mealList]
+            .sort((a, b) => a.sequence - b.sequence)
+            .map((meal) => ({ ...meal }))
+        : [],
+    [selectedDayDetail]
   );
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
   );
-  const totalCalories = useMemo(
-    () =>
-      selectedMeals.reduce((sum, meal) => {
-        return sum + meal.kcal;
-      }, 0),
-    [selectedMeals]
-  );
+  const totalCalories = useMemo(() => {
+    if (typeof selectedDayDetail?.totalKcal === 'number') {
+      return selectedDayDetail.totalKcal;
+    }
+    return selectedMeals.reduce((sum, meal) => sum + meal.kcal, 0);
+  }, [selectedDayDetail, selectedMeals]);
 
   const handleChangeMonth = (offset: number) => {
     setCurrentMonth((prev) => {
@@ -84,20 +125,101 @@ function MealPage() {
     setMealModalVisible(false);
     setMealTitle('');
     setMealCalories('');
+    resetDayDetail();
   };
 
-  const handleSaveMeal = () => {
-    // TODO: 식단 저장 로직 연결
-    setMealModalVisible(false);
-    setMealTitle('');
-    setMealCalories('');
+  const handleSaveMeal = async () => {
+    if (isSavingMeal) return;
+    const trimmedTitle = mealTitle.trim();
+    const trimmedCalories = mealCalories.trim();
+    if (!trimmedTitle) {
+      Alert.alert('식단 등록', '메뉴 이름을 입력해주세요.');
+      return;
+    }
+    if (!trimmedCalories) {
+      Alert.alert('식단 등록', '칼로리를 입력해주세요.');
+      return;
+    }
+    const kcalValue = Number(trimmedCalories);
+    if (Number.isNaN(kcalValue) || kcalValue < 0) {
+      Alert.alert('식단 등록', '칼로리는 숫자로 입력해주세요.');
+      return;
+    }
+
+    setIsSavingMeal(true);
+    try {
+      await createMeal({
+        day: selectedDateKey,
+        title: trimmedTitle,
+        kcal: kcalValue,
+        sequence: getNextSequence(selectedMeals),
+      });
+      await refreshCalendar(currentMonth, { silent: true });
+      await refetchDayDetail({
+        keepPrevious: true,
+        silent: true,
+      });
+      handleCloseModal();
+    } catch (error) {
+      console.error('[MealPage] Failed to save meal', error);
+      Alert.alert(
+        '식단 등록',
+        '식단 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'
+      );
+    } finally {
+      setIsSavingMeal(false);
+    }
   };
+
+  const executeDeleteMeal = useCallback(
+    async (mealId: string) => {
+      setDeletingMealId(mealId);
+      try {
+        await deleteMeal(mealId);
+        await refreshCalendar(currentMonth);
+        await refetchDayDetail();
+      } catch (error) {
+        console.error('[MealPage] Failed to delete meal', error);
+        Alert.alert(
+          '식단 삭제',
+          '식단 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        );
+      } finally {
+        setDeletingMealId(null);
+      }
+    },
+    [currentMonth, refreshCalendar, refetchDayDetail]
+  );
+
+  const handleDeleteMealRequest = useCallback(
+    (mealId: string) => {
+      if (deletingMealId) return;
+      Alert.alert('식단 삭제', '해당 식단을 삭제할까요?', [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => {
+            void executeDeleteMeal(mealId);
+          },
+        },
+      ]);
+    },
+    [deletingMealId, executeDeleteMeal]
+  );
 
   const formattedModalDate = useMemo(() => {
     return `${selectedDate.getFullYear()}년 ${
       selectedDate.getMonth() + 1
     }월 ${selectedDate.getDate()}일`;
   }, [selectedDate]);
+
+  const disableSaveButton =
+    isSavingMeal ||
+    isMealDetailLoading ||
+    mealTitle.trim().length === 0 ||
+    mealCalories.trim().length === 0;
+  const disableInputs = isSavingMeal || isMealDetailLoading;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -130,6 +252,13 @@ function MealPage() {
             <Text style={styles.calendarMonthLabel}>
               {getMonthLabel(currentMonth)}
             </Text>
+            {isCalendarLoading ? (
+              <ActivityIndicator
+                size='small'
+                color='#5F6BEA'
+                style={styles.calendarLoadingIndicator}
+              />
+            ) : null}
           </View>
 
           {/* 요일 헤더 */}
@@ -217,9 +346,13 @@ function MealPage() {
         </View>
         {/* 할 수 있다면 이미지 넣기 */}
 
-        <Text style={styles.calendarHelperText}>
-          날짜를 선택해서 식단을 등록해보세요.
-        </Text>
+        {calendarError ? (
+          <Text style={styles.calendarErrorText}>{calendarError}</Text>
+        ) : (
+          <Text style={styles.calendarHelperText}>
+            날짜를 선택해서 식단을 등록해보세요.
+          </Text>
+        )}
       </ScrollView>
 
       {/* 식단 모달 추가 */}
@@ -234,6 +367,13 @@ function MealPage() {
         onSave={handleSaveMeal}
         onChangeMealTitle={(value) => setMealTitle(value)}
         onChangeMealCalories={(value) => setMealCalories(value)}
+        isLoadingMeals={isMealDetailLoading}
+        isSaving={isSavingMeal}
+        disableSave={disableSaveButton}
+        disableInputs={disableInputs}
+        deletingMealId={deletingMealId}
+        onDeleteMeal={handleDeleteMealRequest}
+        errorMessage={dayDetailError}
       />
     </SafeAreaView>
   );

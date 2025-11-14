@@ -1,6 +1,8 @@
-import { MealCalendarCell, MealLog } from '@pages/meal/types';
+import {
+  MealCalendarCell,
+  MealCalendarPreviewMap,
+} from '@pages/meal/types';
 import { formatDateKey } from '@utils/dateUtil';
-import { resolveMealImageSources } from '@utils/imageUtil';
 
 /**
  *
@@ -9,7 +11,7 @@ import { resolveMealImageSources } from '@utils/imageUtil';
  */
 export const buildMonthMatrix = (
   baseDate: Date,
-  mealLog: MealLog
+  previewMap: MealCalendarPreviewMap
 ): MealCalendarCell[][] => {
   const year = baseDate.getFullYear();
   const month = baseDate.getMonth();
@@ -45,9 +47,10 @@ export const buildMonthMatrix = (
     // 해당 날짜에 사진이 있는 경우, 겹쳐진 사진 미리보기를 출력한다
     const curDate = new Date(year, month, dayNumber);
     const dateKey = formatDateKey(curDate);
-    const mealsForDate = mealLog[dateKey] ?? [];
     const previewImage =
-      mealsForDate.length > 0 ? resolveMealImageSources(mealsForDate) : null;
+      previewMap[dateKey]?.imageUrls.length
+        ? previewMap[dateKey]?.imageUrls.map((uri: string) => ({ uri }))
+        : null;
 
     week.push({
       key: dateKey,
