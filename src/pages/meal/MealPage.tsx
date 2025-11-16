@@ -1,8 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -15,9 +18,15 @@ import { WEEKDAYS } from './constant';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
 import MealModal from './MealModal';
+import type { PendingMealImage } from './MealPage.types';
 import { createMeal, deleteMeal } from '@api/mealApi';
 import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
 import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
+import {
+  launchImageLibrary,
+  type ImagePickerResponse,
+} from 'react-native-image-picker';
+import { uploadMealImage } from '@api/uploadMealImage';
 
 const MAX_STACK = 3;
 
@@ -36,17 +45,13 @@ const getNextSequence = (meals: MealListItem[]) => {
 };
 
 /**
- * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드,  
- * 그리고 식단 조회/추가를 위한 모달이 포함된 식단 일지 페이지를 렌더링한다.
- *
- * 이 컴포넌트는 현재 월 이동, 선택된 날짜 상태, 모달 표시 여부, 임시 식단 입력 필드를 관리하며,  
- * mock 데이터를 기반으로 캘린더 매트릭스, 선택된 식단, 총 칼로리를 계산하여 UI를 구성한다.
+ * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드
  *
  * @returns 식단 일지 페이지를 나타내는 React 요소를 반환함
  */
 function MealPage() {
   const today = useMemo(() => new Date(), []);
-  const todayKey = useMemo(() => formatDateKey(today), [today]);
+  const todayKey = useMemo(() => formatDateKey(today), [today]); // YYYY-MM-DD 형식
 
   const [currentMonth, setCurrentMonth] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1)
@@ -57,6 +62,8 @@ function MealPage() {
   const [mealCalories, setMealCalories] = useState('');
   const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [deletingMealId, setDeletingMealId] = useState<string | null>(null);
+  const [mealImage, setMealImage] = useState<PendingMealImage | null>(null);
+  const [isPermissionChecked, setPermissionChecked] = useState(false);
 
   const {
     previewMap: calendarPreview,
@@ -121,11 +128,122 @@ function MealPage() {
     setMealModalVisible(true);
   };
 
+  /**
+   * 안드로이드에서 사진 접근 권한 요청
+   */
+  const requestPhotoPermission = useCallback(async () => {
+    if (Platform.OS !== 'android') {
+      return true;
+    }
+    const sdkVersion = Number(Platform.Version);
+    const permission =
+      sdkVersion >= 33
+        ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+        : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+    const alreadyGranted = await PermissionsAndroid.check(permission);
+    if (alreadyGranted) {
+      return true;
+    }
+    const status = await PermissionsAndroid.request(permission, {
+      title: '갤러리 접근 권한',
+      message: '식단 사진을 선택하려면 갤러리 접근 권한이 필요합니다.',
+      buttonPositive: '허용',
+    });
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+    if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      Alert.alert(
+        '권한 필요',
+        '설정에서 갤러리 접근 권한을 허용해주세요.',
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '설정 열기',
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    } else {
+      Alert.alert('권한 필요', '이미지를 선택하려면 권한을 허용해주세요.');
+    }
+    return false;
+  }, []);
+
+  /**
+   * 식단 이미지 선택 핸들러
+   */
+  const handlePickMealImage = useCallback(() => {
+    const pick = () =>
+      launchImageLibrary(
+        {
+          mediaType: 'photo',
+          selectionLimit: 1,
+          includeBase64: true,
+          quality: 0.9,
+        },
+        (response: ImagePickerResponse) => {
+          if (response.didCancel) return;
+          if (response.errorCode) {
+            Alert.alert(
+              '이미지 선택',
+              response.errorMessage ?? '이미지를 불러오지 못했습니다.'
+            );
+            return;
+          }
+          const asset = response.assets?.[0];
+          if (!asset?.uri || !asset.base64) {
+            Alert.alert(
+              '이미지 선택',
+              '선택한 이미지 정보를 읽을 수 없습니다.'
+            );
+            return;
+          }
+          setMealImage({
+            uri: asset.uri,
+            base64: asset.base64,
+            type: asset.type,
+            fileName: asset.fileName,
+          });
+        }
+      );
+
+    if (Platform.OS === 'android') {
+      requestPhotoPermission().then((granted) => {
+        if (granted) {
+          pick();
+        } else {
+          setMealModalVisible(false);
+          Alert.alert(
+            '권한 필요',
+            '이미지를 선택하려면 갤러리 접근을 허용해주세요.'
+          );
+        }
+      });
+      return;
+    }
+    pick();
+  }, [requestPhotoPermission]);
+
+  /**
+   * 컴포넌트 마운트 시 안드로이드 권한 체크
+   * 팝업 시마다 권한 요청이 뜨는 것을 방지하기 위함
+   */
+  useEffect(() => {
+    if (Platform.OS === 'android' && !isPermissionChecked) {
+      requestPhotoPermission().finally(() => setPermissionChecked(true));
+    }
+  }, [isPermissionChecked, requestPhotoPermission]);
+
   const handleCloseModal = () => {
     setMealModalVisible(false);
     setMealTitle('');
     setMealCalories('');
     resetDayDetail();
+    setMealImage(null);
   };
 
   const handleSaveMeal = async () => {
@@ -148,12 +266,24 @@ function MealPage() {
 
     setIsSavingMeal(true);
     try {
-      await createMeal({
+      const creationResult = await createMeal({
         day: selectedDateKey,
         title: trimmedTitle,
         kcal: kcalValue,
         sequence: getNextSequence(selectedMeals),
       });
+
+      console.log('>>> Created 결과: ' + JSON.stringify(creationResult));
+
+      if (mealImage?.base64 && creationResult.uploadUrl) {
+        console.log('>>> 이미지 업로드 시작');
+        const uploadResult = await uploadMealImage(creationResult.uploadUrl, {
+          base64: mealImage.base64,
+          mimeType: mealImage.type,
+        });
+        console.log('>>> 업로드 결과: ' + JSON.stringify(uploadResult));
+      }
+
       await refreshCalendar(currentMonth, { silent: true });
       await refetchDayDetail({
         keepPrevious: true,
@@ -168,6 +298,7 @@ function MealPage() {
       );
     } finally {
       setIsSavingMeal(false);
+      setMealImage(null);
     }
   };
 
@@ -292,7 +423,9 @@ function MealPage() {
                         style={[
                           styles.dayInner,
                           isSelected ? styles.selectedDayBackground : null,
-                          !isSelected && isToday ? styles.todayDayOutline : null,
+                          !isSelected && isToday
+                            ? styles.todayDayOutline
+                            : null,
                         ]}
                         onPress={() => handleSelectDate(cell.dateKey)}
                         activeOpacity={0.8}
@@ -303,7 +436,9 @@ function MealPage() {
                             styles.dayNumber,
                             cell.isCurrentMonth ? null : styles.dayNumberMuted,
                             isSelected ? styles.selectedDayNumber : null,
-                            !isSelected && isToday ? styles.todayDayNumber : null,
+                            !isSelected && isToday
+                              ? styles.todayDayNumber
+                              : null,
                           ]}
                         >
                           {cell.dayNumber}
@@ -374,6 +509,8 @@ function MealPage() {
         deletingMealId={deletingMealId}
         onDeleteMeal={handleDeleteMealRequest}
         errorMessage={dayDetailError}
+        pendingImageUri={mealImage?.uri ?? null}
+        onPickImage={handlePickMealImage}
       />
     </SafeAreaView>
   );

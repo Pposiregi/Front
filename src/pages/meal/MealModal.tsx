@@ -12,28 +12,8 @@ import {
 } from 'react-native';
 import styles from '@styles/Meal.styles';
 import { PLACEHOLDER_MEAL } from '@pages/meal/constant';
-import type { MealListItem } from '@pages/meal/types';
 import { resolveMealImageSource } from '@utils/imageUtil';
-
-type MealModalProps = {
-  visible: boolean;
-  formattedDate: string;
-  selectedMeals: MealListItem[];
-  mealTitle: string;
-  mealCalories: string;
-  totalCalories: number;
-  onClose: () => void;
-  onSave: () => void;
-  onChangeMealTitle: (value: string) => void;
-  onChangeMealCalories: (value: string) => void;
-  isLoadingMeals: boolean;
-  isSaving: boolean;
-  disableSave: boolean;
-  disableInputs: boolean;
-  deletingMealId: string | null;
-  onDeleteMeal?: (mealId: string) => void;
-  errorMessage?: string | null;
-};
+import type { MealModalProps } from './MealModal.types';
 
 /**
  * 지정된 날짜의 식단을 조회하고 수정할 수 있는 모달을 렌더링한다.
@@ -75,8 +55,10 @@ function MealModal({
   deletingMealId,
   onDeleteMeal,
   errorMessage,
+  pendingImageUri,
+  onPickImage,
 }: MealModalProps) {
-  const photoMeals =
+  const displayPhotoMeals =
     selectedMeals.length > 0 ? selectedMeals : [PLACEHOLDER_MEAL];
 
   return (
@@ -101,20 +83,37 @@ function MealModal({
               </View>
 
               <View style={styles.modalPhotoRow}>
-                {photoMeals.map((meal) => {
-                  const imageSource = resolveMealImageSource(meal);
-                  return (
-                    <View
-                      key={`modal-photo-${meal.mealId}`}
-                      style={styles.modalPhotoCard}
-                    >
-                      <Image
-                        source={imageSource}
-                        style={styles.modalPhotoImage}
-                      />
-                    </View>
-                  );
-                })}
+                {(pendingImageUri
+                  ? [
+                      {
+                        mealId: 'pending',
+                        title: '',
+                        kcal: 0,
+                        sequence: 0,
+                        imageUri: pendingImageUri,
+                      },
+                      ...displayPhotoMeals,
+                    ]
+                  : displayPhotoMeals
+                )
+                  .slice(0, 3)
+                  .map((meal) => {
+                    const imageSource =
+                      meal.mealId === 'pending'
+                        ? { uri: pendingImageUri as string }
+                        : resolveMealImageSource(meal);
+                    return (
+                      <View
+                        key={`modal-photo-${meal.mealId}`}
+                        style={styles.modalPhotoCard}
+                      >
+                        <Image
+                          source={imageSource}
+                          style={styles.modalPhotoImage}
+                        />
+                      </View>
+                    );
+                  })}
               </View>
 
               <View style={styles.modalMealList}>
@@ -202,7 +201,7 @@ function MealModal({
                     disableInputs ? { opacity: 0.5 } : null,
                   ]}
                   activeOpacity={0.8}
-                  onPress={() => {}}
+                  onPress={onPickImage}
                   disabled={disableInputs}
                 >
                   <Text style={styles.modalCameraIcon}>📷</Text>

@@ -1,0 +1,26 @@
+import type { MealListItem } from './types';
+
+/**
+ * 식단 모달 컴포넌트에 전달되는 props 타입 정의
+ */
+export type MealModalProps = {
+  visible: boolean;
+  formattedDate: string;
+  selectedMeals: MealListItem[];
+  mealTitle: string;
+  mealCalories: string;
+  totalCalories: number;
+  onClose: () => void;
+  onSave: () => void;
+  onChangeMealTitle: (value: string) => void;
+  onChangeMealCalories: (value: string) => void;
+  isLoadingMeals: boolean;
+  isSaving: boolean;
+  disableSave: boolean;
+  disableInputs: boolean;
+  deletingMealId: string | null;
+  onDeleteMeal?: (mealId: string) => void;
+  errorMessage?: string | null;
+  pendingImageUri: string | null;
+  onPickImage: () => void;
+};
