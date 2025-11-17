@@ -115,9 +115,6 @@ function AppInner() {
 
   // Health Connect 필수 체크 (로그인 완료 후)
   console.log('>>> Final isHealthConnectReady 값:', isHealthConnectReady);
-  console.log('>>> Final isCheckingHealthConnect 값:', isCheckingHealthConnect);
-  console.log('>>> Final isLoggedIn 값:', isLoggedIn);
-  console.log('>>> Final isSignUpInProgress 값:', isSignUpInProgress);
   if (isLoggedIn && !isSignUpInProgress && !isHealthConnectReady) {
     console.log('>>> Rendering HealthConnectRequired ');
     if (isCheckingHealthConnect) {

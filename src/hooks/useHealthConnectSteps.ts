@@ -10,6 +10,11 @@ import {
   insertRecords,
   requestPermission,
 } from 'react-native-health-connect';
+import {
+  READ_STEPS_PERMISSION,
+  WRITE_STEPS_PERMISSION,
+  hasReadStepsPermission,
+} from '@utils/healthConnectPermission';
 import { formatDateKey } from '@utils/dateUtil';
 import {
   StepMilestonePayload,
@@ -53,26 +58,17 @@ type UseHealthConnectStepsResult = {
   lastSyncedMilestone: number;
   error: string | null;
   debugInsertSteps?: (count: number) => Promise<void>;
+  requestPermissions: () => Promise<boolean>;
 };
 
 /** 로컬 스토리지 키 접두사 및 기본값 정의 */
 const STORAGE_KEY_PREFIX = 'healthConnect:lastMilestone';
 const DEFAULT_MILESTONE = 1000; // 1000걸음 당 마일스톤
-const DEFAULT_SYNC_INTERVAL_MS = 60 * 1000; // 1분
+const DEFAULT_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5분
 
 /** 로컬 스토리지 키 생성 함수 */
 const buildStorageKey = (userId: string, dateKey: string) =>
   `${STORAGE_KEY_PREFIX}:${userId}:${dateKey}`;
-
-/** Health Connect 권한 설정 */
-const REQUIRED_PERMISSIONS = [
-  { accessType: 'read' as const, recordType: 'Steps' as const },
-];
-
-/** Health Connect 쓰기 권한 설정 (디버그용) */
-const WRITE_PERMISSIONS = [
-  { accessType: 'write' as const, recordType: 'Steps' as const },
-];
 
 /** 하루 시작 시각의 ISO 문자열 반환 함수 */
 const getStartOfDayIsoString = (date: Date) => {
@@ -114,6 +110,7 @@ const useHealthConnectSteps = ({
   const currentDateKeyRef = useRef<string>(formatDateKey(new Date()));
   const isSyncingRef = useRef(false);
   const hasInitializedStorageRef = useRef(false);
+  const permissionDeniedRef = useRef(false);
 
   /** 로컬 스토리지에서 마지막 마일스톤 불러오기 */
   const loadMilestoneFromStorage = useCallback(
@@ -193,28 +190,25 @@ const useHealthConnectSteps = ({
 
   /** Health Connect 권한 확인 및 요청 */
   const ensurePermissions = useCallback(async () => {
+    if (permissionDeniedRef.current) {
+      return false;
+    }
     try {
       const granted = await getGrantedPermissions();
-      const hasPermission = granted.some(
-        (permission) =>
-          'recordType' in permission &&
-          permission.recordType === 'Steps' &&
-          permission.accessType === 'read'
-      );
+      const hasPermission = hasReadStepsPermission(granted);
 
       if (hasPermission) {
         setPermissionsGranted(true);
         return true;
       }
 
-      const result = await requestPermission(REQUIRED_PERMISSIONS);
-      const permissionGranted = result.some(
-        (permission) =>
-          'recordType' in permission &&
-          permission.recordType === 'Steps' &&
-          permission.accessType === 'read'
-      );
+      const result = await requestPermission(READ_STEPS_PERMISSION as any);
+      const permissionGranted = hasReadStepsPermission(result);
       setPermissionsGranted(permissionGranted);
+      if (!permissionGranted) {
+        permissionDeniedRef.current = true;
+        setError('Health Connect 권한이 필요합니다.');
+      }
       return permissionGranted;
     } catch (permissionError) {
       if (__DEV__) {
@@ -224,6 +218,7 @@ const useHealthConnectSteps = ({
         );
       }
       setError('Health Connect 권한 요청에 실패했습니다.');
+      permissionDeniedRef.current = true;
       return false;
     }
   }, []);
@@ -294,6 +289,8 @@ const useHealthConnectSteps = ({
       const permissionGranted = await ensurePermissions();
       if (!permissionGranted) {
         console.log('>>> [HealthConnect] permission not granted');
+        setSyncing(false);
+        isSyncingRef.current = false;
         return;
       }
 
@@ -420,6 +417,7 @@ const useHealthConnectSteps = ({
 
     const handleAppStateChange = (nextState: AppStateStatus) => {
       if (nextState === 'active') {
+        permissionDeniedRef.current = false;
         syncSteps();
       }
     };
@@ -454,10 +452,9 @@ const useHealthConnectSteps = ({
           ) ?? false;
 
         if (!hasWrite) {
-          const result = await requestPermission([
-            ...REQUIRED_PERMISSIONS,
-            ...WRITE_PERMISSIONS,
-          ]);
+          const result = await requestPermission(
+            [...READ_STEPS_PERMISSION, ...WRITE_STEPS_PERMISSION] as any
+          );
           const writeGranted = result.some(
             (permission) =>
               'recordType' in permission &&
@@ -490,6 +487,15 @@ const useHealthConnectSteps = ({
     [enabled, ensureHealthConnectReady, syncSteps, userId]
   );
 
+  const manualPermissionRequest = useCallback(async () => {
+    permissionDeniedRef.current = false;
+    const granted = await ensurePermissions();
+    if (granted) {
+      await syncSteps();
+    }
+    return granted;
+  }, [ensurePermissions, syncSteps]);
+
   return {
     steps,
     permissionsGranted,
@@ -497,6 +503,7 @@ const useHealthConnectSteps = ({
     lastSyncedMilestone: lastMilestoneRef.current,
     error,
     debugInsertSteps: __DEV__ ? debugInsertSteps : undefined,
+    requestPermissions: manualPermissionRequest,
   };
 };
 
