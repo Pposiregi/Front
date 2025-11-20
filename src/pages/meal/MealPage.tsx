@@ -19,7 +19,7 @@ import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
 import MealModal from './MealModal';
 import type { PendingMealImage } from './MealPage.types';
-import { createMeal, deleteMeal } from '@api/mealApi';
+import { createMeal, deleteMeal, updateMeal } from '@api/mealApi';
 import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
 import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
 import {
@@ -64,6 +64,16 @@ function MealPage() {
   const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [deletingMealId, setDeletingMealId] = useState<string | null>(null);
   const [mealImage, setMealImage] = useState<PendingMealImage | null>(null);
+  const [editingMealInfo, setEditingMealInfo] = useState<{
+    mealId: string;
+    sequence: number;
+    imageUri: string | null;
+  } | null>(null);
+  const [editingMealTitle, setEditingMealTitle] = useState('');
+  const [editingMealCalories, setEditingMealCalories] = useState('');
+  const [editingMealImage, setEditingMealImage] =
+    useState<PendingMealImage | null>(null);
+  const [isUpdatingMeal, setIsUpdatingMeal] = useState(false);
   const [isPermissionChecked, setPermissionChecked] = useState(false);
 
   const {
@@ -103,18 +113,17 @@ function MealPage() {
     }
     return [...selectedDayDetail.mealList]
       .sort((a, b) => a.sequence - b.sequence)
-      .map((meal, index) => {
+      .map((meal) => {
         const hasImageUri =
           typeof meal.imageUri === 'string' && meal.imageUri.trim().length > 0;
-        const fallbackUri = selectedDatePreviewImageUris[index] ?? null;
-        const resolvedUri = hasImageUri ? meal.imageUri : fallbackUri;
+        const resolvedUri = hasImageUri ? meal.imageUri : null;
         return {
           ...meal,
           imageUri: resolvedUri,
           imageSource: resolvedUri ? { uri: resolvedUri } : undefined,
         };
       });
-  }, [selectedDayDetail, selectedDatePreviewImageUris]);
+  }, [selectedDayDetail]);
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
@@ -125,6 +134,33 @@ function MealPage() {
     }
     return selectedMeals.reduce((sum, meal) => sum + meal.kcal, 0);
   }, [selectedDayDetail, selectedMeals]);
+
+  const handleCancelEditMeal = useCallback(() => {
+    setEditingMealInfo(null);
+    setEditingMealTitle('');
+    setEditingMealCalories('');
+    setEditingMealImage(null);
+  }, []);
+
+  const handleStartEditMeal = useCallback((meal: MealListItem) => {
+    setEditingMealInfo({
+      mealId: meal.mealId,
+      sequence: meal.sequence,
+      imageUri: meal.imageUri ?? null,
+    });
+    setEditingMealTitle(meal.title);
+    setEditingMealCalories(String(meal.kcal));
+    setEditingMealImage(null);
+  }, []);
+
+  const handleCloseModal = () => {
+    setMealModalVisible(false);
+    setMealTitle('');
+    setMealCalories('');
+    resetDayDetail();
+    setMealImage(null);
+    handleCancelEditMeal();
+  };
 
   const handleChangeMonth = (offset: number) => {
     setCurrentMonth((prev) => {
@@ -195,71 +231,70 @@ function MealPage() {
   }, []);
 
   /**
-   * 식단 이미지 선택 핸들러
-   * - 갤러리에서 사진을 선택하여 상태에 저장함
-   * - Android 내 사진 접근 권한 요청 포함
-   * - 의존성: requestPhotoPermission (최신 권한 상태 반영)
+   * 공통 이미지 선택 헬퍼
    */
+  const pickImageFromLibrary = useCallback(
+    (onSelected: (image: PendingMealImage) => void) => {
+      const pick = () =>
+        launchImageLibrary(
+          {
+            mediaType: 'photo',
+            selectionLimit: 1,
+            includeBase64: false,
+            quality: 0.9,
+          },
+          (response: ImagePickerResponse) => {
+            if (response.didCancel) return;
+            if (response.errorCode) {
+              Alert.alert(
+                '이미지 선택',
+                response.errorMessage ?? '이미지를 불러오지 못했습니다.'
+              );
+              return;
+            }
+            const asset = response.assets?.[0];
+            if (!asset?.uri) {
+              Alert.alert(
+                '이미지 선택',
+                '선택한 이미지 정보를 읽을 수 없습니다.'
+              );
+              return;
+            }
+            onSelected({
+              uri: asset.uri,
+              type: asset.type,
+              fileName: asset.fileName,
+            });
+          }
+        );
+
+      if (Platform.OS === 'android') {
+        requestPhotoPermission().then((granted) => {
+          if (granted) {
+            pick();
+          } else {
+            setMealModalVisible(false);
+            Alert.alert(
+              '권한 필요',
+              '이미지를 선택하려면 갤러리 접근을 허용해주세요.'
+            );
+          }
+        });
+        return;
+      }
+      pick();
+    },
+    [requestPhotoPermission]
+  );
+
   const handlePickMealImage = useCallback(() => {
-    const pick = () =>
-      launchImageLibrary(
-        // 옵션 설정
-        {
-          mediaType: 'photo',
-          selectionLimit: 1, // 1개만 선택하고
-          includeBase64: false, // base64 인코딩 제외, URI만 사용
-          quality: 0.9, // 이미지 품질 설정 (0~1)
-        },
-        (response: ImagePickerResponse) => {
-          // 선택 취소시
-          if (response.didCancel) return;
+    pickImageFromLibrary((image) => setMealImage(image));
+  }, [pickImageFromLibrary]);
 
-          // 에러 발생시
-          if (response.errorCode) {
-            Alert.alert(
-              '이미지 선택',
-              response.errorMessage ?? '이미지를 불러오지 못했습니다.'
-            );
-            return;
-          }
-
-          // 선택된 이미지 정보 처리
-          const asset = response.assets?.[0];
-          // console.log('>>> 선택된 이미지', JSON.stringify(asset));
-          if (!asset?.uri) {
-            Alert.alert(
-              '이미지 선택',
-              '선택한 이미지 정보를 읽을 수 없습니다.'
-            );
-            return;
-          }
-
-          // 상태에 이미지 정보 설정
-          setMealImage({
-            uri: asset.uri,
-            type: asset.type,
-            fileName: asset.fileName,
-          });
-        }
-      );
-
-    // 안드로이드인 경우 권한 요청 후 실행
-    if (Platform.OS === 'android') {
-      requestPhotoPermission().then((granted) => {
-        if (granted) {
-          pick();
-        } else {
-          setMealModalVisible(false);
-          Alert.alert(
-            '권한 필요',
-            '이미지를 선택하려면 갤러리 접근을 허용해주세요.'
-          );
-        }
-      });
-      return;
-    }
-    pick();
-  }, [requestPhotoPermission]); // requestPhotoPermission 값이 변경될 때 갱신
+  const handlePickEditingMealImage = useCallback(() => {
+    if (!editingMealInfo) return;
+    pickImageFromLibrary((image) => setEditingMealImage(image));
+  }, [editingMealInfo, pickImageFromLibrary]);
 
   /**
    * 컴포넌트 마운트 시 안드로이드 권한 체크
@@ -271,13 +306,9 @@ function MealPage() {
     }
   }, [isPermissionChecked, requestPhotoPermission]);
 
-  const handleCloseModal = () => {
-    setMealModalVisible(false);
-    setMealTitle('');
-    setMealCalories('');
-    resetDayDetail();
-    setMealImage(null);
-  };
+  useEffect(() => {
+    handleCancelEditMeal();
+  }, [selectedDateKey, handleCancelEditMeal]);
 
   /**
    * 식단 저장 핸들러
@@ -341,7 +372,7 @@ function MealPage() {
       // 3. 캘린더 및 상세 데이터 리프레시
       await refreshCalendar(currentMonth, { silent: true });
       await refetchDayDetail({
-        keepPrevious: true,
+        keepPrevious: false,
         silent: true,
       });
       handleCloseModal();
@@ -368,6 +399,71 @@ function MealPage() {
       setMealImage(null);
     }
   };
+
+  const handleSubmitEditMeal = useCallback(async () => {
+    if (!editingMealInfo || isUpdatingMeal) return;
+    const trimmedTitle = editingMealTitle.trim();
+    const trimmedCalories = editingMealCalories.trim();
+    if (!trimmedTitle) {
+      Alert.alert('식단 수정', '메뉴 이름을 입력해주세요.');
+      return;
+    }
+    if (!trimmedCalories) {
+      Alert.alert('식단 수정', '칼로리를 입력해주세요.');
+      return;
+    }
+    const kcalValue = Number(trimmedCalories);
+    if (Number.isNaN(kcalValue) || kcalValue < 0) {
+      Alert.alert('식단 수정', '칼로리는 숫자로 입력해주세요.');
+      return;
+    }
+
+    setIsUpdatingMeal(true);
+    try {
+      const changeImage = Boolean(editingMealImage?.uri);
+      const updateResult = await updateMeal(editingMealInfo.mealId, {
+        title: trimmedTitle,
+        kcal: kcalValue,
+        sequence: editingMealInfo.sequence,
+        changeImage,
+      });
+
+      if (changeImage && editingMealImage?.uri && updateResult.uploadUrl) {
+        await uploadMealImage(updateResult.uploadUrl, {
+          uri: editingMealImage.uri,
+          mimeType: editingMealImage.type,
+        });
+      }
+
+      await refreshCalendar(currentMonth, { silent: true });
+      await refetchDayDetail({
+        keepPrevious: true,
+        silent: true,
+      });
+      handleCancelEditMeal();
+    } catch (error) {
+      console.error('>>>[MealPage] Failed to update meal', {
+        error,
+        editingMealInfo,
+      });
+      Alert.alert(
+        '식단 수정',
+        '식단 수정에 실패했습니다. 잠시 후 다시 시도해주세요.'
+      );
+    } finally {
+      setIsUpdatingMeal(false);
+    }
+  }, [
+    editingMealInfo,
+    editingMealTitle,
+    editingMealCalories,
+    editingMealImage,
+    isUpdatingMeal,
+    refreshCalendar,
+    currentMonth,
+    refetchDayDetail,
+    handleCancelEditMeal,
+  ]);
 
   const executeDeleteMeal = useCallback(
     async (mealId: string) => {
@@ -579,6 +675,17 @@ function MealPage() {
         pendingImageUri={mealImage?.uri ?? null}
         onPickImage={handlePickMealImage}
         previewImages={selectedDatePreviewImages}
+        onEditMeal={handleStartEditMeal}
+        editingMealId={editingMealInfo?.mealId ?? null}
+        editingMealTitle={editingMealTitle}
+        editingMealCalories={editingMealCalories}
+        onChangeEditingMealTitle={setEditingMealTitle}
+        onChangeEditingMealCalories={setEditingMealCalories}
+        onCancelEditMeal={handleCancelEditMeal}
+        onSubmitEditMeal={handleSubmitEditMeal}
+        onPickEditingImage={handlePickEditingMealImage}
+        editingMealImageUri={editingMealImage?.uri ?? null}
+        isUpdatingMeal={isUpdatingMeal}
       />
     </SafeAreaView>
   );

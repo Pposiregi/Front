@@ -25,4 +25,15 @@ export type MealModalProps = {
   pendingImageUri: string | null;
   onPickImage: () => void;
   previewImages: ImageSourcePropType[];
+  onEditMeal: (meal: MealListItem) => void;
+  editingMealId: string | null;
+  editingMealTitle: string;
+  editingMealCalories: string;
+  onChangeEditingMealTitle: (value: string) => void;
+  onChangeEditingMealCalories: (value: string) => void;
+  onCancelEditMeal: () => void;
+  onSubmitEditMeal: () => void;
+  onPickEditingImage: () => void;
+  editingMealImageUri: string | null;
+  isUpdatingMeal: boolean;
 };

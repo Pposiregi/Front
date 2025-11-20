@@ -29,6 +29,11 @@ export type UpdateMealRequest = {
   changeImage: boolean;
 };
 
+export type UpdateMealResponse = {
+  imageUrl: string | null;
+  uploadUrl: string | null;
+};
+
 /**
  * 월별 식단 캘린더 조회 요청 타입 (Query)
  */

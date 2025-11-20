@@ -13,6 +13,7 @@ import type {
   MealDayDetailResponse,
   MealIdentifier,
   UpdateMealRequest,
+  UpdateMealResponse,
 } from 'types/meal';
 
 const MEAL_BASE_PATH = '/meal'; // POST, PUT, DELETE
@@ -37,8 +38,12 @@ export const createMeal = async (
 export const updateMeal = async (
   mealId: MealIdentifier['mealId'],
   payload: UpdateMealRequest
-): Promise<void> => {
-  await apiClient.put(`${MEAL_BASE_PATH}/${mealId}`, payload);
+): Promise<UpdateMealResponse> => {
+  const { data } = await apiClient.patch<UpdateMealResponse>(
+    `${MEAL_BASE_PATH}/${mealId}`,
+    payload
+  );
+  return data;
 };
 
 export const deleteMeal = async (
