@@ -1,4 +1,4 @@
 export type UploadImagePayload = {
-  base64: string;
+  uri: string;
   mimeType?: string;
 };

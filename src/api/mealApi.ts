@@ -108,7 +108,10 @@ export const normalizeMealDayDetail = (
 ): MealDayDetailResponse => ({
   date: response.day ?? response.date ?? '',
   totalKcal: response.totalKcal ?? response.total_kcal ?? 0,
-  mealList: (response.meals ?? response.meal_list ?? response.mealList ?? []).map(
-    normalizeMealDetailItem
-  ),
+  mealList: (
+    response.meals ??
+    response.meal_list ??
+    response.mealList ??
+    []
+  ).map(normalizeMealDetailItem),
 });

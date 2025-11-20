@@ -27,6 +27,7 @@ import {
   type ImagePickerResponse,
 } from 'react-native-image-picker';
 import { uploadMealImage } from '@api/uploadMealImage';
+import { isAxiosError } from 'axios';
 
 const MAX_STACK = 3;
 
@@ -72,6 +73,7 @@ function MealPage() {
     refresh: refreshCalendar,
   } = useMealCalendarPreview(currentMonth);
 
+  // 상세 식단 가능여부 = 모달이 열려있고, 선택된 날짜가 있을 때
   const isDetailEnabled = isMealModalVisible && Boolean(selectedDateKey);
   const {
     detail: selectedDayDetail,
@@ -175,18 +177,25 @@ function MealPage() {
 
   /**
    * 식단 이미지 선택 핸들러
+   * - 갤러리에서 사진을 선택하여 상태에 저장함
+   * - Android 내 사진 접근 권한 요청 포함
+   * - 의존성: requestPhotoPermission (최신 권한 상태 반영)
    */
   const handlePickMealImage = useCallback(() => {
     const pick = () =>
       launchImageLibrary(
+        // 옵션 설정
         {
           mediaType: 'photo',
-          selectionLimit: 1,
-          includeBase64: true,
-          quality: 0.9,
+          selectionLimit: 1, // 1개만 선택하고
+          includeBase64: false, // base64 인코딩 제외, URI만 사용
+          quality: 0.9, // 이미지 품질 설정 (0~1)
         },
         (response: ImagePickerResponse) => {
+          // 선택 취소시
           if (response.didCancel) return;
+
+          // 에러 발생시
           if (response.errorCode) {
             Alert.alert(
               '이미지 선택',
@@ -194,23 +203,28 @@ function MealPage() {
             );
             return;
           }
+
+          // 선택된 이미지 정보 처리
           const asset = response.assets?.[0];
-          if (!asset?.uri || !asset.base64) {
+          // console.log('>>> 선택된 이미지', JSON.stringify(asset));
+          if (!asset?.uri) {
             Alert.alert(
               '이미지 선택',
               '선택한 이미지 정보를 읽을 수 없습니다.'
             );
             return;
           }
+
+          // 상태에 이미지 정보 설정
           setMealImage({
             uri: asset.uri,
-            base64: asset.base64,
             type: asset.type,
             fileName: asset.fileName,
           });
         }
       );
 
+    // 안드로이드인 경우 권한 요청 후 실행
     if (Platform.OS === 'android') {
       requestPhotoPermission().then((granted) => {
         if (granted) {
@@ -226,7 +240,7 @@ function MealPage() {
       return;
     }
     pick();
-  }, [requestPhotoPermission]);
+  }, [requestPhotoPermission]); // requestPhotoPermission 값이 변경될 때 갱신
 
   /**
    * 컴포넌트 마운트 시 안드로이드 권한 체크
@@ -246,6 +260,12 @@ function MealPage() {
     setMealImage(null);
   };
 
+  /**
+   * 식단 저장 핸들러
+   * - Backend API를 통한 최초 식단 생성
+   * - 이미지가 있을 경우 S3 업로드 처리
+   * - 캘린더 및 상세 데이터 리프레시
+   */
   const handleSaveMeal = async () => {
     if (isSavingMeal) return;
     const trimmedTitle = mealTitle.trim();
@@ -264,8 +284,17 @@ function MealPage() {
       return;
     }
 
+    console.log('>>> handleSaveMeal 시작', {
+      selectedDateKey,
+      trimmedTitle,
+      kcalValue,
+      hasMealImage: Boolean(mealImage?.uri),
+    });
+
     setIsSavingMeal(true);
+
     try {
+      // 1. 식단 생성 API 호출
       const creationResult = await createMeal({
         day: selectedDateKey,
         title: trimmedTitle,
@@ -273,17 +302,24 @@ function MealPage() {
         sequence: getNextSequence(selectedMeals),
       });
 
+      // 헤더정보 추출해야함
       console.log('>>> Created 결과: ' + JSON.stringify(creationResult));
 
-      if (mealImage?.base64 && creationResult.uploadUrl) {
+      // 2. 이미지가 있을 경우 업로드 처리
+      if (mealImage?.uri && creationResult.uploadUrl) {
         console.log('>>> 이미지 업로드 시작');
-        const uploadResult = await uploadMealImage(creationResult.uploadUrl, {
-          base64: mealImage.base64,
+        await uploadMealImage(creationResult.uploadUrl, {
+          uri: mealImage.uri,
           mimeType: mealImage.type,
         });
-        console.log('>>> 업로드 결과: ' + JSON.stringify(uploadResult));
+      } else {
+        console.log('>>> 이미지 업로드 생략', {
+          hasMealImage: Boolean(mealImage?.uri),
+          hasUploadUrl: Boolean(creationResult.uploadUrl),
+        });
       }
 
+      // 3. 캘린더 및 상세 데이터 리프레시
       await refreshCalendar(currentMonth, { silent: true });
       await refetchDayDetail({
         keepPrevious: true,
@@ -291,7 +327,19 @@ function MealPage() {
       });
       handleCloseModal();
     } catch (error) {
-      console.error('[MealPage] Failed to save meal', error);
+      if (isAxiosError(error)) {
+        console.error('>>>[MealPage] Meal API error detail', {
+          status: error.response?.status,
+          data: error.response?.data,
+          url: error.config?.url,
+          method: error.config?.method,
+        });
+      }
+      console.error('>>>[MealPage] Failed to save meal', {
+        error,
+        selectedDateKey,
+        hasMealImage: Boolean(mealImage?.uri),
+      });
       Alert.alert(
         '식단 등록',
         '식단 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'
