@@ -84,6 +84,7 @@ export const normalizeMealCalendar = (
 type LegacyMealCalendarDayDetail = {
   meal_id?: string | number;
   image_uri?: string | null;
+  image_url?: string | null;
 };
 
 type LegacyMealCalendarDayResponse = {
@@ -95,13 +96,25 @@ type LegacyMealCalendarDayResponse = {
 
 const normalizeMealDetailItem = (
   item: MealCalendarDayDetail & LegacyMealCalendarDayDetail
-): MealDetailItem => ({
-  mealId: String(item.mealId ?? item.meal_id ?? ''),
-  title: item.title,
-  kcal: item.kcal,
-  imageUri: item.imageUri ?? item.image_uri ?? null,
-  sequence: item.sequence,
-});
+): MealDetailItem => {
+  const rawUri =
+    [item.imageUri, item.image_uri, item.image_url].find(
+      (uri) => typeof uri === 'string' && uri.trim().length > 0
+    ) ?? null;
+
+  const imageUri =
+    rawUri === null
+      ? null
+      : `${rawUri}${rawUri.includes('?') ? '&' : '?'}cacheBust=${Date.now()}`;
+
+  return {
+    mealId: String(item.mealId ?? item.meal_id ?? ''),
+    title: item.title,
+    kcal: item.kcal,
+    imageUri,
+    sequence: item.sequence,
+  };
+};
 
 export const normalizeMealDayDetail = (
   response: MealCalendarDayApiResponse & LegacyMealCalendarDayResponse

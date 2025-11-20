@@ -87,15 +87,34 @@ function MealPage() {
     () => buildMonthMatrix(currentMonth, calendarPreview),
     [currentMonth, calendarPreview]
   );
-  const selectedMeals = useMemo<MealListItem[]>(
-    () =>
-      selectedDayDetail?.mealList
-        ? [...selectedDayDetail.mealList]
-            .sort((a, b) => a.sequence - b.sequence)
-            .map((meal) => ({ ...meal }))
-        : [],
-    [selectedDayDetail]
+  const selectedDatePreviewImageUris = useMemo(
+    () => calendarPreview[selectedDateKey]?.imageUrls ?? [],
+    [calendarPreview, selectedDateKey]
   );
+
+  const selectedDatePreviewImages = useMemo(
+    () => selectedDatePreviewImageUris.map((uri) => ({ uri })),
+    [selectedDatePreviewImageUris]
+  );
+
+  const selectedMeals = useMemo<MealListItem[]>(() => {
+    if (!selectedDayDetail?.mealList) {
+      return [];
+    }
+    return [...selectedDayDetail.mealList]
+      .sort((a, b) => a.sequence - b.sequence)
+      .map((meal, index) => {
+        const hasImageUri =
+          typeof meal.imageUri === 'string' && meal.imageUri.trim().length > 0;
+        const fallbackUri = selectedDatePreviewImageUris[index] ?? null;
+        const resolvedUri = hasImageUri ? meal.imageUri : fallbackUri;
+        return {
+          ...meal,
+          imageUri: resolvedUri,
+          imageSource: resolvedUri ? { uri: resolvedUri } : undefined,
+        };
+      });
+  }, [selectedDayDetail, selectedDatePreviewImageUris]);
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
@@ -559,6 +578,7 @@ function MealPage() {
         errorMessage={dayDetailError}
         pendingImageUri={mealImage?.uri ?? null}
         onPickImage={handlePickMealImage}
+        previewImages={selectedDatePreviewImages}
       />
     </SafeAreaView>
   );

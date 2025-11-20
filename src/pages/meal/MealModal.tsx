@@ -57,9 +57,18 @@ function MealModal({
   errorMessage,
   pendingImageUri,
   onPickImage,
+  previewImages,
 }: MealModalProps) {
+  const previewSources =
+    previewImages.length > 0
+      ? previewImages
+      : selectedMeals
+          .filter((meal) => Boolean(meal.imageUri))
+          .map((meal) => ({ uri: meal.imageUri as string }));
   const displayPhotoMeals =
-    selectedMeals.length > 0 ? selectedMeals : [PLACEHOLDER_MEAL];
+    previewSources.length > 0
+      ? previewSources
+      : [resolveMealImageSource(PLACEHOLDER_MEAL)];
 
   return (
     <Modal
@@ -86,34 +95,31 @@ function MealModal({
                 {(pendingImageUri
                   ? [
                       {
-                        mealId: 'pending',
-                        title: '',
-                        kcal: 0,
-                        sequence: 0,
-                        imageUri: pendingImageUri,
+                        key: 'pending',
+                        source: { uri: pendingImageUri as string },
                       },
-                      ...displayPhotoMeals,
+                      ...displayPhotoMeals.map((source, idx) => ({
+                        key: `preview-${idx}`,
+                        source,
+                      })),
                     ]
-                  : displayPhotoMeals
+                  : displayPhotoMeals.map((source, idx) => ({
+                      key: `preview-${idx}`,
+                      source,
+                    }))
                 )
                   .slice(0, 3)
-                  .map((meal) => {
-                    const imageSource =
-                      meal.mealId === 'pending'
-                        ? { uri: pendingImageUri as string }
-                        : resolveMealImageSource(meal);
-                    return (
-                      <View
-                        key={`modal-photo-${meal.mealId}`}
-                        style={styles.modalPhotoCard}
-                      >
-                        <Image
-                          source={imageSource}
-                          style={styles.modalPhotoImage}
-                        />
-                      </View>
-                    );
-                  })}
+                  .map((item) => (
+                    <View
+                      key={`modal-photo-${item.key}`}
+                      style={styles.modalPhotoCard}
+                    >
+                      <Image
+                        source={item.source}
+                        style={styles.modalPhotoImage}
+                      />
+                    </View>
+                  ))}
               </View>
 
               <View style={styles.modalMealList}>
@@ -122,8 +128,11 @@ function MealModal({
                     <ActivityIndicator color='#5F6BEA' />
                   </View>
                 ) : selectedMeals.length > 0 ? (
-                  selectedMeals.map((meal) => {
-                    const imageSource = resolveMealImageSource(meal);
+                  selectedMeals.map((meal, index) => {
+                    const fallbackPreviewSource = previewImages[index];
+                    const resolvedSource =
+                      fallbackPreviewSource ??
+                      resolveMealImageSource(meal);
                     const isDeleting = deletingMealId === meal.mealId;
                     return (
                       <View
@@ -155,7 +164,7 @@ function MealModal({
                           </Text>
                         </View>
                         <Image
-                          source={imageSource}
+                          source={resolvedSource}
                           style={styles.modalMealRowImage}
                         />
                         <View style={styles.modalMealDragHandle}>
