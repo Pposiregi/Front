@@ -140,13 +140,13 @@ function MealModal({
                   </View>
                 ) : selectedMeals.length > 0 ? (
                   selectedMeals.map((meal) => {
-                  const isDeleting = deletingMealId === meal.mealId;
-                  const isEditingTarget = editingMealId === meal.mealId;
-                  const overrideSource =
-                    isEditingTarget && editingMealImageUri
-                      ? { uri: editingMealImageUri }
-                      : null;
-                  const resolvedSource =
+                    const isDeleting = deletingMealId === meal.mealId;
+                    const isEditingTarget = editingMealId === meal.mealId;
+                    const overrideSource =
+                      isEditingTarget && editingMealImageUri
+                        ? { uri: editingMealImageUri }
+                        : null;
+                    const resolvedSource =
                       overrideSource ?? resolveMealImageSource(meal);
                     return (
                       <View
@@ -229,7 +229,10 @@ function MealModal({
                       onChangeText={onChangeEditingMealCalories}
                       placeholder='칼로리 수정'
                       keyboardType='numeric'
-                      style={[styles.modalAddInput, styles.modalAddInputCalorie]}
+                      style={[
+                        styles.modalAddInput,
+                        styles.modalAddInputCalorie,
+                      ]}
                       placeholderTextColor='#B4B8C9'
                       editable={!isUpdatingMeal}
                     />
@@ -262,7 +265,9 @@ function MealModal({
                       {isUpdatingMeal ? (
                         <ActivityIndicator color='#FFFFFF' />
                       ) : (
-                        <Text style={styles.modalEditSubmitLabel}>수정 완료</Text>
+                        <Text style={styles.modalEditSubmitLabel}>
+                          수정 완료
+                        </Text>
                       )}
                     </TouchableOpacity>
                   </View>
