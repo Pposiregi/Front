@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -75,6 +75,8 @@ function MealPage() {
     useState<PendingMealImage | null>(null);
   const [isUpdatingMeal, setIsUpdatingMeal] = useState(false);
   const [isPermissionChecked, setPermissionChecked] = useState(false);
+  const mealImageFallbacksRef = useRef<Record<string, string>>({});
+  const previousDateKeyRef = useRef<string>(selectedDateKey);
 
   const {
     previewMap: calendarPreview,
@@ -108,22 +110,35 @@ function MealPage() {
   );
 
   const selectedMeals = useMemo<MealListItem[]>(() => {
+    if (previousDateKeyRef.current !== selectedDateKey) {
+      mealImageFallbacksRef.current = {};
+      previousDateKeyRef.current = selectedDateKey;
+    }
     if (!selectedDayDetail?.mealList) {
       return [];
     }
     return [...selectedDayDetail.mealList]
       .sort((a, b) => a.sequence - b.sequence)
-      .map((meal) => {
+      .map((meal, index) => {
         const hasImageUri =
           typeof meal.imageUri === 'string' && meal.imageUri.trim().length > 0;
-        const resolvedUri = hasImageUri ? meal.imageUri : null;
+        const fallbackPreview = selectedDatePreviewImageUris[index] ?? null;
+        const storedFallback = mealImageFallbacksRef.current[meal.mealId];
+        const resolvedUri = hasImageUri
+          ? meal.imageUri
+          : storedFallback ?? fallbackPreview ?? null;
+
+        if (resolvedUri) {
+          mealImageFallbacksRef.current[meal.mealId] = resolvedUri;
+        }
+
         return {
           ...meal,
           imageUri: resolvedUri,
           imageSource: resolvedUri ? { uri: resolvedUri } : undefined,
         };
       });
-  }, [selectedDayDetail]);
+  }, [selectedDayDetail, selectedDatePreviewImageUris, selectedDateKey]);
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
@@ -429,6 +444,8 @@ function MealPage() {
       });
 
       if (changeImage && editingMealImage?.uri && updateResult.uploadUrl) {
+        mealImageFallbacksRef.current[editingMealInfo.mealId] =
+          editingMealImage.uri;
         await uploadMealImage(updateResult.uploadUrl, {
           uri: editingMealImage.uri,
           mimeType: editingMealImage.type,

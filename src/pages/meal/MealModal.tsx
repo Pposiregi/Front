@@ -70,16 +70,31 @@ function MealModal({
   editingMealImageUri,
   isUpdatingMeal,
 }: MealModalProps) {
-  const previewSources =
-    previewImages.length > 0
-      ? previewImages
-      : selectedMeals
-          .filter((meal) => Boolean(meal.imageUri))
-          .map((meal) => ({ uri: meal.imageUri as string }));
-  const displayPhotoMeals =
-    previewSources.length > 0
-      ? previewSources
-      : [resolveMealImageSource(PLACEHOLDER_MEAL)];
+  const displayPhotoMeals: {
+    key: string;
+    source: ReturnType<typeof resolveMealImageSource>;
+  }[] =
+    selectedMeals.length > 0
+      ? selectedMeals.map((meal, index) => {
+          if (editingMealId === meal.mealId && editingMealImageUri) {
+            return { key: meal.mealId, source: { uri: editingMealImageUri } };
+          }
+          const fallbackPreview = previewImages[index];
+          if (fallbackPreview) {
+            return { key: meal.mealId, source: fallbackPreview };
+          }
+          const resolvedSource =
+            meal.imageUri && meal.imageUri.length > 0
+              ? { uri: meal.imageUri }
+              : resolveMealImageSource(meal);
+          return { key: meal.mealId, source: resolvedSource };
+        })
+      : [
+          {
+            key: 'placeholder',
+            source: resolveMealImageSource(PLACEHOLDER_MEAL),
+          },
+        ];
 
   return (
     <Modal
@@ -109,15 +124,12 @@ function MealModal({
                         key: 'pending',
                         source: { uri: pendingImageUri as string },
                       },
-                      ...displayPhotoMeals.map((source, idx) => ({
-                        key: `preview-${idx}`,
-                        source,
+                      ...displayPhotoMeals.map((item) => ({
+                        key: `preview-${item.key}`,
+                        source: item.source,
                       })),
                     ]
-                  : displayPhotoMeals.map((source, idx) => ({
-                      key: `preview-${idx}`,
-                      source,
-                    }))
+                  : displayPhotoMeals
                 )
                   .slice(0, 3)
                   .map((item) => (
