@@ -6,9 +6,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SocialLogin from './src/pages/SocialLoginPage';
 import activityStack from './src/navigation/activityStack';
-import Main from '@pages/main/MainPage';
-import Meal from '@pages/meal/MealPage';
 import Achievement from '@pages/AchievementPage';
+import Meal from '@pages/meal/MealPage';
+import Main from '@pages/main/MainPage';
 import Profile from '@pages/ProfilePage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
@@ -17,13 +17,14 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CLIENT_ID } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tokenRefreshers from './src/utils/auth';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
 
 // 헬스 커넥트 권한 요청 훅
 import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 import HealthConnectRequired from '@pages/HealthConnectRequired';
+import { tabIcons, TabIconKey } from '@assets/icons';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -153,32 +154,27 @@ function AppInner() {
           </Stack.Navigator>
         ) : (
           // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
-          <Tab.Navigator initialRouteName='Main'>
-            <Tab.Screen
-              name='Activity'
-              component={activityStack}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Meal'
-              component={Meal}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Main'
-              component={Main}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Achievement'
-              component={Achievement}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Profile'
-              component={Profile}
-              options={{ headerShown: false }}
-            />
+          <Tab.Navigator
+            initialRouteName='Main'
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ focused }) => {
+                const icon = tabIcons[route.name as TabIconKey];
+                return (
+                  <Image
+                    source={focused ? icon.focused : icon.unfocused}
+                    style={styles.tabIcon}
+                  />
+                );
+              },
+              tabBarShowLabel: false,
+            })}
+          >
+            <Tab.Screen name='Activity' component={activityStack} />
+            <Tab.Screen name='Meal' component={Meal} />
+            <Tab.Screen name='Main' component={Main} />
+            <Tab.Screen name='Achievement' component={Achievement} />
+            <Tab.Screen name='Profile' component={Profile} />
           </Tab.Navigator>
         )
       ) : (
@@ -201,6 +197,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  tabIcon: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
   },
 });
 

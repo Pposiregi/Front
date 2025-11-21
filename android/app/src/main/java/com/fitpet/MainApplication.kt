@@ -53,7 +53,7 @@ class MainApplication : Application(), ReactApplication {
         return@addOnCompleteListener
       }
       val token = task.result
-      Log.d(FCM_TAG, ">>> [FCM] TOKEN: $token")l
+      Log.d(FCM_TAG, ">>> [FCM] TOKEN: $token")
     }
   }
   private fun requestNotificationPermission() {
