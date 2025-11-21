@@ -18,9 +18,8 @@ const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fabe4e',
+    backgroundColor: '#F3F4F8',
     paddingTop: Platform.select({ ios: 40, android: 24 }),
-    paddingBottom: BOTTOM_NAV_HEIGHT, // space for bottom nav
   },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
@@ -37,7 +36,7 @@ export default StyleSheet.create({
     /* 센서 미지원에 대한 안내 문장용 */
     fontFamily: 'GowunDodum',
     textAlign: 'center',
-    color: '#fff',
+    color: '#000000ff',
     fontSize: 24,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
@@ -48,9 +47,8 @@ export default StyleSheet.create({
     fontSize: 14,
     marginTop: 6,
   },
-  tokkiBackground: {
+  mainBackground: {
     flex: 1,
-    width: '100%',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: TOKKI_PADDING_V,
@@ -116,13 +114,13 @@ export default StyleSheet.create({
     fontSize: 14,
   },
   startButton: {
+    position: 'absolute',
+    bottom: BOTTOM_NAV_HEIGHT - 20,
+    alignSelf: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: START_BUTTON_PADDING_H,
     paddingVertical: START_BUTTON_PADDING_V,
     borderRadius: START_BUTTON_RADIUS,
-    alignSelf: 'center',
-    marginTop: 16,
-    marginBottom: 12,
   },
   startText: {
     fontFamily: 'JUA',
@@ -146,5 +144,13 @@ export default StyleSheet.create({
     marginTop: 4,
     color: '#fff',
     fontSize: 12,
+  },
+  pet: {
+    position: 'absolute',
+    bottom: 40, // 강아지를 바닥에서 띄우는 값
+    width: 200,
+    height: 200,
+    alignSelf: 'center',
+    resizeMode: 'contain',
   },
 });

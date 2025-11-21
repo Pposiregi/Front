@@ -14,13 +14,15 @@ import {
   ImageBackground,
   Platform,
   Pressable,
+  Image,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
-import TokkiImage from '@assets/images/main_temp_tokki.png'; // 토끼 배경 이미지
+import mainBackGround from '@assets/images/mainBackGround.png'; // 토끼 배경 이미지
+import stand_dog from '@assets/images/stand_dog.png';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
@@ -277,10 +279,11 @@ export const MainPage = () => {
       ) : (
         // 토끼 배경 이미지와 함께 메시지 표시
         <ImageBackground
-          source={TokkiImage}
-          style={styles.tokkiBackground}
+          source={mainBackGround}
+          style={styles.mainBackground}
           resizeMode='cover'
         >
+          <Image source={stand_dog} style={styles.pet} />
           {/* 실시간 센서가 없으면 서버 데이터로 대체하되 안내문 출력. */}
           <Text style={styles.message}>
             {`${displayedSteps.toLocaleString()}보 걸었어요!`}
