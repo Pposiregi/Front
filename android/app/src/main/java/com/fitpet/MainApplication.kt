@@ -1,6 +1,8 @@
 package com.fitpet
 
 import android.app.Application
+import android.content.Intent
+import android.provider.Settings
 import android.util.Log
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -12,7 +14,6 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessaging
 
 private const val FCM_TAG = "FitpetFCM"
@@ -38,17 +39,21 @@ class MainApplication : Application(), ReactApplication {
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
 
+    /**
+     * 앱 시작 시, FCM 토큰을 가져오고  푸시 알림 권한을 요청합니다.
+     * - 권한이 부여되지 않은 경우, 설정 화면으로 이동합니다.
+     */
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
     requestNotificationPermission()
     FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
       if (!task.isSuccessful) {
-        Log.w(FCM_TAG, "Fetching FCM registration token failed", task.exception)
+        Log.w(FCM_TAG, ">>> [FCM] TOKEN 가져오기 실패", task.exception)
         return@addOnCompleteListener
       }
       val token = task.result
-      Log.d(FCM_TAG, ">>> 토큰!!! FCM registration token: $token")
+      Log.d(FCM_TAG, ">>> [FCM] TOKEN: $token")l
     }
   }
   private fun requestNotificationPermission() {
