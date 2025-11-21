@@ -158,6 +158,8 @@ function AppInner() {
             initialRouteName='Main'
             screenOptions={({ route }) => ({
               headerShown: false,
+              tabBarStyle: styles.tabBar,
+              tabBarItemStyle: styles.tabBarItem,
               tabBarIcon: ({ focused }) => {
                 const icon = tabIcons[route.name as TabIconKey];
                 return (
@@ -199,9 +201,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   tabIcon: {
-    width: 28,
-    height: 28,
+    width: 38,
+    height: 38,
     resizeMode: 'contain',
+  },
+  tabBar: {
+    height: 80,
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 0.5,
+    borderTopColor: '#e5e7eb',
+  },
+  tabBarItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
