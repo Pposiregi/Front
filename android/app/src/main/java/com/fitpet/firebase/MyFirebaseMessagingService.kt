@@ -1,9 +1,5 @@
 package com.fitpet.firebase
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,8 +30,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
     Log.d(TAG, "From: ${remoteMessage.from}")
-
-    createNotificationChannel()
 
     if (remoteMessage.data.isNotEmpty()) {
       Log.d(TAG, "Message data payload: ${remoteMessage.data}")
@@ -75,20 +69,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     with(NotificationManagerCompat.from(this)) {
       notify(System.currentTimeMillis().toInt(), builder.build())
-    }
-  }
-
-  private fun createNotificationChannel() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val name = "Fitpet Notifications"
-      val descriptionText = "Default channel for Fitpet FCM"
-      val importance = NotificationManager.IMPORTANCE_HIGH
-      val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-        description = descriptionText
-      }
-      val notificationManager: NotificationManager =
-          getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-      notificationManager.createNotificationChannel(channel)
     }
   }
 }

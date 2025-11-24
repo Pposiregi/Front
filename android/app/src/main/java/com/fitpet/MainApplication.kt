@@ -1,6 +1,9 @@
 package com.fitpet
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
@@ -17,6 +20,9 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 
 private const val FCM_TAG = "FitpetFCM"
+private const val FCM_CHANNEL_ID = "fitpet_fcm_default"
+private const val FCM_CHANNEL_NAME = "Fitpet Notifications"
+private const val FCM_CHANNEL_DESC = "Default channel for Fitpet FCM"
 
 class MainApplication : Application(), ReactApplication {
 
@@ -46,6 +52,7 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
+    createNotificationChannel()
     requestNotificationPermission()
     FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
       if (!task.isSuccessful) {
@@ -56,6 +63,22 @@ class MainApplication : Application(), ReactApplication {
       Log.d(FCM_TAG, ">>> [FCM] TOKEN: $token")
     }
   }
+
+  private fun createNotificationChannel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channel = NotificationChannel(
+        FCM_CHANNEL_ID,
+        FCM_CHANNEL_NAME,
+        NotificationManager.IMPORTANCE_HIGH
+      ).apply {
+        description = FCM_CHANNEL_DESC
+      }
+      val notificationManager =
+        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.createNotificationChannel(channel)
+    }
+  }
+
   private fun requestNotificationPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       val notificationManager = NotificationManagerCompat.from(this)
