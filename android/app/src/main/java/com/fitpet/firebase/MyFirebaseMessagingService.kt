@@ -74,15 +74,20 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_notification)
-        .setContentTitle(title)
-        .setContentText(body)
-        .setContentIntent(pendingIntent)
-        .setAutoCancel(true)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-
     with(NotificationManagerCompat.from(this)) {
+      if (!areNotificationsEnabled()) {
+        Log.w(TAG, "Notifications are disabled, cannot show notification")
+        return
+      }
+
+      val builder = NotificationCompat.Builder(this@MyFirebaseMessagingService, CHANNEL_ID)
+          .setSmallIcon(R.drawable.ic_notification)
+          .setContentTitle(title)
+          .setContentText(body)
+          .setContentIntent(pendingIntent)
+          .setAutoCancel(true)
+          .setPriority(NotificationCompat.PRIORITY_HIGH)
+
       notify(System.currentTimeMillis().toInt(), builder.build())
     }
   }
