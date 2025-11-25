@@ -8,37 +8,43 @@ export const uploadMealImage = async (
     throw new Error('이미지 URI가 없습니다.');
   }
   const mime = payload.mimeType ?? 'image/jpeg';
-  console.log('>>> uploadMealImage URI 업로드 준비', {
-    uploadUrl,
-    mime,
-    uri: payload.uri,
-  });
+  if (__DEV__) {
+    console.log('>>> uploadMealImage URI 업로드 준비', {
+      uploadUrl,
+      mime,
+      uri: payload.uri,
+    });
+  }
 
   let blob: Blob;
   try {
     const fileResponse = await fetch(payload.uri);
     blob = await fileResponse.blob();
   } catch (fileError) {
-    if (fileError instanceof Error) {
-      console.error('>>> uploadMealImage URI fetch 실패', {
-        name: fileError.name,
-        message: fileError.message,
-        stack: fileError.stack,
-      });
-    } else {
-      console.error(
-        '>>> uploadMealImage URI fetch 실패 (non-error)',
-        fileError
-      );
+    if (__DEV__) {
+      if (fileError instanceof Error) {
+        console.error('>>> uploadMealImage URI fetch 실패', {
+          name: fileError.name,
+          message: fileError.message,
+          stack: fileError.stack,
+        });
+      } else {
+        console.error(
+          '>>> uploadMealImage URI fetch 실패 (non-error)',
+          fileError
+        );
+      }
     }
     throw fileError;
   }
 
-  console.log('>>> uploadMealImage 요청 준비', {
-    uploadUrl,
-    mime,
-    blobSize: blob.size,
-  });
+  if (__DEV__) {
+    console.log('>>> uploadMealImage 요청 준비', {
+      uploadUrl,
+      mime,
+      blobSize: blob.size,
+    });
+  }
 
   let response: Response;
   try {
@@ -50,25 +56,34 @@ export const uploadMealImage = async (
       body: blob,
     });
   } catch (networkError) {
-    if (networkError instanceof Error) {
-      console.error('>>> uploadMealImage fetch 실패', {
-        name: networkError.name,
-        message: networkError.message,
-        stack: networkError.stack,
-      });
-    } else {
-      console.error('>>> uploadMealImage fetch 실패 (non-error)', networkError);
+    if (__DEV__) {
+      if (networkError instanceof Error) {
+        console.error('>>> uploadMealImage fetch 실패', {
+          name: networkError.name,
+          message: networkError.message,
+          stack: networkError.stack,
+        });
+      } else {
+        console.error(
+          '>>> uploadMealImage fetch 실패 (non-error)',
+          networkError
+        );
+      }
     }
     throw networkError;
   }
 
-  console.log('>>> uploadMealImage response status:', response.status);
+  if (__DEV__) {
+    console.log('>>> uploadMealImage response status:', response.status);
+  }
 
   if (!response.ok) {
     let errorBody = '';
     try {
       errorBody = await response.text();
-      console.log('>>> uploadMealImage error body:', errorBody);
+      if (__DEV__) {
+        console.log('>>> uploadMealImage error body:', errorBody);
+      }
     } catch {
       // ignore body parsing error
     }
