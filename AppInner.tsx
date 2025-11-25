@@ -47,6 +47,37 @@ GoogleSignin.configure({
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/***
+ * tabBarIcon 생성 함수
+ * @param routeName - 탭 네비게이션의 라우트 이름
+ * @returns 탭 아이콘 컴포넌트
+ */
+const createTabBarIcon =
+  (routeName: TabIconKey) =>
+  ({ focused }: { focused: boolean }) => {
+    const icon = tabIcons[routeName];
+
+    if (!icon) {
+      console.warn(`>>> ICON을 찾을 수 없습니다 : ${routeName}`);
+      return null;
+    }
+
+    return (
+      <Image
+        source={focused ? icon.focused : icon.unfocused}
+        style={styles.tabIcon}
+      />
+    );
+  };
+
+const getTabScreenOptions = (routeName: TabIconKey) => ({
+  headerShown: false,
+  tabBarStyle: styles.tabBar,
+  tabBarItemStyle: styles.tabBarItem,
+  tabBarIcon: createTabBarIcon(routeName),
+  tabBarShowLabel: false,
+});
+
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
@@ -156,21 +187,9 @@ function AppInner() {
           // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
           <Tab.Navigator
             initialRouteName='Main'
-            screenOptions={({ route }) => ({
-              headerShown: false,
-              tabBarStyle: styles.tabBar,
-              tabBarItemStyle: styles.tabBarItem,
-              tabBarIcon: ({ focused }) => {
-                const icon = tabIcons[route.name as TabIconKey];
-                return (
-                  <Image
-                    source={focused ? icon.focused : icon.unfocused}
-                    style={styles.tabIcon}
-                  />
-                );
-              },
-              tabBarShowLabel: false,
-            })}
+            screenOptions={({ route }) =>
+              getTabScreenOptions(route.name as TabIconKey)
+            }
           >
             <Tab.Screen name='Activity' component={activityStack} />
             <Tab.Screen name='Meal' component={Meal} />
