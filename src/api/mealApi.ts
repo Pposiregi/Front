@@ -53,11 +53,12 @@ export const deleteMeal = async (
 };
 
 export const getMealCalendar = async (
-  params: MealCalendarQuery
+  params: MealCalendarQuery,
+  signal?: AbortSignal
 ): Promise<MealCalendarApiResponse> => {
   const { data } = await apiClient.get<MealCalendarApiResponse>(
     GET_MEAL_MONTH_PATH,
-    { params }
+    { params, signal }
   );
   return data;
 };
