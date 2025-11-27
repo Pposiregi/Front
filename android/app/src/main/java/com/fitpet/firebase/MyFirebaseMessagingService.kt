@@ -1,10 +1,17 @@
 package com.fitpet.firebase
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.fitpet.MainActivity
+import com.fitpet.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 private const val TAG = "MyFirebaseMessaging"
+private const val CHANNEL_ID = "fitpet_fcm_default"
 
 /**
  * Handles Firebase Cloud Messaging callbacks for Fitpet.
@@ -39,6 +46,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     remoteMessage.notification?.let {
       Log.d(TAG, "Message Notification Body: ${it.body}")
+      showNotification(it.title ?: "FitPet", it.body ?: "")
     }
   }
 
@@ -53,5 +61,34 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
   private fun handleNow(remoteMessage: RemoteMessage) {
     Log.d(TAG, "handleNow() processing completed")
+  }
+
+  private fun showNotification(title: String, body: String) {
+    val intent = Intent(this, MainActivity::class.java).apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    val pendingIntent = PendingIntent.getActivity(
+      this,
+      0,
+      intent,
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    with(NotificationManagerCompat.from(this)) {
+      if (!areNotificationsEnabled()) {
+        Log.w(TAG, "Notifications are disabled, cannot show notification")
+        return
+      }
+
+      val builder = NotificationCompat.Builder(this@MyFirebaseMessagingService, CHANNEL_ID)
+          .setSmallIcon(R.drawable.ic_notification)
+          .setContentTitle(title)
+          .setContentText(body)
+          .setContentIntent(pendingIntent)
+          .setAutoCancel(true)
+          .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+      notify(System.currentTimeMillis().toInt(), builder.build())
+    }
   }
 }

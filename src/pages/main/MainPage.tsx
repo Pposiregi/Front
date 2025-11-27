@@ -14,6 +14,7 @@ import {
   ImageBackground,
   Platform,
   Pressable,
+  Alert,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
@@ -40,7 +41,7 @@ export const MainPage = () => {
   const healthConnect = useHealthConnectSteps({
     enabled: !!data,
     userId: data?.user.user_id ?? null,
-    syncIntervalMs: 6_0000, // 60초 마다 동기화
+    syncIntervalMs: 5 * 60_000, // 5분마다 동기화
   });
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
@@ -152,6 +153,18 @@ export const MainPage = () => {
     await startTracking();
   }, [isTracking, startTracking, stopTracking]);
 
+  const handleRequestHealthPermission = useCallback(async () => {
+    const granted = await healthConnect.requestPermissions();
+    if (granted) {
+      Alert.alert('Health Connect', '걸음 수 연동 권한이 허용되었습니다.');
+    } else {
+      Alert.alert(
+        'Health Connect',
+        '권한을 허용하려면 Health Connect 앱에서 FitPet을 승인해주세요.'
+      );
+    }
+  }, [healthConnect]);
+
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
    */
@@ -174,9 +187,24 @@ export const MainPage = () => {
 
   // 표시할 걸음 수
   const displayedSteps = stepOverride ?? data?.daily_walk.step ?? 0;
-
   return (
     <View style={styles.container}>
+      {!healthConnect.permissionsGranted ? (
+        <View style={styles.healthConnectBanner}>
+          <Text style={styles.healthConnectBannerText}>
+            Health Connect 권한이 필요합니다. 권한을 허용하면 걸음 수가 자동으로
+            동기화돼요.
+          </Text>
+          <TouchableOpacity
+            style={styles.healthConnectBannerButton}
+            onPress={handleRequestHealthPermission}
+          >
+            <Text style={styles.healthConnectBannerButtonLabel}>
+              권한 요청
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
       {/*
         미션 진행 상황을 가로 스크롤로 표시 
       */}

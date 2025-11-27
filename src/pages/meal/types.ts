@@ -1,11 +1,13 @@
 import type { ImageSourcePropType } from 'react-native';
-import type { MealDetailItem } from 'types/meal';
-
-export type MealLog = Record<string, MealListItem[]>;
+import type { MealCalendarDay, MealDetailItem } from 'types/meal';
 
 export type MealListItem = MealDetailItem & {
   imageSource?: ImageSourcePropType;
 };
+
+export type MealLog = Record<string, MealListItem[]>;
+
+export type MealCalendarPreviewMap = Record<string, MealCalendarDay>;
 
 /**
  * 달력 셀 타입

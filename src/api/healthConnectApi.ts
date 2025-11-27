@@ -1,9 +1,9 @@
-import axios from 'axios';
+import apiClient from './httpClient';
 /***
  * 헬스 커넥트에서 걸음 수 이정표 데이터를 서버로 전송하기 위한 타입 및 함수 정의
  * @module healthConnectApi
  * @author MANDARIN
- * @date 2024-10-26
+ * @date 2025-10-26
  *
  */
 
@@ -23,5 +23,5 @@ export type StepMilestonePayload = {
 };
 
 export const postStepMilestones = (payload: StepMilestonePayload) => {
-  return axios.post(STEP_MILESTONES_ENDPOINT, payload);
+  return apiClient.post(STEP_MILESTONES_ENDPOINT, payload);
 };
