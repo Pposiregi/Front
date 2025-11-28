@@ -9,7 +9,6 @@ import activityStack from './src/navigation/activityStack';
 import Achievement from '@pages/AchievementPage';
 import Meal from '@pages/meal/MealPage';
 import Main from '@pages/main/MainPage';
-import Profile from '@pages/ProfilePage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
@@ -25,6 +24,7 @@ import SplashScreen from 'react-native-splash-screen';
 import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 import HealthConnectRequired from '@pages/HealthConnectRequired';
 import { tabIcons, TabIconKey } from '@assets/icons';
+import ProfileStack from '@navigation/profileStack';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -195,7 +195,7 @@ function AppInner() {
             <Tab.Screen name='Meal' component={Meal} />
             <Tab.Screen name='Main' component={Main} />
             <Tab.Screen name='Achievement' component={Achievement} />
-            <Tab.Screen name='Profile' component={Profile} />
+            <Tab.Screen name='Profile' component={ProfileStack} />
           </Tab.Navigator>
         )
       ) : (
