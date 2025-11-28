@@ -75,6 +75,7 @@ export type MealCalendarDayDetail = {
   title: string;
   kcal: number;
   imageUri: string | null;
+  imageUpdatedAt?: number;
   sequence: MealSequence;
 };
 

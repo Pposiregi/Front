@@ -91,6 +91,7 @@ type LegacyMealCalendarDayDetail = {
   meal_id?: string | number;
   image_uri?: string | null;
   image_url?: string | null;
+  image_updated_at?: number;
 };
 
 type LegacyMealCalendarDayResponse = {
@@ -108,10 +109,19 @@ const normalizeMealDetailItem = (
       (uri) => typeof uri === 'string' && uri.trim().length > 0
     ) ?? null;
 
+  const cacheKey =
+    item.imageUpdatedAt ??
+    item.image_updated_at ??
+    item.mealId ??
+    item.meal_id ??
+    null;
+
   const imageUri =
     rawUri === null
       ? null
-      : `${rawUri}${rawUri.includes('?') ? '&' : '?'}cacheBust=${Date.now()}`;
+      : cacheKey === null
+          ? rawUri
+          : `${rawUri}${rawUri.includes('?') ? '&' : '?'}v=${cacheKey}`;
 
   return {
     mealId: String(item.mealId ?? item.meal_id ?? ''),
