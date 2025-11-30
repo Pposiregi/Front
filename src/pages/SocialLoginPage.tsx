@@ -153,7 +153,7 @@ const SocialLoginPage = () => {
             onPress={() => handleLogin(signInWithKakao)}
           >
             <Image
-              source={require('../assets/images/kakao_icon.png')}
+              source={require('../assets/images/icon/kakao_icon.png')}
               style={styles.kakaoIcon}
             />
             <Text style={styles.text}>카카오 계정으로 계속</Text>
@@ -163,7 +163,7 @@ const SocialLoginPage = () => {
             onPress={() => handleLogin(signInWithGoogle)}
           >
             <Image
-              source={require('../assets/images/google_icon.png')}
+              source={require('../assets/images/icon/google_icon.png')}
               style={styles.googleIcon}
             />
             <Text style={styles.text}>구글 계정으로 계속</Text>

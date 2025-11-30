@@ -8,7 +8,7 @@ import SocialLogin from './src/pages/SocialLoginPage';
 import activityStack from './src/navigation/activityStack';
 import Main from '@pages/main/MainPage';
 import Meal from '@pages/meal/MealPage';
-import Achievement from '@pages/AchievementPage';
+import Achievement from '@pages/achievement/AchievementPage';
 import Profile from '@pages/ProfilePage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';

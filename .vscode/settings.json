@@ -10,7 +10,7 @@
       "server": "fitpet.c9giysgm0vor.ap-northeast-2.rds.amazonaws.com",
       "port": 3306,
       "driver": "MySQL",
-      "name": "FitPet",
+      "name": "FitPet_RDS",
       "database": "FitPet",
       "username": "admin"
     }

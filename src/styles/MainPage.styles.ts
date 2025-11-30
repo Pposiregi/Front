@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
 // 화면 크기 기반 반응형 사이즈 계산
@@ -14,6 +14,9 @@ const START_BUTTON_PADDING_V = Math.max(10, Math.round(SCREEN_HEIGHT * 0.015));
 const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
+
+const PET_WIDTH = SCREEN_WIDTH * 0.45;
+const PET_HEIGHT = PET_WIDTH * 0.6;
 
 export default StyleSheet.create({
   container: {
@@ -147,10 +150,36 @@ export default StyleSheet.create({
   },
   pet: {
     position: 'absolute',
-    bottom: 40, // 강아지를 바닥에서 띄우는 값
-    width: 200,
-    height: 200,
+    bottom: SCREEN_WIDTH * 0.15,
     alignSelf: 'center',
     resizeMode: 'contain',
+  },
+  petImage: {
+    width: PET_WIDTH * 1,
+    height: PET_HEIGHT * 2.5,
+  },
+  running_pet: {
+    position: 'absolute',
+    bottom: SCREEN_WIDTH * 0.25,
+    width: PET_WIDTH * 2,
+    height: PET_HEIGHT * 2,
+    left: (SCREEN_WIDTH - PET_WIDTH * 2) / 2,
+    resizeMode: 'contain',
+  },
+  countdownOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  countdownText: {
+    fontSize: 90,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });

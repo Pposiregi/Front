@@ -43,6 +43,7 @@ export default StyleSheet.create({
   },
   // 뱃지
   badgeCard: {
+    marginTop: 10,
     backgroundColor: '#fff',
     padding: 14,
     borderRadius: 14,
@@ -65,5 +66,47 @@ export default StyleSheet.create({
     width: 60,
     height: 60,
     marginBottom: 4,
+  },
+  tabHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#007AFF',
+  },
+  tabText: {
+    fontWeight: 'bold',
+  },
+  rankingNumberText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginRight: 15,
+    width: 30,
+    textAlign: 'center',
+  },
+  rankingNameScoreContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  listItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  listItemText: {
+    fontSize: 16,
   },
 });
