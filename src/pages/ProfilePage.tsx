@@ -19,10 +19,7 @@ import {
   getBodyHistoryByDate,
   updateBodyHistory,
 } from '@api/bodyHistoryApi';
-import {
-  BodyHistoryFormValues,
-  BodyHistoryResponse,
-} from '@types/bodyHistory';
+import { BodyHistoryFormValues, BodyHistoryResponse } from '@types/bodyHistory';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import { isAxiosError } from 'axios';
 
@@ -132,8 +129,13 @@ function ProfilePage() {
           color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
           strokeWidth: 3,
         },
+        {
+          data: [15, 16, 15.5, 15.2, 15.4, 15.1, 15.3],
+          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+          strokeWidth: 3,
+        },
       ],
-      legend: ['최근 7일 변화'],
+      legend: ['체중(kg)', '체지방률(%)'],
     }),
     []
   );
@@ -149,8 +151,13 @@ function ProfilePage() {
           color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
           strokeWidth: 3,
         },
+        {
+          data: recent.map((history) => history.pbf),
+          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+          strokeWidth: 3,
+        },
       ],
-      legend: ['체중(kg)'],
+      legend: ['체중(kg)', '체지방률(%)'],
     };
   }, [fallbackChartData, histories]);
 
