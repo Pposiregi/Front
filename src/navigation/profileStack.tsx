@@ -15,6 +15,10 @@ export type ProfileStackNavigationProp<T extends keyof ProfileStackParamList> =
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
+/**
+ *  프로필 > 설정, 기타 페이지 네비게이션 스택
+ * @returns
+ */
 const ProfileStack = () => {
   return (
     <Stack.Navigator>

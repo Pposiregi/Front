@@ -1,12 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -23,6 +16,11 @@ type SettingRowProps = {
   muted?: boolean;
 };
 
+/**
+ *  설정 항목 행 컴포넌트
+ * @param param0
+ * @returns
+ */
 const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   <Pressable style={styles.row} onPress={onPress}>
     <Text style={[styles.rowLabel, muted && styles.rowMuted]}>{label}</Text>
@@ -30,6 +28,10 @@ const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   </Pressable>
 );
 
+/**
+ *  프로필 설정 페이지
+ * @returns
+ */
 const ProfileSettingPage = () => {
   const navigation =
     useNavigation<ProfileStackNavigationProp<'ProfileSettings'>>();
@@ -43,6 +45,11 @@ const ProfileSettingPage = () => {
     []
   );
 
+  /**
+   * 임시로 구현한 로그아웃 핸들러
+   * 현님 검토 필요
+   * @returns
+   */
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
@@ -107,27 +114,38 @@ const ProfileSettingPage = () => {
           <SettingRow
             label='내 몸 목표 수정'
             onPress={() =>
-              Alert.alert('내 몸 목표 수정', '다음 배포에서 목표 수정 화면을 연결합니다.')
+              Alert.alert(
+                '내 몸 목표 수정',
+                '다음 배포에서 목표 수정 화면을 연결합니다.'
+              )
             }
           />
           <SettingRow
             label='내 펫 설정'
-            onPress={() => Alert.alert('내 펫 설정', '펫 정보 변경 화면 준비 중입니다.')}
+            onPress={() =>
+              Alert.alert('내 펫 설정', '펫 정보 변경 화면 준비 중입니다.')
+            }
           />
         </View>
 
         <View style={styles.section}>
           <SettingRow
             label='알림설정'
-            onPress={() => Alert.alert('알림설정', '푸시/리마인드 설정은 곧 제공됩니다.')}
+            onPress={() =>
+              Alert.alert('알림설정', '푸시/리마인드 설정은 곧 제공됩니다.')
+            }
           />
           <SettingRow
             label='공지사항'
-            onPress={() => Alert.alert('공지사항', '공지 리스트 화면이 연결될 예정입니다.')}
+            onPress={() =>
+              Alert.alert('공지사항', '공지 리스트 화면이 연결될 예정입니다.')
+            }
           />
           <SettingRow
             label='약관 및 정책'
-            onPress={() => Alert.alert('약관 및 정책', '약관/정책 웹뷰를 연결해둘게요.')}
+            onPress={() =>
+              Alert.alert('약관 및 정책', '약관/정책 웹뷰를 연결해둘게요.')
+            }
           />
           <SettingRow label='현재버전 1.0.0' muted onPress={() => {}} />
         </View>

@@ -12,7 +12,7 @@ const cardShadow = {
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEF8EC',
+    backgroundColor: '#F3F4F6',
   },
   contentContainer: {
     paddingHorizontal: 20,
@@ -167,5 +167,11 @@ export default StyleSheet.create({
   },
   chartStyle: {
     borderRadius: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
   },
 });

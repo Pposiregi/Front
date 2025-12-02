@@ -16,8 +16,10 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
+import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
@@ -26,6 +28,12 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
+import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import { BodyHistoryFormValues } from '@types/bodyHistory';
+import { createBodyHistory } from '@api/bodyHistoryApi';
+
+const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const BODY_HISTORY_USER_ID = 3;
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -52,6 +60,30 @@ export const MainPage = () => {
     width: number;
     height: number;
   } | null>(null);
+  const [showBodyPrompt, setShowBodyPrompt] = useState(false);
+  const [savingBodyHistory, setSavingBodyHistory] = useState(false);
+  const bodyPromptDate = new Date();
+  const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
+  const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+
+  useEffect(() => {
+    const loadPromptState = async () => {
+      const todayKey = formatDateKey(new Date());
+      try {
+        const skipDate = await AsyncStorage.getItem(BODY_PROMPT_SKIP_KEY);
+        if (skipDate === todayKey) {
+          setShowBodyPrompt(false);
+          return;
+        }
+        setShowBodyPrompt(true);
+      } catch (err) {
+        console.error('[BodyPrompt] 상태 로딩 실패', err);
+        setShowBodyPrompt(true);
+      }
+    };
+
+    loadPromptState();
+  }, []);
 
   /* 폴리라인 좌표 정제 및 GeoJSON 변환
    * - 유효한 경계값 내의 Path만 필터링
@@ -152,6 +184,48 @@ export const MainPage = () => {
 
     await startTracking();
   }, [isTracking, startTracking, stopTracking]);
+
+  const markSkipToday = useCallback(async () => {
+    const todayKey = formatDateKey(new Date());
+    try {
+      await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
+    } catch (err) {
+      console.error('[BodyPrompt] 스킵 상태 저장 실패', err);
+    }
+  }, []);
+
+  const handleSaveBodyPrompt = useCallback(
+    async (values: BodyHistoryFormValues) => {
+      setSavingBodyHistory(true);
+      try {
+        await createBodyHistory({
+          userId: BODY_HISTORY_USER_ID,
+          heightCm: values.heightCm,
+          weightKg: values.weightKg,
+          pbf: values.pbf,
+          baseDate: values.baseDate,
+        });
+        await markSkipToday();
+        setShowBodyPrompt(false);
+        Alert.alert('기록 완료', '오늘의 몸 기록을 저장했어요.');
+      } catch (err) {
+        console.error('[BodyPrompt] 기록 저장 실패', err);
+        Alert.alert('저장 실패', '몸 기록 저장 중 문제가 발생했어요.');
+      } finally {
+        setSavingBodyHistory(false);
+      }
+    },
+    [markSkipToday]
+  );
+
+  const handleSkipBodyPromptToday = useCallback(async () => {
+    await markSkipToday();
+    setShowBodyPrompt(false);
+  }, [markSkipToday]);
+
+  const handleLaterBodyPrompt = useCallback(() => {
+    setShowBodyPrompt(false);
+  }, []);
 
   const handleRequestHealthPermission = useCallback(async () => {
     const granted = await healthConnect.requestPermissions();
@@ -358,6 +432,16 @@ export const MainPage = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      <BodyRecordPrompt
+        visible={showBodyPrompt}
+        dateLabel={bodyPromptDateLabel}
+        baseDate={bodyPromptBaseDate}
+        onSave={handleSaveBodyPrompt}
+        onLater={handleLaterBodyPrompt}
+        onSkipToday={handleSkipBodyPromptToday}
+        saving={savingBodyHistory}
+      />
     </View>
   );
 };
