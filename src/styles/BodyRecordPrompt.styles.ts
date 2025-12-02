@@ -54,9 +54,6 @@ export default StyleSheet.create({
     fontSize: 22,
   },
   field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
     borderWidth: 1,
@@ -68,6 +65,12 @@ export default StyleSheet.create({
       ios: cardShadow,
       android: { elevation: 2 },
     }),
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
   },
   fieldLabel: {
     fontFamily: 'JUA',
@@ -88,7 +91,7 @@ export default StyleSheet.create({
     textAlign: 'right',
     fontFamily: 'JUA',
     fontSize: 20,
-    color: '#111827',
+    color: '#6B7280',
     paddingVertical: Platform.select({ ios: 4, android: 0 }),
     paddingHorizontal: 0,
   },
@@ -124,7 +127,8 @@ export default StyleSheet.create({
     backgroundColor: '#7385F5',
   },
   aimText: {
-    marginTop: 4,
+    marginTop: 6,
+    alignSelf: 'flex-end',
     fontFamily: 'GowunDodum',
     fontSize: 10,
     color: '#9CA3AF',

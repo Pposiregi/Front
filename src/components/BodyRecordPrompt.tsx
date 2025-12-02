@@ -118,24 +118,26 @@ const BodyRecordPrompt = ({
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>키</Text>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={styles.fieldInput}
-                keyboardType='decimal-pad'
-                value={heightInput}
-                onChangeText={setHeightInput}
-                placeholder='0'
-                placeholderTextColor='#9CA3AF'
-                selectTextOnFocus
-              />
-              <Text style={styles.fieldUnit}>cm</Text>
+            <View style={styles.fieldHeader}>
+              <Text style={styles.fieldLabel}>키</Text>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.fieldInput}
+                  keyboardType='decimal-pad'
+                  value={heightInput}
+                  onChangeText={setHeightInput}
+                  placeholder='0'
+                  placeholderTextColor='#9CA3AF'
+                  selectTextOnFocus
+                />
+                <Text style={styles.fieldUnit}>cm</Text>
+              </View>
             </View>
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>체중</Text>
-            <View style={styles.fieldRight}>
+            <View style={styles.fieldHeader}>
+              <Text style={styles.fieldLabel}>체중</Text>
               <View style={styles.inputRow}>
                 <TextInput
                   style={styles.fieldInput}
@@ -148,23 +150,23 @@ const BodyRecordPrompt = ({
                 />
                 <Text style={styles.fieldUnit}>kg</Text>
               </View>
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    { width: `${weightProgress * 100}%`, backgroundColor: '#7385F5' },
-                  ]}
-                />
-              </View>
-              {typeof weightAim === 'number' && (
-                <Text style={styles.aimText}>aim: {weightAim}</Text>
-              )}
             </View>
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressBar,
+                  { width: `${weightProgress * 100}%`, backgroundColor: '#7385F5' },
+                ]}
+              />
+            </View>
+            {typeof weightAim === 'number' && (
+              <Text style={styles.aimText}>aim: {weightAim}</Text>
+            )}
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>체지방률</Text>
-            <View style={styles.fieldRight}>
+            <View style={styles.fieldHeader}>
+              <Text style={styles.fieldLabel}>체지방률</Text>
               <View style={styles.inputRow}>
                 <TextInput
                   style={styles.fieldInput}
@@ -177,18 +179,18 @@ const BodyRecordPrompt = ({
                 />
                 <Text style={styles.fieldUnit}>%</Text>
               </View>
-              <View style={[styles.progressTrack, styles.progressTrackFat]}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    { width: `${bodyFatProgress * 100}%`, backgroundColor: '#7B5EF7' },
-                  ]}
-                />
-              </View>
-              {typeof bodyFatAim === 'number' && (
-                <Text style={styles.aimText}>aim: {bodyFatAim}</Text>
-              )}
             </View>
+            <View style={[styles.progressTrack, styles.progressTrackFat]}>
+              <View
+                style={[
+                  styles.progressBar,
+                  { width: `${bodyFatProgress * 100}%`, backgroundColor: '#7B5EF7' },
+                ]}
+              />
+            </View>
+            {typeof bodyFatAim === 'number' && (
+              <Text style={styles.aimText}>aim: {bodyFatAim}</Text>
+            )}
           </View>
 
           <View style={styles.infoRow}>
