@@ -1,15 +1,15 @@
 import { ImageSourcePropType } from 'react-native';
 
-import IconHandActive from './images/Icon_colored/fp_hand.png';
 import IconHandInactive from './images/Icon_uncolored/fp_hand.png';
 import IconCarrotActive from './images/Icon_colored/fp_carrot.png';
 import IconCarrotInactive from './images/Icon_uncolored/fp_carrot.png';
 import IconHomeActive from './images/Icon_colored/fb_home.png';
 import IconHomeInactive from './images/Icon_uncolored/fb_home.png';
 import IconHumanActive from './images/Icon_colored/fp_human.png';
-import IconHumanInactive from './images/Icon_uncolored/fp_human.png';
 import IconDogActive from './images/Icon_colored/fp_dog.png';
 import IconDogInactive from './images/Icon_uncolored/fp_dog.png';
+import IconMedalActive from './images/Icon_colored/fp_medal.png';
+import IconMedalInactive from './images/Icon_uncolored/fp_medal.png';
 
 export const tabIcons: Record<
   'Activity' | 'Meal' | 'Main' | 'Achievement' | 'Profile',
@@ -28,11 +28,11 @@ export const tabIcons: Record<
     unfocused: IconHomeInactive,
   },
   Achievement: {
-    focused: IconHumanActive,
-    unfocused: IconHumanInactive,
+    focused: IconMedalActive,
+    unfocused: IconMedalInactive,
   },
   Profile: {
-    focused: IconHandActive,
+    focused: IconHumanActive,
     unfocused: IconHandInactive,
   },
 };
