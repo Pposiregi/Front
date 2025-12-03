@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from 'react-native';
 
-export default StyleSheet.create({
+export const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -108,5 +108,29 @@ export default StyleSheet.create({
   },
   listItemText: {
     fontSize: 16,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  rankingFilterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#EEE', // 기본 배경색
+    alignItems: 'center',
+  },
+  rankingFilterButtonText: {
+    fontSize: 14,
+    color: '#000', // 기본 글자색
+    fontWeight: 'bold',
+  },
+  rankingFilterButtonActive: {
+    backgroundColor: '#007AFF', // 활성화 배경색
+  },
+  rankingFilterButtonTextActive: {
+    color: '#FFF', // 활성화 글자색
   },
 });

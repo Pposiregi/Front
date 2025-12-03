@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   ImageSourcePropType,
   Modal,
 } from 'react-native';
-import styles from '@styles/Achievement.styles';
+import { styles } from '@styles/Achievement.styles';
+import { getDailyStepRanking } from '@api/rankingApi';
 
 // ====================
 // 타입 정의
@@ -41,7 +42,7 @@ type RankingData = {
 };
 
 // ====================
-// 목업 데이터
+// 목업 데이터 (뱃지, 미션)
 // ====================
 const mockBadges: Badge[] = [
   {
@@ -67,29 +68,6 @@ const mockMissions: MissionData[] = [
   { missionId: 2, title: '주간 10km 달리기', progress: 50 },
   { missionId: 3, title: '칼로리 500kcal 소모', progress: 100 },
 ];
-
-// 랭킹 데이터 목업
-const mockRankingAll: RankingData = {
-  top10: [
-    { userId: 1, nickname: 'Alice', dailyStepCount: 20000 },
-    { userId: 2, nickname: 'Bob', dailyStepCount: 19000 },
-    { userId: 3, nickname: 'Charlie', dailyStepCount: 18000 },
-    { userId: 4, nickname: 'Diana', dailyStepCount: 17500 },
-    { userId: 5, nickname: 'Eve', dailyStepCount: 17000 },
-    { userId: 6, nickname: 'Frank', dailyStepCount: 16500 },
-    { userId: 7, nickname: 'Grace', dailyStepCount: 16000 },
-    { userId: 8, nickname: 'Hank', dailyStepCount: 15500 },
-    { userId: 9, nickname: 'Ivy', dailyStepCount: 15000 },
-    { userId: 10, nickname: 'Jack', dailyStepCount: 14500 },
-  ],
-  myRank: 13,
-};
-
-// 전체/남/여 임시 복사본
-const mockRankingMale: RankingData = JSON.parse(JSON.stringify(mockRankingAll));
-const mockRankingFemale: RankingData = JSON.parse(
-  JSON.stringify(mockRankingAll)
-);
 
 // ====================
 // 모달 컴포넌트
@@ -138,25 +116,47 @@ const ItemModal = ({
 // ====================
 function AchievementPage() {
   const [loading, setLoading] = useState(false);
-
-  // 상단 탭 분리 초기는 RANKING
+  const [rankingData, setRankingData] = useState<RankingData | null>(null);
   const [activeTab, setActiveTab] = useState<'RANKING' | 'MISSION' | 'BADGE'>(
     'RANKING'
   );
-
-  // RANKING 정렬 필터
   const [rankingFilter, setRankingFilter] = useState<'ALL' | 'MALE' | 'FEMALE'>(
     'ALL'
   );
-
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [isBadgeModalVisible, setIsBadgeModalVisible] = useState(false);
 
-  // 뱃지 모달
+  // 뱃지 모달 열기
   const handleBadgePress = (badge: Badge) => {
     setSelectedBadge(badge);
     setIsBadgeModalVisible(true);
   };
+
+  // ====================
+  // 랭킹 API 호출
+  // ====================
+  useEffect(() => {
+    const fetchRanking = async () => {
+      try {
+        setLoading(true);
+        const data = await getDailyStepRanking({
+          limit: 10,
+          gender: rankingFilter,
+        });
+
+        setRankingData({
+          top10: data.top10,
+          myRank: data.myRank,
+        });
+      } catch (error) {
+        console.log('랭킹 로드 실패', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRanking();
+  }, [rankingFilter]);
 
   // ====================
   // 상단 탭 UI
@@ -190,57 +190,46 @@ function AchievementPage() {
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'RANKING':
-        const rankingData = (() => {
-          switch (rankingFilter) {
-            case 'ALL':
-              return mockRankingAll;
-            case 'MALE':
-              return mockRankingMale;
-            case 'FEMALE':
-              return mockRankingFemale;
-          }
-        })();
-
+        if (!rankingData) {
+          return (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size='large' />
+            </View>
+          );
+        }
         return (
           <View style={{ flex: 1, paddingHorizontal: 10 }}>
             {/* 필터 버튼 */}
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginVertical: 10,
-              }}
-            >
-              {['ALL', 'MALE', 'FEMALE'].map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  onPress={() =>
-                    setRankingFilter(filter as 'ALL' | 'MALE' | 'FEMALE')
-                  }
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    marginHorizontal: 4,
-                    borderRadius: 8,
-                    backgroundColor:
-                      rankingFilter === filter ? '#007AFF' : '#EEE',
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: rankingFilter === filter ? '#FFF' : '#000',
-                    }}
+            <View style={styles.filterButton}>
+              {['ALL', 'MALE', 'FEMALE'].map((filter) => {
+                const isActive = rankingFilter === filter;
+                return (
+                  <TouchableOpacity
+                    key={filter}
+                    onPress={() =>
+                      setRankingFilter(filter as 'ALL' | 'MALE' | 'FEMALE')
+                    }
+                    style={[
+                      styles.rankingFilterButton,
+                      isActive && styles.rankingFilterButtonActive,
+                    ]}
                   >
-                    {filter === 'ALL'
-                      ? '전체'
-                      : filter === 'MALE'
-                      ? '남자'
-                      : '여자'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.rankingFilterButtonText,
+                        isActive && styles.rankingFilterButtonTextActive,
+                      ]}
+                    >
+                      {filter === 'ALL'
+                        ? '전체'
+                        : filter === 'MALE'
+                        ? '남자'
+                        : '여자'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-
             {/* top10 리스트 */}
             <FlatList
               data={rankingData.top10}
@@ -257,11 +246,12 @@ function AchievementPage() {
                 </View>
               )}
             />
-
-            {/* 나의 순위 */}
-            <Text style={{ textAlign: 'center', marginTop: 10 }}>
-              나의 순위: {rankingData.myRank}위
-            </Text>
+            {/* 전체 탭에서만 나의 순위 표시 */}
+            {rankingFilter === 'ALL' && (
+              <Text style={{ textAlign: 'center', marginTop: 10 }}>
+                나의 순위: {rankingData.myRank}위
+              </Text>
+            )}
           </View>
         );
 
@@ -306,6 +296,9 @@ function AchievementPage() {
     }
   };
 
+  // ====================
+  // 로딩 화면 처리
+  // ====================
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
