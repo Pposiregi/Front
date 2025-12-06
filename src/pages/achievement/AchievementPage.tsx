@@ -11,35 +11,7 @@ import {
 } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
-
-// ====================
-// 타입 정의
-// ====================
-type Badge = {
-  badgeId: number;
-  title: string;
-  type: 'STEP' | 'RUN' | 'MISSION' | 'ATTENDANCE' | 'EAT_KCAL';
-  tier: 'BRONZE' | 'SILVER' | 'GOLD';
-  iconUrl: ImageSourcePropType;
-  createdAt: string;
-};
-
-type MissionData = {
-  missionId: number;
-  title: string;
-  progress: number; // 0~100
-};
-
-type RankingItem = {
-  userId: number;
-  nickname: string;
-  dailyStepCount: number;
-};
-
-type RankingData = {
-  top10: RankingItem[];
-  myRank: number;
-};
+import { Badge, MissionData, RankingData } from './types';
 
 // ====================
 // 목업 데이터 (뱃지, 미션)
@@ -63,7 +35,7 @@ const mockBadges: Badge[] = [
   },
 ];
 
-const mockMissions: MissionData[] = [
+const mockMissions: MissionData = [
   { missionId: 1, title: '오늘 5000보 걷기', progress: 80 },
   { missionId: 2, title: '주간 10km 달리기', progress: 50 },
   { missionId: 3, title: '칼로리 500kcal 소모', progress: 100 },
@@ -143,7 +115,6 @@ function AchievementPage() {
           limit: 10,
           gender: rankingFilter,
         });
-
         setRankingData({
           top10: data.top10,
           myRank: data.myRank,
@@ -233,7 +204,9 @@ function AchievementPage() {
             {/* top10 리스트 */}
             <FlatList
               data={rankingData.top10}
-              keyExtractor={(item) => item.userId.toString()}
+              keyExtractor={(item, index) =>
+                item && item.userId ? item.userId.toString() : index.toString()
+              }
               renderItem={({ item, index }) => (
                 <View style={styles.listItem}>
                   <Text style={styles.rankingNumberText}>{index + 1}</Text>
@@ -254,7 +227,6 @@ function AchievementPage() {
             )}
           </View>
         );
-
       case 'MISSION':
         return (
           <View style={{ flex: 1 }}>
@@ -270,7 +242,6 @@ function AchievementPage() {
             />
           </View>
         );
-
       case 'BADGE':
         return (
           <View>

@@ -10,28 +10,35 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { isValidPbf, isValidWeight } from '../../utils/validation';
+import {
+  isValidPbf,
+  isValidTargetWalk,
+  isValidWeight,
+} from '../../utils/validation';
 
 type OptionalInfoProps = {
   onFinish: (data: {
     targetWeight: string;
     currentPbf: string;
     targetPbf: string;
+    targetWalk: string;
   }) => void;
 };
 const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
   const [targetWeight, setTargetWeight] = useState('');
   const [currentPbf, setcurrentPbf] = useState('');
   const [targetPbf, setTargetPbf] = useState('');
+  const [targetWalk, setTargetWalk] = useState('');
   const targetWeightRef = useRef<TextInput | null>(null);
   const currentPbfRef = useRef<TextInput | null>(null);
   const targetPbfRef = useRef<TextInput | null>(null);
-  const allEmpty = !targetWeight && !currentPbf && !targetPbf;
+  const targetWalkRef = useRef<TextInput | null>(null);
+  const allEmpty = !targetWeight && !currentPbf && !targetPbf && !targetWalk;
   // 제출 버튼을 눌렀을 때 실행될 함수
   const onSubmit = useCallback(() => {
     // 모든 값이 비어있을 때 (건너뛰기)
     if (allEmpty) {
-      onFinish({ targetWeight, currentPbf, targetPbf });
+      onFinish({ targetWeight, currentPbf, targetPbf, targetWalk });
       return;
     }
 
@@ -48,10 +55,14 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
       Alert.alert('알림', '목표 체지방률을 올바르게 입력해주세요.');
       return;
     }
+    if (targetWalk && !isValidTargetWalk(targetWalk)) {
+      Alert.alert('알림', '목표 걸음을 올바르게 입력해주세요.');
+      return;
+    }
 
     // 모든 유효성 검사 통과
-    onFinish({ targetWeight, currentPbf, targetPbf });
-  }, [targetWeight, currentPbf, targetPbf, allEmpty, onFinish]);
+    onFinish({ targetWeight, currentPbf, targetPbf, targetWalk });
+  }, [targetWeight, currentPbf, targetPbf, targetWalk, allEmpty, onFinish]);
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
@@ -75,10 +86,23 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setTargetWeight}
-              ref={targetWeightRef}
+              ref={targetWalkRef}
               onSubmitEditing={() => currentPbfRef.current?.focus()}
             />
             <Text style={styles.unit}>kg</Text>
+          </View>
+          <Text style={styles.label}>목표 걸음</Text>
+          <View style={styles.inputWithUnit}>
+            <TextInput
+              style={styles.textInputFlex}
+              placeholder='목표 걸음을 입력하세요.'
+              placeholderTextColor='#666'
+              keyboardType='numeric'
+              onChangeText={setTargetWalk}
+              ref={targetWeightRef}
+              onSubmitEditing={() => currentPbfRef.current?.focus()}
+            />
+            <Text style={styles.unit}>step</Text>
           </View>
           <Text style={styles.label}>현재 체지방률(pbf)</Text>
           <View style={styles.inputWithUnit}>

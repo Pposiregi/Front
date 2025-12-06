@@ -1,20 +1,10 @@
-import { GPS_SESSION, MissionData } from './types';
+import { GPS_SESSION } from '../../types/activity';
 
 export const getDateString = (daysAgo: number): string => {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
   return date.toISOString().split('T')[0];
 };
-
-export const mock_daily_workout: MissionData[] = [
-  { date: getDateString(6), step: 8900 },
-  { date: getDateString(5), step: 2225 },
-  { date: getDateString(4), step: 4450 },
-  { date: getDateString(3), step: 8900 },
-  { date: getDateString(2), step: 2225 },
-  { date: getDateString(1), step: 4450 },
-  { date: getDateString(0), step: 8900 },
-];
 
 // 월별 활동 기록을 시뮬레이션하기 위한 목업 데이터
 // 2025년 11월과 10월 데이터를 가정

@@ -3,10 +3,16 @@ import chartConfig from '@utils/chartConfig';
 import React, { useEffect, useState, useMemo } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { ActivityDetailNavigationProp, ChartData, GPS_SESSION } from './types';
-import { mock_daily_workout, mock_data_by_month } from './mock';
+import {
+  ActivityDetailNavigationProp,
+  ChartData,
+  GPS_SESSION,
+  WeeklyStepItem,
+} from '../../types/activity';
+import { mock_data_by_month } from './mock';
 import { styles } from '@styles/Activity.styles';
 import { SCREEN_WIDTH } from '@styles/dimensions';
+import { getWeeklySteps } from '@api/activityApi';
 
 function ActivityPage() {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
@@ -20,6 +26,7 @@ function ActivityPage() {
     labels: [],
     datasets: [{ data: [] }],
   });
+  const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
 
   const SessionItem = ({ session }: { session: GPS_SESSION }) => {
     const handlePress = () => {
@@ -105,51 +112,44 @@ function ActivityPage() {
   };
 
   // 주간 거리를 계산하고 그래프 데이터를 생성하는 함수
-  const calculateWeeklyData = () => {
-    const todayDate = new Date(today);
-    const dailyDataMap = new Map<string, number>();
-    const dates: string[] = [];
-
-    // 지난 7일의 날짜 계산 및 초기화
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(todayDate);
-      date.setDate(todayDate.getDate() - i);
-      const dateString = date.toISOString().split('T')[0];
-      dates.push(dateString.substring(5, 10).replace('-', '/'));
-      dailyDataMap.set(dateString, 0);
-    }
-
-    // 목업 데이터를 순회하며 7일 이내의 데이터만 집계
-    mock_daily_workout.forEach((data) => {
-      if (dailyDataMap.has(data.date)) {
-        dailyDataMap.set(data.date, data.step);
-      }
-    });
-
-    const dataValues = Array.from(dailyDataMap.values());
+  const calculateWeeklyChart = () => {
+    if (weeklySteps.length === 0) return;
+    const labels = weeklySteps.map((item) =>
+      item.date.substring(5).replace('-', '/')
+    );
+    const dataValues = weeklySteps.map((item) => item.step);
     setChartData({
-      labels: dates,
-      datasets: [
-        {
-          data: dataValues,
-        },
-      ],
+      labels,
+      datasets: [{ data: dataValues }],
     });
   };
-
   useEffect(() => {
     fetchMonthlyActivities(currentMonth);
   }, [currentMonth]);
 
   useEffect(() => {
-    calculateWeeklyData();
+    fetchWeeklySteps();
   }, []);
+
+  useEffect(() => {
+    if (weeklySteps.length > 0) {
+      calculateWeeklyChart();
+    }
+  }, [weeklySteps]);
 
   const headerText = useMemo(() => {
     const month = currentMonth.getMonth() + 1;
     return `${month}월의 활동기록`;
   }, [currentMonth]);
 
+  const fetchWeeklySteps = async () => {
+    try {
+      const response = await getWeeklySteps(3); // userId 동적이면 본인 ID 넣기
+      setWeeklySteps(response);
+    } catch (err) {
+      console.warn('주간 걸음수 fetch 실패', err);
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.monthHeaderContainer}>

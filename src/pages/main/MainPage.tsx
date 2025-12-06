@@ -28,7 +28,7 @@ import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
-import mainBackGround_night from '@assets/images/MainBackground_night.png';
+import mainBackGround_day_wide from '@assets/images/mainBackground_day_wide.png';
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';

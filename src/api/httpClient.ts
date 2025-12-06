@@ -6,4 +6,9 @@ const apiClient = axios.create({
   baseURL: (API_BASE_URL || '').trim() || 'http://localhost:8080',
 });
 
+apiClient.interceptors.request.use((config) => {
+  config.headers['dev-user-id'] = '3'; // 항상 추가
+  return config;
+});
+
 export default apiClient;
