@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_WIDTH = Math.max(
   150,
   Math.min(220, Math.round(SCREEN_WIDTH * 0.42))

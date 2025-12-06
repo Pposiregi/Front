@@ -27,6 +27,7 @@ import axios from 'axios';
 import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
+import { styles } from '@styles/SocialLogin.styles';
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -153,7 +154,7 @@ const SocialLoginPage = () => {
             onPress={() => handleLogin(signInWithKakao)}
           >
             <Image
-              source={require('../assets/images/kakao_icon.png')}
+              source={require('../assets/images/icon/kakao_icon.png')}
               style={styles.kakaoIcon}
             />
             <Text style={styles.text}>카카오 계정으로 계속</Text>
@@ -163,7 +164,7 @@ const SocialLoginPage = () => {
             onPress={() => handleLogin(signInWithGoogle)}
           >
             <Image
-              source={require('../assets/images/google_icon.png')}
+              source={require('../assets/images/icon/google_icon.png')}
               style={styles.googleIcon}
             />
             <Text style={styles.text}>구글 계정으로 계속</Text>
@@ -175,65 +176,3 @@ const SocialLoginPage = () => {
 };
 
 export default SocialLoginPage;
-
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 100,
-  },
-  mainText: {
-    fontSize: 50,
-    textAlign: 'center',
-    paddingHorizontal: 30,
-    marginBottom: height * 0.23,
-    fontFamily: 'JUA',
-  },
-  kakaoButton: {
-    backgroundColor: '#FDDC3F',
-    borderRadius: 40,
-    borderWidth: 1,
-    width: width * 0.7,
-    height: height * 0.05,
-    paddingHorizontal: width * 0.02,
-    paddingVertical: 7,
-    marginTop: height * 0.015,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  kakaoIcon: {
-    width: 35,
-    height: 35,
-    marginRight: 22,
-  },
-  googleButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 40,
-    borderWidth: 1,
-    width: width * 0.7,
-    height: height * 0.05,
-    paddingHorizontal: width * 0.03,
-    paddingVertical: 7,
-    marginTop: height * 0.015,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  googleIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 33,
-  },
-  text: {
-    textAlign: 'center',
-    fontFamily: 'GowunDodum',
-    fontWeight: '800',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-  },
-});
