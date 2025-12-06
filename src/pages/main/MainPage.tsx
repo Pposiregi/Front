@@ -83,45 +83,6 @@ export const MainPage = () => {
     useRouteTracking();
 
   const mapRef = useRef<MapView | null>(null);
-  // const [mapLayout, setMapLayout] = useState<{
-  //   width: number;
-  //   height: number;
-  // } | null>(null);
-
-  /* 폴리라인 좌표 정제 및 GeoJSON 변환
-   * - 유효한 경계값 내의 Path만 필터링
-   */
-  // const polylinePoints = useMemo(
-  //   () =>
-  //     path.filter(
-  //       (point) =>
-  //         Number.isFinite(point.latitude) && Number.isFinite(point.longitude)
-  //     ),
-  //   [path]
-  // );
-
-  /* GeoJSON 변환
-   * - polylinePoints가 2개 미만이면 null 반환
-   */
-  // const polylineGeoJSON = useMemo(() => {
-  //   if (polylinePoints.length < 2) return null;
-  //   return {
-  //     type: 'FeatureCollection' as const,
-  //     features: [
-  //       {
-  //         type: 'Feature' as const,
-  //         properties: {},
-  //         geometry: {
-  //           type: 'LineString' as const,
-  //           coordinates: polylinePoints.map((point) => [
-  //             point.longitude,
-  //             point.latitude,
-  //           ]),
-  //         },
-  //       },
-  //     ],
-  //   };
-  // }, [polylinePoints]);
 
   /* 펫 표정 관리 위해 FSM 상태 추가 */
   const { state: petState, transition: changePetState } = usePetFSM();
@@ -131,36 +92,6 @@ export const MainPage = () => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });
   };
-
-  // /* 디버그용 로그 - Ployline Point 추가 시 확인 */
-  // useEffect(() => {
-  //   if (__DEV__) {
-  //     console.debug('[MainPage] polylinePoints', polylinePoints.length);
-  //   }
-  // }, [polylinePoints.length]);
-
-  /* 디버그용 로그 - Polyline 및 GeoJSON 렌더링 정보 확인
-   * - 개발 모드에서만 실행
-   * - polylinePoints 또는 polylineGeoJSON이 변경될 때마다 실행
-   */
-  // useEffect(() => {
-  //   if (!__DEV__) return;
-  //   if (polylinePoints.length > 1) {
-  //     const first = polylinePoints[0];
-  //     const last = polylinePoints[polylinePoints.length - 1];
-  //     console.debug('[MainPage] will render polyline', {
-  //       count: polylinePoints.length,
-  //       first,
-  //       last,
-  //     });
-  //   }
-  //   if (polylineGeoJSON) {
-  //     console.debug('[MainPage] geojson ready', {
-  //       features: polylineGeoJSON.features.length,
-  //       coordinates: polylineGeoJSON.features[0]?.geometry.coordinates.length,
-  //     });
-  //   }
-  // }, [polylinePoints, polylineGeoJSON]);
 
   /* 지도 카메라 이동
    * - isTracking: 추적 중일 때만 카메라 이동
@@ -311,70 +242,6 @@ export const MainPage = () => {
           >
             <AnimatedDog />
           </ImageBackground>
-          {/* <MapView
-            ref={mapRef}
-            style={styles.map}
-            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-            initialRegion={region}
-            region={region}
-            showsUserLocation
-            followsUserLocation
-          >
-            {/* 개발 시 시각 확인용 가이드 라인 */}
-          {/* {__DEV__ && (
-              <Polyline
-                key='debug-sample'
-                coordinates={[
-                  {
-                    latitude: region.latitude + 0.001,
-                    longitude: region.longitude - 0.001,
-                  },
-                  { latitude: region.latitude, longitude: region.longitude },
-                  {
-                    latitude: region.latitude - 0.001,
-                    longitude: region.longitude + 0.001,
-                  },
-                ]}
-                strokeColor='rgba(0, 255, 0, 0.5)'
-                strokeWidth={4}
-                lineDashPattern={[6, 6]}
-              />
-            )} */}
-          {/* {polylinePoints.length > 0 && (
-              // 가장 최근 좌표를 커스텀 마커로 강조해 현재 위치를 명시한다.
-              <Marker coordinate={polylinePoints[polylinePoints.length - 1]}>
-                <View style={styles.currentPin}>
-                  <View style={styles.currentPinInner} />
-                </View>
-              </Marker>
-            )}
-          </MapView> */}
-          {/* {mapLayout && polylinePoints.length > 1 && (
-            // react-native-svg를 이용한 화면 좌표 기반 오버레이 폴리라인
-            <MapOverlayPolyline
-              region={region}
-              coordinates={polylinePoints}
-              width={mapLayout.width}
-              height={mapLayout.height}
-            />
-          )} */}
-          {/* 내 위치로 이동 버튼 */}
-          {/* <Pressable
-            style={styles.locateButton}
-            accessibilityRole='button'
-            accessibilityLabel='현재 위치로 이동'
-            onPress={() => {
-              if (!mapRef.current) return;
-              mapRef.current.animateToRegion?.(region, 500);
-            }}
-          >
-            <Text style={styles.locateText}>내 위치</Text>
-          </Pressable>  */}
-          {/* <View style={styles.mapOverlay}>
-            <Text style={styles.overlayText}>
-              경로 추적 중 · {polylinePoints.length.toLocaleString()} 포인트
-            </Text>
-          </View> */}
         </View>
       ) : (
         // 배경 이미지 & 펫 이미지와 함께 메시지 표시
