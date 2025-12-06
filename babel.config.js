@@ -16,6 +16,7 @@ module.exports = {
       'module-resolver',
       {
         root: ['./src'],
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
         alias: {
           '@components': './src/components',
           '@pages': './src/pages',

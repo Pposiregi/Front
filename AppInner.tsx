@@ -17,13 +17,14 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CLIENT_ID } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tokenRefreshers from './src/utils/auth';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
 
 // 헬스 커넥트 권한 요청 훅
 import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 import HealthConnectRequired from '@pages/HealthConnectRequired';
+import { tabIcons, TabIconKey } from '@assets/icons';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -45,6 +46,37 @@ GoogleSignin.configure({
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/***
+ * tabBarIcon 생성 함수
+ * @param routeName - 탭 네비게이션의 라우트 이름
+ * @returns 탭 아이콘 컴포넌트
+ */
+const createTabBarIcon =
+  (routeName: TabIconKey) =>
+  ({ focused }: { focused: boolean }) => {
+    const icon = tabIcons[routeName];
+
+    if (!icon) {
+      console.warn(`>>> ICON을 찾을 수 없습니다 : ${routeName}`);
+      return null;
+    }
+
+    return (
+      <Image
+        source={focused ? icon.focused : icon.unfocused}
+        style={styles.tabIcon}
+      />
+    );
+  };
+
+const getTabScreenOptions = (routeName: TabIconKey) => ({
+  headerShown: false,
+  tabBarStyle: styles.tabBar,
+  tabBarItemStyle: styles.tabBarItem,
+  tabBarIcon: createTabBarIcon(routeName),
+  tabBarShowLabel: false,
+});
 
 function AppInner() {
   const dispatch = useAppDispatch();
@@ -115,9 +147,6 @@ function AppInner() {
 
   // Health Connect 필수 체크 (로그인 완료 후)
   console.log('>>> Final isHealthConnectReady 값:', isHealthConnectReady);
-  console.log('>>> Final isCheckingHealthConnect 값:', isCheckingHealthConnect);
-  console.log('>>> Final isLoggedIn 값:', isLoggedIn);
-  console.log('>>> Final isSignUpInProgress 값:', isSignUpInProgress);
   if (isLoggedIn && !isSignUpInProgress && !isHealthConnectReady) {
     console.log('>>> Rendering HealthConnectRequired ');
     if (isCheckingHealthConnect) {
@@ -156,32 +185,17 @@ function AppInner() {
           </Stack.Navigator>
         ) : (
           // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
-          <Tab.Navigator initialRouteName='Main'>
-            <Tab.Screen
-              name='Activity'
-              component={activityStack}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Meal'
-              component={Meal}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Main'
-              component={Main}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Achievement'
-              component={Achievement}
-              options={{ headerShown: false }}
-            />
-            <Tab.Screen
-              name='Profile'
-              component={Profile}
-              options={{ headerShown: false }}
-            />
+          <Tab.Navigator
+            initialRouteName='Main'
+            screenOptions={({ route }) =>
+              getTabScreenOptions(route.name as TabIconKey)
+            }
+          >
+            <Tab.Screen name='Activity' component={activityStack} />
+            <Tab.Screen name='Meal' component={Meal} />
+            <Tab.Screen name='Main' component={Main} />
+            <Tab.Screen name='Achievement' component={Achievement} />
+            <Tab.Screen name='Profile' component={Profile} />
           </Tab.Navigator>
         )
       ) : (
@@ -204,6 +218,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  tabIcon: {
+    width: 38,
+    height: 38,
+    resizeMode: 'contain',
+  },
+  tabBar: {
+    height: 80,
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 0.5,
+    borderTopColor: '#e5e7eb',
+  },
+  tabBarItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

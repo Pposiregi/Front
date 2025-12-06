@@ -70,6 +70,9 @@ export default StyleSheet.create({
     fontSize: 18,
     color: '#2B2B2B',
   },
+  calendarLoadingIndicator: {
+    marginLeft: 8,
+  },
   weekHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -336,6 +339,12 @@ export default StyleSheet.create({
     color: '#7C8098',
     fontSize: 14,
   },
+  calendarErrorText: {
+    marginTop: 16,
+    textAlign: 'center',
+    color: '#D9534F',
+    fontSize: 13,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -395,6 +404,23 @@ export default StyleSheet.create({
   modalMealList: {
     marginTop: 4,
   },
+  modalMealLoadingContainer: {
+    minHeight: 96,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalEmptyText: {
+    textAlign: 'center',
+    color: '#9DA2B5',
+    fontSize: 13,
+    marginTop: 8,
+  },
+  modalErrorText: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#D9534F',
+    fontSize: 12,
+  },
   modalMealRowContainer: {
     position: 'relative',
     flexDirection: 'row',
@@ -408,6 +434,15 @@ export default StyleSheet.create({
     borderColor: '#E4E6F1',
     ...baseShadow,
   },
+  modalMealRowEditing: {
+    borderColor: '#5F6BEA',
+    backgroundColor: '#EDF1FF',
+  },
+  modalMealControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   modalMealRemoveButton: {
     width: 32,
     height: 32,
@@ -417,6 +452,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+  },
+  modalMealRemoveButtonDisabled: {
+    opacity: 0.5,
   },
   modalMealRemoveLabel: {
     fontFamily: 'JUA',
@@ -441,6 +479,22 @@ export default StyleSheet.create({
     height: 48,
     borderRadius: 16,
     marginRight: 12,
+  },
+  modalMealEditButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#D8DBE8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  modalMealEditLabel: {
+    fontFamily: 'JUA',
+    fontSize: 15,
+    color: '#4C5AC7',
   },
   modalMealDragHandle: {
     width: 22,
@@ -499,6 +553,44 @@ export default StyleSheet.create({
   modalCameraIcon: {
     fontSize: 18,
     color: '#9DA3BB',
+  },
+  modalEditRow: {
+    marginTop: 18,
+    backgroundColor: '#F5F7FF',
+  },
+  modalEditActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  modalEditButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  modalEditCancel: {
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#C8CCE0',
+    backgroundColor: '#FFFFFF',
+  },
+  modalEditSubmit: {
+    marginLeft: 8,
+    backgroundColor: '#FF9F43',
+  },
+  modalEditActionDisabled: {
+    opacity: 0.5,
+  },
+  modalEditCancelLabel: {
+    fontFamily: 'JUA',
+    color: '#8F95AF',
+    fontSize: 14,
+  },
+  modalEditSubmitLabel: {
+    fontFamily: 'JUA',
+    color: '#FFFFFF',
+    fontSize: 14,
   },
   modalTotalRow: {
     flexDirection: 'row',
