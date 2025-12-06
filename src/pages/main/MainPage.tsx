@@ -15,6 +15,7 @@ import {
   Pressable,
   Image,
   Animated,
+  Alert,
 } from 'react-native';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
@@ -128,6 +129,18 @@ export const MainPage = () => {
     setCountdown(3);
   }, [isTracking, startTracking, stopTracking]);
 
+  const handleRequestHealthPermission = useCallback(async () => {
+    const granted = await healthConnect.requestPermissions();
+    if (granted) {
+      Alert.alert('Health Connect', '걸음 수 연동 권한이 허용되었습니다.');
+    } else {
+      Alert.alert(
+        'Health Connect',
+        '권한을 허용하려면 Health Connect 앱에서 FitPet을 승인해주세요.'
+      );
+    }
+  }, [healthConnect]);
+
   // 카운트 다운 애니메이션 적용
   useEffect(() => {
     if (countdown === null) return;
@@ -194,9 +207,7 @@ export const MainPage = () => {
             style={styles.healthConnectBannerButton}
             onPress={handleRequestHealthPermission}
           >
-            <Text style={styles.healthConnectBannerButtonLabel}>
-              권한 요청
-            </Text>
+            <Text style={styles.healthConnectBannerButtonLabel}>권한 요청</Text>
           </TouchableOpacity>
         </View>
       ) : null}
