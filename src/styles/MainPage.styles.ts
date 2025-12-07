@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
 // 화면 크기 기반 반응형 사이즈 계산
@@ -15,12 +15,14 @@ const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 
+const PET_WIDTH = SCREEN_WIDTH * 0.45;
+const PET_HEIGHT = PET_WIDTH * 0.6;
+
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fabe4e',
+    backgroundColor: '#F3F4F8',
     paddingTop: Platform.select({ ios: 40, android: 24 }),
-    paddingBottom: BOTTOM_NAV_HEIGHT, // space for bottom nav
   },
   healthConnectBanner: {
     backgroundColor: '#FFF6DA',
@@ -63,7 +65,7 @@ export default StyleSheet.create({
     /* 센서 미지원에 대한 안내 문장용 */
     fontFamily: 'GowunDodum',
     textAlign: 'center',
-    color: '#fff',
+    color: '#000000ff',
     fontSize: 24,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
@@ -74,9 +76,8 @@ export default StyleSheet.create({
     fontSize: 14,
     marginTop: 6,
   },
-  tokkiBackground: {
+  mainBackground: {
     flex: 1,
-    width: '100%',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: TOKKI_PADDING_V,
@@ -142,13 +143,13 @@ export default StyleSheet.create({
     fontSize: 14,
   },
   startButton: {
+    position: 'absolute',
+    bottom: BOTTOM_NAV_HEIGHT - 20,
+    alignSelf: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: START_BUTTON_PADDING_H,
     paddingVertical: START_BUTTON_PADDING_V,
     borderRadius: START_BUTTON_RADIUS,
-    alignSelf: 'center',
-    marginTop: 16,
-    marginBottom: 12,
   },
   startText: {
     fontFamily: 'JUA',
@@ -172,5 +173,39 @@ export default StyleSheet.create({
     marginTop: 4,
     color: '#fff',
     fontSize: 12,
+  },
+  pet: {
+    position: 'absolute',
+    bottom: SCREEN_WIDTH * 0.15,
+    alignSelf: 'center',
+    resizeMode: 'contain',
+  },
+  petImage: {
+    width: PET_WIDTH * 1,
+    height: PET_HEIGHT * 2.5,
+  },
+  running_pet: {
+    position: 'absolute',
+    bottom: SCREEN_WIDTH * 0.25,
+    width: PET_WIDTH * 2,
+    height: PET_HEIGHT * 2,
+    left: (SCREEN_WIDTH - PET_WIDTH * 2) / 2,
+    resizeMode: 'contain',
+  },
+  countdownOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  countdownText: {
+    fontSize: 90,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });

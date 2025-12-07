@@ -88,3 +88,15 @@ export const isValidPbf = (pbf: string) => {
 
   return true;
 };
+
+// 목표 걸음 수 정규식 (숫자만 허용, 1,000 ~ 100,000)
+const targetWalkRegex = /^[0-9]{3,6}$/;
+
+export const isValidTargetWalk = (steps: string) => {
+  if (!targetWalkRegex.test(steps)) return false;
+
+  const num = parseInt(steps, 10);
+  if (isNaN(num) || num < 1000 || num > 100000) return false; // 최소 1000 ~ 최대 100,000 걸음
+
+  return true;
+};

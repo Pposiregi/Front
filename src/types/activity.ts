@@ -9,7 +9,7 @@ export type GPS_SESSION = {
   total_distance: number;
 };
 
-export type MissionData = {
+export type WeeklyStepItem = {
   date: string;
   step: number;
 };
