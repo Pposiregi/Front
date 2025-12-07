@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import styles from '@styles/BodyRecordPrompt.styles';
-import { BodyHistoryFormValues } from '@types/bodyHistory';
+import type { BodyHistoryFormValues } from 'types/bodyHistory';
 
 type BodyRecordPromptProps = {
   visible: boolean;

@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import styles from '@styles/ProfilePage.styles';
 import { ProfileStackNavigationProp } from '@navigation/profileStack';
@@ -16,12 +16,13 @@ import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import {
   createBodyHistory,
   getBodyHistoriesByUser,
-  getBodyHistoryByDate,
   updateBodyHistory,
 } from '@api/bodyHistoryApi';
-import { BodyHistoryFormValues, BodyHistoryResponse } from '@types/bodyHistory';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
-import { isAxiosError } from 'axios';
+import type {
+  BodyHistoryFormValues,
+  BodyHistoryResponse,
+} from 'types/bodyHistory';
 
 const CONTENT_PADDING = 20;
 const CHART_CARD_PADDING = 14;
@@ -89,11 +90,15 @@ function ProfilePage() {
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [savingRecord, setSavingRecord] = useState(false);
 
+  // 기록 저장 후 최신 데이터를 불러올지 여부
+  const [shouldRefreshAfterRecord, setShouldRefreshAfterRecord] =
+    useState(false);
+
   const loadBodyHistories = useCallback(async () => {
     try {
       const data = await getBodyHistoriesByUser(API_USER_ID);
       const sorted = [...data].sort((a, b) =>
-        a.baseDate.localeCompare(b.baseDate)
+        b.baseDate.localeCompare(a.baseDate)
       );
       setHistories(sorted);
     } catch (err) {
@@ -104,12 +109,22 @@ function ProfilePage() {
     }
   }, []);
 
+  // 화면이 포커스될 때마다 최신 기록을 불러온다.
+  useFocusEffect(
+    useCallback(() => {
+      loadBodyHistories();
+    }, [loadBodyHistories])
+  );
+
+  // 팝업을 닫은 직후 최신 기록을 다시 불러와 화면을 갱신한다.
   useEffect(() => {
-    loadBodyHistories();
-  }, [loadBodyHistories]);
+    if (!recordModalVisible && shouldRefreshAfterRecord) {
+      loadBodyHistories().finally(() => setShouldRefreshAfterRecord(false));
+    }
+  }, [loadBodyHistories, recordModalVisible, shouldRefreshAfterRecord]);
 
   const latestHistory = useMemo(
-    () => (histories.length ? histories[histories.length - 1] : null),
+    () => (histories.length ? histories[0] : null),
     [histories]
   );
 
@@ -142,7 +157,7 @@ function ProfilePage() {
 
   const chartData = useMemo(() => {
     if (!histories.length) return fallbackChartData;
-    const recent = histories.slice(-7);
+    const recent = [...histories].slice(0, 7).reverse(); // 차트는 시간순으로 표시
     return {
       labels: recent.map((history) => history.baseDate.slice(5)),
       datasets: [
@@ -165,14 +180,9 @@ function ProfilePage() {
     async (values: BodyHistoryFormValues) => {
       setSavingRecord(true);
       try {
-        let existing: BodyHistoryResponse | null = null;
-        try {
-          existing = await getBodyHistoryByDate(API_USER_ID, values.baseDate);
-        } catch (err) {
-          if (!isAxiosError(err) || err.response?.status !== 404) {
-            throw err;
-          }
-        }
+        const existing = histories.find(
+          (history) => history.baseDate === values.baseDate
+        );
 
         if (existing?.id) {
           await updateBodyHistory(existing.id, {
@@ -191,7 +201,7 @@ function ProfilePage() {
           });
         }
 
-        await loadBodyHistories();
+        setShouldRefreshAfterRecord(true);
         setRecordModalVisible(false);
         Alert.alert('기록 완료', '몸 기록을 저장했어요.');
       } catch (err) {
@@ -201,7 +211,7 @@ function ProfilePage() {
         setSavingRecord(false);
       }
     },
-    [loadBodyHistories]
+    [histories]
   );
 
   const chartConfig = {

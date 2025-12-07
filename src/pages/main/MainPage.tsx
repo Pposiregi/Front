@@ -29,7 +29,7 @@ import { useRouteTracking } from '@hooks/useRouteTracking';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
-import { BodyHistoryFormValues } from '@types/bodyHistory';
+import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory } from '@api/bodyHistoryApi';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';

@@ -1,8 +1,8 @@
-import {
+import type {
   BodyHistoryCreateRequest,
   BodyHistoryResponse,
   BodyHistoryUpdateRequest,
-} from '@types/bodyHistory';
+} from 'types/bodyHistory';
 import apiClient from './httpClient';
 
 const BASE_PATH = '/body-histories';

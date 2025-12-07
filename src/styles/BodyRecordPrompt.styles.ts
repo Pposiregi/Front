@@ -63,7 +63,7 @@ export default StyleSheet.create({
     marginBottom: 10,
     ...Platform.select({
       ios: cardShadow,
-      android: { elevation: 2 },
+      android: { ...cardShadow, elevation: 2 },
     }),
   },
   fieldHeader: {
