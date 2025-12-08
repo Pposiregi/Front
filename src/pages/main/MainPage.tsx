@@ -155,7 +155,7 @@ export const MainPage = () => {
    * - isTracking이 true면 산책 중이므로 종료
    * - isTracking이 false면 산책 전이므로 시작
    */
-  const handleToggleTracking = useCallback(async () => {
+  const handleToggleTracking = useCallback(() => {
     // 이미 추적 중이면 즉시 종료하고, 그렇지 않으면 권한 확인 후 추적을 시작한다.
     if (isTracking) {
       stopTracking();
@@ -163,7 +163,7 @@ export const MainPage = () => {
       return;
     }
     setCountdown(3);
-  }, [isTracking, startTracking, stopTracking]);
+  }, [isTracking, stopTracking]);
 
   const markSkipToday = useCallback(async () => {
     const todayKey = formatDateKey(new Date());
@@ -249,7 +249,7 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown]);
+  }, [countdown, startTracking]);
 
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
