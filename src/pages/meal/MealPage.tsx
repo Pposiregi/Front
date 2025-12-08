@@ -104,11 +104,6 @@ function MealPage() {
     [calendarPreview, selectedDateKey]
   );
 
-  const selectedDatePreviewImages = useMemo(
-    () => selectedDatePreviewImageUris.map((uri) => ({ uri })),
-    [selectedDatePreviewImageUris]
-  );
-
   const selectedMeals = useMemo<MealListItem[]>(() => {
     if (previousDateKeyRef.current !== selectedDateKey) {
       mealImageFallbacksRef.current = {};
@@ -390,7 +385,10 @@ function MealPage() {
         keepPrevious: false,
         silent: true,
       });
-      handleCloseModal();
+      // 연속 추가를 위해 모달은 닫지 않고 입력만 초기화한다.
+      setMealTitle('');
+      setMealCalories('');
+      setMealImage(null);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error('>>>[MealPage] Meal API error detail', {
@@ -411,7 +409,6 @@ function MealPage() {
       );
     } finally {
       setIsSavingMeal(false);
-      setMealImage(null);
     }
   };
 
@@ -691,7 +688,6 @@ function MealPage() {
         errorMessage={dayDetailError}
         pendingImageUri={mealImage?.uri ?? null}
         onPickImage={handlePickMealImage}
-        previewImages={selectedDatePreviewImages}
         onEditMeal={handleStartEditMeal}
         editingMealId={editingMealInfo?.mealId ?? null}
         editingMealTitle={editingMealTitle}
