@@ -9,15 +9,15 @@ export type DailyStepRankingApiItem = {
   dailyStepCount: number;
 };
 
-export type DailyStepRankingApiResponse = {
-  top10: DailyStepRankingApiItem[];
-  myRank: number;
-};
-
 export type DailyStepRankingItem = {
   userId: number;
   nickname: string;
   dailyStepCount: number;
+};
+
+export type DailyStepRankingApiResponse = {
+  top10: DailyStepRankingApiItem[];
+  myRank: number;
 };
 
 export type DailyStepRankingResponse = {
