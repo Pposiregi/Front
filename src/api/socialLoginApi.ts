@@ -11,7 +11,6 @@ export const getSocialLogin = async ({
   platform,
 }: GetSocialLoginPlatformRequest): Promise<SocialLoginResponse> => {
   const url = `/auth/oauth/${platform}`;
-
   // 플랫폼에 따라 body 분기
   let body: any = {};
 
@@ -22,7 +21,7 @@ export const getSocialLogin = async ({
   if (platform === 'kakao') {
     body.accessToken = accessToken;
   }
-
+  console.log('바디 데이터 확인', body);
   const { data } = await apiClient.post<SocialLoginApiResponse>(url, body);
   console.log('데이터 확인', data);
   return data;
