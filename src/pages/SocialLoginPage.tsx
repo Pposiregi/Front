@@ -137,11 +137,11 @@ const SocialLoginPage = () => {
   // 구글 로그인
   const signInWithGoogle = async () => {
     await GoogleSignin.hasPlayServices();
-    // GoogleSignin.configure({
-    //   webClientId:
-    //     '670074275623-4pqtm5i7a7octebi7qnpgsvb1m0sh3l6.apps.googleusercontent.com', // 서버와 동일하게
-    //   offlineAccess: true, // refresh token 발급 원하면 true
-    // });
+    GoogleSignin.configure({
+      webClientId:
+        '670074275623-4pqtm5i7a7octebi7qnpgsvb1m0sh3l6.apps.googleusercontent.com', // 서버와 동일하게
+      offlineAccess: true, // refresh token 발급 원하면 true
+    });
     const profile = await GoogleSignin.signIn();
     console.log('프로필', profile);
     // const idToken= profile.data?.idToken 아이디 토큰
