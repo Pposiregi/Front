@@ -7,6 +7,8 @@ import userSlice from '../../slices/user';
 import OptionalInfoPage from './OptionalInfoPage';
 import PermissionPage from './PermissionPage';
 import UserInfoPage from './UserInfoPage';
+import { signUp } from '@api/authApi';
+import { authRequest, signUpFormData } from '../../types/auth';
 
 const IntroPage = () => {
   //현재 페이지 주소 나타냄
@@ -38,20 +40,17 @@ const IntroPage = () => {
   }, [dispatch]);
 
   // 서버에 보낼 사용자 정보 저장
-  const [formData, setFormData] = useState({
-    // PermissionPage 정보
+  const [formData, setFormData] = useState<signUpFormData>({
     permissions: {
       locationAgree: false,
       privacyAgree: false,
       pushAgree: false,
     },
-    // UserInfoPage 정보
     nickName: '',
     birth: { year: '', month: '', day: '' },
-    gender: null as 'male' | 'female' | null,
+    gender: null,
     weightKg: '',
     heightCm: '',
-    // OptionalInfoPage 정보
     targetWeightKg: '',
     pbf: '',
     targetPbf: '',
@@ -70,12 +69,32 @@ const IntroPage = () => {
       setCurrentPage(currentPage + 1);
     }
   };
+  const buildFinalSignUpData = (formData: signUpFormData): authRequest => {
+    const { birth } = formData;
 
+    // 생일 → 나이 변환
+    const age = birth.year ? new Date().getFullYear() - Number(birth.year) : 0;
+
+    return {
+      nickname: formData.nickName,
+      age,
+      gender: formData.gender,
+      weightKg: Number(formData.weightKg),
+      heightCm: Number(formData.heightCm),
+      targetWeightKg: Number(formData.targetWeightKg),
+      pbf: Number(formData.pbf),
+      targetPbf: Number(formData.targetPbf),
+      targetStepCount: Number(formData.targetStepCount),
+      // permissions는 서버에 보내지 않음
+    };
+  };
   const handleFinish = async (data: Partial<typeof formData>) => {
-    const finalFormData = { ...formData, ...data };
-    console.log('검증', finalFormData);
+    const finalData = buildFinalSignUpData(formData);
+    console.log('회원가입 사용자 정보 검증', finalData);
     // AsyncStorage, Redux 업데이트
     try {
+      const result = await signUp(finalData);
+      console.log('>>>>> 회원가입 성공', result);
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {

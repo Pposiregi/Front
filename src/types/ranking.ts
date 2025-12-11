@@ -1,6 +1,6 @@
 export type GetDailyStepRankingRequest = {
-  limit?: number;
-  gender?: 'ALL' | 'MALE' | 'FEMALE';
+  limit: number;
+  gender: 'ALL' | 'MALE' | 'FEMALE';
 };
 
 export type DailyStepRankingApiItem = {
