@@ -39,22 +39,23 @@ const IntroPage = () => {
 
   // 서버에 보낼 사용자 정보 저장
   const [formData, setFormData] = useState({
-    // SignUp 정보
+    // PermissionPage 정보
     permissions: {
       locationAgree: false,
       privacyAgree: false,
       pushAgree: false,
     },
-    // SignUp2 정보
+    // UserInfoPage 정보
     nickName: '',
     birth: { year: '', month: '', day: '' },
     gender: null as 'male' | 'female' | null,
-    weight: '',
-    height: '',
-    // SignUp3 정보
-    targetWeight: '',
-    currentPbf: '',
+    weightKg: '',
+    heightCm: '',
+    // OptionalInfoPage 정보
+    targetWeightKg: '',
+    pbf: '',
     targetPbf: '',
+    targetStepCount: '',
   });
   const handleNext = (data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
