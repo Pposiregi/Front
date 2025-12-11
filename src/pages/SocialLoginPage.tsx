@@ -85,8 +85,8 @@ const SocialLoginPage = () => {
     try {
       console.log('>>> firstLoginCheck request', {
         platform,
-        hasIdToken: !!idToken,
-        hasAccessToken: !!accessToken,
+        idToken: idToken,
+        accessToken: accessToken,
       });
 
       const result = await getSocialLogin({
@@ -94,15 +94,10 @@ const SocialLoginPage = () => {
         accessToken,
         platform,
       });
-
+      console.log('로그인 성공 후 전달받은 result : ', result);
       if (!result.success) {
         throw new Error('서버 로그인 실패');
       }
-
-      console.log('>>> firstLoginCheck response', {
-        registrationStatus: result.registrationStatus,
-        tokenLen: result.serverAccessToken?.length,
-      });
 
       // 서버 액세스 토큰 저장
       await EncryptedStorage.setItem(
@@ -152,28 +147,20 @@ const SocialLoginPage = () => {
 
   // 구글 로그인
   const signInWithGoogle = async () => {
-    const LOG = '>>> GoogleLogin';
     try {
-      console.log(`${LOG} start, clientId(env):`, GOOGLE_CLIENT_ID);
       const profile = await GoogleSignin.signIn();
-      console.log(`${LOG} profile:`, profile);
-
       const idToken = profile.data?.idToken;
-      console.log(`${LOG} idToken exists:`, !!idToken);
-      console.log('콘솔ㄹ로그', idToken);
       if (!idToken) {
         throw new Error('idToken 없음');
       }
-
       await AsyncStorage.setItem('platform', 'google');
-
       await firstLoginCheck({
         platform: 'google',
         idToken,
         accessToken: '',
       });
     } catch (err) {
-      console.error(`${LOG} error`, err);
+      console.error('error', err);
       throw err;
     }
   };

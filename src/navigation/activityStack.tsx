@@ -9,7 +9,7 @@ export type ActivityStackParamList = {
   };
 };
 const Stack = createNativeStackNavigator<ActivityStackParamList>();
-const activityStack = () => {
+const ActivityStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -26,4 +26,4 @@ const activityStack = () => {
   );
 };
 
-export default activityStack;
+export default ActivityStack;
