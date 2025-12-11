@@ -112,8 +112,6 @@ const normalizeMealDetailItem = (
   const cacheKey =
     item.imageUpdatedAt ??
     item.image_updated_at ??
-    item.mealId ??
-    item.meal_id ??
     null;
 
   const imageUri =

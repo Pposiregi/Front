@@ -265,7 +265,7 @@ function ProfilePage() {
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>내 바디~~~</Text>
+          <Text style={styles.sectionTitle}>내 몸 상태</Text>
           <Pressable
             style={styles.recordButton}
             onPress={() => setRecordModalVisible(true)}
@@ -288,7 +288,7 @@ function ProfilePage() {
         <MetricCard label='체지방률' value={bodyFatValue} unit='%' />
 
         <View style={[styles.sectionHeader, styles.chartHeader]}>
-          <Text style={styles.sectionTitle}>내 바디 변화량~~~</Text>
+          <Text style={styles.sectionTitle}>내 몸 변화</Text>
         </View>
 
         <View style={styles.chartCard}>
