@@ -133,11 +133,7 @@ const SocialLoginPage = () => {
   // 카카오 로그인 // 라이브러리 삭제 후 웹뷰 형식으로 변경 예정
   const signInWithKakao = async (): Promise<void> => {
     const token = await login();
-    const profile = await getProfile();
-    await EncryptedStorage.setItem('refreshToken', token.refreshToken);
     await AsyncStorage.setItem('platform', 'kakao');
-    console.log('카카오 idToken : ', token.idToken!);
-    console.log('카카오 accessToken : ', token.accessToken);
     await firstLoginCheck({
       platform: 'kakao',
       idToken: token.idToken!,

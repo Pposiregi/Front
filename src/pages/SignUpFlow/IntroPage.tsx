@@ -8,7 +8,7 @@ import OptionalInfoPage from './OptionalInfoPage';
 import PermissionPage from './PermissionPage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
-import { authRequest, signUpFormData } from '../../types/auth';
+import { authRequest } from '../../types/auth';
 
 const IntroPage = () => {
   //현재 페이지 주소 나타냄
@@ -40,17 +40,20 @@ const IntroPage = () => {
   }, [dispatch]);
 
   // 서버에 보낼 사용자 정보 저장
-  const [formData, setFormData] = useState<signUpFormData>({
+  const [formData, setFormData] = useState({
+    // PermissionPage 정보
     permissions: {
       locationAgree: false,
       privacyAgree: false,
       pushAgree: false,
     },
+    // UserInfoPage 정보
     nickName: '',
     birth: { year: '', month: '', day: '' },
-    gender: null,
+    gender: null as 'male' | 'female' | null,
     weightKg: '',
     heightCm: '',
+    // OptionalInfoPage 정보
     targetWeightKg: '',
     pbf: '',
     targetPbf: '',
@@ -69,56 +72,45 @@ const IntroPage = () => {
       setCurrentPage(currentPage + 1);
     }
   };
-  const buildFinalSignUpData = (formData: signUpFormData): authRequest => {
-    const { birth } = formData;
 
-    // 생일 → 나이 변환
-    const age = birth.year ? new Date().getFullYear() - Number(birth.year) : 0;
-
-    return {
-      nickname: formData.nickName,
-      age,
-      gender: formData.gender,
-      weightKg: Number(formData.weightKg),
-      heightCm: Number(formData.heightCm),
-      targetWeightKg: Number(formData.targetWeightKg),
-      pbf: Number(formData.pbf),
-      targetPbf: Number(formData.targetPbf),
-      targetStepCount: Number(formData.targetStepCount),
-      // permissions는 서버에 보내지 않음
-    };
-  };
   const handleFinish = async (data: Partial<typeof formData>) => {
-    const finalData = buildFinalSignUpData(formData);
-    console.log('회원가입 사용자 정보 검증', finalData);
-    // AsyncStorage, Redux 업데이트
+    const finalFormData = { ...formData, ...data };
+
+    // 생년월일 → 나이 계산
+    const { year, month, day } = finalFormData.birth;
+    const birthDate = new Date(Number(year), Number(month) - 1, Number(day));
+    const age =
+      new Date().getFullYear() -
+      birthDate.getFullYear() -
+      (new Date().getMonth() < birthDate.getMonth() ||
+      (new Date().getMonth() === birthDate.getMonth() &&
+        new Date().getDate() < birthDate.getDate())
+        ? 1
+        : 0);
+
+    // authRequest 타입에 맞게 변환
+    const requestBody: authRequest = {
+      nickname: finalFormData.nickName,
+      age,
+      gender: finalFormData.gender as 'male' | 'female',
+      weightKg: Number(finalFormData.weightKg),
+      heightCm: Number(finalFormData.heightCm),
+      targetWeightKg: Number(finalFormData.targetWeightKg),
+      pbf: Number(finalFormData.pbf),
+      targetPbf: Number(finalFormData.targetPbf),
+      targetStepCount: Number(finalFormData.targetStepCount),
+    };
+
+    console.log('최종 회원가입 payload: ', requestBody);
+
     try {
-      const result = await signUp(finalData);
+      const result = await signUp(requestBody);
       console.log('>>>>> 회원가입 성공', result);
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
       console.error('회원가입 상태 업데이트 실패', err);
     }
-
-    // // 서버에 최종 데이터 전송
-    // try {
-    //   const res = await fetch('https://your-server.com/signup', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(finalFormData),
-    //   });
-    //   if (!res.ok) throw new Error('회원가입 실패');
-    //   const result = await res.json();
-    //   console.log('회원가입 성공:', result);
-    //   // 여기서 다음 화면 이동 가능
-    // } catch (err) {
-    //   console.error(err);
-    //   Alert.alert(
-    //     '오류',
-    //     '회원가입 중 문제가 발생했습니다. 다시 시도해 주세요.'
-    //   );
-    // }
   };
 
   return (

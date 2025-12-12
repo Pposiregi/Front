@@ -1,7 +1,7 @@
 export type authRequest = {
   nickname: string;
   age: number;
-  gender: 'male' | 'female' | null;
+  gender: 'male' | 'female';
   weightKg: number;
   heightCm: number;
   targetWeightKg: number;
@@ -15,7 +15,7 @@ export type authResponse = {
   email: string;
   nickname: string;
   age: number;
-  gender: 'male' | 'female' | null;
+  gender: 'male' | 'female';
   weightKg: number;
   targetWeightKg: number;
   heightCm: number;
@@ -35,15 +35,15 @@ export type signUpFormData = {
   };
   nickName: string;
   birth: {
-    year: string;
-    month: string;
-    day: string;
+    year: number;
+    month: number;
+    day: number;
   };
-  gender: 'male' | 'female' | null;
-  weightKg: string;
-  heightCm: string;
-  targetWeightKg: string;
-  pbf: string;
-  targetPbf: string;
-  targetStepCount: string;
+  gender: 'male' | 'female';
+  weightKg: number;
+  heightCm: number;
+  targetWeightKg: number;
+  pbf: number;
+  targetPbf: number;
+  targetStepCount: number;
 };

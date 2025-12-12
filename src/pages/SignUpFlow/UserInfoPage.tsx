@@ -28,8 +28,8 @@ type UserInfoProps = {
       day: string;
     };
     gender: 'male' | 'female';
-    weight: string;
-    height: string;
+    weight: number;
+    height: number;
   }) => void;
 };
 
@@ -66,7 +66,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
   const onChangeHeight = useCallback((text: string) => {
     setHeight(text.trim());
   }, []);
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
     if (!nickName || !nickName.trim())
       return Alert.alert('알림', '닉네임을 입력해주세요.');
     if (!year || !year.trim())
@@ -123,8 +123,8 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
         day,
       },
       gender,
-      weight,
-      height,
+      weight: Number(weight),
+      height: Number(height),
     });
   }, [nickName, year, month, day, gender, weight, height]);
 

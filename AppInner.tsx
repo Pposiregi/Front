@@ -25,6 +25,7 @@ import SplashScreen from 'react-native-splash-screen';
 import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
 import HealthConnectRequired from '@pages/HealthConnectRequired';
 import { tabIcons, TabIconKey } from '@assets/icons';
+import { refreshAccessToken } from '@api/authApi';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -103,38 +104,32 @@ function AppInner() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // AsyncStorage에서 회원가입 상태를 가져와 리덕스에 동기화
-        const signUpInProgressValue = await AsyncStorage.getItem(
-          'isSignUpInProgress'
-        );
-        const isSignUp = signUpInProgressValue === 'true';
-        dispatch(userSlice.actions.setSignUpInProgress(isSignUp)); // EncryptedStorage에서 토큰을 가져와 로그인 상태를 확인
-
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
-          const platform = await AsyncStorage.getItem('platform');
-          if (platform) {
-            const platformRefresher =
-              tokenRefreshers[platform as keyof typeof tokenRefreshers];
-            const { accessToken, refreshToken: newRefreshToken } =
-              await platformRefresher(refreshToken);
-            if (newRefreshToken) {
-              await EncryptedStorage.setItem('refreshToken', newRefreshToken);
-            } // 로그인 상태를 리덕스에 동기화
-            dispatch(userSlice.actions.setUser({ accessToken }));
+          const result = await refreshAccessToken();
+          if (result?.serverAccessToken) {
+            dispatch(
+              userSlice.actions.setUser({
+                accessToken: result.serverAccessToken,
+              })
+            );
+            dispatch(
+              userSlice.actions.setSignUpInProgress(
+                result.registrationStatus === 'INCOMPLETE'
+              )
+            );
           }
         }
       } catch (err) {
-        console.error(`[AuthError] 인증 상태 확인 실패:`, err);
+        console.error('[AuthError] 자동로그인 실패', err);
       } finally {
-        // 4. 모든 비동기 작업이 완료된 후 로딩 상태를 false로 변경
         SplashScreen.hide();
         setLoading(false);
       }
     };
 
     checkAuthStatus();
-  }, [dispatch]); // 로딩 중일 때는 로딩 화면만 렌더링
+  }, [dispatch]);
 
   if (loading) {
     console.log('>>> Rendering loading indicator');
