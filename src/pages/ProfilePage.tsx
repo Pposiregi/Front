@@ -102,7 +102,6 @@ function ProfilePage() {
       );
       setHistories(sorted);
     } catch (err) {
-      console.error('[Profile] 몸 기록 불러오기 실패', err);
       Alert.alert('불러오기 실패', '몸 기록을 불러오지 못했어요.');
     } finally {
       setLoading(false);
@@ -157,7 +156,17 @@ function ProfilePage() {
 
   const chartData = useMemo(() => {
     if (!histories.length) return fallbackChartData;
-    const recent = [...histories].slice(0, 7).reverse(); // 차트는 시간순으로 표시
+    const sanitized = histories
+      .map((history) => ({
+        baseDate: history.baseDate ?? '',
+        weightKg: Number(history.weightKg) || 0,
+        pbf: Number(history.pbf) || 0,
+      }))
+      .filter((item) => item.baseDate);
+
+    if (!sanitized.length) return fallbackChartData;
+
+    const recent = sanitized.slice(0, 7).reverse(); // 차트는 시간순으로 표시
     return {
       labels: recent.map((history) => history.baseDate.slice(5)),
       datasets: [

@@ -152,6 +152,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
   },
+  input: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: '#111827',
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  chipSelected: {
+    borderColor: '#F59E0B',
+    backgroundColor: '#FFF7ED',
+  },
+  chipText: {
+    fontFamily: 'GowunDodum',
+    fontSize: 14,
+    color: '#4B5563',
+  },
+  chipTextSelected: {
+    color: '#C2410C',
+    fontWeight: '700',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
 });
 
 export default styles;

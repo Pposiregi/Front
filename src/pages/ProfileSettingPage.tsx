@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -9,6 +17,8 @@ import styles from '@styles/ProfileSettings.styles';
 import { useAppDispatch } from '@store/index';
 import userSlice from '@slices/user';
 import { ProfileStackNavigationProp } from '@navigation/profileStack';
+import { updatePetProfile, updateUserProfile } from '@api/profileApi';
+import type { PetType } from 'types/profile';
 
 type SettingRowProps = {
   label: string;
@@ -38,6 +48,21 @@ const ProfileSettingPage = () => {
   const dispatch = useAppDispatch();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
+  const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
+  const [petModalVisible, setPetModalVisible] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState('');
+  const [petNameInput, setPetNameInput] = useState('');
+  const [petType, setPetType] = useState<PetType>('DOG');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingGoal, setSavingGoal] = useState(false);
+  const [savingPet, setSavingPet] = useState(false);
+  const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
+  const [targetWeightInput, setTargetWeightInput] = useState('');
+  const [targetPbfInput, setTargetPbfInput] = useState('');
+
+  // TODO: 실제 로그인 사용자/펫 정보로 교체 필요
+  const API_USER_ID = 3;
+  const API_PET_ID = 1;
 
   const commonNotice = useMemo(
     () =>
@@ -56,7 +81,6 @@ const ProfileSettingPage = () => {
     try {
       const platform = await AsyncStorage.getItem('platform');
       if (platform === 'google') {
-        await GoogleSignin.revokeAccess();
         await GoogleSignin.signOut();
       } else if (platform === 'kakao') {
         await kakaoLogout();
@@ -109,22 +133,15 @@ const ProfileSettingPage = () => {
         <View style={styles.section}>
           <SettingRow
             label='계정설정'
-            onPress={() => Alert.alert('계정설정', commonNotice)}
+            onPress={() => setNicknameModalVisible(true)}
           />
           <SettingRow
             label='내 몸 목표 수정'
-            onPress={() =>
-              Alert.alert(
-                '내 몸 목표 수정',
-                '다음 배포에서 목표 수정 화면을 연결합니다.'
-              )
-            }
+            onPress={() => setBodyGoalModalVisible(true)}
           />
           <SettingRow
             label='내 펫 설정'
-            onPress={() =>
-              Alert.alert('내 펫 설정', '펫 정보 변경 화면 준비 중입니다.')
-            }
+            onPress={() => setPetModalVisible(true)}
           />
         </View>
 
@@ -199,6 +216,234 @@ const ProfileSettingPage = () => {
                 onPress={confirmWithdraw}
               >
                 <Text style={styles.modalConfirmText}>확인</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 닉네임 수정 모달 */}
+      <Modal
+        visible={nicknameModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setNicknameModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>닉네임 수정</Text>
+            <Text style={styles.modalBody}>
+              새 닉네임을 입력하세요. (2~20자)
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder='닉네임'
+              value={nicknameInput}
+              onChangeText={setNicknameInput}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setNicknameModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>취소</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.modalButton,
+                  styles.modalConfirm,
+                  savingProfile && styles.buttonDisabled,
+                ]}
+                disabled={savingProfile}
+                onPress={async () => {
+                  if (nicknameInput.trim().length < 2) {
+                    Alert.alert('입력 오류', '닉네임을 2자 이상 입력하세요.');
+                    return;
+                  }
+                  setSavingProfile(true);
+                  try {
+                    await updateUserProfile(API_USER_ID, {
+                      nickname: nicknameInput.trim(),
+                    });
+                    Alert.alert('완료', '닉네임이 변경되었습니다.');
+                    setNicknameModalVisible(false);
+                  } catch (err) {
+                    console.error('[Profile] 닉네임 수정 실패', err);
+                    Alert.alert('실패', '닉네임을 수정하지 못했습니다.');
+                  } finally {
+                    setSavingProfile(false);
+                  }
+                }}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {savingProfile ? '저장 중...' : '저장'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 내 몸 목표 수정 모달 */}
+      <Modal
+        visible={bodyGoalModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setBodyGoalModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>내 몸 목표 수정</Text>
+            <Text style={styles.modalBody}>
+              목표 체중(kg)과 체지방률(%)을 입력하세요.
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder='목표 체중 (kg)'
+              keyboardType='decimal-pad'
+              value={targetWeightInput}
+              onChangeText={setTargetWeightInput}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder='목표 체지방률 (%)'
+              keyboardType='decimal-pad'
+              value={targetPbfInput}
+              onChangeText={setTargetPbfInput}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setBodyGoalModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>취소</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.modalButton,
+                  styles.modalConfirm,
+                  savingGoal && styles.buttonDisabled,
+                ]}
+                disabled={savingGoal}
+                onPress={async () => {
+                  const weight = Number(targetWeightInput);
+                  const pbf = Number(targetPbfInput);
+
+                  if (!targetWeightInput.trim() || Number.isNaN(weight)) {
+                    Alert.alert('입력 오류', '목표 체중을 올바르게 입력하세요.');
+                    return;
+                  }
+                  if (!targetPbfInput.trim() || Number.isNaN(pbf)) {
+                    Alert.alert(
+                      '입력 오류',
+                      '목표 체지방률을 올바르게 입력하세요.'
+                    );
+                    return;
+                  }
+
+                  setSavingGoal(true);
+                  try {
+                    await updateUserProfile(API_USER_ID, {
+                      targetWeightKg: weight,
+                      targetPbf: pbf,
+                    });
+                    Alert.alert('완료', '내 몸 목표가 수정되었습니다.');
+                    setBodyGoalModalVisible(false);
+                    setTargetWeightInput('');
+                    setTargetPbfInput('');
+                  } catch (err) {
+                    console.error('[Profile] 몸 목표 수정 실패', err);
+                    Alert.alert('실패', '몸 목표를 수정하지 못했습니다.');
+                  } finally {
+                    setSavingGoal(false);
+                  }
+                }}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {savingGoal ? '저장 중...' : '저장'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 펫 정보 수정 모달 */}
+      <Modal
+        visible={petModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setPetModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>펫 정보 수정</Text>
+            <Text style={styles.modalBody}>이름과 종류를 변경합니다.</Text>
+            <TextInput
+              style={styles.input}
+              placeholder='펫 이름'
+              value={petNameInput}
+              onChangeText={setPetNameInput}
+            />
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+              {(['DOG', 'CAT'] as PetType[]).map((type) => (
+                <Pressable
+                  key={type}
+                  style={[
+                    styles.chip,
+                    petType === type && styles.chipSelected,
+                  ]}
+                  onPress={() => setPetType(type)}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      petType === type && styles.chipTextSelected,
+                    ]}
+                  >
+                    {type === 'DOG' ? '강아지' : '고양이'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setPetModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>취소</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.modalButton,
+                  styles.modalConfirm,
+                  savingPet && styles.buttonDisabled,
+                ]}
+                disabled={savingPet}
+                onPress={async () => {
+                  if (!petNameInput.trim()) {
+                    Alert.alert('입력 오류', '펫 이름을 입력하세요.');
+                    return;
+                  }
+                  setSavingPet(true);
+                  try {
+                    await updatePetProfile(API_USER_ID, API_PET_ID, {
+                      name: petNameInput.trim(),
+                      petType,
+                    });
+                    Alert.alert('완료', '펫 정보가 변경되었습니다.');
+                    setPetModalVisible(false);
+                  } catch (err) {
+                    console.error('[Profile] 펫 정보 수정 실패', err);
+                    Alert.alert('실패', '펫 정보를 수정하지 못했습니다.');
+                  } finally {
+                    setSavingPet(false);
+                  }
+                }}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {savingPet ? '저장 중...' : '저장'}
+                </Text>
               </Pressable>
             </View>
           </View>
