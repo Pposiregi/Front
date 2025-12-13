@@ -180,6 +180,7 @@ const ProfileSettingPage = () => {
           <Pressable
             style={[styles.actionButton, styles.withdrawButton]}
             onPress={handleWithdraw}
+            disabled={isLoggingOut}
           >
             <Text style={styles.withdrawText}>회원탈퇴</Text>
           </Pressable>

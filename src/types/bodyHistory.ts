@@ -23,6 +23,4 @@ export type BodyHistoryUpdateRequest = {
   baseDate: string; // YYYY-MM-DD
 };
 
-export type BodyHistoryFormValues = BodyHistoryUpdateRequest & {
-  baseDate: string;
-};
+export type BodyHistoryFormValues = BodyHistoryUpdateRequest;

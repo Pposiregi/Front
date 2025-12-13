@@ -34,7 +34,10 @@ import { useRouteTracking } from '@hooks/useRouteTracking';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
-import { createBodyHistory } from '@api/bodyHistoryApi';
+import {
+  createBodyHistory,
+  getBodyHistoryByDate,
+} from '@api/bodyHistoryApi';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const BODY_HISTORY_USER_ID = 3;
@@ -102,6 +105,28 @@ export const MainPage = () => {
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
+  const checkTodayBodyHistory = useCallback(async () => {
+    const todayKey = formatDateKey(new Date());
+    try {
+      const existing = await getBodyHistoryByDate(
+        BODY_HISTORY_USER_ID,
+        todayKey
+      );
+      if (existing) {
+        // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
+        await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
+        setShowBodyPrompt(false);
+        return true;
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        return false; // 기록 없음
+      }
+      console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
+    }
+    return false;
+  }, []);
+
   useEffect(() => {
     const loadPromptState = async () => {
       const todayKey = formatDateKey(new Date());
@@ -111,6 +136,8 @@ export const MainPage = () => {
           setShowBodyPrompt(false);
           return;
         }
+        const hasTodayRecord = await checkTodayBodyHistory();
+        if (hasTodayRecord) return;
         setShowBodyPrompt(true);
       } catch (err) {
         console.error('[BodyPrompt] 상태 로딩 실패', err);
@@ -119,7 +146,7 @@ export const MainPage = () => {
     };
 
     loadPromptState();
-  }, []);
+  }, [checkTodayBodyHistory]);
 
   /* 펫 표정 관리 위해 FSM 상태 추가 */
   const { state: petState, transition: changePetState } = usePetFSM();
