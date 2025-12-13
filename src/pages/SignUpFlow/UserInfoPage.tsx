@@ -28,8 +28,8 @@ type UserInfoProps = {
       day: string;
     };
     gender: 'male' | 'female';
-    weight: number;
-    height: number;
+    weightKg: string;
+    heightCm: string;
   }) => void;
 };
 
@@ -39,8 +39,8 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [weightKg, setWeight] = useState('');
+  const [heightCm, setHeight] = useState('');
   const nameRef = useRef<TextInput | null>(null);
   const yearRef = useRef<TextInput | null>(null);
   const monthRef = useRef<TextInput | null>(null);
@@ -76,9 +76,9 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
     if (!day || !day.trim())
       return Alert.alert('알림', '출생 일을 입력해주세요.');
     if (!gender) return Alert.alert('알림', '성별을 선택해주세요.');
-    if (!weight || !weight.trim())
+    if (!weightKg || !weightKg.trim())
       return Alert.alert('알림', '몸무게를 입력해주세요.');
-    if (!height || !height.trim())
+    if (!heightCm || !heightCm.trim())
       return Alert.alert('알림', '키를 입력해주세요.');
 
     const y = parseInt(year);
@@ -106,12 +106,12 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
     }
 
     // 몸무게 검증
-    if (!isValidWeight(weight)) {
+    if (!isValidWeight(weightKg)) {
       return Alert.alert('알림', '올바른 체중을 입력해주세요.');
     }
 
     // 몸무게 검증
-    if (!isValidHeight(height)) {
+    if (!isValidHeight(heightCm)) {
       return Alert.alert('알림', '올바른 키를 입력해주세요.');
     }
     // 모든 체크 통과
@@ -123,13 +123,13 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
         day,
       },
       gender,
-      weight: Number(weight),
-      height: Number(height),
+      weightKg,
+      heightCm,
     });
-  }, [nickName, year, month, day, gender, weight, height]);
+  }, [nickName, year, month, day, gender, weightKg, heightCm]);
 
   const canGoNext =
-    nickName && year && month && day && gender && weight && height;
+    nickName && year && month && day && gender && weightKg && heightCm;
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정

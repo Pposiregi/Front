@@ -2,12 +2,12 @@ export type authRequest = {
   nickname: string;
   age: number;
   gender: 'male' | 'female';
-  weightKg: number;
-  heightCm: number;
-  targetWeightKg: number;
-  pbf: number;
-  targetPbf: number;
-  targetStepCount: number;
+  weightKg?: number;
+  heightCm?: number;
+  targetWeightKg?: number;
+  pbf?: number;
+  targetPbf?: number;
+  targetStepCount?: number;
 };
 
 export type authResponse = {

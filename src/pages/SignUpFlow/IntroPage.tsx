@@ -75,7 +75,6 @@ const IntroPage = () => {
 
   const handleFinish = async (data: Partial<typeof formData>) => {
     const finalFormData = { ...formData, ...data };
-
     // 생년월일 → 나이 계산
     const { year, month, day } = finalFormData.birth;
     const birthDate = new Date(Number(year), Number(month) - 1, Number(day));
@@ -88,24 +87,25 @@ const IntroPage = () => {
         ? 1
         : 0);
 
+    // 빈 값 처리 + number 변환
+    const toNumberOrUndefined = (value: string) =>
+      value.trim() === '' ? undefined : Number(value);
+
     // authRequest 타입에 맞게 변환
     const requestBody: authRequest = {
       nickname: finalFormData.nickName,
       age,
       gender: finalFormData.gender as 'male' | 'female',
-      weightKg: Number(finalFormData.weightKg),
-      heightCm: Number(finalFormData.heightCm),
-      targetWeightKg: Number(finalFormData.targetWeightKg),
-      pbf: Number(finalFormData.pbf),
-      targetPbf: Number(finalFormData.targetPbf),
-      targetStepCount: Number(finalFormData.targetStepCount),
+      weightKg: toNumberOrUndefined(finalFormData.weightKg),
+      heightCm: toNumberOrUndefined(finalFormData.heightCm),
+      targetWeightKg: toNumberOrUndefined(finalFormData.targetWeightKg),
+      pbf: toNumberOrUndefined(finalFormData.pbf),
+      targetPbf: toNumberOrUndefined(finalFormData.targetPbf),
+      targetStepCount: toNumberOrUndefined(finalFormData.targetStepCount),
     };
-
-    console.log('최종 회원가입 payload: ', requestBody);
 
     try {
       const result = await signUp(requestBody);
-      console.log('>>>>> 회원가입 성공', result);
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {

@@ -4,11 +4,11 @@ import apiClient from './httpClient';
 
 export const signUp = async (formData: authRequest) => {
   try {
-    console.log('이게 포장이묹넨가', formData);
     const response = await apiClient.patch<authResponse>(
       `/users/signUp/complete`,
       formData
     );
+    console.log('----- 회원가입 성공 -----');
     console.log('>>>>> signUpApi response : ', response);
     return response.data;
   } catch (err) {
@@ -23,8 +23,6 @@ export const refreshAccessToken = async (): Promise<{
 } | null> => {
   try {
     const refreshToken = await EncryptedStorage.getItem('refreshToken');
-    console.log('흠 여기가없나', refreshToken);
-    [];
 
     if (!refreshToken) throw new Error('refreshToken 없음');
     const response = await apiClient.post<{
@@ -35,9 +33,8 @@ export const refreshAccessToken = async (): Promise<{
       {},
       {
         headers: {
-          Cookie: `REFRESH_TOKEN=${refreshToken}`,
+          Authorization: `Bearer ${refreshToken}`,
         },
-        withCredentials: true,
       }
     );
     console.log('>>>>> refreshAccessToken response : ', response);

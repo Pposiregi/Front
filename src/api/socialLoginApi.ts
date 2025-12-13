@@ -23,11 +23,8 @@ export const getSocialLogin = async ({
 
   try {
     const response = await apiClient.post<SocialLoginApiResponse>(url, body);
-
     const setCookieHeader = response.headers['set-cookie'];
-
     if (setCookieHeader) {
-      // 예: "refreshToken=abcd1234; Path=/; HttpOnly; Secure"
       const cookieString = Array.isArray(setCookieHeader)
         ? setCookieHeader.join(';')
         : setCookieHeader;
@@ -35,7 +32,6 @@ export const getSocialLogin = async ({
       if (match) {
         const refreshToken = match[1];
         await EncryptedStorage.setItem('refreshToken', refreshToken);
-        console.log('refreshToken 이거 해보자', refreshToken);
       }
     } else {
       console.log('Set-Cookie 헤더가 응답에 없습니다.');
