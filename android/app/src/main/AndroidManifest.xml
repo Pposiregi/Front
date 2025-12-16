@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+    
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -13,10 +16,10 @@
      <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
     
     <!-- Health Connect, Background 걸음 수 체크용 -->
-    <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <!-- 디버그에서 write 권한 쓰기 위함 -->
-    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
-
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
 
     <application
       android:name=".MainApplication"
@@ -61,24 +64,25 @@
 
       <!-- Health Connect 온보딩 진입 지점 (Android 13 이하 APK 버전) -->
       <activity
-        android:name=".healthconnect.OnboardingActivity"
-        android:exported="true"
-        android:permission="com.google.android.apps.healthdata.permission.START_ONBOARDING">
+          android:name=".PermissionsRationaleActivity"
+          android:exported="true">
         <intent-filter>
-          <action android:name="androidx.health.ACTION_SHOW_ONBOARDING" />
+          <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
         </intent-filter>
       </activity>
 
       <!-- Android 14 이상 플랫폼 Health Connect 온보딩 진입 지점 -->
-      <activity-alias
-        android:name=".healthconnect.UAndAboveOnboardingActivity"
-        android:exported="true"
-        android:permission="android.permission.health.START_ONBOARDING"
-        android:targetActivity=".healthconnect.OnboardingActivity">
-        <intent-filter>
-          <action android:name="android.health.connect.action.SHOW_ONBOARDING" />
-        </intent-filter>
-      </activity-alias>
+  <activity-alias
+      android:name="ViewPermissionUsageActivity"
+      android:exported="true"
+      android:targetActivity=".PermissionsRationaleActivity"
+      android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+    <intent-filter>
+      <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+      <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+    </intent-filter>
+  </activity-alias>
+
       <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="${GOOGLE_MAPS_API_KEY}" />

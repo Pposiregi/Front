@@ -10,6 +10,7 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import com.fitpet.healthconnect.HealthConnectAvailability
 import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
 import org.devio.rn.splashscreen.SplashScreen
 
@@ -21,6 +22,7 @@ class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     SplashScreen.show(this)
     super.onCreate(savedInstanceState)
+    HealthConnectAvailability.ensureAvailable(this) // SDK 상태 확인 및 필요 시 스토어 리디렉션
     HealthConnectPermissionDelegate.setPermissionDelegate(this) // 2025.10.26 MAN]Health Connect 권한 위임 설정
     requestNotificationPermissionIfNeeded()
   }
