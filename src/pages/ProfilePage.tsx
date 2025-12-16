@@ -27,9 +27,9 @@ import type {
 const CONTENT_PADDING = 20;
 const CHART_CARD_PADDING = 14;
 const API_USER_ID = 3;
-const FALLBACK_HEIGHT = 177;
-const FALLBACK_WEIGHT = 85;
-const FALLBACK_BODY_FAT = 18;
+const FALLBACK_HEIGHT = 0;
+const FALLBACK_WEIGHT = 0;
+const FALLBACK_BODY_FAT = 0;
 
 type MetricCardProps = {
   label: string;
@@ -134,17 +134,20 @@ function ProfilePage() {
   const todayKey = formatDateKey(new Date());
   const todayLabel = formatDateLabel(new Date());
 
+  /*
+    차트용 초기 더미 데이터 생성
+  */
   const fallbackChartData = useMemo(
     () => ({
       labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       datasets: [
         {
-          data: [3, 5, 4, 7, 5, 6, 4],
+          data: [0, 0, 0, 0, 0, 0, 0],
           color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
           strokeWidth: 3,
         },
         {
-          data: [15, 16, 15.5, 15.2, 15.4, 15.1, 15.3],
+          data: [1, 0, 1, 0, 1, 0, 1],
           color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
           strokeWidth: 3,
         },
