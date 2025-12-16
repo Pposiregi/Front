@@ -124,7 +124,12 @@ export default StyleSheet.create({
   progressBar: {
     height: 8,
     borderRadius: 10,
+  },
+  weightProgressBar: {
     backgroundColor: '#7385F5',
+  },
+  fatProgressBar: {
+    backgroundColor: '#7B5EF7',
   },
   aimText: {
     marginTop: 6,
