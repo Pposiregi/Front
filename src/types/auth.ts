@@ -33,7 +33,7 @@ export type signUpFormData = {
     privacyAgree: boolean;
     pushAgree: boolean;
   };
-  nickName: string;
+  nickname: string;
   birth: {
     year: number;
     month: number;
