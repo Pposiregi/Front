@@ -16,6 +16,6 @@ export type SocialLoginApiResponse = {
 
 export type SocialLoginResponse = {
   success: true;
-  registrationStatus: string;
+  registrationStatus: RegistrationStatus;
   serverAccessToken: string;
 };
