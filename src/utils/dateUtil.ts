@@ -41,3 +41,11 @@ export const parseDateKey = (dateKey: string) => {
   }
   return new Date(year, month, day);
 };
+
+/**
+ * 'YYYY년 M월 D일' 형식으로 날짜 라벨을 반환합니다.
+ * @param date {Date} 날짜 객체
+ * @returns {string} 한글 날짜 라벨
+ */
+export const formatDateLabel = (date: Date) =>
+  `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;

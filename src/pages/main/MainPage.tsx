@@ -17,19 +17,30 @@ import {
   Animated,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
+import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import run_dog from '@assets/images/pet/run_dog.png';
+import mainBackGround_day from '@assets/images/mainBackground_day.png';
+import mainBackGround_day_wide from '@assets/images/mainBackground_day_wide.png';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
 import { useRouteTracking } from '@hooks/useRouteTracking';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
-import mainBackGround_day from '@assets/images/mainBackground_day.png';
-import mainBackGround_day_wide from '@assets/images/mainBackground_day_wide.png';
+import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import type { BodyHistoryFormValues } from 'types/bodyHistory';
+import {
+  createBodyHistory,
+  getBodyHistoryByDate,
+} from '@api/bodyHistoryApi';
+
+const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const BODY_HISTORY_USER_ID = 3;
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
@@ -84,6 +95,58 @@ export const MainPage = () => {
     useRouteTracking();
 
   const mapRef = useRef<MapView | null>(null);
+  const [mapLayout, setMapLayout] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [showBodyPrompt, setShowBodyPrompt] = useState(false);
+  const [savingBodyHistory, setSavingBodyHistory] = useState(false);
+  const bodyPromptDate = new Date();
+  const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
+  const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+
+  const checkTodayBodyHistory = useCallback(async () => {
+    const todayKey = formatDateKey(new Date());
+    try {
+      const existing = await getBodyHistoryByDate(
+        BODY_HISTORY_USER_ID,
+        todayKey
+      );
+      if (existing) {
+        // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
+        await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
+        setShowBodyPrompt(false);
+        return true;
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        return false; // 기록 없음
+      }
+      console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
+    }
+    return false;
+  }, []);
+
+  useEffect(() => {
+    const loadPromptState = async () => {
+      const todayKey = formatDateKey(new Date());
+      try {
+        const skipDate = await AsyncStorage.getItem(BODY_PROMPT_SKIP_KEY);
+        if (skipDate === todayKey) {
+          setShowBodyPrompt(false);
+          return;
+        }
+        const hasTodayRecord = await checkTodayBodyHistory();
+        if (hasTodayRecord) return;
+        setShowBodyPrompt(true);
+      } catch (err) {
+        console.error('[BodyPrompt] 상태 로딩 실패', err);
+        setShowBodyPrompt(true);
+      }
+    };
+
+    loadPromptState();
+  }, [checkTodayBodyHistory]);
 
   /* 펫 표정 관리 위해 FSM 상태 추가 */
   const { state: petState, transition: changePetState } = usePetFSM();
@@ -119,7 +182,7 @@ export const MainPage = () => {
    * - isTracking이 true면 산책 중이므로 종료
    * - isTracking이 false면 산책 전이므로 시작
    */
-  const handleToggleTracking = useCallback(async () => {
+  const handleToggleTracking = useCallback(() => {
     // 이미 추적 중이면 즉시 종료하고, 그렇지 않으면 권한 확인 후 추적을 시작한다.
     if (isTracking) {
       stopTracking();
@@ -127,7 +190,61 @@ export const MainPage = () => {
       return;
     }
     setCountdown(3);
-  }, [isTracking, startTracking, stopTracking]);
+  }, [isTracking, stopTracking]);
+
+  const markSkipToday = useCallback(async () => {
+    const todayKey = formatDateKey(new Date());
+    try {
+      await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
+    } catch (err) {
+      console.error('[BodyPrompt] 스킵 상태 저장 실패', err);
+    }
+  }, []);
+
+  const handleSaveBodyPrompt = useCallback(
+    async (values: BodyHistoryFormValues) => {
+      setSavingBodyHistory(true);
+      try {
+        await createBodyHistory({
+          userId: BODY_HISTORY_USER_ID,
+          heightCm: values.heightCm,
+          weightKg: values.weightKg,
+          pbf: values.pbf,
+          baseDate: values.baseDate,
+        });
+        await markSkipToday();
+        setShowBodyPrompt(false);
+        Alert.alert('기록 완료', '오늘의 몸 기록을 저장했어요.');
+      } catch (err) {
+        console.error('[BodyPrompt] 기록 저장 실패', err);
+        Alert.alert('저장 실패', '몸 기록 저장 중 문제가 발생했어요.');
+      } finally {
+        setSavingBodyHistory(false);
+      }
+    },
+    [markSkipToday]
+  );
+
+  const handleSkipBodyPromptToday = useCallback(async () => {
+    await markSkipToday();
+    setShowBodyPrompt(false);
+  }, [markSkipToday]);
+
+  const handleLaterBodyPrompt = useCallback(() => {
+    setShowBodyPrompt(false);
+  }, []);
+
+  const handleRequestHealthPermission = useCallback(async () => {
+    const granted = await healthConnect.requestPermissions();
+    if (granted) {
+      Alert.alert('Health Connect', '걸음 수 연동 권한이 허용되었습니다.');
+    } else {
+      Alert.alert(
+        'Health Connect',
+        '권한을 허용하려면 Health Connect 앱에서 FitPet을 승인해주세요.'
+      );
+    }
+  }, [healthConnect]);
 
   const handleRequestHealthPermission = useCallback(async () => {
     const granted = await healthConnect.requestPermissions();
@@ -171,7 +288,7 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown]);
+  }, [countdown, startTracking]);
 
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
@@ -332,6 +449,16 @@ export const MainPage = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      <BodyRecordPrompt
+        visible={showBodyPrompt}
+        dateLabel={bodyPromptDateLabel}
+        baseDate={bodyPromptBaseDate}
+        onSave={handleSaveBodyPrompt}
+        onLater={handleLaterBodyPrompt}
+        onSkipToday={handleSkipBodyPromptToday}
+        saving={savingBodyHistory}
+      />
     </View>
   );
 };

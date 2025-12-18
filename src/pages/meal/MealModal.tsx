@@ -2,6 +2,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   Image,
+  ImageSourcePropType,
   Keyboard,
   Modal,
   Text,
@@ -11,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import styles from '@styles/Meal.styles';
-import { PLACEHOLDER_MEAL } from '@pages/meal/constant';
+import previewMealImage from '@assets/images/preview_meal.png';
 import { resolveMealImageSource } from '@utils/imageUtil';
 import type { MealModalProps } from './MealModal.types';
 
@@ -57,7 +58,6 @@ function MealModal({
   errorMessage,
   pendingImageUri,
   onPickImage,
-  previewImages,
   onEditMeal,
   editingMealId,
   editingMealTitle,
@@ -70,31 +70,23 @@ function MealModal({
   editingMealImageUri,
   isUpdatingMeal,
 }: MealModalProps) {
-  const displayPhotoMeals: {
-    key: string;
-    source: ReturnType<typeof resolveMealImageSource>;
-  }[] =
-    selectedMeals.length > 0
-      ? selectedMeals.map((meal, index) => {
-          if (editingMealId === meal.mealId && editingMealImageUri) {
-            return { key: meal.mealId, source: { uri: editingMealImageUri } };
-          }
-          const fallbackPreview = previewImages[index];
-          if (fallbackPreview) {
-            return { key: meal.mealId, source: fallbackPreview };
-          }
-          const resolvedSource =
-            meal.imageUri && meal.imageUri.length > 0
-              ? { uri: meal.imageUri }
-              : resolveMealImageSource(meal);
-          return { key: meal.mealId, source: resolvedSource };
-        })
-      : [
-          {
-            key: 'placeholder',
-            source: resolveMealImageSource(PLACEHOLDER_MEAL),
-          },
-        ];
+  const photoRowItems: { key: string; source: ImageSourcePropType }[] = [
+    ...selectedMeals.map((meal) => {
+      const source =
+        editingMealId === meal.mealId && editingMealImageUri
+          ? { uri: editingMealImageUri }
+          : resolveMealImageSource(meal);
+      return { key: meal.mealId, source };
+    }),
+  ];
+
+  if (pendingImageUri) {
+    photoRowItems.push({ key: 'pending', source: { uri: pendingImageUri } });
+  }
+
+  if (photoRowItems.length === 0) {
+    photoRowItems.push({ key: 'preview', source: previewMealImage });
+  }
 
   return (
     <Modal
@@ -118,31 +110,14 @@ function MealModal({
               </View>
 
               <View style={styles.modalPhotoRow}>
-                {(pendingImageUri
-                  ? [
-                      {
-                        key: 'pending',
-                        source: { uri: pendingImageUri as string },
-                      },
-                      ...displayPhotoMeals.map((item) => ({
-                        key: `preview-${item.key}`,
-                        source: item.source,
-                      })),
-                    ]
-                  : displayPhotoMeals
-                )
-                  .slice(0, 3)
-                  .map((item) => (
-                    <View
-                      key={`modal-photo-${item.key}`}
-                      style={styles.modalPhotoCard}
-                    >
-                      <Image
-                        source={item.source}
-                        style={styles.modalPhotoImage}
-                      />
-                    </View>
-                  ))}
+                {photoRowItems.map((item) => (
+                  <View
+                    key={`modal-photo-${item.key}`}
+                    style={styles.modalPhotoCard}
+                  >
+                    <Image source={item.source} style={styles.modalPhotoImage} />
+                  </View>
+                ))}
               </View>
 
               <View style={styles.modalMealList}>
