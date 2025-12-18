@@ -110,7 +110,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
       return Alert.alert('알림', '올바른 체중을 입력해주세요.');
     }
 
-    // 몸무게 검증
+    // 키 검증
     if (!isValidHeight(heightCm)) {
       return Alert.alert('알림', '올바른 키를 입력해주세요.');
     }
