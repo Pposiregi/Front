@@ -26,24 +26,3 @@ export type authResponse = {
   createdAt: string;
   updatedAt: string;
 };
-
-export type signUpFormData = {
-  permissions: {
-    locationAgree: boolean;
-    privacyAgree: boolean;
-    pushAgree: boolean;
-  };
-  nickname: string;
-  birth: {
-    year: number;
-    month: number;
-    day: number;
-  };
-  gender: 'male' | 'female';
-  weightKg: number;
-  heightCm: number;
-  targetWeightKg: number;
-  pbf: number;
-  targetPbf: number;
-  targetStepCount: number;
-};
