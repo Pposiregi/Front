@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SocialLogin from './src/pages/SocialLoginPage';
-import activityStack from './src/navigation/activityStack';
+import ActivityStack from './src/navigation/activityStack';
 import Main from '@pages/main/MainPage';
 import Meal from '@pages/meal/MealPage';
 import Achievement from '@pages/achievement/AchievementPage';
@@ -186,7 +186,7 @@ function AppInner() {
               getTabScreenOptions(route.name as TabIconKey)
             }
           >
-            <Tab.Screen name='Activity' component={activityStack} />
+            <Tab.Screen name='Activity' component={ActivityStack} />
             <Tab.Screen name='Meal' component={Meal} />
             <Tab.Screen name='Main' component={Main} />
             <Tab.Screen name='Achievement' component={Achievement} />
