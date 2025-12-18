@@ -105,7 +105,7 @@ const IntroPage = () => {
     };
 
     try {
-      const result = await signUp(requestBody);
+      await signUp(requestBody);
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
