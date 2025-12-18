@@ -1,4 +1,3 @@
-import type { ImageSourcePropType } from 'react-native';
 import type { MealListItem } from './types';
 
 /**
@@ -24,7 +23,6 @@ export type MealModalProps = {
   errorMessage?: string | null;
   pendingImageUri: string | null;
   onPickImage: () => void;
-  previewImages: ImageSourcePropType[];
   onEditMeal: (meal: MealListItem) => void;
   editingMealId: string | null;
   editingMealTitle: string;
