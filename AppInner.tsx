@@ -15,7 +15,6 @@ import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CLIENT_ID } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import tokenRefreshers from './src/utils/auth';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
