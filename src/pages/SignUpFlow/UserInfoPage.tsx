@@ -271,15 +271,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 26,
     marginVertical: 10,
     fontFamily: 'JUA',
+    color: '#080505bb',
     marginTop: height * 0.07,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'thin',
+    color: '#666',
     marginBottom: 10,
     fontFamily: 'JUA',
   },
