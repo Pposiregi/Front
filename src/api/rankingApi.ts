@@ -33,6 +33,11 @@ export const getDailyStepRanking = async ({
   const { data } = await apiClient.get<DailyStepRankingApiResponse>(url, {
     params,
   });
+
+  if (!data || !Array.isArray(data.top10)) {
+    throw new Error('부정확한 랭킹 데이터.');
+  }
+
   return {
     top10: data.top10.map(normalizeRankingItem),
     myRank: data.myRank,

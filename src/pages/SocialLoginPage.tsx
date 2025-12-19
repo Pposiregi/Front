@@ -28,6 +28,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
+import { getSocialLogin } from '@api/socialLoginApi';
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -37,7 +38,7 @@ const SocialLoginPage = () => {
   const handleReset = async () => {
     try {
       console.log('초기화 버튼 클릭: 초기화 시작');
-
+      await GoogleSignin.signOut();
       // 저장소의 모든 데이터 삭제
       await AsyncStorage.clear();
       await EncryptedStorage.clear();
@@ -72,68 +73,92 @@ const SocialLoginPage = () => {
   };
 
   // 서버에 소셜 로그인 + 최초 로그인 체크 요청 함수
-  const firstLoginCheck = async (
-    email: string,
-    platform: string,
-    accessToken: string
-  ) => {
+  const firstLoginCheck = async ({
+    idToken,
+    accessToken,
+    platform,
+  }: {
+    idToken: string;
+    accessToken: string;
+    platform: 'kakao' | 'google';
+  }) => {
     try {
-      // 임시 로직: 서버 응답 대신 `AsyncStorage`를 사용
-      const isUserLoggedInBefore = await AsyncStorage.getItem(
-        `hasLoggedIn_${email}`
+      console.log('>>> firstLoginCheck request', {
+        platform,
+        idToken: idToken,
+        accessToken: accessToken,
+      });
+
+      const result = await getSocialLogin({
+        idToken,
+        accessToken,
+        platform,
+      });
+      console.log('로그인 성공 후 전달받은 result : ', result);
+      if (!result.success) {
+        throw new Error('서버 로그인 실패');
+      }
+
+      // 서버 액세스 토큰 저장
+      await EncryptedStorage.setItem(
+        'serverAccessToken',
+        result.serverAccessToken
       );
-      const isNewUser = !isUserLoggedInBefore;
 
-      // 최종적으로 Redux에 로그인 상태와 회원가입 필요 상태를 저장
-      dispatch(userSlice.actions.setUser({ accessToken, email }));
+      // Redux 저장
+      dispatch(
+        userSlice.actions.setUser({
+          accessToken: result.serverAccessToken,
+          platform,
+        })
+      );
 
-      if (isNewUser) {
-        await AsyncStorage.setItem(`hasLoggedIn_${email}`, 'true');
+      // 신규/기존 회원 분기
+      if (result.registrationStatus === 'INCOMPLETE') {
         dispatch(userSlice.actions.setSignUpInProgress(true));
       } else {
         dispatch(userSlice.actions.setSignUpInProgress(false));
       }
-    } catch (err) {
-      console.error('서버 로그인 처리 실패', err);
-      // 실패 시 로그인 화면으로 복귀
-      dispatch(userSlice.actions.resetUser());
+    } catch (err: any) {
+      console.error('>>> firstLoginCheck error', {
+        status: err?.response?.status,
+        data: err?.response?.data,
+        message: err?.message,
+        raw: err,
+      });
+      Alert.alert('로그인 실패', '서버 통신에 오류가 발생했습니다.');
     }
   };
 
-  // 카카오 로그인
+  // 카카오 로그인 // 라이브러리 삭제 후 웹뷰 형식으로 변경 예정
   const signInWithKakao = async (): Promise<void> => {
     const token = await login();
-    const profile = await getProfile();
-
-    await EncryptedStorage.setItem('refreshToken', token.refreshToken);
     await AsyncStorage.setItem('platform', 'kakao');
-
-    await firstLoginCheck(profile.email, 'kakao', token.accessToken);
+    await firstLoginCheck({
+      platform: 'kakao',
+      idToken: token.idToken!,
+      accessToken: token.accessToken,
+    });
   };
 
   // 구글 로그인
   const signInWithGoogle = async () => {
-    await GoogleSignin.hasPlayServices();
-    const profile = await GoogleSignin.signIn();
-    // const idToken= profile.data?.idToken 아이디 토큰
-    const res = await fetch('https://www.googleapis.com/oauth2/v3/token', {
-      method: 'POST',
-      body: JSON.stringify({
-        code: profile.data?.serverAuthCode,
-        clientId: GOOGLE_CLIENT_ID,
-        clientSecret: GOOGLE_CLIENT_SECRET,
-        grant_type: 'authorization_code',
-      }),
-    });
-    const token = await res.json();
-    await EncryptedStorage.setItem('refreshToken', token.refresh_token);
-    await AsyncStorage.setItem('platform', 'google');
-
-    await firstLoginCheck(
-      profile.data?.user.email!,
-      'google',
-      token.access_token
-    );
+    try {
+      const profile = await GoogleSignin.signIn();
+      const idToken = profile.data?.idToken;
+      if (!idToken) {
+        throw new Error('idToken 없음');
+      }
+      await AsyncStorage.setItem('platform', 'google');
+      await firstLoginCheck({
+        platform: 'google',
+        idToken,
+        accessToken: '',
+      });
+    } catch (err) {
+      console.error('error', err);
+      throw err;
+    }
   };
   return (
     <View style={styles.container}>
