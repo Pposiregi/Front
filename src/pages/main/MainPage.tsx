@@ -34,10 +34,7 @@ import { useRouteTracking } from '@hooks/useRouteTracking';
 import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
-import {
-  createBodyHistory,
-  getBodyHistoryByDate,
-} from '@api/bodyHistoryApi';
+import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const BODY_HISTORY_USER_ID = 3;

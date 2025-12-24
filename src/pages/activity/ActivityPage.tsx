@@ -144,7 +144,7 @@ function ActivityPage() {
 
   const fetchWeeklySteps = async () => {
     try {
-      const response = await getWeeklySteps(3); // userId 동적이면 본인 ID 넣기
+      const response = await getWeeklySteps(); // userId 동적이면 본인 ID 넣기
       setWeeklySteps(response);
     } catch (err) {
       console.warn('주간 걸음수 fetch 실패', err);

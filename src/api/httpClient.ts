@@ -3,7 +3,7 @@ import { API_BASE_URL } from '@env';
 
 // 환경변수(API_BASE_URL)가 있으면 우선 사용하고, 없으면 로컬 기본값으로 대체
 const apiClient = axios.create({
-  baseURL: (API_BASE_URL || 'http://localhost:8080').trim(),
+  baseURL: (API_BASE_URL || 'http://10.0.0.8:8080').trim(),
 });
 
 const toLogString = (payload: unknown) => {
