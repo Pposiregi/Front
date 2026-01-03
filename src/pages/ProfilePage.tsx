@@ -24,8 +24,8 @@ import type {
   BodyHistoryResponse,
 } from 'types/bodyHistory';
 
-const CONTENT_PADDING = 20;
-const CHART_CARD_PADDING = 14;
+const DEVICE_WIDTH = Dimensions.get('window').width;
+const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
 const API_USER_ID = 3;
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
@@ -80,10 +80,7 @@ const MetricCard = ({
 
 function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
-  const chartWidth =
-    Dimensions.get('window').width -
-    CONTENT_PADDING * 2 -
-    CHART_CARD_PADDING * 2;
+  const chartWidth = DEVICE_WIDTH - Math.max(12, CONTENT_PADDING * 1.5) * 2;
 
   const [histories, setHistories] = useState<BodyHistoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +168,10 @@ function ProfilePage() {
 
     const recent = sanitized.slice(0, 7).reverse(); // 차트는 시간순으로 표시
     return {
-      labels: recent.map((history) => history.baseDate.slice(5)),
+      labels: recent.map(
+        (history) =>
+          `${history.baseDate.slice(5, 7)}/${history.baseDate.slice(8, 10)}`
+      ), // "MM/DD"
       datasets: [
         {
           data: recent.map((history) => history.weightKg),
