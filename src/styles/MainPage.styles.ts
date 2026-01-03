@@ -36,19 +36,12 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   message: {
-    /* 센서 미지원에 대한 안내 문장용 */
+    /* 메인 메시지 문구 */
     fontFamily: 'GowunDodum',
     textAlign: 'center',
     color: '#000000ff',
     fontSize: 24,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
-  },
-  stepFallback: {
-    fontFamily: 'GowunDodum',
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 14,
-    marginTop: 6,
   },
   mainBackground: {
     flex: 1,

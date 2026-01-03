@@ -17,7 +17,6 @@ import { StepProgress } from '@components/StepProgress';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
-import useStepCount from '@hooks/useStepCount';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
@@ -68,10 +67,6 @@ export const MainPage = () => {
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
-  // 걸음 수, [센서 접근 가능 -> 실시간 걸음수] / [센서 접근 불가능  -> GPS]
-  const { stepCount, isAvailable } = useStepCount();
-
-  // 헬스 커넥트 걸음 수 동기화 훅
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
@@ -251,21 +246,18 @@ export const MainPage = () => {
     return <ActivityIndicator size='large' />;
   }
 
-  // 표시할 걸음 수
-  const stepOverride = isAvailable ? stepCount : undefined;
-
   // 데이터가 아직 없다면 안전하게 스피너를 노출하고 미션 계산을 건너뛴다.
   if (!data) {
     return <ActivityIndicator size='large' />;
   }
 
   const missions = getMissions(data, {
-    // 디바이스 센서를 우선 사용하고, 없으면 서버 데이터를 사용한다.
-    stepOverride,
+    // 서버 데이터를 사용한다.
+    stepOverride: undefined,
   });
 
   // 표시할 걸음 수
-  const displayedSteps = stepOverride ?? data.daily_walk.step ?? 0;
+  const displayedSteps = data.daily_walk.step ?? 0;
   return (
     <View style={styles.container}>
       {/*
@@ -335,15 +327,9 @@ export const MainPage = () => {
               fadeDuration={0}
             />
           </Pressable>
-          {/* 실시간 센서가 없으면 서버 데이터로 대체하되 안내문 출력. */}
           <Text style={styles.message}>
             {`${displayedSteps.toLocaleString()}보 걸었어요!`}
           </Text>
-          {!isAvailable && (
-            <Text style={styles.stepFallback}>
-              디바이스 걸음 센서를 찾을 수 없어 서버 데이터를 표시해요.
-            </Text>
-          )}
         </ImageBackground>
       )}
       {/* Start / End Button */}
