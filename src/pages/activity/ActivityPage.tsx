@@ -12,7 +12,7 @@ import {
 import { mock_data_by_month } from './mock';
 import { styles } from '@styles/Activity.styles';
 import { SCREEN_WIDTH } from '@styles/dimensions';
-import { getWeeklySteps } from '@api/activityApi';
+import { getMonthlySessions, getWeeklySteps } from '@api/activityApi';
 
 function ActivityPage() {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
@@ -68,28 +68,32 @@ function ActivityPage() {
   };
 
   // 월별 활동 기록을 가져오는 함수 (추후 API 호출 로직으로 대체 필요)
-  const fetchMonthlyActivities = (date: Date) => {
+  const fetchMonthlyActivities = async (date: Date) => {
     setLoading(true);
+    try {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      //const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      // 현재는 목업 데이터 사용
+      //const data = mock_data_by_month[monthKey] || [];
 
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      // api 연결
+      const data = await getMonthlySessions(year, month);
 
-    // 요기를 실제 db데이터를 받아오는 걸로 수정
-    // 현재는 목업 데이터 사용
-    const data = mock_data_by_month[monthKey] || [];
-
-    // 데이터 로딩 구현
-    setTimeout(() => {
+      // 데이터 로딩 구현
       // start_time을 기준으로 최신순 정렬
       const sortedData = [...data].sort(
         (a, b) =>
           new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
       );
-
       setMonthlyActivities(sortedData);
       setLoading(false);
-    }, 500);
+    } catch (err) {
+      console.log('월별 활동 조회 실패', err);
+      setMonthlyActivities([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 월 이동 핸들러 (MealPage의 로직 응용)

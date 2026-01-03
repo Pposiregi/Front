@@ -4,27 +4,27 @@ import { useRoute } from '@react-navigation/native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import MapOverlayPolyline from '@components/MapOverlayPolyline';
 import { ActivityDetailRouteProp, SessionDetail } from './types';
-import { mock_gps_log, mockSessionMetadata } from './mock';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
+import { getSessionDetail } from '@api/activityApi';
 
-// 목업 데이터 합치기
-const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const logs = mock_gps_log[id];
-      const metadata = mockSessionMetadata[id];
-      if (logs && metadata) {
-        resolve({
-          ...metadata,
-          routeLogs: logs,
-        });
-      } else {
-        reject(new Error(`데이터를 찾지 못했습니다.`));
-      }
-    }, 1000);
-  });
-};
+// 목업 데이터
+// const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       const logs = mock_gps_log[id];
+//       const metadata = mockSessionMetadata[id];
+//       if (logs && metadata) {
+//         resolve({
+//           ...metadata,
+//           routeLogs: logs,
+//         });
+//       } else {
+//         reject(new Error(`데이터를 찾지 못했습니다.`));
+//       }
+//     }, 1000);
+//   });
+// };
 
 // 받은 경로 중 센터 찾기
 const getCenterRegion = (
@@ -51,7 +51,9 @@ const ActivityDetailPage = () => {
       if (!sessionId) return;
       setLoading(true);
       try {
-        const data = await fetchSessionDetail(sessionId);
+        //기존 목업 데이터
+        //const data = await fetchSessionDetail(sessionId);
+        const data = await getSessionDetail(sessionId);
         setDetailData(data);
       } catch (error) {
         console.error('상세 데이터 로드 실패:', error);
