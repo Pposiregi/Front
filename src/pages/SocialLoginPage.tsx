@@ -86,16 +86,19 @@ const SocialLoginPage = () => {
     platform: 'kakao' | 'google';
   }) => {
     try {
-      if (BYPASS_SOCIAL_LOGIN) {
-        const mockToken = 'dev-bypass-token';
-        await EncryptedStorage.setItem('serverAccessToken', mockToken);
-        dispatch(
-          userSlice.actions.setUser({
-            accessToken: mockToken,
-            platform,
-          })
-        );
-        dispatch(userSlice.actions.setSignUpInProgress(false));
+      if (__DEV__) {
+        // DEV 버전 전용, 소셜 로그인 임시 무시
+        if (BYPASS_SOCIAL_LOGIN) {
+          const mockToken = 'dev-bypass-token';
+          await EncryptedStorage.setItem('serverAccessToken', mockToken);
+          dispatch(
+            userSlice.actions.setUser({
+              accessToken: mockToken,
+              platform,
+            })
+          );
+          dispatch(userSlice.actions.setSignUpInProgress(false)); // 회원가입 과정 스킵
+        }
         console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
         return;
       }

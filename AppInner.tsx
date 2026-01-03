@@ -21,6 +21,7 @@ import SplashScreen from 'react-native-splash-screen';
 import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
+import useHealthConnectDemo from '@hooks/useHealthConnectDemo';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -77,6 +78,7 @@ const getTabScreenOptions = (routeName: TabIconKey) => ({
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
+  useHealthConnectDemo();
 
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken

@@ -10,6 +10,7 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
 import org.devio.rn.splashscreen.SplashScreen
 
 class MainActivity : ReactActivity() {
@@ -21,6 +22,11 @@ class MainActivity : ReactActivity() {
     SplashScreen.show(this)
     super.onCreate(savedInstanceState)
 
+    // Health Connect 권한 콜백을 연결 (패키지명: com.google.android.apps.healthdata)
+    HealthConnectPermissionDelegate.setPermissionDelegate(this, "com.google.android.apps.healthdata")
+
+    
+    // Push
     requestNotificationPermissionIfNeeded()
   }
   /**

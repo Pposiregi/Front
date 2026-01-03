@@ -8,7 +8,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-     <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
+
+     <!-- HelthConnect  -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+
+    <queries>
+      <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
     <application
       android:name=".MainApplication"
@@ -30,6 +38,26 @@
         </intent-filter>
       </activity>
       <activity
+        android:name=".healthconnect.PermissionsRationaleActivity"
+        android:exported="true">
+        <!-- Android 13 이하에서 지원되는 버전용: 사용자가 개인정보처리방침 링크를 눌렀을 때 Health Connect 권한 안내를 보여줄 액티비티 -->
+        <intent-filter>
+          <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent-filter>
+      </activity>
+
+      <!-- Android 14 이상용: 사용자가 개인정보처리방침 링크를 눌렀을 때 Health Connect 권한 안내를 보여줄 액티비티 별칭 -->
+      <activity-alias
+        android:name="ViewPermissionUsageActivity"
+        android:exported="true"
+        android:targetActivity=".healthconnect.PermissionsRationaleActivity"
+        android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+          <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+        </intent-filter>
+      </activity-alias>
+      <activity
     android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
         android:exported="true">
         <intent-filter>
@@ -42,6 +70,7 @@
                 android:scheme="${KAKAO_SCHEME}" />
         </intent-filter>
       </activity>
+
 
       <service
         android:name=".firebase.MyFirebaseMessagingService"
