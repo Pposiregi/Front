@@ -24,32 +24,6 @@ export default StyleSheet.create({
     backgroundColor: '#F3F4F8',
     paddingTop: Platform.select({ ios: 40, android: 24 }),
   },
-  healthConnectBanner: {
-    backgroundColor: '#FFF6DA',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#F5C86C',
-  },
-  healthConnectBannerText: {
-    color: '#5F3A00',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  healthConnectBannerButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FF9900',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  healthConnectBannerButtonLabel: {
-    color: '#fff',
-    fontWeight: '600',
-  },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,

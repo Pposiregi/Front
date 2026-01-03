@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -25,13 +19,9 @@ import styles from '@styles/MainPage.styles';
 import { getMissions } from './missions';
 import useStepCount from '@hooks/useStepCount';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
-import run_dog from '@assets/images/pet/run_dog.png';
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
-import mainBackGround_day_wide from '@assets/images/mainBackground_day_wide.png';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import { MapOverlayPolyline } from '@components/MapOverlayPolyline';
+import MapView from 'react-native-maps';
 import { useRouteTracking } from '@hooks/useRouteTracking';
-import useHealthConnectSteps from '@hooks/useHealthConnectSteps';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
@@ -82,20 +72,11 @@ export const MainPage = () => {
   const { stepCount, isAvailable } = useStepCount();
 
   // 헬스 커넥트 걸음 수 동기화 훅
-  const healthConnect = useHealthConnectSteps({
-    enabled: !!data,
-    userId: data?.user.user_id ?? null,
-    syncIntervalMs: 5 * 60_000, // 5분마다 동기화
-  });
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
 
   const mapRef = useRef<MapView | null>(null);
-  const [mapLayout, setMapLayout] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const bodyPromptDate = new Date();
@@ -231,18 +212,6 @@ export const MainPage = () => {
     setShowBodyPrompt(false);
   }, []);
 
-  const handleRequestHealthPermission = useCallback(async () => {
-    const granted = await healthConnect.requestPermissions();
-    if (granted) {
-      Alert.alert('Health Connect', '걸음 수 연동 권한이 허용되었습니다.');
-    } else {
-      Alert.alert(
-        'Health Connect',
-        '권한을 허용하려면 Health Connect 앱에서 FitPet을 승인해주세요.'
-      );
-    }
-  }, [healthConnect]);
-
   // 카운트 다운 애니메이션 적용
   useEffect(() => {
     if (countdown === null) return;
@@ -273,46 +242,32 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, startTracking]);
+  }, [countdown, scaleAnim, opacityAnim, startTracking]);
 
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
    */
-  if (loading || !data) {
+  if (loading) {
     return <ActivityIndicator size='large' />;
   }
 
   // 표시할 걸음 수
-  const stepOverride =
-    typeof healthConnect.steps === 'number'
-      ? healthConnect.steps
-      : isAvailable
-      ? stepCount
-      : undefined;
+  const stepOverride = isAvailable ? stepCount : undefined;
+
+  // 데이터가 아직 없다면 안전하게 스피너를 노출하고 미션 계산을 건너뛴다.
+  if (!data) {
+    return <ActivityIndicator size='large' />;
+  }
 
   const missions = getMissions(data, {
-    // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
+    // 디바이스 센서를 우선 사용하고, 없으면 서버 데이터를 사용한다.
     stepOverride,
   });
 
   // 표시할 걸음 수
-  const displayedSteps = stepOverride ?? data?.daily_walk.step ?? 0;
+  const displayedSteps = stepOverride ?? data.daily_walk.step ?? 0;
   return (
     <View style={styles.container}>
-      {!healthConnect.permissionsGranted ? (
-        <View style={styles.healthConnectBanner}>
-          <Text style={styles.healthConnectBannerText}>
-            Health Connect 권한이 필요합니다. 권한을 허용하면 걸음 수가 자동으로
-            동기화돼요.
-          </Text>
-          <TouchableOpacity
-            style={styles.healthConnectBannerButton}
-            onPress={handleRequestHealthPermission}
-          >
-            <Text style={styles.healthConnectBannerButtonLabel}>권한 요청</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
       {/*
         START 버튼 누른 후 카운트 다운
       */}
@@ -355,13 +310,7 @@ export const MainPage = () => {
         />
       </View>
       {isTracking ? (
-        <View
-          style={styles.mapContainer}
-          onLayout={({ nativeEvent }) => {
-            const { width, height } = nativeEvent.layout;
-            // setMapLayout({ width, height });
-          }}
-        >
+        <View style={styles.mapContainer}>
           {/* 지도 대신 PNG 배경 */}
           <ImageBackground
             source={mainBackGround_day}
@@ -406,34 +355,6 @@ export const MainPage = () => {
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
       </TouchableOpacity>
-      {/* 헬스 커넥트 디버그용 걸음수 삽입 버튼 */}
-      {__DEV__ && healthConnect.debugInsertSteps && (
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            padding: 12,
-            borderRadius: 8,
-            rowGap: 8,
-          }}
-        >
-          <Text style={{ color: '#fff', marginBottom: 4 }}>HC Debug</Text>
-          <TouchableOpacity
-            style={{ padding: 8, backgroundColor: '#4CAF50', borderRadius: 4 }}
-            onPress={() => healthConnect.debugInsertSteps?.(100)}
-          >
-            <Text style={{ color: '#fff' }}>+100 steps</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ padding: 8, backgroundColor: '#2196F3', borderRadius: 4 }}
-            onPress={() => healthConnect.debugInsertSteps?.(1000)}
-          >
-            <Text style={{ color: '#fff' }}>+1000 steps</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       <BodyRecordPrompt
         visible={showBodyPrompt}

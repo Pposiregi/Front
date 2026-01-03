@@ -1,8 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-    </queries>
-    
+
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -14,12 +11,6 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- pedometer 접근 */-->
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
      <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
-    
-    <!-- Health Connect, Background 걸음 수 체크용 -->
-    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
-    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE"/>
-    <uses-permission android:name="android.permission.health.READ_STEPS"/>
-    <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
 
     <application
       android:name=".MainApplication"
@@ -61,27 +52,6 @@
           <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>
       </service>
-
-      <!-- Health Connect 온보딩 진입 지점 (Android 13 이하 APK 버전) -->
-      <activity
-          android:name=".PermissionsRationaleActivity"
-          android:exported="true">
-        <intent-filter>
-          <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent-filter>
-      </activity>
-
-      <!-- Android 14 이상 플랫폼 Health Connect 온보딩 진입 지점 -->
-  <activity-alias
-      android:name="ViewPermissionUsageActivity"
-      android:exported="true"
-      android:targetActivity=".PermissionsRationaleActivity"
-      android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
-    <intent-filter>
-      <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
-      <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
-    </intent-filter>
-  </activity-alias>
 
       <meta-data
         android:name="com.google.android.geo.API_KEY"
