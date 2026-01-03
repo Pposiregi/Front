@@ -1,4 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const GRID_SIZE = Math.min(52, Math.round(SCREEN_WIDTH / 7.5)); // 요일 7개 기준으로 폭 맞추기
+const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
+const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
+const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
 
 const baseShadow = {
   shadowColor: '#000000',
@@ -8,10 +14,10 @@ const baseShadow = {
   elevation: 4,
 };
 
-const STACK_HEIGHT = 32; // 썸네일 영역 높이 TODO: 상대값으로 바꿔야하는가
-const STACK_ITEM_SIZE = 24; // 각 이미지 및 플레이스홀더 크기 TODO: 상대값으로 바꿔야하는가
+const STACK_HEIGHT = Math.round(GRID_SIZE * 0.7);
+const STACK_ITEM_SIZE = Math.round(GRID_SIZE * 0.55);
 const STACK_ITEM_OFFSET = (STACK_HEIGHT - STACK_ITEM_SIZE) / 2;
-const STACK_ITEM_RADIUS = 8; // 이미지 모서리 반경
+const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.3);
 
 export default StyleSheet.create({
   container: {
@@ -81,14 +87,14 @@ export default StyleSheet.create({
   weekDayLabel: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: Math.max(11, Math.round(GRID_SIZE * 0.22)),
     color: '#9597A3',
     fontFamily: 'JUA',
   },
   weekRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    marginBottom: 10,
+    marginBottom: Math.max(8, Math.round(GRID_SIZE * 0.18)),
   },
   dayCell: {
     flex: 1,
@@ -96,23 +102,23 @@ export default StyleSheet.create({
     justifyContent: 'flex-start',
   },
   dayEmptySlot: {
-    width: 48,
-    height: 48,
+    width: GRID_SIZE,
+    height: GRID_SIZE,
   },
   dayInner: {
-    width: 48,
-    borderRadius: 14,
+    width: GRID_SIZE,
+    borderRadius: GRID_RADIUS,
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+    paddingVertical: GRID_PADDING_V,
+    paddingHorizontal: GRID_PADDING_H,
     borderWidth: 1,
     borderColor: '#E4E6F1',
     backgroundColor: '#FFFFFF',
   },
   dayNumber: {
     fontFamily: 'JUA',
-    fontSize: 15,
+    fontSize: Math.max(13, Math.round(GRID_SIZE * 0.3)),
     color: '#383A45',
   },
   dayNumberMuted: {
@@ -135,9 +141,9 @@ export default StyleSheet.create({
     color: '#FF9F43',
   },
   dayPreviewThumbnail: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: STACK_ITEM_SIZE,
+    height: STACK_ITEM_SIZE,
+    borderRadius: STACK_ITEM_RADIUS,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#E4E6F1',
