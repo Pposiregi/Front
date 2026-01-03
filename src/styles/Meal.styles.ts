@@ -5,6 +5,7 @@ const GRID_SIZE = Math.min(52, Math.round(SCREEN_WIDTH / 7.5)); // 요일 7개 �
 const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
+const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
 const MODAL_CARD_SIZE = Math.round(
   Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
 );
@@ -15,8 +16,6 @@ const MODAL_BUTTON_SIZE = Math.round(
 const MODAL_ROW_IMAGE = Math.round(
   Math.min(56, Math.max(44, SCREEN_WIDTH * 0.12))
 );
-const MODAL_PADDING_H = Math.round(Math.max(16, SCREEN_WIDTH * 0.05));
-const MODAL_PADDING_V = Math.round(Math.max(18, SCREEN_WIDTH * 0.04));
 const MODAL_ROW_RADIUS = Math.round(MODAL_BUTTON_SIZE * 0.7);
 
 const baseShadow = {
@@ -74,8 +73,8 @@ export default StyleSheet.create({
   calendarContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 28,
-    paddingVertical: 18,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     ...baseShadow,
   },
   calendarMonthRow: {
@@ -95,19 +94,19 @@ export default StyleSheet.create({
   weekHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: GRID_GAP,
   },
   weekDayLabel: {
     flex: 1,
     textAlign: 'center',
-    fontSize: Math.max(11, Math.round(GRID_SIZE * 0.22)),
+    fontSize: Math.max(12, Math.round(GRID_SIZE * 0.25)),
     color: '#9597A3',
     fontFamily: 'JUA',
   },
   weekRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    marginBottom: Math.max(8, Math.round(GRID_SIZE * 0.18)),
+    marginBottom: GRID_GAP,
   },
   dayCell: {
     flex: 1,
@@ -128,6 +127,8 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E4E6F1',
     backgroundColor: '#FFFFFF',
+    marginHorizontal: GRID_GAP * 1,
+    marginVertical: GRID_GAP * 0.3,
   },
   dayNumber: {
     fontFamily: 'JUA',
