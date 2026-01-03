@@ -2,13 +2,14 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { authRequest, authResponse } from '../types/auth';
 import apiClient from './httpClient';
 
-export const signUp = async (formData: authRequest) => {
+export const signUp = async (
+  formData: authRequest
+): Promise<authResponse | null> => {
   try {
     const response = await apiClient.patch<authResponse>(
       `/users/signUp/complete`,
       formData
     );
-    console.log('----- 회원가입 성공 -----');
     console.log('>>>>> signUpApi response : ', response);
     return response.data;
   } catch (err) {
