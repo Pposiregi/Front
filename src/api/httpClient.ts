@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from '@env';
+import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
 
 // 환경변수(API_BASE_URL)가 있으면 우선 사용하고, 없으면 로컬 기본값으로 대체
 const apiClient = axios.create({
@@ -17,7 +17,7 @@ const toLogString = (payload: unknown) => {
 };
 
 apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = '1'; // 항상 추가
+  config.headers['dev-user-id'] = BODY_HISTORY_USER_ID; // 항상 추가
   return config;
 });
 

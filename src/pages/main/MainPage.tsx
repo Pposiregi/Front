@@ -25,9 +25,10 @@ import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
+import { BODY_HISTORY_USER_ID } from '@env';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
-const BODY_HISTORY_USER_ID = 3;
+
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
@@ -75,6 +76,17 @@ export const MainPage = () => {
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
+  const parsedBodyHistoryUserId = Number(BODY_HISTORY_USER_ID);
+  const bodyHistoryUserId = Number.isFinite(parsedBodyHistoryUserId)
+    ? parsedBodyHistoryUserId
+    : 1;
+  useEffect(() => {
+    if (!Number.isFinite(parsedBodyHistoryUserId)) {
+      console.warn(
+        '>>> [BodyHistory] BODY_HISTORY_USER_ID가 설정되지 않아 기본값 1을 사용합니다.'
+      );
+    }
+  }, [parsedBodyHistoryUserId]);
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
@@ -83,7 +95,7 @@ export const MainPage = () => {
     const todayKey = formatDateKey(new Date());
     try {
       const existing = await getBodyHistoryByDate(
-        BODY_HISTORY_USER_ID,
+        bodyHistoryUserId,
         todayKey
       );
       if (existing) {
@@ -99,7 +111,7 @@ export const MainPage = () => {
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
     }
     return false;
-  }, []);
+  }, [bodyHistoryUserId]);
 
   useEffect(() => {
     const loadPromptState = async () => {
@@ -180,7 +192,7 @@ export const MainPage = () => {
       setSavingBodyHistory(true);
       try {
         await createBodyHistory({
-          userId: BODY_HISTORY_USER_ID,
+          userId: bodyHistoryUserId,
           heightCm: values.heightCm,
           weightKg: values.weightKg,
           pbf: values.pbf,
@@ -196,7 +208,7 @@ export const MainPage = () => {
         setSavingBodyHistory(false);
       }
     },
-    [markSkipToday]
+    [markSkipToday, bodyHistoryUserId]
   );
 
   const handleSkipBodyPromptToday = useCallback(async () => {
