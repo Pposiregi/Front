@@ -24,6 +24,7 @@ import { useRouteTracking } from '@hooks/useRouteTracking';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
+import useHealthSteps from '@hooks/useHealthSteps';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const BODY_HISTORY_USER_ID = 3;
@@ -239,6 +240,9 @@ export const MainPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startTracking]);
 
+  // Health Connect 오늘 걸음 수
+  const { steps: healthSteps, addSteps } = useHealthSteps();
+
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
    */
@@ -252,12 +256,12 @@ export const MainPage = () => {
   }
 
   const missions = getMissions(data, {
-    // 서버 데이터를 사용한다.
-    stepOverride: undefined,
+    // Health Connect로 가져온 값을 우선 사용
+    stepOverride: healthSteps ?? undefined,
   });
 
   // 표시할 걸음 수
-  const displayedSteps = data.daily_walk.step ?? 0;
+  const displayedSteps = healthSteps ?? data.daily_walk.step ?? 0;
   return (
     <View style={styles.container}>
       {/*
@@ -327,9 +331,20 @@ export const MainPage = () => {
               fadeDuration={0}
             />
           </Pressable>
-          <Text style={styles.message}>
-            {`${displayedSteps.toLocaleString()}보 걸었어요!`}
-          </Text>
+          <View style={styles.messageRow}>
+            <Text style={styles.message}>
+              {`${displayedSteps.toLocaleString()}보 걸었어요!`}
+            </Text>
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devHealthButton}
+                onPress={() => addSteps(1000)}
+                accessibilityLabel='Health Connect 걸음 +1000'
+              >
+                <Text style={styles.devHealthButtonText}>+1000</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </ImageBackground>
       )}
       {/* Start / End Button */}

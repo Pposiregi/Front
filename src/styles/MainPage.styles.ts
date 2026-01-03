@@ -43,6 +43,11 @@ export default StyleSheet.create({
     fontSize: 24,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   mainBackground: {
     flex: 1,
     justifyContent: 'space-between',
@@ -122,6 +127,17 @@ export default StyleSheet.create({
     fontFamily: 'JUA',
     fontWeight: 'bold',
     fontSize: START_BUTTON_FONT,
+  },
+  devHealthButton: {
+    backgroundColor: '#1f2937',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  devHealthButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   bottomNav: {
     position: 'absolute',
