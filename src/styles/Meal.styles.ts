@@ -5,6 +5,19 @@ const GRID_SIZE = Math.min(52, Math.round(SCREEN_WIDTH / 7.5)); // 요일 7개 �
 const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
+const MODAL_CARD_SIZE = Math.round(
+  Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
+);
+const MODAL_CARD_RADIUS = Math.round(MODAL_CARD_SIZE * 0.22);
+const MODAL_BUTTON_SIZE = Math.round(
+  Math.min(36, Math.max(28, SCREEN_WIDTH * 0.08))
+);
+const MODAL_ROW_IMAGE = Math.round(
+  Math.min(56, Math.max(44, SCREEN_WIDTH * 0.12))
+);
+const MODAL_PADDING_H = Math.round(Math.max(16, SCREEN_WIDTH * 0.05));
+const MODAL_PADDING_V = Math.round(Math.max(18, SCREEN_WIDTH * 0.04));
+const MODAL_ROW_RADIUS = Math.round(MODAL_BUTTON_SIZE * 0.7);
 
 const baseShadow = {
   shadowColor: '#000000',
@@ -384,22 +397,22 @@ export default StyleSheet.create({
     color: '#222430',
   },
   modalSubtitle: {
-    marginTop: 6,
-    fontSize: 14,
+    marginTop: Math.max(4, Math.round(SCREEN_WIDTH * 0.012)),
+    fontSize: Math.max(12, Math.round(SCREEN_WIDTH * 0.034)),
     color: '#9DA2B5',
   },
   modalPhotoRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 22,
+    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
   },
   modalPhotoCard: {
-    width: 108,
-    height: 108,
-    borderRadius: 24,
+    width: MODAL_CARD_SIZE,
+    height: MODAL_CARD_SIZE,
+    borderRadius: MODAL_CARD_RADIUS,
     overflow: 'hidden',
     backgroundColor: '#F4F6FB',
-    marginHorizontal: 8,
+    marginHorizontal: Math.max(6, Math.round(SCREEN_WIDTH * 0.018)),
     position: 'relative',
   },
   modalPhotoImage: {
@@ -411,7 +424,7 @@ export default StyleSheet.create({
     marginTop: 4,
   },
   modalMealLoadingContainer: {
-    minHeight: 96,
+    minHeight: Math.max(80, Math.round(SCREEN_WIDTH * 0.23)),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -432,10 +445,10 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    borderRadius: MODAL_ROW_RADIUS,
+    paddingVertical: Math.max(12, Math.round(SCREEN_WIDTH * 0.03)),
+    paddingHorizontal: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
+    marginBottom: Math.max(10, Math.round(SCREEN_WIDTH * 0.025)),
     borderWidth: 1,
     borderColor: '#E4E6F1',
     ...baseShadow,
@@ -447,24 +460,24 @@ export default StyleSheet.create({
   modalMealControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
   },
   modalMealRemoveButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: MODAL_BUTTON_SIZE,
+    height: MODAL_BUTTON_SIZE,
+    borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
     borderColor: '#D8DBE8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
   },
   modalMealRemoveButtonDisabled: {
     opacity: 0.5,
   },
   modalMealRemoveLabel: {
     fontFamily: 'JUA',
-    fontSize: 18,
+    fontSize: Math.max(16, Math.round(SCREEN_WIDTH * 0.042)),
     color: '#8F95AF',
   },
   modalMealRowContent: {
@@ -472,34 +485,34 @@ export default StyleSheet.create({
   },
   modalMealRowName: {
     fontFamily: 'JUA',
-    fontSize: 15,
+    fontSize: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
     color: '#2E313D',
   },
   modalMealRowCalories: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: Math.max(11, Math.round(SCREEN_WIDTH * 0.028)),
     color: '#9398B3',
   },
   modalMealRowImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    marginRight: 12,
+    width: MODAL_ROW_IMAGE,
+    height: MODAL_ROW_IMAGE,
+    borderRadius: Math.round(MODAL_ROW_IMAGE * 0.35),
+    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
   },
   modalMealEditButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: MODAL_BUTTON_SIZE,
+    height: MODAL_BUTTON_SIZE,
+    borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
     borderColor: '#D8DBE8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
+    marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
     backgroundColor: '#FFFFFF',
   },
   modalMealEditLabel: {
     fontFamily: 'JUA',
-    fontSize: 15,
+    fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
     color: '#4C5AC7',
   },
   modalMealDragHandle: {
