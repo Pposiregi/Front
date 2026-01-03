@@ -30,6 +30,9 @@ import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
 import { getSocialLogin } from '@api/socialLoginApi';
 
+// 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
+const BYPASS_SOCIAL_LOGIN = true;
+
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -83,6 +86,20 @@ const SocialLoginPage = () => {
     platform: 'kakao' | 'google';
   }) => {
     try {
+      if (BYPASS_SOCIAL_LOGIN) {
+        const mockToken = 'dev-bypass-token';
+        await EncryptedStorage.setItem('serverAccessToken', mockToken);
+        dispatch(
+          userSlice.actions.setUser({
+            accessToken: mockToken,
+            platform,
+          })
+        );
+        dispatch(userSlice.actions.setSignUpInProgress(false));
+        console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
+        return;
+      }
+
       console.log('>>> firstLoginCheck request', {
         platform,
         idToken: idToken,
