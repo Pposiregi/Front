@@ -7,6 +7,8 @@ import {
   requestPermission,
   type Permission,
   type BackgroundAccessPermission,
+  type WriteExerciseRoutePermission,
+  type ReadHealthDataHistoryPermission,
 } from 'react-native-health-connect';
 
 type HealthStepsState = {
@@ -37,12 +39,36 @@ const useHealthSteps = (): HealthStepsState => {
   const [error, setError] = useState<string | null>(null);
   const checkingRef = useRef(false);
 
+  // 필수권한 전체 포함 여부 확인
+  // - 누락 시 예외 메시지를 통해 흐름 중단
+  const hasAllPermissions = (
+    granted: (
+      | Permission
+      | BackgroundAccessPermission
+      | WriteExerciseRoutePermission
+      | ReadHealthDataHistoryPermission
+    )[]
+  ) => {
+    return HEALTH_PERMISSIONS.every((required) =>
+      granted.some(
+        (permission) =>
+          permission.recordType === required.recordType &&
+          permission.accessType === required.accessType
+      )
+    );
+  };
+
   const ensureInitializedAndPermitted = async () => {
     const isInitialized = await initialize();
     if (!isInitialized) {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
-    await requestPermission(HEALTH_PERMISSIONS);
+    const granted = await requestPermission(HEALTH_PERMISSIONS);
+    if (!hasAllPermissions(granted)) {
+      throw new Error(
+        'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
+      );
+    }
   };
 
   const fetchSteps = async () => {
@@ -113,7 +139,10 @@ const useHealthSteps = (): HealthStepsState => {
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
     return () => subscription.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

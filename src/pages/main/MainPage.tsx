@@ -253,7 +253,18 @@ export const MainPage = () => {
   }, [countdown, scaleAnim, opacityAnim, startTracking]);
 
   // Health Connect 오늘 걸음 수
-  const { steps: healthSteps, addSteps } = useHealthSteps();
+  const { steps: healthSteps, addSteps, error: healthError } = useHealthSteps();
+  const healthErrorShownRef = useRef(false);
+
+  useEffect(() => {
+    if (!healthError) {
+      healthErrorShownRef.current = false;
+      return;
+    }
+    if (healthErrorShownRef.current) return;
+    healthErrorShownRef.current = true;
+    Alert.alert('걸음 수 연동 실패', healthError);
+  }, [healthError]);
 
   /* 로딩 상태
    * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
