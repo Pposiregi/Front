@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initialize,
   insertRecords,
   readRecords,
   requestPermission,
-  type Permission,
-  type BackgroundAccessPermission,
-  type WriteExerciseRoutePermission,
-  type ReadHealthDataHistoryPermission,
 } from 'react-native-health-connect';
+import {
+  getStartOfToday,
+  hasAllPermissions,
+  HEALTH_PERMISSIONS,
+  HEALTH_STEPS_CACHE_KEY,
+  type GrantedHealthPermission,
+} from '@utils/healthConnect';
 
 type HealthStepsState = {
   steps: number | null;
@@ -19,19 +23,6 @@ type HealthStepsState = {
   addSteps: (delta: number) => Promise<void>;
 };
 
-const HEALTH_PERMISSIONS: (Permission | BackgroundAccessPermission)[] = [
-  { accessType: 'read', recordType: 'Steps' },
-  { accessType: 'write', recordType: 'Steps' },
-  { accessType: 'read', recordType: 'BackgroundAccessPermission' },
-];
-
-const getStartOfToday = () => {
-  const now = new Date();
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  return { start, end: now };
-};
-
 const useHealthSteps = (): HealthStepsState => {
   const [steps, setSteps] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,35 +30,33 @@ const useHealthSteps = (): HealthStepsState => {
   const [error, setError] = useState<string | null>(null);
   const checkingRef = useRef(false);
 
-  // 필수권한 전체 포함 여부 확인
-  // - 누락 시 예외 메시지를 통해 흐름 중단
-  const hasAllPermissions = (
-    granted: (
-      | Permission
-      | BackgroundAccessPermission
-      | WriteExerciseRoutePermission
-      | ReadHealthDataHistoryPermission
-    )[]
-  ) => {
-    return HEALTH_PERMISSIONS.every((required) =>
-      granted.some(
-        (permission) =>
-          permission.recordType === required.recordType &&
-          permission.accessType === required.accessType
-      )
-    );
-  };
-
   const ensureInitializedAndPermitted = async () => {
+    // HC SDK 초기화 + 필수 권한 확인
     const isInitialized = await initialize();
     if (!isInitialized) {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
-    const granted = await requestPermission(HEALTH_PERMISSIONS);
+    const granted: GrantedHealthPermission[] =
+      await requestPermission(HEALTH_PERMISSIONS);
     if (!hasAllPermissions(granted)) {
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
       );
+    }
+  };
+
+  const loadCachedSteps = async () => {
+    // 백그라운드 동기화가 저장한 금일 걸음 수 캐시가 있으면 UI에 선반영
+    try {
+      const raw = await AsyncStorage.getItem(HEALTH_STEPS_CACHE_KEY);
+      if (!raw) return;
+      const cached = JSON.parse(raw) as { date: string; steps: number };
+      const { start } = getStartOfToday();
+      if (cached?.date === start.toISOString()) {
+        setSteps(cached.steps);
+      }
+    } catch (err) {
+      console.warn('[HC] 캐시된 걸음 수 로드 실패', err);
     }
   };
 
@@ -95,6 +84,15 @@ const useHealthSteps = (): HealthStepsState => {
         0
       );
       setSteps(total);
+      try {
+        // 최신 결과를 캐시에 저장해 다음 진입/백그라운드 핸들러와 공유
+        await AsyncStorage.setItem(
+          HEALTH_STEPS_CACHE_KEY,
+          JSON.stringify({ date: start.toISOString(), steps: total })
+        );
+      } catch (err) {
+        console.warn('[HC] 걸음 수 캐시 저장 실패', err);
+      }
     } catch (err: any) {
       console.error('>>> [HC] 걸음 수 읽기 실패', err);
       setError(err?.message ?? '걸음 수를 불러오지 못했습니다.');
@@ -131,6 +129,8 @@ const useHealthSteps = (): HealthStepsState => {
   };
 
   useEffect(() => {
+    loadCachedSteps();
+
     fetchSteps();
 
     const handleAppStateChange = (state: AppStateStatus) => {

@@ -5,11 +5,9 @@
 import { AppRegistry } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
-import messaging from '@react-native-firebase/messaging';
+import { registerBackgroundMessageHandler } from './src/services/backgroundMessaging';
 
-// Backend 상태에서 오는 데이터 메시지를 처리하기 위한 핸들러
-messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-  console.log('[FCM][background] message received', remoteMessage);
-});
+// FCM 백그라운드 데이터 메시지 핸들러 등록
+registerBackgroundMessageHandler();
 
 AppRegistry.registerComponent(appName, () => App);

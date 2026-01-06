@@ -26,6 +26,7 @@ import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
 import { BODY_HISTORY_USER_ID } from '@env';
+import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 
@@ -76,6 +77,7 @@ export const MainPage = () => {
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
+  const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
   const parsedBodyHistoryUserId = Number(BODY_HISTORY_USER_ID);
   const bodyHistoryUserId = Number.isFinite(parsedBodyHistoryUserId)
     ? parsedBodyHistoryUserId
@@ -91,13 +93,15 @@ export const MainPage = () => {
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
+  useEffect(() => {
+    // 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
+    loadBodyGoals(bodyHistoryUserId).then(setBodyGoals);
+  }, [bodyHistoryUserId]);
+
   const checkTodayBodyHistory = useCallback(async () => {
     const todayKey = formatDateKey(new Date());
     try {
-      const existing = await getBodyHistoryByDate(
-        bodyHistoryUserId,
-        todayKey
-      );
+      const existing = await getBodyHistoryByDate(bodyHistoryUserId, todayKey);
       if (existing) {
         // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
         await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
@@ -384,6 +388,9 @@ export const MainPage = () => {
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}
         baseDate={bodyPromptBaseDate}
+        // 목표값에 대한 진행률/aim 라벨을 실제 데이터로 표시
+        weightAim={bodyGoals.weightAim}
+        bodyFatAim={bodyGoals.bodyFatAim}
         onSave={handleSaveBodyPrompt}
         onLater={handleLaterBodyPrompt}
         onSkipToday={handleSkipBodyPromptToday}
