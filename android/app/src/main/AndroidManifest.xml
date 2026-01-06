@@ -8,15 +8,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- pedometer 접근 */-->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
-     <!--  임시 비활성화 <uses-permission android:name="android.permission.BODY_SENSORS" /> -->
-    
-    <!-- Health Connect, Background 걸음 수 체크용 -->
-    <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <!-- 디버그에서 write 권한 쓰기 위함 -->
-    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
 
+     <!-- HealthConnect  -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+
+    <queries>
+      <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
     <application
       android:name=".MainApplication"
@@ -38,6 +38,26 @@
         </intent-filter>
       </activity>
       <activity
+        android:name=".healthconnect.PermissionsRationaleActivity"
+        android:exported="true">
+        <!-- Android 13 이하에서 지원되는 버전용: 사용자가 개인정보처리방침 링크를 눌렀을 때 Health Connect 권한 안내를 보여줄 액티비티 -->
+        <intent-filter>
+          <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent-filter>
+      </activity>
+
+      <!-- Android 14 이상용: 사용자가 개인정보처리방침 링크를 눌렀을 때 Health Connect 권한 안내를 보여줄 액티비티 별칭 -->
+      <activity-alias
+        android:name="ViewPermissionUsageActivity"
+        android:exported="true"
+        android:targetActivity=".healthconnect.PermissionsRationaleActivity"
+        android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+          <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+        </intent-filter>
+      </activity-alias>
+      <activity
     android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
         android:exported="true">
         <intent-filter>
@@ -51,6 +71,7 @@
         </intent-filter>
       </activity>
 
+
       <service
         android:name=".firebase.MyFirebaseMessagingService"
         android:exported="false">
@@ -59,26 +80,6 @@
         </intent-filter>
       </service>
 
-      <!-- Health Connect 온보딩 진입 지점 (Android 13 이하 APK 버전) -->
-      <activity
-        android:name=".healthconnect.OnboardingActivity"
-        android:exported="true"
-        android:permission="com.google.android.apps.healthdata.permission.START_ONBOARDING">
-        <intent-filter>
-          <action android:name="androidx.health.ACTION_SHOW_ONBOARDING" />
-        </intent-filter>
-      </activity>
-
-      <!-- Android 14 이상 플랫폼 Health Connect 온보딩 진입 지점 -->
-      <activity-alias
-        android:name=".healthconnect.UAndAboveOnboardingActivity"
-        android:exported="true"
-        android:permission="android.permission.health.START_ONBOARDING"
-        android:targetActivity=".healthconnect.OnboardingActivity">
-        <intent-filter>
-          <action android:name="android.health.connect.action.SHOW_ONBOARDING" />
-        </intent-filter>
-      </activity-alias>
       <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="${GOOGLE_MAPS_API_KEY}" />

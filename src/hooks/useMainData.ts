@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
 export const useMainData = (userId: string) => {
-  const [data, setData] = useState<MainResponse | null>(null);
+  const [data, setData] = useState<MainResponse>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // ✅ 서버 없이 목업 데이터로 테스트
     const mock: MainResponse = {
-      user: { user_id: 'u1', nick_name: '규리', age: 25, gender: 'F' },
+      user: { user_id: '3', nick_name: '규리', age: 25, gender: 'F' },
       pet: {
         pet_id: 'p1',
         name: '토토',

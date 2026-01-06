@@ -3,9 +3,11 @@ import {
   Alert,
   Modal,
   Pressable,
+  StyleProp,
   Text,
   TextInput,
   View,
+  ViewStyle,
 } from 'react-native';
 import styles from '@styles/BodyRecordPrompt.styles';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
@@ -35,11 +37,11 @@ const BodyRecordPrompt = ({
   visible,
   dateLabel,
   baseDate,
-  initialHeight = 177,
-  initialWeight = 85,
-  initialBodyFat = 13,
-  weightAim = 43,
-  bodyFatAim = 12,
+  initialHeight = 0,
+  initialWeight = 0,
+  initialBodyFat = 0,
+  weightAim = 0,
+  bodyFatAim = 0,
   saving = false,
   primaryLabel = '저장할게요',
   secondaryLabel = '나중에 할게요',
@@ -59,7 +61,6 @@ const BodyRecordPrompt = ({
     setBodyFatInput(String(initialBodyFat));
   }, [initialHeight, initialBodyFat, initialWeight, visible]);
 
-  const currentHeight = Number(heightInput) || 0;
   const currentWeight = Number(weightInput) || 0;
   const currentBodyFat = Number(bodyFatInput) || 0;
 
@@ -69,11 +70,29 @@ const BodyRecordPrompt = ({
     return clampProgress(ratio);
   }, [currentWeight, weightAim]);
 
+  const weightBarStyle = useMemo<StyleProp<ViewStyle>>(
+    () => [
+      styles.progressBar,
+      styles.weightProgressBar,
+      { width: `${weightProgress * 100}%` },
+    ],
+    [weightProgress]
+  );
+
   const bodyFatProgress = useMemo(() => {
     if (currentBodyFat <= 0 || !bodyFatAim || bodyFatAim <= 0) return 0.6;
     const ratio = bodyFatAim / Math.max(currentBodyFat, bodyFatAim);
     return clampProgress(ratio);
   }, [bodyFatAim, currentBodyFat]);
+
+  const bodyFatBarStyle = useMemo<StyleProp<ViewStyle>>(
+    () => [
+      styles.progressBar,
+      styles.fatProgressBar,
+      { width: `${bodyFatProgress * 100}%` },
+    ],
+    [bodyFatProgress]
+  );
 
   const handleSave = () => {
     const heightCm = Number(heightInput);
@@ -152,12 +171,7 @@ const BodyRecordPrompt = ({
               </View>
             </View>
             <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressBar,
-                  { width: `${weightProgress * 100}%`, backgroundColor: '#7385F5' },
-                ]}
-              />
+              <View style={weightBarStyle} />
             </View>
             {typeof weightAim === 'number' && (
               <Text style={styles.aimText}>aim: {weightAim}</Text>
@@ -181,12 +195,7 @@ const BodyRecordPrompt = ({
               </View>
             </View>
             <View style={[styles.progressTrack, styles.progressTrackFat]}>
-              <View
-                style={[
-                  styles.progressBar,
-                  { width: `${bodyFatProgress * 100}%`, backgroundColor: '#7B5EF7' },
-                ]}
-              />
+              <View style={bodyFatBarStyle} />
             </View>
             {typeof bodyFatAim === 'number' && (
               <Text style={styles.aimText}>aim: {bodyFatAim}</Text>
@@ -195,7 +204,9 @@ const BodyRecordPrompt = ({
 
           <View style={styles.infoRow}>
             <Text style={styles.infoIcon}>🧡</Text>
-            <Text style={styles.infoText}>마이페이지에서 다시 기록할 수 있어요.</Text>
+            <Text style={styles.infoText}>
+              마이페이지에서 다시 기록할 수 있어요.
+            </Text>
           </View>
 
           <View style={styles.buttonRow}>

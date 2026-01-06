@@ -37,10 +37,8 @@ import { isAxiosError } from 'axios';
 
 const MAX_STACK = 3;
 
-const getDiaryTitle = (date: Date) => `${date.getMonth() + 1}월의 식사일기`;
-
-const getMonthLabel = (date: Date) =>
-  `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+const getDiaryTitle = (date: Date) =>
+  `${date.getFullYear()}년 ${date.getMonth() + 1}월의 식사`;
 
 const getNextSequence = (meals: MealListItem[]) => {
   if (meals.length === 0) return 1;
@@ -563,9 +561,6 @@ function MealPage() {
         <View style={[styles.calendarContainer, styles.sectionSpacing]}>
           {/* 달력 월 표시 */}
           <View style={styles.calendarMonthRow}>
-            <Text style={styles.calendarMonthLabel}>
-              {getMonthLabel(currentMonth)}
-            </Text>
             {isCalendarLoading ? (
               <ActivityIndicator
                 size='small'

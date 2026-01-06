@@ -18,10 +18,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
-
-// 헬스 커넥트 권한 요청 훅
-import useHealthConnectPrompt from '@hooks/useHealthConnectPrompt';
-import HealthConnectRequired from '@pages/HealthConnectRequired';
 import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
@@ -89,17 +85,6 @@ function AppInner() {
     (state: RootState) => state.user.isSignUpInProgress
   );
 
-  // 25.10.24, MAN: 헬스 커넥트 권한 요청 훅 사용
-  const {
-    isHealthConnectReady,
-    isCheckingStatus: isCheckingHealthConnect,
-    requirement: healthConnectRequirement,
-    openStore: openHealthConnectStore,
-    retryCheck: retryHealthConnectCheck,
-  } = useHealthConnectPrompt({
-    enabled: !loading && isLoggedIn && !isSignUpInProgress,
-  });
-
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -138,28 +123,6 @@ function AppInner() {
       </View>
     );
   }
-
-  // Health Connect 필수 체크 (로그인 완료 후)
-  console.log('>>> Final isHealthConnectReady 값:', isHealthConnectReady);
-  if (isLoggedIn && !isSignUpInProgress && !isHealthConnectReady) {
-    console.log('>>> Rendering HealthConnectRequired ');
-    if (isCheckingHealthConnect) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size='large' color='#000000' />
-        </View>
-      );
-    }
-
-    return (
-      <HealthConnectRequired
-        requirement={healthConnectRequirement}
-        onRetry={retryHealthConnectCheck}
-        onOpenStore={openHealthConnectStore}
-        isChecking={isCheckingHealthConnect}
-      />
-    );
-  } // 최종 상태를 기준으로 내비게이션 결정
 
   console.log('Final isLoggedIn 값:', isLoggedIn);
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);

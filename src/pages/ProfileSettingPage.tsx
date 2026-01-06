@@ -18,6 +18,7 @@ import { useAppDispatch } from '@store/index';
 import userSlice from '@slices/user';
 import { ProfileStackNavigationProp } from '@navigation/profileStack';
 import { updatePetProfile, updateUserProfile } from '@api/profileApi';
+import { saveBodyGoals } from '@utils/bodyGoalsStorage';
 import type { PetType } from 'types/profile';
 
 type SettingRowProps = {
@@ -344,9 +345,14 @@ const ProfileSettingPage = () => {
 
                   setSavingGoal(true);
                   try {
+                    // 서버 프로필 업데이트 후 로컬 목표값도 캐싱해 화면에서 즉시 사용
                     await updateUserProfile(API_USER_ID, {
                       targetWeightKg: weight,
                       targetPbf: pbf,
+                    });
+                    await saveBodyGoals(API_USER_ID, {
+                      weightAim: weight,
+                      bodyFatAim: pbf,
                     });
                     Alert.alert('완료', '내 몸 목표가 수정되었습니다.');
                     setBodyGoalModalVisible(false);

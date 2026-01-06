@@ -21,7 +21,12 @@ class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     SplashScreen.show(this)
     super.onCreate(savedInstanceState)
-    HealthConnectPermissionDelegate.setPermissionDelegate(this) // 2025.10.26 MAN]Health Connect 권한 위임 설정
+
+    // Health Connect 권한 콜백을 연결 (패키지명: com.google.android.apps.healthdata)
+    HealthConnectPermissionDelegate.setPermissionDelegate(this, "com.google.android.apps.healthdata")
+
+    
+    // Push
     requestNotificationPermissionIfNeeded()
   }
   /**
@@ -37,6 +42,10 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
+
+  /**
+   * 알림 권한 요청 (Android 13+)
+   */
   private fun requestNotificationPermissionIfNeeded() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       val permission = Manifest.permission.POST_NOTIFICATIONS
