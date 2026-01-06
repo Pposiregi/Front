@@ -30,6 +30,7 @@ const useHealthSteps = (): HealthStepsState => {
   const [writing, setWriting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const checkingRef = useRef(false);
+  const lastWriteEndRef = useRef<Date | null>(null);
 
   const ensureBackgroundRationaleAcknowledged = async () => {
     // BackgroundAccessPermission은 민감하므로 한 번은 목적을 안내한다.
@@ -128,12 +129,20 @@ const useHealthSteps = (): HealthStepsState => {
 
   const addSteps = async (delta: number) => {
     if (Platform.OS !== 'android') return;
+    if (delta <= 0) {
+      setError('걸음 수 증분은 1 이상이어야 합니다.');
+      return;
+    }
     setWriting(true);
     setError(null);
     try {
       await ensureInitializedAndPermitted();
       const now = new Date();
-      const startTime = new Date(now.getTime() - 5 * 60 * 1000); // 최근 5분 구간
+      // 마지막 기록 종료 시각 이후로부터 현재까지를 구간으로 설정해 중복/겹침 최소화
+      const startTime =
+        lastWriteEndRef.current && lastWriteEndRef.current < now
+          ? lastWriteEndRef.current
+          : new Date(now.getTime() - 5 * 60 * 1000);
       await insertRecords([
         {
           recordType: 'Steps',
@@ -142,6 +151,7 @@ const useHealthSteps = (): HealthStepsState => {
           endTime: now.toISOString(),
         },
       ]);
+      lastWriteEndRef.current = now;
       await fetchSteps();
     } catch (err: any) {
       console.error('>>> [HC] 걸음 수 쓰기 실패', err);
