@@ -44,10 +44,12 @@ apiClient.interceptors.response.use(
     const status = response?.status;
     const data = response?.data;
 
-    console.error(
-      `>>> [API][${method}] ${url} ${status ?? ''}`.trim(),
-      toLogString(data)
-    );
+    if (__DEV__) {
+      console.error(
+        `>>> [API][${method}] ${url} ${status ?? ''}`.trim(),
+        toLogString(data)
+      );
+    }
 
     return Promise.reject(error);
   }
