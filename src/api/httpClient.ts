@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
 
+if (!API_BASE_URL) {
+  throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
+}
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });

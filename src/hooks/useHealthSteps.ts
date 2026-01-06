@@ -156,6 +156,7 @@ const useHealthSteps = (): HealthStepsState => {
     } catch (err: any) {
       console.error('>>> [HC] 걸음 수 쓰기 실패', err);
       setError(err?.message ?? '걸음 수를 기록하지 못했습니다.');
+      throw err;
     } finally {
       setWriting(false);
     }

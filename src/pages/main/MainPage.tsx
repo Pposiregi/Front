@@ -257,8 +257,22 @@ export const MainPage = () => {
   }, [countdown, scaleAnim, opacityAnim, startTracking]);
 
   // Health Connect 오늘 걸음 수
-  const { steps: healthSteps, addSteps, error: healthError } = useHealthSteps();
+  const {
+    steps: healthSteps,
+    addSteps,
+    error: healthError,
+    writing: healthWriting,
+  } = useHealthSteps();
   const healthErrorShownRef = useRef(false);
+  const handleDevAddSteps = useCallback(async () => {
+    try {
+      await addSteps(1000);
+    } catch (err: any) {
+      // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
+      healthErrorShownRef.current = true;
+      Alert.alert('걸음 추가 실패', err?.message ?? '걸음 수를 추가하지 못했습니다.');
+    }
+  }, [addSteps]);
 
   useEffect(() => {
     if (!healthError) {
@@ -365,8 +379,9 @@ export const MainPage = () => {
             {__DEV__ && (
               <TouchableOpacity
                 style={styles.devHealthButton}
-                onPress={() => addSteps(1000)}
+                onPress={handleDevAddSteps}
                 accessibilityLabel='Health Connect 걸음 +1000'
+                disabled={healthWriting}
               >
                 <Text style={styles.devHealthButtonText}>+1000</Text>
               </TouchableOpacity>
