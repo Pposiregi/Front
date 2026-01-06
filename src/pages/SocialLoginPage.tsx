@@ -31,7 +31,7 @@ import { styles } from '@styles/SocialLogin.styles';
 import { getSocialLogin } from '@api/socialLoginApi';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
-const BYPASS_SOCIAL_LOGIN = true;
+const BYPASS_SOCIAL_LOGIN = false;
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -98,9 +98,9 @@ const SocialLoginPage = () => {
             })
           );
           dispatch(userSlice.actions.setSignUpInProgress(false)); // 회원가입 과정 스킵
+          console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
+          return;
         }
-        console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
-        return;
       }
 
       console.log('>>> firstLoginCheck request', {
