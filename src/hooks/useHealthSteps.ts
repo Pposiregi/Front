@@ -31,26 +31,40 @@ const useHealthSteps = (): HealthStepsState => {
   const [error, setError] = useState<string | null>(null);
   const checkingRef = useRef(false);
   const lastWriteEndRef = useRef<Date | null>(null);
+  const rationalePromiseRef = useRef<Promise<void> | null>(null);
 
   const ensureBackgroundRationaleAcknowledged = async () => {
-    // BackgroundAccessPermission은 민감하므로 한 번은 목적을 안내한다.
-    const shown = await AsyncStorage.getItem(BG_RATIONALE_SHOWN_KEY);
-    if (shown) return;
-
-    const acknowledged = await new Promise<boolean>((resolve) => {
-      Alert.alert(
-        'Health Connect 백그라운드 권한 안내',
-        '백그라운드에서도 걸음 수를 동기화하기 위해 Health Connect 백그라운드 접근 권한이 필요합니다.',
-        [
-          { text: '취소', style: 'cancel', onPress: () => resolve(false) },
-          { text: '계속', onPress: () => resolve(true) },
-        ]
-      );
-    });
-    if (!acknowledged) {
-      throw new Error('백그라운드 권한 안내에 동의하지 않았습니다.');
+    if (rationalePromiseRef.current) {
+      return rationalePromiseRef.current;
     }
-    await AsyncStorage.setItem(BG_RATIONALE_SHOWN_KEY, '1');
+
+    // BackgroundAccessPermission은 민감하므로 한 번은 목적을 안내한다.
+    const runner = (async () => {
+      const shown = await AsyncStorage.getItem(BG_RATIONALE_SHOWN_KEY);
+      if (shown) return;
+
+      const acknowledged = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          'Health Connect 백그라운드 권한 안내',
+          '백그라운드에서도 걸음 수를 동기화하기 위해 Health Connect 백그라운드 접근 권한이 필요합니다.',
+          [
+            { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+            { text: '계속', onPress: () => resolve(true) },
+          ]
+        );
+      });
+      if (!acknowledged) {
+        throw new Error('백그라운드 권한 안내에 동의하지 않았습니다.');
+      }
+      await AsyncStorage.setItem(BG_RATIONALE_SHOWN_KEY, '1');
+    })();
+
+    rationalePromiseRef.current = runner;
+    try {
+      await runner;
+    } finally {
+      rationalePromiseRef.current = null;
+    }
   };
 
   const ensureInitializedAndPermitted = async () => {
