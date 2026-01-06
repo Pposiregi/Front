@@ -340,14 +340,15 @@ function ProfilePage() {
         <View style={styles.chartCard}>
           <LineChart
             data={chartData}
-            width={chartWidth}
-            height={200}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chartStyle}
-            withInnerLines
-            withOuterLines={false}
-          />
+          width={chartWidth}
+          height={200}
+          chartConfig={chartConfig}
+          bezier
+          fromZero
+          style={styles.chartStyle}
+          withInnerLines
+          withOuterLines={false}
+        />
         </View>
       </ScrollView>
 
