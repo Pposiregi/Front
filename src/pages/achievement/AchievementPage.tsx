@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
-import { Badge, MissionData, RankingData } from './types';
+import { Badge, RankingData } from './types';
+import MissionTab from './MissionTab';
 
 // ====================
 // 목업 데이터 (뱃지, 미션)
@@ -33,12 +34,6 @@ const mockBadges: Badge[] = [
     iconUrl: require('../../assets/images/mission_gold.png'),
     createdAt: '2025-10-12T09:00:00Z',
   },
-];
-
-const mockMissions: MissionData = [
-  { missionId: 1, title: '오늘 5000보 걷기', progress: 80 },
-  { missionId: 2, title: '주간 10km 달리기', progress: 50 },
-  { missionId: 3, title: '칼로리 500kcal 소모', progress: 100 },
 ];
 
 // ====================
@@ -228,20 +223,7 @@ function AchievementPage() {
           </View>
         );
       case 'MISSION':
-        return (
-          <View style={{ flex: 1 }}>
-            <FlatList
-              data={mockMissions}
-              keyExtractor={(item) => item.missionId.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.listItem}>
-                  <Text style={styles.listItemText}>{item.title}</Text>
-                  <Text style={styles.listItemText}>{item.progress}%</Text>
-                </View>
-              )}
-            />
-          </View>
-        );
+        return <MissionTab />;
       case 'BADGE':
         return (
           <View>
