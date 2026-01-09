@@ -1,5 +1,5 @@
 // 미션 API
-export type MissionCategory = 'STEP' | 'PHOTO' | 'MEAL';
+export type MissionCategory = 'STEP' | 'MEAL';
 export type MissionPeriodType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
 export interface MissionHistoryItem {

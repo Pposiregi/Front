@@ -84,6 +84,7 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#007AFF',
   },
+  activeTabText: {},
   tabText: {
     fontWeight: 'bold',
   },
@@ -132,5 +133,20 @@ export const styles = StyleSheet.create({
   },
   rankingFilterButtonTextActive: {
     color: '#FFF', // 활성화 글자색
+  },
+  // 미션
+  sectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#f6f6f6',
+  },
+  sectionHeaderText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
+  },
+  listItemTitle: {
+    fontSize: 15,
+    color: '#222',
   },
 });
