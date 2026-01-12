@@ -1,10 +1,16 @@
 import apiClient from './httpClient';
-import { MissionHistoryResponse } from '../types/achievement';
+import { MissionResponse, MissionHistoryResponse } from '../types/mission';
 
 export const getMissionHistory = async (): Promise<MissionHistoryResponse> => {
   const { data } = await apiClient.get<MissionHistoryResponse>(
-    '/api/missions/history'
+    '/missions/history'
   );
   console.log('>>>> getMissionHistory api data :', data);
+  return data;
+};
+
+export const getMissionss = async (): Promise<MissionResponse> => {
+  const { data } = await apiClient.get<MissionResponse>('/missions/active');
+  console.log('>>>> getMissions api data :', data);
   return data;
 };

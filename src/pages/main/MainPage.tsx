@@ -41,6 +41,8 @@ const BODY_HISTORY_USER_ID = 3;
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
+import { MissionItem } from 'types/mission';
+import { getMissionss } from '@api/missionApi';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -75,6 +77,9 @@ export const MainPage = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Mission
+  const [missionApiItems, setMissionApiItems] = useState<MissionItem[]>([]);
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -123,6 +128,32 @@ export const MainPage = () => {
     }
     return false;
   }, []);
+  // 미션 데이터 받아서 사용
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        const data = await getMissionss();
+        setMissionApiItems(data.missions);
+      } catch (e) {
+        console.error('미션 조회 실패', e);
+      }
+    };
+    fetchMissions();
+  }, []);
+
+  // porgressBar 가공
+  const progressMissions = useMemo(() => {
+    return missionApiItems
+      .filter((m) => !m.is_completed)
+      .map((m) => ({
+        id: m.mission_check_id.toString(),
+        title: m.title,
+        current: m.progress_value,
+        goal: m.goal_value,
+        unit:
+          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+      }));
+  }, [missionApiItems]);
 
   useEffect(() => {
     const loadPromptState = async () => {
@@ -290,10 +321,10 @@ export const MainPage = () => {
       ? stepCount
       : undefined;
 
-  const missions = getMissions(data, {
-    // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
-    stepOverride,
-  });
+  // const missions = getMissions(data, {
+  //   // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
+  //   stepOverride,
+  // });
 
   // 표시할 걸음 수
   const displayedSteps = stepOverride ?? data?.daily_walk.step ?? 0;
@@ -339,7 +370,7 @@ export const MainPage = () => {
           주간/일일 미션을 수평 스크롤 카드 형태로 표시
         */}
         <FlatList
-          data={missions}
+          data={progressMissions}
           horizontal
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (

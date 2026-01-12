@@ -3,8 +3,7 @@ import { View, Text, ActivityIndicator, SectionList } from 'react-native';
 import dayjs from 'dayjs';
 
 import { styles } from '@styles/Achievement.styles';
-import { MissionHistoryItem } from '../../../types/achievement';
-import { mockCompletedMissions } from './MockData';
+import { MissionHistoryItem } from '../../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
 // import { getMissionHistory } from '@api/missionApi';
 
@@ -22,11 +21,7 @@ const MissionTab = () => {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        // Mock 데이터
-        //const data = mockCompletedMissions;
-        // API
         const data = await getMissionHistory();
-
         setMissions(data.missions);
         setStatus('READY');
       } catch (e) {
@@ -43,17 +38,17 @@ const MissionTab = () => {
   // ====================
   const sections: MissionSection[] = useMemo(() => {
     const completed = missions
-      .filter((m) => m.completed_at)
+      .filter((m) => m.completedAt)
       .sort(
         (a, b) =>
-          new Date(b.completed_at!).getTime() -
-          new Date(a.completed_at!).getTime()
+          new Date(b.completedAt!).getTime() -
+          new Date(a.completedAt!).getTime()
       );
 
     const grouped: Record<string, MissionHistoryItem[]> = {};
 
     completed.forEach((mission) => {
-      const dateKey = dayjs(mission.completed_at).format('YYYY.MM.DD');
+      const dateKey = dayjs(mission.completedAt).format('YYYY.MM.DD');
 
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -100,7 +95,7 @@ const MissionTab = () => {
   return (
     <SectionList
       sections={sections}
-      keyExtractor={(item) => item.mission_check_id.toString()}
+      keyExtractor={(item) => item.missionCheckId.toString()}
       contentContainerStyle={{ paddingBottom: 20 }}
       renderSectionHeader={({ section }) => (
         <View style={styles.sectionHeader}>
