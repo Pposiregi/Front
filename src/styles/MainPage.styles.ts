@@ -218,4 +218,17 @@ export default StyleSheet.create({
     color: '#888',
     fontWeight: '500',
   },
+  missionButton: {
+    position: 'absolute',
+    top: 15, // 상단 여백
+    right: 15, // 오른쪽 여백
+    width: 50,
+    height: 50,
+    padding: 10,
+    backgroundColor: 'rgba(241, 0, 189, 0.5)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
 });

@@ -44,6 +44,7 @@ import { petImageByState } from '@utils/petImages';
 import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
+import MissionModal from './missionModal';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -73,7 +74,6 @@ export const MainPage = () => {
 
     return <Image source={runDogFrames[frame]} style={styles.running_pet} />;
   };
-
   // START 버튼 누른 후 카운트 다운
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -83,6 +83,9 @@ export const MainPage = () => {
   const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
     []
   );
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const handleOpenMission = () => setShowMissionModal(true);
+  const handleCloseMission = () => setShowMissionModal(false);
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -425,6 +428,18 @@ export const MainPage = () => {
           style={styles.mainBackground}
           resizeMode='cover'
         >
+          {/* 오른쪽 상단 미션 버튼 */}
+          <TouchableOpacity
+            onPress={handleOpenMission}
+            style={styles.missionButton}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>미션</Text>
+          </TouchableOpacity>
+          <MissionModal
+            visible={showMissionModal}
+            onClose={handleCloseMission}
+            missions={missionApiItems}
+          />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <Image
