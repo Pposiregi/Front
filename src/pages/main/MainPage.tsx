@@ -43,6 +43,7 @@ import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
 import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
+import { useFocusEffect } from '@react-navigation/native';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -131,17 +132,21 @@ export const MainPage = () => {
     return false;
   }, []);
   // 미션 데이터 받아서 사용
-  useEffect(() => {
-    const fetchMissions = async () => {
-      try {
-        const data = await getMissionsActive();
-        setMissionApiItems(data.missions);
-      } catch (e) {
-        console.error('미션 조회 실패', e);
-      }
-    };
-    fetchMissions();
-  }, []);
+  // 메인화면으로 오면 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      const fetchMissions = async () => {
+        try {
+          const data = await getMissionsActive();
+          setMissionApiItems(data.missions);
+        } catch (e) {
+          console.error('미션 조회 실패', e);
+        }
+      };
+
+      fetchMissions();
+    }, [])
+  );
 
   // porgressBar 가공
   const progressMissions = useMemo(() => {
