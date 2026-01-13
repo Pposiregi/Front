@@ -217,6 +217,7 @@ export default StyleSheet.create({
     fontSize: 18,
     color: '#888',
     fontWeight: '500',
+    textAlign: 'center',
   },
   missionButton: {
     position: 'absolute',
@@ -234,5 +235,70 @@ export default StyleSheet.create({
   missionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  /**
+   * 미션 UI
+   */
+  missionView: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: '95%',
+    height: '83%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+  },
+  missionTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderBottomColor: '#2196F3',
+    alignItems: 'center',
+  },
+  missionUICard: {
+    padding: 12,
+    marginVertical: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  missionUICardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  missionUITextTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  missionUIText: {
+    fontSize: 16,
+    color: '#555',
+  },
+  missionUIExitButton: {
+    marginTop: 12,
+    alignSelf: 'flex-end',
+    padding: 8,
+    backgroundColor: '#2196F3',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  missionUIExitText: {
+    color: '#fff',
+    fontSize: 20,
   },
 });

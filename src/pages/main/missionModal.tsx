@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import type { MissionActiveItem } from 'types/mission';
-import { StepProgress } from '@components/StepProgress'; // 기존 컴포넌트 import
+import styles from '@styles/MainPage.styles';
 
 interface MissionModalProps {
   visible: boolean;
@@ -28,43 +28,25 @@ const MissionModal: React.FC<MissionModalProps> = ({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            width: '95%',
-            height: '83%',
-            backgroundColor: '#fff',
-            borderRadius: 12,
-            padding: 16,
-          }}
-        >
-          <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 12 }}>
-            미션
-          </Text>
+      <View style={styles.missionView}>
+        <View style={styles.modalBox}>
+          <Text style={styles.missionTitle}>미션</Text>
 
           {/* 탭 버튼 */}
-          <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          <View style={styles.tabRow}>
             {['DAILY', 'WEEKLY', 'MONTHLY'].map((tab) => (
               <TouchableOpacity
                 key={tab}
                 onPress={() =>
                   setActiveTab(tab as 'DAILY' | 'WEEKLY' | 'MONTHLY')
                 }
-                style={{
-                  flex: 1,
-                  paddingVertical: 8,
-                  marginHorizontal: 4,
-                  borderBottomWidth: activeTab === tab ? 2 : 0,
-                  borderBottomColor: '#2196F3',
-                  alignItems: 'center',
-                }}
+                style={[
+                  styles.tabButton,
+                  activeTab === tab && {
+                    borderBottomWidth: 2,
+                    borderBottomColor: '#2196F3',
+                  },
+                ]}
               >
                 <Text
                   style={{ fontWeight: activeTab === tab ? 'bold' : 'normal' }}
@@ -81,9 +63,7 @@ const MissionModal: React.FC<MissionModalProps> = ({
 
           <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
             {filteredMissions.length === 0 ? (
-              <Text style={{ textAlign: 'center', color: '#888' }}>
-                미션이 없습니다.
-              </Text>
+              <Text style={styles.emptyMissionText}>미션이 없습니다.</Text>
             ) : (
               filteredMissions.map((mission) => {
                 const progress =
@@ -94,26 +74,14 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 return (
                   <View
                     key={mission.missionCheckId}
-                    style={{
-                      padding: 12,
-                      marginVertical: 6,
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: 8,
-                    }}
+                    style={styles.missionUICard}
                   >
                     {/* 한 줄로 타이틀과 진행값 배치 */}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 8,
-                      }}
-                    >
-                      <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                    <View style={styles.missionUICardHeader}>
+                      <Text style={styles.missionUITextTitle}>
                         {mission.title}
                       </Text>
-                      <Text style={{ fontSize: 16, color: '#555' }}>
+                      <Text style={styles.missionUIText}>
                         {mission.progressValue} / {mission.goalValue}{' '}
                         {mission.category === 'STEP'
                           ? '보'
@@ -130,17 +98,9 @@ const MissionModal: React.FC<MissionModalProps> = ({
 
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              marginTop: 12,
-              alignSelf: 'flex-end',
-              padding: 8,
-              backgroundColor: '#2196F3',
-              borderRadius: 6,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+            style={styles.missionUIExitButton}
           >
-            <Text style={{ color: '#fff', fontSize: 20 }}>닫기</Text>
+            <Text style={styles.missionUIExitText}>닫기</Text>
           </TouchableOpacity>
         </View>
       </View>
