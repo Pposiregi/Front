@@ -8,6 +8,7 @@ type Props = {
   current: number;
   goal: number;
   unit?: string;
+  isCompleted?: boolean;
 };
 
 /**
@@ -17,7 +18,13 @@ type Props = {
  * @param goal - goal value
  * @param unit - optional unit string (ex: "보", "km")
  */
-export const StepProgress = ({ title, current, goal, unit }: Props) => {
+export const StepProgress = ({
+  title,
+  current,
+  goal,
+  unit,
+  isCompleted,
+}: Props) => {
   const progress = goal > 0 ? current / goal : 0;
   const { width: SCREEN_WIDTH } = Dimensions.get('window');
   const cardWidth = Math.max(

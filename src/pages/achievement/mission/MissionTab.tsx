@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import { styles } from '@styles/Achievement.styles';
 import { MissionHistoryItem } from '../../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
-// import { getMissionHistory } from '@api/missionApi';
 
 type MissionStatus = 'LOADING' | 'READY';
 

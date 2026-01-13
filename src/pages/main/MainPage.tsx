@@ -41,8 +41,8 @@ const BODY_HISTORY_USER_ID = 3;
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
-import { MissionItem } from 'types/mission';
-import { getMissionss } from '@api/missionApi';
+import { MissionActiveItem } from 'types/mission';
+import { getMissionsActive } from '@api/missionApi';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -79,7 +79,9 @@ export const MainPage = () => {
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   // Mission
-  const [missionApiItems, setMissionApiItems] = useState<MissionItem[]>([]);
+  const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
+    []
+  );
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -132,7 +134,7 @@ export const MainPage = () => {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        const data = await getMissionss();
+        const data = await getMissionsActive();
         setMissionApiItems(data.missions);
       } catch (e) {
         console.error('미션 조회 실패', e);
