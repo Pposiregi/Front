@@ -150,19 +150,16 @@ export const MainPage = () => {
 
   // porgressBar 가공
   const progressMissions = useMemo(() => {
-    return (
-      missionApiItems
-        // .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
-        .filter((m) => !m.isCompleted)
-        .map((m) => ({
-          id: m.missionCheckId.toString(),
-          title: m.title,
-          current: m.progressValue,
-          goal: m.goalValue,
-          unit:
-            m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-        }))
-    );
+    return missionApiItems
+      .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+      .map((m) => ({
+        id: m.missionCheckId.toString(),
+        title: m.title,
+        current: m.progressValue,
+        goal: m.goalValue,
+        unit:
+          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+      }));
   }, [missionApiItems]);
 
   useEffect(() => {
