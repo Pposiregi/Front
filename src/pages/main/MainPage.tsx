@@ -433,7 +433,7 @@ export const MainPage = () => {
             onPress={handleOpenMission}
             style={styles.missionButton}
           >
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>미션</Text>
+            <Text style={styles.missionButtonText}>미션</Text>
           </TouchableOpacity>
           <MissionModal
             visible={showMissionModal}

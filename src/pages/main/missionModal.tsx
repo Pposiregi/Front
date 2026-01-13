@@ -38,8 +38,8 @@ const MissionModal: React.FC<MissionModalProps> = ({
       >
         <View
           style={{
-            width: '85%',
-            height: '80%',
+            width: '95%',
+            height: '83%',
             backgroundColor: '#fff',
             borderRadius: 12,
             padding: 16,
@@ -85,22 +85,46 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 미션이 없습니다.
               </Text>
             ) : (
-              filteredMissions.map((mission) => (
-                <StepProgress
-                  key={mission.missionCheckId}
-                  title={mission.title}
-                  current={mission.progressValue}
-                  goal={mission.goalValue}
-                  unit={
-                    mission.category === 'STEP'
-                      ? '보'
-                      : mission.category === 'MEAL'
-                      ? '회'
-                      : '장'
-                  }
-                  isCompleted={mission.isCompleted}
-                />
-              ))
+              filteredMissions.map((mission) => {
+                const progress =
+                  mission.goalValue > 0
+                    ? mission.progressValue / mission.goalValue
+                    : 0;
+
+                return (
+                  <View
+                    key={mission.missionCheckId}
+                    style={{
+                      padding: 12,
+                      marginVertical: 6,
+                      backgroundColor: '#f0f0f0',
+                      borderRadius: 8,
+                    }}
+                  >
+                    {/* 한 줄로 타이틀과 진행값 배치 */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                        {mission.title}
+                      </Text>
+                      <Text style={{ fontSize: 16, color: '#555' }}>
+                        {mission.progressValue} / {mission.goalValue}{' '}
+                        {mission.category === 'STEP'
+                          ? '보'
+                          : mission.category === 'MEAL'
+                          ? '회'
+                          : '장'}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
             )}
           </ScrollView>
 

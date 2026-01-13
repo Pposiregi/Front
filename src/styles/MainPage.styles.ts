@@ -225,10 +225,14 @@ export default StyleSheet.create({
     width: 50,
     height: 50,
     padding: 10,
-    backgroundColor: 'rgba(241, 0, 189, 0.5)',
+    backgroundColor: '#ca4949',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+  },
+  missionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
