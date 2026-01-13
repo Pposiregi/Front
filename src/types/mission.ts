@@ -22,17 +22,17 @@ export interface MissionHistoryResponse {
 
 // get missions
 export interface MissionItem {
-  mission_check_id: number;
-  mission_id: number;
+  missionCheckId: number;
+  missionId: number;
   title: string;
   category: MissionCategory;
-  period_type: MissionPeriodType;
-  period_start: string;
-  period_end: string;
-  goal_value: number;
-  progress_value: number;
-  is_completed: boolean;
-  completed_at: string | null;
+  periodType: MissionPeriodType;
+  periodStart: string;
+  periodEnd: string;
+  goalValue: number;
+  progressValue: number;
+  isCompleted: boolean;
+  completedAt: string | null;
 }
 
 export interface MissionResponse {

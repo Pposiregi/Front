@@ -144,12 +144,12 @@ export const MainPage = () => {
   // porgressBar 가공
   const progressMissions = useMemo(() => {
     return missionApiItems
-      .filter((m) => !m.is_completed)
+      .filter((m) => !m.isCompleted)
       .map((m) => ({
-        id: m.mission_check_id.toString(),
+        id: m.missionCheckId.toString(),
         title: m.title,
-        current: m.progress_value,
-        goal: m.goal_value,
+        current: m.progressValue,
+        goal: m.goalValue,
         unit:
           m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
       }));
