@@ -14,3 +14,7 @@ export const getMissionss = async (): Promise<MissionResponse> => {
   console.log('>>>> getMissions api data :', data);
   return data;
 };
+
+export const postMissionsPhoto = async (): Promise<void> => {
+  const { data } = await apiClient.post('/missions/progress/photo');
+};

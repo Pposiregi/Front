@@ -34,6 +34,7 @@ import {
 } from 'react-native-image-picker';
 import { uploadMealImage } from '@api/uploadMealImage';
 import { isAxiosError } from 'axios';
+import { postMissionsPhoto } from '@api/missionApi';
 
 const MAX_STACK = 3;
 
@@ -385,7 +386,10 @@ function MealPage() {
         });
       }
 
-      // 3. 캘린더 및 상세 데이터 리프레시
+      // 3. 미션 진행도 증가
+      await postMissionsPhoto();
+
+      // 4. 캘린더 및 상세 데이터 리프레시
       await refreshCalendar(currentMonth, { silent: true });
       await refetchDayDetail({
         keepPrevious: false,
