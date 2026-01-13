@@ -75,5 +75,5 @@ export interface MissionProgressResult {
 }
 
 export interface MissionProgressResponse {
-  updateMissions: MissionProgressResult[];
+  updatedMissions: MissionProgressResult[];
 }

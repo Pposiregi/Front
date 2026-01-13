@@ -208,4 +208,14 @@ export default StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  emptyMissionContainer: {
+    height: 96,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyMissionText: {
+    fontSize: 18,
+    color: '#888',
+    fontWeight: '500',
+  },
 });

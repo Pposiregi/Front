@@ -30,5 +30,6 @@ export const getMissionsChecks = async (): Promise<MissionCheckItem[]> => {
 
 export const postMissionsPhoto = async (): Promise<MissionProgressResponse> => {
   const { data } = await apiClient.post('/missions/progress/photo');
+  console.log('>>>> postMissionsPhoto api data :', data);
   return data;
 };

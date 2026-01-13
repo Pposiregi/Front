@@ -388,15 +388,15 @@ function MealPage() {
 
       // 3. 미션 진행도 증가
       const misisonRes = await postMissionsPhoto();
-      const completedMissions = misisonRes.updateMissions.filter(
-        (m) => m.completed === true
-      );
+      const completedMissions = Array.isArray(misisonRes.updatedMissions)
+        ? misisonRes.updatedMissions.filter((m) => m.completed === true)
+        : [];
       // 미션 완료하면 사용자에게 알림
       if (completedMissions.length === 1) {
         Alert.alert('미션 완료', '미션을 완료했어요!');
       } else if (completedMissions.length > 1) {
         Alert.alert(
-          '미션 완료',
+          '미션 완료 ',
           `${completedMissions.length}개의 미션을 완료했어요!`
         );
       }

@@ -150,16 +150,19 @@ export const MainPage = () => {
 
   // porgressBar 가공
   const progressMissions = useMemo(() => {
-    return missionApiItems
-      .filter((m) => !m.isCompleted)
-      .map((m) => ({
-        id: m.missionCheckId.toString(),
-        title: m.title,
-        current: m.progressValue,
-        goal: m.goalValue,
-        unit:
-          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-      }));
+    return (
+      missionApiItems
+        // .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+        .filter((m) => !m.isCompleted)
+        .map((m) => ({
+          id: m.missionCheckId.toString(),
+          title: m.title,
+          current: m.progressValue,
+          goal: m.goalValue,
+          unit:
+            m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+        }))
+    );
   }, [missionApiItems]);
 
   useEffect(() => {
@@ -374,23 +377,31 @@ export const MainPage = () => {
       */}
       <View style={styles.progressContainer}>
         {/*
-          주간/일일 미션을 수평 스크롤 카드 형태로 표시
+          일일 미션을 수평 스크롤 카드 형태로 표시, 미션이 없으면 미션 X 띄움 
         */}
-        <FlatList
-          data={progressMissions}
-          horizontal
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <StepProgress
-              title={item.title}
-              current={item.current}
-              goal={item.goal}
-              unit={item.unit}
-            />
-          )}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.progressRow}
-        />
+        {progressMissions.length === 0 ? (
+          <View style={styles.emptyMissionContainer}>
+            <Text style={styles.emptyMissionText}>
+              완벽한 하루예요! 내일도 함께해요!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={progressMissions}
+            horizontal
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <StepProgress
+                title={item.title}
+                current={item.current}
+                goal={item.goal}
+                unit={item.unit}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.progressRow}
+          />
+        )}
       </View>
       {isTracking ? (
         <View
