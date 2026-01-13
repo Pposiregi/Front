@@ -22,12 +22,6 @@ export const getMissionsActive = async (): Promise<MissionActiveResponse> => {
   return data;
 };
 
-export const getMissionsChecks = async (): Promise<MissionCheckItem[]> => {
-  const { data } = await apiClient.get<MissionCheckItem[]>('/missions/checks');
-  console.log('>>>> getMissionsChecks api data :', data);
-  return data;
-};
-
 export const postMissionsPhoto = async (): Promise<MissionProgressResponse> => {
   const { data } = await apiClient.post('/missions/progress/photo');
   console.log('>>>> postMissionsPhoto api data :', data);

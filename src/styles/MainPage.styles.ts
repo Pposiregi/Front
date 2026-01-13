@@ -5,7 +5,7 @@ import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 const BOTTOM_NAV_HEIGHT = 60;
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
   80,
-  Math.min(120, SCREEN_HEIGHT * 0.12)
+  Math.min(120, SCREEN_HEIGHT * 0.1)
 );
 const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
 const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));

@@ -131,6 +131,7 @@ export const MainPage = () => {
     }
     return false;
   }, []);
+
   // 미션 데이터 받아서 사용
   // 메인화면으로 오면 새로고침
   useFocusEffect(
