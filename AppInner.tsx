@@ -13,14 +13,16 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { GOOGLE_CLIENT_ID } from '@env';
+import { DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
 import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
 import { getOrCreateDeviceUuid } from '@utils/deviceUuid';
+import { postPushToken, type PushTokenPayload } from '@api/pushTokenApi';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -84,6 +86,7 @@ function AppInner() {
   const isSignUpInProgress = useSelector(
     (state: RootState) => state.user.isSignUpInProgress
   );
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -124,6 +127,58 @@ function AppInner() {
 
     checkAuthStatus();
   }, [dispatch]);
+
+  useEffect(() => {
+    /**
+     * PushToken
+     * @returns
+     */
+    const registerPushToken = async () => {
+      // 로그인 || 회원가입 상태에서만.
+      if (!isLoggedIn || isSignUpInProgress || !accessToken) {
+        return;
+      }
+
+      try {
+        // 로그인 직후/앱 재시작 시 알림 권한 요청 → 토큰 획득 → 서버 등록
+        const authStatus = await messaging().requestPermission();
+
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (!enabled) {
+          console.log('>>> [FCM][PushToken] 알림 권한 미승인', authStatus);
+          return;
+        }
+
+        const fcmToken = await messaging().getToken();
+        if (!fcmToken) {
+          console.warn('>>> [FCM][PushToken] FCM 토큰 없음');
+          return;
+        }
+
+        const deviceUuid = await getOrCreateDeviceUuid();
+        const payload: PushTokenPayload = {
+          deviceUuid: deviceUuid,
+          deviceOs: 'ANDROID',
+          deviceToken: fcmToken,
+        };
+
+        const parsedUserId = Number(DEV_USER_ID);
+        const userId = Number.isFinite(parsedUserId) ? parsedUserId : 1;
+        console.log('>>> [FCM][PushToken] POST /devices/push-token', {
+          ...payload,
+          userId,
+        });
+        await postPushToken(payload, accessToken, userId);
+      } catch (err) {
+        console.error('>>> [FCM][PushToken] POST 실패', err);
+      }
+    };
+
+    registerPushToken();
+  }, [accessToken, isLoggedIn, isSignUpInProgress]);
 
   if (loading) {
     console.log('>>> Rendering loading indicator');
