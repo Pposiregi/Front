@@ -95,7 +95,6 @@ const MissionModal: React.FC<MissionModalProps> = ({
               })
             )}
           </ScrollView>
-
           <TouchableOpacity
             onPress={onClose}
             style={styles.missionUIExitButton}
