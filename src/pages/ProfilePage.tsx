@@ -19,17 +19,18 @@ import {
   updateBodyHistory,
 } from '@api/bodyHistoryApi';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
 import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
 
-const CONTENT_PADDING = 20;
-const CHART_CARD_PADDING = 14;
+const DEVICE_WIDTH = Dimensions.get('window').width;
+const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
 const API_USER_ID = 3;
-const FALLBACK_HEIGHT = 177;
-const FALLBACK_WEIGHT = 85;
-const FALLBACK_BODY_FAT = 18;
+const FALLBACK_HEIGHT = 0;
+const FALLBACK_WEIGHT = 0;
+const FALLBACK_BODY_FAT = 0;
 
 type MetricCardProps = {
   label: string;
@@ -80,15 +81,13 @@ const MetricCard = ({
 
 function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
-  const chartWidth =
-    Dimensions.get('window').width -
-    CONTENT_PADDING * 2 -
-    CHART_CARD_PADDING * 2;
+  const chartWidth = DEVICE_WIDTH - Math.max(12, CONTENT_PADDING * 1.5) * 2;
 
   const [histories, setHistories] = useState<BodyHistoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [savingRecord, setSavingRecord] = useState(false);
+  const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
 
   // 기록 저장 후 최신 데이터를 불러올지 여부
   const [shouldRefreshAfterRecord, setShouldRefreshAfterRecord] =
@@ -108,11 +107,18 @@ function ProfilePage() {
     }
   }, []);
 
+  const loadGoals = useCallback(async () => {
+    // 저장된 목표 체중/체지방률을 로컬에서 불러와 진행률 계산에 사용
+    const goals = await loadBodyGoals(API_USER_ID);
+    setBodyGoals(goals);
+  }, []);
+
   // 화면이 포커스될 때마다 최신 기록을 불러온다.
   useFocusEffect(
     useCallback(() => {
       loadBodyHistories();
-    }, [loadBodyHistories])
+      loadGoals();
+    }, [loadBodyHistories, loadGoals])
   );
 
   // 팝업을 닫은 직후 최신 기록을 다시 불러와 화면을 갱신한다.
@@ -130,21 +136,36 @@ function ProfilePage() {
   const heightValue = latestHistory?.heightCm ?? FALLBACK_HEIGHT;
   const weightValue = latestHistory?.weightKg ?? FALLBACK_WEIGHT;
   const bodyFatValue = latestHistory?.pbf ?? FALLBACK_BODY_FAT;
+  const weightAim = bodyGoals.weightAim;
+  const bodyFatAim = bodyGoals.bodyFatAim;
+
+  const weightProgress = useMemo(() => {
+    if (!weightAim || weightAim <= 0 || weightValue <= 0) return undefined;
+    return Math.min(weightAim / Math.max(weightValue, weightAim), 1);
+  }, [weightAim, weightValue]);
+
+  const bodyFatProgress = useMemo(() => {
+    if (!bodyFatAim || bodyFatAim <= 0 || bodyFatValue <= 0) return undefined;
+    return Math.min(bodyFatAim / Math.max(bodyFatValue, bodyFatAim), 1);
+  }, [bodyFatAim, bodyFatValue]);
 
   const todayKey = formatDateKey(new Date());
   const todayLabel = formatDateLabel(new Date());
 
+  /*
+    차트용 초기 더미 데이터 생성
+  */
   const fallbackChartData = useMemo(
     () => ({
       labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       datasets: [
         {
-          data: [3, 5, 4, 7, 5, 6, 4],
+          data: [0, 0, 0, 0, 0, 0, 0],
           color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
           strokeWidth: 3,
         },
         {
-          data: [15, 16, 15.5, 15.2, 15.4, 15.1, 15.3],
+          data: [1, 0, 1, 0, 1, 0, 1],
           color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
           strokeWidth: 3,
         },
@@ -168,7 +189,10 @@ function ProfilePage() {
 
     const recent = sanitized.slice(0, 7).reverse(); // 차트는 시간순으로 표시
     return {
-      labels: recent.map((history) => history.baseDate.slice(5)),
+      labels: recent.map(
+        (history) =>
+          `${history.baseDate.slice(5, 7)}/${history.baseDate.slice(8, 10)}`
+      ), // "MM/DD"
       datasets: [
         {
           data: recent.map((history) => history.weightKg),
@@ -293,8 +317,21 @@ function ProfilePage() {
           </Text>
         </View>
 
-        <MetricCard label='체중' value={weightValue} unit='kg' />
-        <MetricCard label='체지방률' value={bodyFatValue} unit='%' />
+        <MetricCard
+          label='체중'
+          value={weightValue}
+          unit='kg'
+          aim={weightAim}
+          progress={weightProgress}
+        />
+        <MetricCard
+          label='체지방률'
+          value={bodyFatValue}
+          unit='%'
+          aim={bodyFatAim}
+          progress={bodyFatProgress}
+          barColor='#F58634'
+        />
 
         <View style={[styles.sectionHeader, styles.chartHeader]}>
           <Text style={styles.sectionTitle}>내 몸 변화</Text>
@@ -303,14 +340,15 @@ function ProfilePage() {
         <View style={styles.chartCard}>
           <LineChart
             data={chartData}
-            width={chartWidth}
-            height={200}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chartStyle}
-            withInnerLines
-            withOuterLines={false}
-          />
+          width={chartWidth}
+          height={200}
+          chartConfig={chartConfig}
+          bezier
+          fromZero
+          style={styles.chartStyle}
+          withInnerLines
+          withOuterLines={false}
+        />
         </View>
       </ScrollView>
 
@@ -321,6 +359,8 @@ function ProfilePage() {
         initialHeight={heightValue}
         initialWeight={weightValue}
         initialBodyFat={bodyFatValue}
+        weightAim={weightAim}
+        bodyFatAim={bodyFatAim}
         onSave={handleSaveRecord}
         onLater={() => setRecordModalVisible(false)}
         secondaryLabel='취소'

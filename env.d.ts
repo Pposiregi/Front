@@ -4,4 +4,5 @@ declare module '@env' {
   export const GOOGLE_CLIENT_SECRET: string;
   export const KAKAO_CLIENT_ID: string;
   export const API_BASE_URL: string;
+  export const BODY_HISTORY_USER_ID: string;
 }

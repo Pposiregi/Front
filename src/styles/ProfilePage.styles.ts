@@ -1,5 +1,23 @@
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Dimensions } from 'react-native';
 import { SCREEN_WIDTH } from './dimensions';
+
+const { width: deviceWidth } = Dimensions.get('window');
+const baseUnit = deviceWidth / 24; // 반응형 기준 단위
+const avatarSize = Math.max(80, Math.round(deviceWidth * 0.24));
+const gearSize = Math.max(28, Math.round(deviceWidth * 0.09));
+const cardRadius = Math.max(12, Math.round(deviceWidth * 0.04));
+const cardPadding = Math.max(12, Math.round(deviceWidth * 0.04));
+const headerFont = Math.max(18, Math.round(deviceWidth * 0.05));
+const bodyFont = Math.max(12, Math.round(deviceWidth * 0.034));
+const smallFont = Math.max(11, Math.round(deviceWidth * 0.03));
+const titleFont = Math.max(20, Math.round(deviceWidth * 0.053));
+const metricNumberFont = Math.max(16, Math.round(deviceWidth * 0.05));
+const chartRadius = Math.max(10, Math.round(deviceWidth * 0.03));
+const chartPadding = Math.max(10, Math.round(deviceWidth * 0.035));
+const contentPadding = Math.max(16, Math.round(deviceWidth * 0.048));
+const progressHeight = Math.max(6, Math.round(deviceWidth * 0.02));
+const progressRadius = Math.round(progressHeight * 1.2);
+const bottomPadding = Math.max(100, Math.round(deviceWidth * 0.28));
 
 const cardShadow = {
   shadowColor: '#000',
@@ -15,90 +33,91 @@ export default StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   contentContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: contentPadding,
     paddingTop: Platform.select({ ios: 6, android: 6 }),
-    paddingBottom: 120,
+    paddingBottom: bottomPadding,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.max(8, Math.round(baseUnit * 1.2)),
   },
   avatarWrapper: {
     position: 'relative',
   },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: avatarSize,
+    height: avatarSize,
+    borderRadius: Math.round(avatarSize / 2),
     backgroundColor: '#FFE1B8',
     alignItems: 'center',
     justifyContent: 'center',
     ...cardShadow,
   },
   avatarEmoji: {
-    fontSize: 46,
+    fontSize: Math.max(32, Math.round(avatarSize * 0.48)),
   },
   gearButton: {
     position: 'absolute',
-    bottom: -4,
-    right: -6,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    bottom: -Math.round(gearSize * 0.12),
+    right: -Math.round(gearSize * 0.15),
+    width: gearSize,
+    height: gearSize,
+    borderRadius: Math.round(gearSize / 2),
     backgroundColor: '#FFB454',
     alignItems: 'center',
     justifyContent: 'center',
     ...cardShadow,
   },
   gearText: {
-    fontSize: 18,
+    fontSize: Math.max(14, Math.round(gearSize * 0.52)),
   },
   name: {
-    marginTop: 10,
+    marginTop: Math.max(8, Math.round(baseUnit * 1.2)),
     fontFamily: 'JUA',
-    fontSize: 20,
+    fontSize: titleFont,
     color: '#1F2937',
   },
   caption: {
-    marginTop: 6,
+    marginTop: Math.max(4, Math.round(baseUnit * 0.8)),
     fontFamily: 'GowunDodum',
-    fontSize: 13,
+    fontSize: bodyFont,
     color: '#6B7280',
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: Math.max(10, Math.round(baseUnit * 1.4)),
+    marginBottom: Math.max(6, Math.round(baseUnit * 1)),
   },
   sectionTitle: {
     fontFamily: 'JUA',
-    fontSize: 18,
+    fontSize: headerFont,
     color: '#1F2937',
   },
   recordButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: Math.max(10, Math.round(baseUnit * 1.3)),
+    paddingVertical: Math.max(4, Math.round(baseUnit * 0.7)),
+    borderRadius: Math.max(10, Math.round(baseUnit * 1.4)),
   },
   recordIcon: {
-    marginRight: 6,
+    marginRight: Math.max(4, Math.round(baseUnit * 0.8)),
   },
   recordText: {
     fontFamily: 'GowunDodum',
-    fontSize: 12,
+    fontSize: bodyFont,
     fontWeight: '600',
     color: '#4B5563',
   },
   metricCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: cardRadius,
+    paddingVertical: Math.max(10, Math.round(cardPadding * 0.8)),
+    paddingHorizontal: cardPadding,
+    marginBottom: Math.max(10, Math.round(baseUnit * 1.3)),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -106,9 +125,10 @@ export default StyleSheet.create({
   },
   metricCardSingle: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: cardRadius,
+    paddingVertical: Math.max(10, Math.round(cardPadding * 0.8)),
+    paddingHorizontal: cardPadding,
+    marginBottom: Math.max(10, Math.round(baseUnit * 1.3)),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -116,57 +136,61 @@ export default StyleSheet.create({
   },
   metricLabel: {
     fontFamily: 'JUA',
-    fontSize: 16,
+    fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
+    lineHeight: Math.max(12, Math.round(baseUnit * 1.4)),
     color: '#111827',
   },
   metricAim: {
     fontFamily: 'GowunDodum',
-    fontSize: 11,
+    fontSize: smallFont,
     color: '#9CA3AF',
-    marginTop: 4,
+    marginTop: Math.max(2, Math.round(baseUnit * 0.5)),
   },
   metricRight: {
     alignItems: 'flex-end',
   },
   metricValue: {
     fontFamily: 'GowunDodum',
-    fontSize: 13,
+    fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
+    lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#4B5563',
   },
   metricNumber: {
     fontFamily: 'JUA',
-    fontSize: 22,
+    fontSize: metricNumberFont,
+    lineHeight: Math.max(metricNumberFont, Math.round(metricNumberFont * 1.05)),
     color: '#111827',
   },
   metricUnit: {
     fontFamily: 'GowunDodum',
-    fontSize: 13,
+    fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
+    lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#6B7280',
   },
   progressTrack: {
     width: Math.max(140, SCREEN_WIDTH * 0.35),
-    height: 8,
-    borderRadius: 10,
+    height: progressHeight,
+    borderRadius: progressRadius,
     backgroundColor: '#E5E7EB',
-    marginTop: 8,
+    marginTop: Math.max(6, Math.round(baseUnit * 1)),
   },
   progressBar: {
-    height: 8,
-    borderRadius: 10,
+    height: progressHeight,
+    borderRadius: progressRadius,
     backgroundColor: '#A5B4FC',
   },
   chartHeader: {
-    marginTop: 10,
+    marginTop: Math.max(8, Math.round(baseUnit * 1.2)),
   },
   chartCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    borderRadius: cardRadius,
+    paddingVertical: chartPadding,
+    paddingHorizontal: chartPadding,
     ...cardShadow,
   },
   chartStyle: {
-    borderRadius: 12,
+    borderRadius: chartRadius,
   },
   loadingContainer: {
     flex: 1,

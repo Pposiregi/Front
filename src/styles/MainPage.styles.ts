@@ -24,32 +24,6 @@ export default StyleSheet.create({
     backgroundColor: '#F3F4F8',
     paddingTop: Platform.select({ ios: 40, android: 24 }),
   },
-  healthConnectBanner: {
-    backgroundColor: '#FFF6DA',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#F5C86C',
-  },
-  healthConnectBannerText: {
-    color: '#5F3A00',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  healthConnectBannerButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FF9900',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  healthConnectBannerButtonLabel: {
-    color: '#fff',
-    fontWeight: '600',
-  },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
@@ -62,19 +36,17 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   message: {
-    /* 센서 미지원에 대한 안내 문장용 */
+    /* 메인 메시지 문구 */
     fontFamily: 'GowunDodum',
     textAlign: 'center',
     color: '#000000ff',
     fontSize: 24,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
-  stepFallback: {
-    fontFamily: 'GowunDodum',
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 14,
-    marginTop: 6,
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   mainBackground: {
     flex: 1,
@@ -155,6 +127,17 @@ export default StyleSheet.create({
     fontFamily: 'JUA',
     fontWeight: 'bold',
     fontSize: START_BUTTON_FONT,
+  },
+  devHealthButton: {
+    backgroundColor: '#1f2937',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  devHealthButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   bottomNav: {
     position: 'absolute',
