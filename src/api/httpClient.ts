@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
+import { API_BASE_URL, DEV_USER_ID } from '@env';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -18,8 +18,32 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+const redactHeaders = (headers: unknown) => {
+  const rawHeaders =
+    typeof (headers as { toJSON?: () => unknown })?.toJSON === 'function'
+      ? (headers as { toJSON: () => unknown }).toJSON()
+      : headers;
+
+  if (!rawHeaders || typeof rawHeaders !== 'object') {
+    return rawHeaders;
+  }
+
+  const redacted = { ...(rawHeaders as Record<string, unknown>) };
+  const sensitiveKeys = ['authorization', 'cookie', 'set-cookie', 'x-api-key'];
+
+  Object.keys(redacted).forEach((key) => {
+    if (sensitiveKeys.includes(key.toLowerCase())) {
+      redacted[key] = '***';
+    }
+  });
+
+  return redacted;
+};
+
 apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = BODY_HISTORY_USER_ID; // 항상 추가
+  if (DEV_USER_ID) {
+    config.headers['dev-user-id'] = String(DEV_USER_ID); // dev 전용 헤더
+  }
   return config;
 });
 
@@ -45,9 +69,19 @@ apiClient.interceptors.response.use(
     const data = response?.data;
 
     if (__DEV__) {
+      const requestInfo = {
+        baseURL: config?.baseURL,
+        url,
+        method,
+        params: config?.params,
+        data: config?.data,
+        headers: redactHeaders(config?.headers),
+      };
+      const responseInfo = { status, data };
+
       console.error(
         `>>> [API][${method}] ${url} ${status ?? ''}`.trim(),
-        toLogString(data)
+        toLogString({ request: requestInfo, response: responseInfo })
       );
     }
 

@@ -25,7 +25,7 @@ import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
-import { BODY_HISTORY_USER_ID } from '@env';
+import { DEV_USER_ID } from '@env';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
@@ -78,14 +78,14 @@ export const MainPage = () => {
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const parsedBodyHistoryUserId = Number(BODY_HISTORY_USER_ID);
+  const parsedBodyHistoryUserId = Number(DEV_USER_ID);
   const bodyHistoryUserId = Number.isFinite(parsedBodyHistoryUserId)
     ? parsedBodyHistoryUserId
     : 1;
   useEffect(() => {
     if (!Number.isFinite(parsedBodyHistoryUserId)) {
       console.warn(
-        '>>> [BodyHistory] BODY_HISTORY_USER_ID가 설정되지 않아 기본값 1을 사용합니다.'
+        '>>> [BodyHistory] DEV_USER_ID가 설정되지 않아 기본값 1을 사용합니다.'
       );
     }
   }, [parsedBodyHistoryUserId]);
@@ -270,7 +270,10 @@ export const MainPage = () => {
     } catch (err: any) {
       // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
       healthErrorShownRef.current = true;
-      Alert.alert('걸음 추가 실패', err?.message ?? '걸음 수를 추가하지 못했습니다.');
+      Alert.alert(
+        '걸음 추가 실패',
+        err?.message ?? '걸음 수를 추가하지 못했습니다.'
+      );
     }
   }, [addSteps]);
 

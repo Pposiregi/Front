@@ -24,10 +24,14 @@ import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
+import { DEV_USER_ID } from '@env';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
-const API_USER_ID = 3;
+
+const parsedDevUserId = Number(DEV_USER_ID);
+const API_USER_ID = Number.isFinite(parsedDevUserId) ? parsedDevUserId : 1;
+
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
 const FALLBACK_BODY_FAT = 0;
@@ -340,15 +344,15 @@ function ProfilePage() {
         <View style={styles.chartCard}>
           <LineChart
             data={chartData}
-          width={chartWidth}
-          height={200}
-          chartConfig={chartConfig}
-          bezier
-          fromZero
-          style={styles.chartStyle}
-          withInnerLines
-          withOuterLines={false}
-        />
+            width={chartWidth}
+            height={200}
+            chartConfig={chartConfig}
+            bezier
+            fromZero
+            style={styles.chartStyle}
+            withInnerLines
+            withOuterLines={false}
+          />
         </View>
       </ScrollView>
 
