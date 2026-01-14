@@ -1,7 +1,6 @@
 import apiClient from './httpClient';
 import {
   MissionHistoryResponse,
-  MissionCheckItem,
   MissionActiveResponse,
   MissionProgressResponse,
 } from '../types/mission';
