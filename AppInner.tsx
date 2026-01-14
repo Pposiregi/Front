@@ -14,13 +14,13 @@ import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CLIENT_ID } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
 import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
+import { getOrCreateDeviceUuid } from '@utils/deviceUuid';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -88,6 +88,16 @@ function AppInner() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        try {
+          // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
+          const deviceUuid = await getOrCreateDeviceUuid();
+          console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
+        } catch (err) {
+          console.warn(
+            '>>> [FCM][DeviceUuid] UUID 생성 실패 || Storagy 저장 실패',
+            err
+          );
+        }
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
           const result = await refreshAccessToken();
