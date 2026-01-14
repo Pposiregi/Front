@@ -6,7 +6,7 @@ import { styles } from '@styles/Achievement.styles';
 import { MissionHistoryItem } from '../../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
 
-type MissionStatus = 'LOADING' | 'READY';
+type MissionStatus = 'LOADING' | 'READY' | 'ERROR';
 
 type MissionSection = {
   title: string; // 날짜
@@ -16,6 +16,7 @@ type MissionSection = {
 const MissionTab = () => {
   const [missions, setMissions] = useState<MissionHistoryItem[]>([]);
   const [status, setStatus] = useState<MissionStatus>('LOADING');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -24,8 +25,11 @@ const MissionTab = () => {
         setMissions(data.missions);
         setStatus('READY');
       } catch (e) {
-        console.log('미션 히스토리 조회 실패', e);
-        setStatus('READY');
+        console.error('미션 히스토리 조회 실패', e);
+        setErrorMessage(
+          '미션 기록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+        );
+        +setStatus('ERROR');
       }
     };
 
@@ -70,6 +74,16 @@ const MissionTab = () => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size='large' color='#777' />
         <Text>불러오는 중...</Text>
+      </View>
+    );
+  }
+  // ====================
+  // ERROR
+  // ====================
+  if (status === 'ERROR') {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={{ fontSize: 16 }}>{errorMessage}</Text>
       </View>
     );
   }
