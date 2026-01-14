@@ -38,7 +38,7 @@ export const ItemModal = ({
       activeOpacity={1}
       onPress={onClose}
     >
-      <View style={styles.modalContent}>
+      <View style={styles.modalContent} pointerEvents='none'>
         <Image
           source={imageUri}
           style={styles.fullScreenImage}
