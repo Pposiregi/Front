@@ -87,7 +87,6 @@ function ActivityPage() {
           new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
       );
       setMonthlyActivities(sortedData);
-      setLoading(false);
     } catch (err) {
       console.log('월별 활동 조회 실패', err);
       setMonthlyActivities([]);
