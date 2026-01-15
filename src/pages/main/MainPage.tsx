@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -16,7 +22,6 @@ import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
-import { getMissions } from './missions';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';

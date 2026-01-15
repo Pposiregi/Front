@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -23,6 +23,7 @@ import { updatePetProfile, updateUserProfile } from '@api/profileApi';
 import { saveBodyGoals } from '@utils/bodyGoalsStorage';
 import { deletePushToken } from '@api/pushTokenApi';
 import { getDeviceUuid } from '@utils/deviceUuid';
+import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
 import { getResolvedUserId } from '@utils/userIdStorage';
@@ -93,28 +94,28 @@ const ProfileSettingPage = () => {
 
   /**
    * 임시로 구현한 로그아웃 핸들러
+   *  - 로그아웃 시, Device Token 삭제(푸쉬알람 전송방지)
    * @returns
    */
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
-      // 로그아웃 전에 디바이스 토큰을 비활성화한다.
       if (accessToken) {
         try {
           const deviceUuid = await getDeviceUuid();
           if (!deviceUuid) {
             console.warn('>>> [FCM][PushToken] deviceUuid 없음, DELETE 스킵');
           } else {
-            const userId = await getResolvedUserId(
-              1,
-              '>>> [FCM][PushToken]'
-            );
+            const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
             console.log('>>> [FCM][PushToken] DELETE /devices/push-token', {
               deviceUuid,
               userId,
             });
+
+            // DB, Storagy 초기화
             await deletePushToken({ deviceUuid }, accessToken, userId);
+            await clearLastSentPushToken(userId);
           }
         } catch (err) {
           console.error('>>> [FCM][PushToken] DELETE 실패', err);

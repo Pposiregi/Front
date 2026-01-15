@@ -29,6 +29,10 @@ import {
 } from '@api/pushTokenApi';
 import { ensureUserIdStored, getResolvedUserId } from '@utils/userIdStorage';
 import { ensurePetIdStored } from '@utils/petIdStorage';
+import {
+  getLastSentPushToken,
+  setLastSentPushToken,
+} from '@utils/pushTokenStorage';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -81,6 +85,47 @@ const getTabScreenOptions = (routeName: TabIconKey) => ({
   tabBarIcon: createTabBarIcon(routeName),
   tabBarShowLabel: false,
 });
+
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+
+const getPermissionLabel = (status: number) => {
+  switch (status) {
+    case messaging.AuthorizationStatus.AUTHORIZED:
+      return 'AUTHORIZED';
+    case messaging.AuthorizationStatus.PROVISIONAL:
+      return 'PROVISIONAL';
+    case messaging.AuthorizationStatus.DENIED:
+      return 'DENIED';
+    case messaging.AuthorizationStatus.NOT_DETERMINED:
+      return 'NOT_DETERMINED';
+    default:
+      return `UNKNOWN(${status})`;
+  }
+};
+
+const runWithRetry = async <T,>(
+  label: string,
+  task: () => Promise<T>,
+  attempts = 3
+) => {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await task();
+    } catch (err) {
+      console.error(
+        `>>> [FCM][PushToken] ${label} 실패 (시도 ${attempt}/${attempts})`,
+        err
+      );
+      if (attempt >= attempts) {
+        throw err;
+      }
+      const delayMs = [1000, 3000, 5000][attempt - 1] ?? 5000;
+      console.log(`>>> [FCM][PushToken] 재시도 대기 ${delayMs}ms`);
+      await wait(delayMs);
+    }
+  }
+};
 
 function AppInner() {
   const dispatch = useAppDispatch();
@@ -160,32 +205,45 @@ function AppInner() {
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
         if (!enabled) {
-          console.log('>>> [FCM][PushToken] 알림 권한 미승인', authStatus);
-          return;
-        }
-
-        const fcmToken = await messaging().getToken();
-        if (!fcmToken) {
-          console.warn('>>> [FCM][PushToken] FCM 토큰 없음');
+          console.warn(
+            '>>> [FCM][PushToken] 알림 권한 거부',
+            getPermissionLabel(authStatus)
+          );
           return;
         }
 
         const deviceUuid = await getOrCreateDeviceUuid();
-        const payload: PushTokenPayload = {
-          deviceUuid: deviceUuid,
-          deviceOs: 'ANDROID',
-          deviceToken: fcmToken,
+        const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
+        const send = async () => {
+          const fcmToken = await messaging().getToken();
+          if (!fcmToken) {
+            throw new Error('FCM 토큰 없음');
+          }
+
+          // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
+          const lastToken = await getLastSentPushToken(userId);
+          if (lastToken === fcmToken) {
+            console.log('>>> [FCM][PushToken] 동일 토큰, 전송 스킵');
+            return { skipped: true };
+          }
+
+          const payload: PushTokenPayload = {
+            deviceUuid: deviceUuid,
+            deviceOs: 'ANDROID',
+            deviceToken: fcmToken,
+          };
+
+          console.log('>>> [FCM][PushToken] POST /devices/push-token', {
+            ...payload,
+            userId,
+          });
+          await postPushToken(payload, accessToken, userId);
+          await setLastSentPushToken(userId, fcmToken);
+          return { skipped: false };
         };
 
-        const userId = await getResolvedUserId(
-          1,
-          '>>> [FCM][PushToken]'
-        );
-        console.log('>>> [FCM][PushToken] POST /devices/push-token', {
-          ...payload,
-          userId,
-        });
-        await postPushToken(payload, accessToken, userId);
+        // 전송 실패 시 재시도한다.
+        await runWithRetry('POST /devices/push-token', send);
       } catch (err) {
         console.error('>>> [FCM][PushToken] POST 실패', err);
       }
@@ -213,16 +271,26 @@ function AppInner() {
           deviceOs: 'ANDROID',
           deviceToken: fcmToken,
         };
-        const userId = await getResolvedUserId(
-          1,
-          '>>> [FCM][PushToken]'
-        );
+        const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
+        const send = async () => {
+          // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
+          const lastToken = await getLastSentPushToken(userId);
+          if (lastToken === fcmToken) {
+            console.log('>>> [FCM][PushToken] 동일 토큰, 전송 스킵');
+            return { skipped: true };
+          }
 
-        console.log('>>> [FCM][PushToken] PATCH /devices/push-token', {
-          ...payload,
-          userId,
-        });
-        await patchPushToken(payload, accessToken, userId);
+          console.log('>>> [FCM][PushToken] PATCH /devices/push-token', {
+            ...payload,
+            userId,
+          });
+          await patchPushToken(payload, accessToken, userId);
+          await setLastSentPushToken(userId, fcmToken);
+          return { skipped: false };
+        };
+
+        // 전송 실패 시 재시도한다.
+        await runWithRetry('PATCH /devices/push-token', send);
       } catch (err) {
         console.error('>>> [FCM][PushToken] PATCH 실패', err);
       }
