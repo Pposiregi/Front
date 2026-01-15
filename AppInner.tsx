@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
+import { DEV_PET_ID, DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
@@ -22,7 +22,13 @@ import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
 import { getOrCreateDeviceUuid } from '@utils/deviceUuid';
-import { postPushToken, type PushTokenPayload } from '@api/pushTokenApi';
+import {
+  patchPushToken,
+  postPushToken,
+  type PushTokenPayload,
+} from '@api/pushTokenApi';
+import { ensureUserIdStored, getResolvedUserId } from '@utils/userIdStorage';
+import { ensurePetIdStored } from '@utils/petIdStorage';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -92,6 +98,11 @@ function AppInner() {
     const checkAuthStatus = async () => {
       try {
         try {
+          // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
+          if (__DEV__) {
+            await ensureUserIdStored(DEV_USER_ID);
+            await ensurePetIdStored(DEV_PET_ID);
+          }
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
           const deviceUuid = await getOrCreateDeviceUuid();
           console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
@@ -165,8 +176,10 @@ function AppInner() {
           deviceToken: fcmToken,
         };
 
-        const parsedUserId = Number(DEV_USER_ID);
-        const userId = Number.isFinite(parsedUserId) ? parsedUserId : 1;
+        const userId = await getResolvedUserId(
+          1,
+          '>>> [FCM][PushToken]'
+        );
         console.log('>>> [FCM][PushToken] POST /devices/push-token', {
           ...payload,
           userId,
@@ -178,6 +191,43 @@ function AppInner() {
     };
 
     registerPushToken();
+  }, [accessToken, isLoggedIn, isSignUpInProgress]);
+
+  useEffect(() => {
+    if (!isLoggedIn || isSignUpInProgress || !accessToken) {
+      return;
+    }
+
+    // FCM 토큰 갱신 이벤트를 듣고 즉시 서버에 반영한다.
+    const unsubscribe = messaging().onTokenRefresh(async (fcmToken) => {
+      try {
+        if (!fcmToken) {
+          console.warn('>>> [FCM][PushToken] 갱신 토큰 없음');
+          return;
+        }
+
+        const deviceUuid = await getOrCreateDeviceUuid();
+        const payload: PushTokenPayload = {
+          deviceUuid: deviceUuid,
+          deviceOs: 'ANDROID',
+          deviceToken: fcmToken,
+        };
+        const userId = await getResolvedUserId(
+          1,
+          '>>> [FCM][PushToken]'
+        );
+
+        console.log('>>> [FCM][PushToken] PATCH /devices/push-token', {
+          ...payload,
+          userId,
+        });
+        await patchPushToken(payload, accessToken, userId);
+      } catch (err) {
+        console.error('>>> [FCM][PushToken] PATCH 실패', err);
+      }
+    });
+
+    return unsubscribe;
   }, [accessToken, isLoggedIn, isSignUpInProgress]);
 
   if (loading) {

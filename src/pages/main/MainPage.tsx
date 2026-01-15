@@ -25,8 +25,8 @@ import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
-import { DEV_USER_ID } from '@env';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
+import { getResolvedUserId } from '@utils/userIdStorage';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 
@@ -78,17 +78,18 @@ export const MainPage = () => {
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const parsedBodyHistoryUserId = Number(DEV_USER_ID);
-  const bodyHistoryUserId = Number.isFinite(parsedBodyHistoryUserId)
-    ? parsedBodyHistoryUserId
-    : 1;
+  const [bodyHistoryUserId, setBodyHistoryUserId] = useState(1);
   useEffect(() => {
-    if (!Number.isFinite(parsedBodyHistoryUserId)) {
-      console.warn(
-        '>>> [BodyHistory] DEV_USER_ID가 설정되지 않아 기본값 1을 사용합니다.'
-      );
-    }
-  }, [parsedBodyHistoryUserId]);
+    let mounted = true;
+    getResolvedUserId(1, '>>> [BodyHistory]').then((resolved) => {
+      if (mounted) {
+        setBodyHistoryUserId(resolved);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);

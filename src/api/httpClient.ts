@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { API_BASE_URL, DEV_USER_ID } from '@env';
+import { API_BASE_URL } from '@env';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { getUserId } from '@utils/userIdStorage';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -40,9 +42,23 @@ const redactHeaders = (headers: unknown) => {
   return redacted;
 };
 
-apiClient.interceptors.request.use((config) => {
-  if (DEV_USER_ID) {
-    config.headers['dev-user-id'] = String(DEV_USER_ID); // dev 전용 헤더
+apiClient.interceptors.request.use(async (config) => {
+  const userId = await getUserId();
+  if (userId) {
+    // 유저 식별 헤더는 AsyncStorage 값으로 통일한다.
+    config.headers = config.headers ?? {};
+    config.headers['dev-user-id'] = String(userId);
+  }
+
+  const hasAuthHeader =
+    Boolean(config.headers?.Authorization) ||
+    Boolean((config.headers as Record<string, unknown> | undefined)?.authorization);
+  if (!hasAuthHeader) {
+    const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    if (accessToken) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
   }
   return config;
 });

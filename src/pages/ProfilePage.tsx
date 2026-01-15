@@ -20,17 +20,13 @@ import {
 } from '@api/bodyHistoryApi';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
+import { getResolvedUserId } from '@utils/userIdStorage';
 import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
-import { DEV_USER_ID } from '@env';
-
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
-
-const parsedDevUserId = Number(DEV_USER_ID);
-const API_USER_ID = Number.isFinite(parsedDevUserId) ? parsedDevUserId : 1;
 
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
@@ -92,6 +88,19 @@ function ProfilePage() {
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [savingRecord, setSavingRecord] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
+  const [apiUserId, setApiUserId] = useState(1);
+
+  useEffect(() => {
+    let mounted = true;
+    getResolvedUserId(1, '>>> [Profile]').then((resolved) => {
+      if (mounted) {
+        setApiUserId(resolved);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // 기록 저장 후 최신 데이터를 불러올지 여부
   const [shouldRefreshAfterRecord, setShouldRefreshAfterRecord] =
@@ -99,7 +108,7 @@ function ProfilePage() {
 
   const loadBodyHistories = useCallback(async () => {
     try {
-      const data = await getBodyHistoriesByUser(API_USER_ID);
+      const data = await getBodyHistoriesByUser(apiUserId);
       const sorted = [...data].sort((a, b) =>
         b.baseDate.localeCompare(a.baseDate)
       );
@@ -109,13 +118,13 @@ function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiUserId]);
 
   const loadGoals = useCallback(async () => {
     // 저장된 목표 체중/체지방률을 로컬에서 불러와 진행률 계산에 사용
-    const goals = await loadBodyGoals(API_USER_ID);
+    const goals = await loadBodyGoals(apiUserId);
     setBodyGoals(goals);
-  }, []);
+  }, [apiUserId]);
 
   // 화면이 포커스될 때마다 최신 기록을 불러온다.
   useFocusEffect(
@@ -230,7 +239,7 @@ function ProfilePage() {
           });
         } else {
           await createBodyHistory({
-            userId: API_USER_ID,
+            userId: apiUserId,
             heightCm: values.heightCm,
             weightKg: values.weightKg,
             pbf: values.pbf,
@@ -248,7 +257,7 @@ function ProfilePage() {
         setSavingRecord(false);
       }
     },
-    [histories]
+    [apiUserId, histories]
   );
 
   const chartConfig = {

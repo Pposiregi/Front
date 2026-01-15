@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -9,17 +9,25 @@ import {
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { logout as kakaoLogout } from '@react-native-seoul/kakao-login';
 import styles from '@styles/ProfileSettings.styles';
 import { useAppDispatch } from '@store/index';
+import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import { ProfileStackNavigationProp } from '@navigation/profileStack';
 import { updatePetProfile, updateUserProfile } from '@api/profileApi';
 import { saveBodyGoals } from '@utils/bodyGoalsStorage';
+import { deletePushToken } from '@api/pushTokenApi';
+import { getDeviceUuid } from '@utils/deviceUuid';
 import type { PetType } from 'types/profile';
+import { getResolvedPetId } from '@utils/petIdStorage';
+import { getResolvedUserId } from '@utils/userIdStorage';
+
+const PET_ID_FALLBACK = 1;
 
 type SettingRowProps = {
   label: string;
@@ -47,6 +55,7 @@ const ProfileSettingPage = () => {
   const navigation =
     useNavigation<ProfileStackNavigationProp<'ProfileSettings'>>();
   const dispatch = useAppDispatch();
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
@@ -60,26 +69,60 @@ const ProfileSettingPage = () => {
   const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
+  const [apiUserId, setApiUserId] = useState(1);
+  const [petId, setPetId] = useState(PET_ID_FALLBACK);
 
-  // TODO: 실제 로그인 사용자/펫 정보로 교체 필요
-  const API_USER_ID = 3;
-  const API_PET_ID = 1;
-
-  const commonNotice = useMemo(
-    () =>
-      'OAuth 로그인은 비밀번호 변경이 불가능해요. 계정 보안은 각 플랫폼(구글/카카오)에서 진행해주세요.',
-    []
-  );
+  useEffect(() => {
+    let mounted = true;
+    getResolvedUserId(1, '>>> [ProfileSettings]').then((resolved) => {
+      if (mounted) {
+        setApiUserId(resolved);
+      }
+    });
+    getResolvedPetId(PET_ID_FALLBACK, '>>> [ProfileSettings]').then(
+      (resolved) => {
+        if (mounted) {
+          setPetId(resolved);
+        }
+      }
+    );
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   /**
    * 임시로 구현한 로그아웃 핸들러
-   * 현님 검토 필요
    * @returns
    */
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
+      // 로그아웃 전에 디바이스 토큰을 비활성화한다.
+      if (accessToken) {
+        try {
+          const deviceUuid = await getDeviceUuid();
+          if (!deviceUuid) {
+            console.warn('>>> [FCM][PushToken] deviceUuid 없음, DELETE 스킵');
+          } else {
+            const userId = await getResolvedUserId(
+              1,
+              '>>> [FCM][PushToken]'
+            );
+            console.log('>>> [FCM][PushToken] DELETE /devices/push-token', {
+              deviceUuid,
+              userId,
+            });
+            await deletePushToken({ deviceUuid }, accessToken, userId);
+          }
+        } catch (err) {
+          console.error('>>> [FCM][PushToken] DELETE 실패', err);
+        }
+      } else {
+        console.warn('>>> [FCM][PushToken] accessToken 없음, DELETE 스킵');
+      }
+
       const platform = await AsyncStorage.getItem('platform');
       if (platform === 'google') {
         await GoogleSignin.signOut();
@@ -264,7 +307,7 @@ const ProfileSettingPage = () => {
                   }
                   setSavingProfile(true);
                   try {
-                    await updateUserProfile(API_USER_ID, {
+                    await updateUserProfile(apiUserId, {
                       nickname: nicknameInput.trim(),
                     });
                     Alert.alert('완료', '닉네임이 변경되었습니다.');
@@ -332,7 +375,10 @@ const ProfileSettingPage = () => {
                   const pbf = Number(targetPbfInput);
 
                   if (!targetWeightInput.trim() || Number.isNaN(weight)) {
-                    Alert.alert('입력 오류', '목표 체중을 올바르게 입력하세요.');
+                    Alert.alert(
+                      '입력 오류',
+                      '목표 체중을 올바르게 입력하세요.'
+                    );
                     return;
                   }
                   if (!targetPbfInput.trim() || Number.isNaN(pbf)) {
@@ -346,11 +392,11 @@ const ProfileSettingPage = () => {
                   setSavingGoal(true);
                   try {
                     // 서버 프로필 업데이트 후 로컬 목표값도 캐싱해 화면에서 즉시 사용
-                    await updateUserProfile(API_USER_ID, {
+                    await updateUserProfile(apiUserId, {
                       targetWeightKg: weight,
                       targetPbf: pbf,
                     });
-                    await saveBodyGoals(API_USER_ID, {
+                    await saveBodyGoals(apiUserId, {
                       weightAim: weight,
                       bodyFatAim: pbf,
                     });
@@ -396,10 +442,7 @@ const ProfileSettingPage = () => {
               {(['DOG', 'CAT'] as PetType[]).map((type) => (
                 <Pressable
                   key={type}
-                  style={[
-                    styles.chip,
-                    petType === type && styles.chipSelected,
-                  ]}
+                  style={[styles.chip, petType === type && styles.chipSelected]}
                   onPress={() => setPetType(type)}
                 >
                   <Text
@@ -434,7 +477,7 @@ const ProfileSettingPage = () => {
                   }
                   setSavingPet(true);
                   try {
-                    await updatePetProfile(API_USER_ID, API_PET_ID, {
+                    await updatePetProfile(apiUserId, petId, {
                       name: petNameInput.trim(),
                       petType,
                     });
