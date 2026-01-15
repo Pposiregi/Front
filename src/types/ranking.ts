@@ -15,12 +15,12 @@ export type DailyStepRankingItem = {
   dailyStepCount: number;
 };
 
-export type DailyStepRankingApiResponse = {
+export interface DailyStepRankingApiResponse {
   top10: DailyStepRankingApiItem[];
   myRank: number;
-};
+}
 
-export type DailyStepRankingResponse = {
+export interface DailyStepRankingResponse {
   top10: DailyStepRankingItem[];
   myRank: number;
-};
+}

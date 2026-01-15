@@ -107,6 +107,7 @@ function AppInner() {
       } catch (err) {
         console.error('[AuthError] 자동로그인 실패', err);
       } finally {
+        console.log('>>> SplashScreen.hide 호출 전');
         SplashScreen.hide();
         setLoading(false);
       }

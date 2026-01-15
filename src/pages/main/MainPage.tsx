@@ -33,6 +33,10 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { petImageByState } from '@utils/petImages';
+import { MissionActiveItem } from 'types/mission';
+import { getMissionsActive } from '@api/missionApi';
+import { useFocusEffect } from '@react-navigation/native';
+import MissionModal from './missionModal';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -62,11 +66,18 @@ export const MainPage = () => {
 
     return <Image source={runDogFrames[frame]} style={styles.running_pet} />;
   };
-
   // START 버튼 누른 후 카운트 다운
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Mission
+  const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
+    []
+  );
+  const [showMissionModal, setShowMissionModal] = useState(false);
+  const handleOpenMission = () => setShowMissionModal(true);
+  const handleCloseMission = () => setShowMissionModal(false);
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -116,6 +127,37 @@ export const MainPage = () => {
     }
     return false;
   }, [bodyHistoryUserId]);
+
+  // 미션 데이터 받아서 사용
+  // 메인화면으로 오면 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      const fetchMissions = async () => {
+        try {
+          const data = await getMissionsActive();
+          setMissionApiItems(data.missions);
+        } catch (e) {
+          console.error('미션 조회 실패', e);
+        }
+      };
+
+      fetchMissions();
+    }, [])
+  );
+
+  // porgressBar 가공
+  const progressMissions = useMemo(() => {
+    return missionApiItems
+      .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+      .map((m) => ({
+        id: m.missionCheckId.toString(),
+        title: m.title,
+        current: m.progressValue,
+        goal: m.goalValue,
+        unit:
+          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+      }));
+  }, [missionApiItems]);
 
   useEffect(() => {
     const loadPromptState = async () => {
@@ -296,10 +338,10 @@ export const MainPage = () => {
     return <ActivityIndicator size='large' />;
   }
 
-  const missions = getMissions(data, {
-    // Health Connect로 가져온 값을 우선 사용
-    stepOverride: healthSteps ?? undefined,
-  });
+  // const missions = getMissions(data, {
+  //   // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
+  //   stepOverride,
+  // });
 
   // 표시할 걸음 수
   const displayedSteps = healthSteps ?? data.daily_walk.step ?? 0;
@@ -328,23 +370,31 @@ export const MainPage = () => {
       */}
       <View style={styles.progressContainer}>
         {/*
-          주간/일일 미션을 수평 스크롤 카드 형태로 표시
+          일일 미션을 수평 스크롤 카드 형태로 표시, 미션이 없으면 미션 X 띄움 
         */}
-        <FlatList
-          data={missions}
-          horizontal
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <StepProgress
-              title={item.title}
-              current={item.current}
-              goal={item.goal}
-              unit={item.unit}
-            />
-          )}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.progressRow}
-        />
+        {progressMissions.length === 0 ? (
+          <View style={styles.emptyMissionContainer}>
+            <Text style={styles.emptyMissionText}>
+              완벽한 하루예요! 내일도 함께해요!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={progressMissions}
+            horizontal
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <StepProgress
+                title={item.title}
+                current={item.current}
+                goal={item.goal}
+                unit={item.unit}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.progressRow}
+          />
+        )}
       </View>
       {isTracking ? (
         <View style={styles.mapContainer}>
@@ -364,6 +414,18 @@ export const MainPage = () => {
           style={styles.mainBackground}
           resizeMode='cover'
         >
+          {/* 오른쪽 상단 미션 버튼 */}
+          <TouchableOpacity
+            onPress={handleOpenMission}
+            style={styles.missionButton}
+          >
+            <Text style={styles.missionButtonText}>미션</Text>
+          </TouchableOpacity>
+          <MissionModal
+            visible={showMissionModal}
+            onClose={handleCloseMission}
+            missions={missionApiItems}
+          />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <Image

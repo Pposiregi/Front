@@ -5,7 +5,7 @@ import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 const BOTTOM_NAV_HEIGHT = 60;
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
   80,
-  Math.min(120, SCREEN_HEIGHT * 0.12)
+  Math.min(120, SCREEN_HEIGHT * 0.1)
 );
 const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
 const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));
@@ -190,5 +190,98 @@ export default StyleSheet.create({
     fontSize: 90,
     color: 'white',
     fontWeight: 'bold',
+  },
+  emptyMissionContainer: {
+    height: 96,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyMissionText: {
+    fontSize: 18,
+    color: '#888',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  missionButton: {
+    position: 'absolute',
+    top: 15, // 상단 여백
+    right: 15, // 오른쪽 여백
+    width: 50,
+    height: 50,
+    padding: 10,
+    backgroundColor: '#ca4949',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  missionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  /**
+   * 미션 UI
+   */
+  missionView: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: '95%',
+    height: '83%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+  },
+  missionTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderBottomColor: '#2196F3',
+    alignItems: 'center',
+  },
+  missionUICard: {
+    padding: 12,
+    marginVertical: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  missionUICardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  missionUITextTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  missionUIText: {
+    fontSize: 16,
+    color: '#555',
+  },
+  missionUIExitButton: {
+    marginTop: 12,
+    alignSelf: 'flex-end',
+    padding: 8,
+    backgroundColor: '#2196F3',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  missionUIExitText: {
+    color: '#fff',
+    fontSize: 20,
   },
 });
