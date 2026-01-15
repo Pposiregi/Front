@@ -9,6 +9,7 @@ if (!API_BASE_URL) {
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 const toLogString = (payload: unknown) => {

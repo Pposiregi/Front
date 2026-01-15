@@ -9,12 +9,6 @@ export type Badge = {
   createdAt: string;
 };
 
-export type MissionData = {
-  missionId: number;
-  title: string;
-  progress: number; // 0~100
-}[];
-
 export type RankingItem = {
   userId: number;
   nickname: string;

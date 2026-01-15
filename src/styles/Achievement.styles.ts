@@ -133,4 +133,19 @@ export const styles = StyleSheet.create({
   rankingFilterButtonTextActive: {
     color: '#FFF', // 활성화 글자색
   },
+  // 미션
+  sectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    backgroundColor: '#f6f6f6',
+  },
+  sectionHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+  },
+  listItemTitle: {
+    fontSize: 15,
+    color: '#222',
+  },
 });

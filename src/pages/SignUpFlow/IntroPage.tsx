@@ -103,7 +103,6 @@ const IntroPage = () => {
       targetPbf: toNumberOrUndefined(finalFormData.targetPbf),
       targetStepCount: toNumberOrUndefined(finalFormData.targetStepCount),
     };
-
     try {
       await signUp(requestBody);
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
