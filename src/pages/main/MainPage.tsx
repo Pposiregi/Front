@@ -86,8 +86,8 @@ export const MainPage = () => {
   const handleOpenMission = () => setShowMissionModal(true);
   const handleCloseMission = () => setShowMissionModal(false);
 
-  // 걸음수 1000보 저장
-  const { syncSteps } = useStepSync();
+  // 걸음수 1000보가 되면 서버로 전송 resetSync는 로컬 저장된 데이터 삭제용
+  const { syncSteps, resetSync } = useStepSync();
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -470,6 +470,15 @@ export const MainPage = () => {
                 disabled={healthWriting}
               >
                 <Text style={styles.devHealthButtonText}>+1000</Text>
+              </TouchableOpacity>
+            )}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devHealthButton}
+                onPress={resetSync}
+                accessibilityLabel='걸음 동기화 초기화'
+              >
+                <Text style={styles.devHealthButtonText}>RESET</Text>
               </TouchableOpacity>
             )}
           </View>
