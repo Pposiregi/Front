@@ -43,6 +43,7 @@ import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
+import { useStepSync } from '@hooks/useStepSync';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -84,6 +85,9 @@ export const MainPage = () => {
   const [showMissionModal, setShowMissionModal] = useState(false);
   const handleOpenMission = () => setShowMissionModal(true);
   const handleCloseMission = () => setShowMissionModal(false);
+
+  // 걸음수 1000보 저장
+  const { syncSteps } = useStepSync();
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
   const { data, loading } = useMainData('u12345');
@@ -133,37 +137,6 @@ export const MainPage = () => {
     }
     return false;
   }, [bodyHistoryUserId]);
-
-  // 미션 데이터 받아서 사용
-  // 메인화면으로 오면 새로고침
-  useFocusEffect(
-    useCallback(() => {
-      const fetchMissions = async () => {
-        try {
-          const data = await getMissionsActive();
-          setMissionApiItems(data.missions);
-        } catch (e) {
-          console.error('미션 조회 실패', e);
-        }
-      };
-
-      fetchMissions();
-    }, [])
-  );
-
-  // porgressBar 가공
-  const progressMissions = useMemo(() => {
-    return missionApiItems
-      .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
-      .map((m) => ({
-        id: m.missionCheckId.toString(),
-        title: m.title,
-        current: m.progressValue,
-        goal: m.goalValue,
-        unit:
-          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-      }));
-  }, [missionApiItems]);
 
   useEffect(() => {
     const loadPromptState = async () => {
@@ -324,6 +297,48 @@ export const MainPage = () => {
       );
     }
   }, [addSteps]);
+
+  const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
+  // Health Steps 서버 전송 + 미션 최신화
+  const refreshMissions = useCallback(async () => {
+    try {
+      if (healthSteps != null) {
+        const diff = healthSteps - lastSyncedSteps;
+        if (diff >= 1000) {
+          await syncSteps(healthSteps);
+          setLastSyncedSteps(healthSteps);
+        }
+      }
+
+      const data = await getMissionsActive();
+      setMissionApiItems(data.missions);
+    } catch (err) {
+      console.error('미션 업데이트 실패', err);
+    }
+  }, [healthSteps, lastSyncedSteps, syncSteps]);
+
+  // Health Steps 변화 시 호출 (1000보 단위로 제한)
+  useEffect(() => {
+    refreshMissions();
+  }, [healthSteps, refreshMissions]);
+
+  // 화면 포커스 시 항상 최신 미션 불러오기
+  useFocusEffect(
+    useCallback(() => {
+      refreshMissions();
+    }, [refreshMissions])
+  );
+
+  // Progress Bar 가공
+  const progressMissions = missionApiItems
+    .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+    .map((m) => ({
+      id: m.missionCheckId.toString(),
+      title: m.title,
+      current: m.progressValue,
+      goal: m.goalValue,
+      unit: m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+    }));
 
   useEffect(() => {
     if (!healthError) {
