@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -312,7 +318,10 @@ export const MainPage = () => {
     } catch (err: any) {
       // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
       healthErrorShownRef.current = true;
-      Alert.alert('걸음 추가 실패', err?.message ?? '걸음 수를 추가하지 못했습니다.');
+      Alert.alert(
+        '걸음 추가 실패',
+        err?.message ?? '걸음 수를 추가하지 못했습니다.'
+      );
     }
   }, [addSteps]);
 
