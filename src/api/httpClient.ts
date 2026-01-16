@@ -19,8 +19,9 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+const devUserId = BODY_HISTORY_USER_ID;
 apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = BODY_HISTORY_USER_ID; // 항상 추가
+  config.headers['dev-user-id'] = devUserId; // 항상 추가
   return config;
 });
 
