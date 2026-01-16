@@ -10,7 +10,6 @@ export const signUp = async (
       `/users/signUp/complete`,
       formData
     );
-    console.log('>>>>> signUpApi response : ', response);
     return response.data;
   } catch (err) {
     console.error('[Auth] 회원가입 완료 실패', err);
@@ -38,7 +37,6 @@ export const refreshAccessToken = async (): Promise<{
         },
       }
     );
-    console.log('>>>>> refreshAccessToken response : ', response);
     return response.data;
   } catch (err) {
     console.error('[Auth] accessToken 갱신 실패', err);

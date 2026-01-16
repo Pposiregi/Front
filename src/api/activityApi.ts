@@ -6,7 +6,6 @@ export const getWeeklySteps = async (): Promise<WeeklyStepItem[]> => {
   const { data } = await apiClient.get<WeeklyStepItem[]>(
     `/daily/walks/steps/weekly`
   );
-  console.log('>>>> getWeeklySteps api data :', data);
   return data;
 };
 
@@ -17,7 +16,6 @@ export const getMonthlySessions = async (
   const { data } = await apiClient.get('/gps/sessions', {
     params: { year, month },
   });
-  console.log('>>>> getMonthlySessions api data :', data);
   return data;
 };
 
@@ -27,6 +25,5 @@ export const getSessionDetail = async (
   const { data } = await apiClient.get<SessionDetail>(
     `/gps/sessions/${sessionId}`
   );
-  console.log('>>>> getSessionDetail api data :', data);
   return data;
 };
