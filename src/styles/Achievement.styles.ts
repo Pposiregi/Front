@@ -41,7 +41,9 @@ export const styles = StyleSheet.create({
     color: '#555',
     fontFamily: 'GowunDodum',
   },
-  // 뱃지
+  /**
+   * 뱃지
+   */
   badgeCard: {
     marginTop: 10,
     backgroundColor: '#fff',
@@ -87,6 +89,9 @@ export const styles = StyleSheet.create({
   tabText: {
     fontWeight: 'bold',
   },
+  /**
+   * 랭킹
+   */
   rankingNumberText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -133,7 +138,9 @@ export const styles = StyleSheet.create({
   rankingFilterButtonTextActive: {
     color: '#FFF', // 활성화 글자색
   },
-  // 미션
+  /**
+   * 미션
+   */
   sectionHeader: {
     paddingHorizontal: 16,
     paddingVertical: 5,

@@ -27,6 +27,16 @@ export default StyleSheet.create({
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
+    marginHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   progressRow: {
     paddingHorizontal: 16,
@@ -192,7 +202,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
   emptyMissionContainer: {
-    height: 96,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -99,7 +99,14 @@ function RankingTab() {
       />
 
       {rankingFilter === 'ALL' && (
-        <Text style={{ textAlign: 'center', marginTop: 10 }}>
+        <Text
+          style={{
+            textAlign: 'center',
+            marginTop: 10,
+            marginBottom: 10,
+            fontSize: 20,
+          }}
+        >
           나의 순위: {rankingData.myRank}위
         </Text>
       )}
