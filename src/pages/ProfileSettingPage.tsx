@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { DEV_USER_ID } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,8 +27,11 @@ import { getDeviceUuid } from '@utils/deviceUuid';
 import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
-import { getResolvedUserId } from '@utils/userIdStorage';
 
+const DEV_USER_ID_VALUE = Number(DEV_USER_ID);
+const RESOLVED_USER_ID = Number.isFinite(DEV_USER_ID_VALUE)
+  ? DEV_USER_ID_VALUE
+  : 1;
 const PET_ID_FALLBACK = 1;
 
 type SettingRowProps = {
@@ -70,16 +74,11 @@ const ProfileSettingPage = () => {
   const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
-  const [apiUserId, setApiUserId] = useState(1);
+  const apiUserId = RESOLVED_USER_ID;
   const [petId, setPetId] = useState(PET_ID_FALLBACK);
 
   useEffect(() => {
     let mounted = true;
-    getResolvedUserId(1, '>>> [ProfileSettings]').then((resolved) => {
-      if (mounted) {
-        setApiUserId(resolved);
-      }
-    });
     getResolvedPetId(PET_ID_FALLBACK, '>>> [ProfileSettings]').then(
       (resolved) => {
         if (mounted) {
@@ -107,7 +106,7 @@ const ProfileSettingPage = () => {
           if (!deviceUuid) {
             console.warn('>>> [FCM][PushToken] deviceUuid 없음, DELETE 스킵');
           } else {
-            const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
+            const userId = apiUserId;
             console.log('>>> [FCM][PushToken] DELETE /devices/push-token', {
               deviceUuid,
               userId,

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { getUserId } from '@utils/userIdStorage';
+import { DEV_USER_ID } from '@env';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -44,18 +44,21 @@ const redactHeaders = (headers: unknown) => {
 };
 
 apiClient.interceptors.request.use(async (config) => {
-  const userId = await getUserId();
-  if (userId) {
-    // 유저 식별 헤더는 AsyncStorage 값으로 통일한다.
+  if (__DEV__ && DEV_USER_ID) {
+    // 개발환경에서는 env 값으로 dev-user-id를 고정한다.
     config.headers = config.headers ?? {};
-    config.headers['dev-user-id'] = String(userId);
+    config.headers['dev-user-id'] = DEV_USER_ID;
+    console.log('>>> dev-user-id: ' + DEV_USER_ID);
   }
 
   const hasAuthHeader =
     Boolean(config.headers?.Authorization) ||
-    Boolean((config.headers as Record<string, unknown> | undefined)?.authorization);
+    Boolean(
+      (config.headers as Record<string, unknown> | undefined)?.authorization
+    );
   if (!hasAuthHeader) {
     const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    console.log('>>> [JWT] accesstoken: ' + accessToken);
     if (accessToken) {
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${accessToken}`;

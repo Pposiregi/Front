@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { DEV_USER_ID } from '@env';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import styles from '@styles/ProfilePage.styles';
@@ -20,11 +21,15 @@ import {
 } from '@api/bodyHistoryApi';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
-import { getResolvedUserId } from '@utils/userIdStorage';
 import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
+
+const DEV_USER_ID_VALUE = Number(DEV_USER_ID);
+const RESOLVED_USER_ID = Number.isFinite(DEV_USER_ID_VALUE)
+  ? DEV_USER_ID_VALUE
+  : 1;
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
 
@@ -88,19 +93,7 @@ function ProfilePage() {
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [savingRecord, setSavingRecord] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const [apiUserId, setApiUserId] = useState(1);
-
-  useEffect(() => {
-    let mounted = true;
-    getResolvedUserId(1, '>>> [Profile]').then((resolved) => {
-      if (mounted) {
-        setApiUserId(resolved);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const apiUserId = RESOLVED_USER_ID;
 
   // 기록 저장 후 최신 데이터를 불러올지 여부
   const [shouldRefreshAfterRecord, setShouldRefreshAfterRecord] =

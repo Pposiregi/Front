@@ -18,6 +18,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEV_USER_ID } from '@env';
 import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
@@ -31,9 +32,12 @@ import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
-import { getResolvedUserId } from '@utils/userIdStorage';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const DEV_USER_ID_VALUE = Number(DEV_USER_ID);
+const RESOLVED_USER_ID = Number.isFinite(DEV_USER_ID_VALUE)
+  ? DEV_USER_ID_VALUE
+  : 1;
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -94,18 +98,7 @@ export const MainPage = () => {
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const [bodyHistoryUserId, setBodyHistoryUserId] = useState(1);
-  useEffect(() => {
-    let mounted = true;
-    getResolvedUserId(1, '>>> [BodyHistory]').then((resolved) => {
-      if (mounted) {
-        setBodyHistoryUserId(resolved);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const bodyHistoryUserId = RESOLVED_USER_ID;
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);

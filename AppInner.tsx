@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
+import { DEV_PET_ID, DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
@@ -27,7 +27,6 @@ import {
   postPushToken,
   type PushTokenPayload,
 } from '@api/pushTokenApi';
-import { ensureUserIdStored, getResolvedUserId } from '@utils/userIdStorage';
 import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
   getLastSentPushToken,
@@ -138,6 +137,8 @@ function AppInner() {
     (state: RootState) => state.user.isSignUpInProgress
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
+  const parsedUserId = Number(DEV_USER_ID);
+  const resolvedUserId = Number.isFinite(parsedUserId) ? parsedUserId : 1;
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -145,7 +146,6 @@ function AppInner() {
         try {
           // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
           if (__DEV__) {
-            await ensureUserIdStored();
             await ensurePetIdStored(DEV_PET_ID);
           }
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
@@ -213,7 +213,7 @@ function AppInner() {
         }
 
         const deviceUuid = await getOrCreateDeviceUuid();
-        const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
+        const userId = resolvedUserId;
         const send = async () => {
           const fcmToken = await messaging().getToken();
           if (!fcmToken) {
@@ -250,7 +250,7 @@ function AppInner() {
     };
 
     registerPushToken();
-  }, [accessToken, isLoggedIn, isSignUpInProgress]);
+  }, [accessToken, isLoggedIn, isSignUpInProgress, resolvedUserId]);
 
   useEffect(() => {
     if (!isLoggedIn || isSignUpInProgress || !accessToken) {
@@ -271,7 +271,7 @@ function AppInner() {
           deviceOs: 'ANDROID',
           deviceToken: fcmToken,
         };
-        const userId = await getResolvedUserId(1, '>>> [FCM][PushToken]');
+        const userId = resolvedUserId;
         const send = async () => {
           // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
           const lastToken = await getLastSentPushToken(userId);
@@ -297,7 +297,7 @@ function AppInner() {
     });
 
     return unsubscribe;
-  }, [accessToken, isLoggedIn, isSignUpInProgress]);
+  }, [accessToken, isLoggedIn, isSignUpInProgress, resolvedUserId]);
 
   if (loading) {
     console.log('>>> Rendering loading indicator');
