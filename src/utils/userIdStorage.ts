@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEV_USER_ID } from '@env';
 
 const USER_ID_KEY = 'userId';
 const LEGACY_DEV_USER_ID_KEY = 'devUserId';
@@ -15,6 +16,11 @@ const migrateLegacyDevUserId = async () => {
 export const ensureUserIdStored = async (seed?: string) => {
   // 앱 시작 시 1회 저장해두고 이후에는 AsyncStorage 값을 사용한다.
   const existing = await AsyncStorage.getItem(USER_ID_KEY);
+
+  if (__DEV__) {
+    return Number(DEV_USER_ID);
+  }
+
   if (existing) {
     return existing;
   }

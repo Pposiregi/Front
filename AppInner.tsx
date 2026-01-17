@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_PET_ID, DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
+import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
@@ -145,7 +145,7 @@ function AppInner() {
         try {
           // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
           if (__DEV__) {
-            await ensureUserIdStored(DEV_USER_ID);
+            await ensureUserIdStored();
             await ensurePetIdStored(DEV_PET_ID);
           }
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
