@@ -19,8 +19,13 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+// 추후에 할 것
+// dev-user-id 제거 →
+// EncryptedStorage에 저장된 serverAccessToken을 꺼내서
+// Authorization 헤더로 보내기
+const devUserId = BODY_HISTORY_USER_ID;
 apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = BODY_HISTORY_USER_ID; // 항상 추가
+  config.headers['dev-user-id'] = devUserId; // 항상 추가
   return config;
 });
 
