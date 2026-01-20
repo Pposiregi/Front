@@ -34,7 +34,6 @@ import {
 } from 'react-native-image-picker';
 import { uploadMealImage } from '@api/uploadMealImage';
 import { isAxiosError } from 'axios';
-import { postMissionsPhoto } from '@api/missionApi';
 
 const MAX_STACK = 3;
 
@@ -384,27 +383,7 @@ function MealPage() {
         });
       }
 
-      // 3. 미션 진행도 증가
-      postMissionsPhoto()
-        .then((missionRes) => {
-          const completedMissions = Array.isArray(missionRes.updatedMissions)
-            ? missionRes.updatedMissions.filter((m) => m.completed)
-            : [];
-
-          if (completedMissions.length === 1) {
-            Alert.alert('미션 완료', '미션을 완료했어요!');
-          } else if (completedMissions.length > 1) {
-            Alert.alert(
-              '미션 완료',
-              `${completedMissions.length}개의 미션을 완료했어요!`
-            );
-          }
-        })
-        .catch((error) => {
-          console.error('Meal mission 업데이트 실패', error);
-        });
-
-      // 4. 캘린더 및 상세 데이터 리프레시
+      // 3. 캘린더 및 상세 데이터 리프레시
       await refreshCalendar(currentMonth, { silent: true });
       await refetchDayDetail({
         keepPrevious: false,

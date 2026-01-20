@@ -21,11 +21,16 @@ const toLogString = (payload: unknown) => {
 };
 
 apiClient.interceptors.request.use(async (config) => {
-  const serverAccessToken = await EncryptedStorage.getItem('serverAccessToken');
-  if (serverAccessToken) {
-    config.headers.Authorization = `Bearer ${serverAccessToken}`;
+  try {
+    const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    console.log('accessToken', accessToken);
+    return config;
+  } catch (error) {
+    return Promise.reject(error);
   }
-  return config;
 });
 
 /***

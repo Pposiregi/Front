@@ -48,7 +48,7 @@ export interface MissionActiveResponse {
 }
 
 /**
- * 미션 체크 상태
+ * 미션 체크 상태 (현재 사용 하지 않음)
  */
 export interface MissionCheckItem {
   missionCheckId: number;
@@ -77,7 +77,3 @@ export interface MissionProgressResult {
 export interface MissionProgressResponse {
   updatedMissions: MissionProgressResult[];
 }
-
-export type MissionProgressRequest = {
-  increment: number;
-};
