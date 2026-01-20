@@ -19,10 +19,16 @@ const toLogString = (payload: unknown) => {
   }
 };
 
-const devUserId = BODY_HISTORY_USER_ID;
-apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = devUserId; // 항상 추가
-  return config;
+apiClient.interceptors.request.use(async (config) => {
+  try {
+    const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  } catch (error) {
+    return Promise.reject(error);
+  }
 });
 
 /***
