@@ -1,12 +1,15 @@
-import { MissionProgressResponse } from 'types/mission';
 import apiClient from './httpClient';
-import { DailyWalkRequest, getUserResponse } from 'types/main';
+import {
+  DailyWalkRequest,
+  DailyWalkResponse,
+  getUserResponse,
+} from 'types/main';
 
 /**
  * User 정보 가져오기
  */
 export const getUser = async (): Promise<getUserResponse> => {
-  const { data } = await apiClient.get('users');
+  const { data } = await apiClient.get<getUserResponse>('users');
   return data;
 };
 
@@ -15,7 +18,10 @@ export const getUser = async (): Promise<getUserResponse> => {
  */
 export const postDailyWalks = async (
   payload: DailyWalkRequest
-): Promise<MissionProgressResponse> => {
-  const { data } = await apiClient.post('/daily/walks', payload);
+): Promise<DailyWalkResponse> => {
+  const { data } = await apiClient.post<DailyWalkResponse>(
+    '/daily/walks',
+    payload
+  );
   return data;
 };

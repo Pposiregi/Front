@@ -4,6 +4,13 @@ export type DailyWalkRequest = {
   burnCalories: number | 0;
 };
 
+export type DailyWalkResponse = {
+  id: number;
+  step: number;
+  distanceKm: number;
+  burnCalories: number;
+};
+
 export type getUserResponse = {
   userId: number;
   email: string;
