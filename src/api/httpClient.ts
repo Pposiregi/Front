@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
