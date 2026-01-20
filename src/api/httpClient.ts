@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -19,14 +20,16 @@ const toLogString = (payload: unknown) => {
   }
 };
 
-// 추후에 할 것
-// dev-user-id 제거 →
-// EncryptedStorage에 저장된 serverAccessToken을 꺼내서
-// Authorization 헤더로 보내기
-const devUserId = BODY_HISTORY_USER_ID;
-apiClient.interceptors.request.use((config) => {
-  config.headers['dev-user-id'] = devUserId; // 항상 추가
-  return config;
+apiClient.interceptors.request.use(async (config) => {
+  try {
+    const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  } catch (error) {
+    return Promise.reject(error);
+  }
 });
 
 /***

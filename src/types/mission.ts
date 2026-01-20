@@ -77,3 +77,7 @@ export interface MissionProgressResult {
 export interface MissionProgressResponse {
   updatedMissions: MissionProgressResult[];
 }
+
+export type MissionProgressRequest = {
+  increment: number;
+};
