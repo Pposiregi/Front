@@ -8,11 +8,12 @@ import {
 } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
-import { RankingData } from './types';
+import { DailyStepRankingResponse } from 'types/ranking';
 
 function RankingTab() {
   const [loading, setLoading] = useState(false);
-  const [rankingData, setRankingData] = useState<RankingData | null>(null);
+  const [rankingData, setRankingData] =
+    useState<DailyStepRankingResponse | null>(null);
   const [rankingFilter, setRankingFilter] = useState<'ALL' | 'MALE' | 'FEMALE'>(
     'ALL'
   );

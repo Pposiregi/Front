@@ -1,26 +1,24 @@
+/**
+ * 걸음 수 기준 유저 랭킹 조회 요청 타입
+ */
 export type GetDailyStepRankingRequest = {
   limit: number;
   gender: 'ALL' | 'MALE' | 'FEMALE';
 };
 
-export type DailyStepRankingApiItem = {
-  userId: number;
-  nickname: string;
-  dailyStepCount: number;
-};
+/**
+ * 걸음 수 기준 유저 랭킹 조회 응답 타입
+ */
+export interface DailyStepRankingResponse {
+  top10: DailyStepRankingItem[];
+  myRank: number;
+}
 
+/**
+ * 걸음 수 기준 유저 랭킹 조회 응답 아이템
+ */
 export type DailyStepRankingItem = {
   userId: number;
   nickname: string;
   dailyStepCount: number;
 };
-
-export interface DailyStepRankingApiResponse {
-  top10: DailyStepRankingApiItem[];
-  myRank: number;
-}
-
-export interface DailyStepRankingResponse {
-  top10: DailyStepRankingItem[];
-  myRank: number;
-}

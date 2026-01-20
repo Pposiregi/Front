@@ -8,14 +8,3 @@ export type Badge = {
   iconUrl: ImageSourcePropType;
   createdAt: string;
 };
-
-export type RankingItem = {
-  userId: number;
-  nickname: string;
-  dailyStepCount: number;
-};
-
-export type RankingData = {
-  top10: RankingItem[];
-  myRank: number;
-};

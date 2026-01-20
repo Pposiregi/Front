@@ -1,19 +1,8 @@
 import apiClient from './httpClient';
 import type {
   GetDailyStepRankingRequest,
-  DailyStepRankingApiResponse,
-  DailyStepRankingApiItem,
   DailyStepRankingResponse,
-  DailyStepRankingItem,
 } from 'types/ranking';
-
-const normalizeRankingItem = (
-  item: DailyStepRankingApiItem
-): DailyStepRankingItem => ({
-  userId: item.userId,
-  nickname: item.nickname,
-  dailyStepCount: item.dailyStepCount,
-});
 
 export const getDailyStepRanking = async ({
   limit = 10,
@@ -30,7 +19,7 @@ export const getDailyStepRanking = async ({
     params.gender = 'female';
   }
 
-  const { data } = await apiClient.get<DailyStepRankingApiResponse>(url, {
+  const { data } = await apiClient.get<DailyStepRankingResponse>(url, {
     params,
   });
 
@@ -39,7 +28,7 @@ export const getDailyStepRanking = async ({
   }
 
   return {
-    top10: data.top10.map(normalizeRankingItem),
+    top10: data.top10,
     myRank: data.myRank,
   };
 };
