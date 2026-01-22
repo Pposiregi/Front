@@ -1,7 +1,12 @@
 import axios from 'axios';
+<<<<<<< HEAD
 import { API_BASE_URL } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { DEV_USER_ID } from '@env';
+=======
+import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
+import EncryptedStorage from 'react-native-encrypted-storage';
+>>>>>>> develop
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -21,6 +26,7 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+<<<<<<< HEAD
 const redactHeaders = (headers: unknown) => {
   const rawHeaders =
     typeof (headers as { toJSON?: () => unknown })?.toJSON === 'function'
@@ -67,6 +73,18 @@ apiClient.interceptors.request.use(async (config) => {
     }
   }
   return config;
+=======
+apiClient.interceptors.request.use(async (config) => {
+  try {
+    const accessToken = await EncryptedStorage.getItem('serverAccessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+>>>>>>> develop
 });
 
 /***
