@@ -58,10 +58,12 @@ apiClient.interceptors.request.use(async (config) => {
     );
   if (!hasAuthHeader) {
     const accessToken = await EncryptedStorage.getItem('serverAccessToken');
-    console.log('>>> [JWT] accesstoken: ' + accessToken);
     if (accessToken) {
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${accessToken}`;
+      if (__DEV__) {
+        console.log('>>> [JWT] accesstoken: ' + accessToken);
+      }
     }
   }
   return config;

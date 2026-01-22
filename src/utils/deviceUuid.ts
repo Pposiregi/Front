@@ -1,21 +1,29 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
+import { Platform } from 'react-native';
 
 /***
  * Device UUID 관리 Util
+ * - Android: ANDROID_ID 사용 (재설치 후에도 보통 유지됨)
  */
 
-// 앱 재설정 전까지 유지되는 기기 식별자 저장 키
-const DEVICE_UUID_KEY = 'deviceUuid';
+const assertAndroidOnly = () => {
+  if (Platform.OS !== 'android') {
+    throw new Error('Device UUID는 Android 전용입니다.');
+  }
+};
 
-const generateDeviceUuid = () => {
-  // 외부 의존성 없이 UUID v4 형태를 만들어 저장한다.
-  let seed = Date.now();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
-    const rand = (seed + Math.random() * 16) % 16 | 0;
-    seed = Math.floor(seed / 16);
-    const value = char === 'x' ? rand : (rand & 0x3) | 0x8;
-    return value.toString(16);
-  });
+const getAndroidId = async () => {
+  try {
+    assertAndroidOnly();
+    const androidId = await DeviceInfo.getUniqueIdSync(); // getAndroidId();
+    if (!androidId) {
+      throw new Error('ANDROID_ID를 가져올 수 없습니다.');
+    }
+    return androidId;
+  } catch (err) {
+    console.warn('>>> [DeviceUuid] ANDROID_ID 조회 실패', err);
+    throw err;
+  }
 };
 
 /**
@@ -23,7 +31,7 @@ const generateDeviceUuid = () => {
  * @returns Device UUID
  */
 export const getDeviceUuid = async () => {
-  return AsyncStorage.getItem(DEVICE_UUID_KEY);
+  return getAndroidId();
 };
 
 /**
@@ -32,13 +40,5 @@ export const getDeviceUuid = async () => {
  * @returns
  */
 export const getOrCreateDeviceUuid = async () => {
-  // 재로그인/앱 재시작 시 동일 값을 사용하도록 1회 생성 후 보관
-  const existing = await AsyncStorage.getItem(DEVICE_UUID_KEY);
-  if (existing) {
-    return existing;
-  }
-
-  const created = generateDeviceUuid();
-  await AsyncStorage.setItem(DEVICE_UUID_KEY, created);
-  return created;
+  return getAndroidId();
 };
