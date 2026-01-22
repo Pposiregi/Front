@@ -104,7 +104,7 @@ const ProfileSettingPage = () => {
               deviceUuid,
             });
 
-            // DB, Storagy 초기화
+            // DB, Storage 초기화
             await deletePushToken({ deviceUuid }, accessToken);
             await clearLastSentPushToken();
           }
