@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { DEV_USER_ID } from '@env';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import styles from '@styles/ProfilePage.styles';
@@ -26,10 +25,6 @@ import type {
   BodyHistoryResponse,
 } from 'types/bodyHistory';
 
-const DEV_USER_ID_VALUE = Number(DEV_USER_ID);
-const RESOLVED_USER_ID = Number.isFinite(DEV_USER_ID_VALUE)
-  ? DEV_USER_ID_VALUE
-  : 1;
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
 
@@ -93,7 +88,6 @@ function ProfilePage() {
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [savingRecord, setSavingRecord] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const apiUserId = RESOLVED_USER_ID;
 
   // 기록 저장 후 최신 데이터를 불러올지 여부
   const [shouldRefreshAfterRecord, setShouldRefreshAfterRecord] =
@@ -101,7 +95,7 @@ function ProfilePage() {
 
   const loadBodyHistories = useCallback(async () => {
     try {
-      const data = await getBodyHistoriesByUser(apiUserId);
+      const data = await getBodyHistoriesByUser();
       const sorted = [...data].sort((a, b) =>
         b.baseDate.localeCompare(a.baseDate)
       );
@@ -111,13 +105,13 @@ function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [apiUserId]);
+  }, []);
 
   const loadGoals = useCallback(async () => {
     // 저장된 목표 체중/체지방률을 로컬에서 불러와 진행률 계산에 사용
-    const goals = await loadBodyGoals(apiUserId);
+    const goals = await loadBodyGoals();
     setBodyGoals(goals);
-  }, [apiUserId]);
+  }, []);
 
   // 화면이 포커스될 때마다 최신 기록을 불러온다.
   useFocusEffect(
@@ -232,7 +226,6 @@ function ProfilePage() {
           });
         } else {
           await createBodyHistory({
-            userId: apiUserId,
             heightCm: values.heightCm,
             weightKg: values.weightKg,
             pbf: values.pbf,
@@ -250,7 +243,7 @@ function ProfilePage() {
         setSavingRecord(false);
       }
     },
-    [apiUserId, histories]
+    [histories]
   );
 
   const chartConfig = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export const useMainData = (userId: string) => {
+export const useMainData = () => {
   const [data, setData] = useState<MainResponse>();
   const [loading, setLoading] = useState(true);
 
@@ -38,14 +38,14 @@ export const useMainData = (userId: string) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [userId]);
+  }, []);
 
   // useEffect(() => {
-  //     getMainData(userId).then((res) => {
+  //     getMainData().then((res) => {
   //         setData(res);
   //         setLoading(false);
   //     });
-  // }, [userId]);
+  // }, []);
 
   return { data, loading };
 };

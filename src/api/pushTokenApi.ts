@@ -16,42 +16,36 @@ export type PushTokenDeletePayload = {
 
 export const postPushToken = async (
   payload: PushTokenPayload,
-  accessToken: string,
-  userId: number
+  accessToken: string
 ) => {
   const { data } = await apiClient.post('/devices/push-token', payload, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    params: { userId },
   });
   return data;
 };
 
 export const patchPushToken = async (
   payload: PushTokenPayload,
-  accessToken: string,
-  userId: number
+  accessToken: string
 ) => {
   const { data } = await apiClient.patch('/devices/push-token', payload, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    params: { userId },
   });
   return data;
 };
 
 export const deletePushToken = async (
   payload: PushTokenDeletePayload,
-  accessToken: string,
-  userId: number
+  accessToken: string
 ) => {
   const { data } = await apiClient.delete('/devices/push-token', {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    params: { userId },
     data: payload,
   });
   return data;

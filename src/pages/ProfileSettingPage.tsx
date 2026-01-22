@@ -8,7 +8,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { DEV_USER_ID } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,10 +27,6 @@ import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
 
-const DEV_USER_ID_VALUE = Number(DEV_USER_ID);
-const RESOLVED_USER_ID = Number.isFinite(DEV_USER_ID_VALUE)
-  ? DEV_USER_ID_VALUE
-  : 1;
 const PET_ID_FALLBACK = 1;
 
 type SettingRowProps = {
@@ -74,7 +69,6 @@ const ProfileSettingPage = () => {
   const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
-  const apiUserId = RESOLVED_USER_ID;
   const [petId, setPetId] = useState(PET_ID_FALLBACK);
 
   useEffect(() => {
@@ -106,15 +100,13 @@ const ProfileSettingPage = () => {
           if (!deviceUuid) {
             console.warn('>>> [FCM][PushToken] deviceUuid 없음, DELETE 스킵');
           } else {
-            const userId = apiUserId;
             console.log('>>> [FCM][PushToken] DELETE /devices/push-token', {
               deviceUuid,
-              userId,
             });
 
             // DB, Storagy 초기화
-            await deletePushToken({ deviceUuid }, accessToken, userId);
-            await clearLastSentPushToken(userId);
+            await deletePushToken({ deviceUuid }, accessToken);
+            await clearLastSentPushToken();
           }
         } catch (err) {
           console.error('>>> [FCM][PushToken] DELETE 실패', err);
@@ -307,7 +299,7 @@ const ProfileSettingPage = () => {
                   }
                   setSavingProfile(true);
                   try {
-                    await updateUserProfile(apiUserId, {
+                    await updateUserProfile({
                       nickname: nicknameInput.trim(),
                     });
                     Alert.alert('완료', '닉네임이 변경되었습니다.');
@@ -392,11 +384,11 @@ const ProfileSettingPage = () => {
                   setSavingGoal(true);
                   try {
                     // 서버 프로필 업데이트 후 로컬 목표값도 캐싱해 화면에서 즉시 사용
-                    await updateUserProfile(apiUserId, {
+                    await updateUserProfile({
                       targetWeightKg: weight,
                       targetPbf: pbf,
                     });
-                    await saveBodyGoals(apiUserId, {
+                    await saveBodyGoals({
                       weightAim: weight,
                       bodyFatAim: pbf,
                     });
@@ -477,7 +469,7 @@ const ProfileSettingPage = () => {
                   }
                   setSavingPet(true);
                   try {
-                    await updatePetProfile(apiUserId, petId, {
+                    await updatePetProfile(petId, {
                       name: petNameInput.trim(),
                       petType,
                     });

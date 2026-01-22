@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_PET_ID, DEV_USER_ID, GOOGLE_CLIENT_ID } from '@env';
+import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
 import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
@@ -112,10 +112,12 @@ const runWithRetry = async <T,>(
     try {
       return await task();
     } catch (err) {
-      console.error(
-        `>>> [FCM][PushToken] ${label} 실패 (시도 ${attempt}/${attempts})`,
-        err
-      );
+      if (__DEV__) {
+        console.error(
+          `>>> [FCM][PushToken] ${label} 실패 (시도 ${attempt}/${attempts})`,
+          err
+        );
+      }
       if (attempt >= attempts) {
         throw err;
       }
@@ -137,20 +139,19 @@ function AppInner() {
     (state: RootState) => state.user.isSignUpInProgress
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
-  const parsedUserId = Number(DEV_USER_ID);
-  const resolvedUserId = Number.isFinite(parsedUserId) ? parsedUserId : 1;
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         try {
-          // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
-          if (__DEV__) {
-            await ensurePetIdStored(DEV_PET_ID);
-          }
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
           const deviceUuid = await getDeviceUuid();
-          console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
+
+          if (__DEV__) {
+            // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
+            await ensurePetIdStored(DEV_PET_ID);
+            console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
+          }
         } catch (err) {
           console.warn(
             '>>> [FCM][DeviceUuid] UUID 생성 실패 || Storagy 저장 실패',
@@ -212,7 +213,6 @@ function AppInner() {
         }
 
         const deviceUuid = await getDeviceUuid();
-        const userId = resolvedUserId;
         const send = async () => {
           const fcmToken = await messaging().getToken();
           if (!fcmToken) {
@@ -220,7 +220,7 @@ function AppInner() {
           }
 
           // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
-          const lastToken = await getLastSentPushToken(userId);
+          const lastToken = await getLastSentPushToken();
           if (lastToken === fcmToken) {
             console.log('>>> [FCM][PushToken] 동일 토큰, 전송 스킵');
             return { skipped: true };
@@ -232,12 +232,9 @@ function AppInner() {
             deviceToken: fcmToken,
           };
 
-          console.log('>>> [FCM][PushToken] POST /devices/push-token', {
-            ...payload,
-            userId,
-          });
-          await postPushToken(payload, accessToken, userId);
-          await setLastSentPushToken(userId, fcmToken);
+          console.log('>>> [FCM][PushToken] POST /devices/push-token', payload);
+          await postPushToken(payload, accessToken);
+          await setLastSentPushToken(fcmToken);
           return { skipped: false };
         };
 
@@ -249,7 +246,7 @@ function AppInner() {
     };
 
     registerPushToken();
-  }, [accessToken, isLoggedIn, isSignUpInProgress, resolvedUserId]);
+  }, [accessToken, isLoggedIn, isSignUpInProgress]);
 
   useEffect(() => {
     if (!isLoggedIn || isSignUpInProgress || !accessToken) {
@@ -265,26 +262,25 @@ function AppInner() {
         }
 
         const deviceUuid = await getDeviceUuid();
+        // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
+        const lastToken = await getLastSentPushToken();
+        if (lastToken === fcmToken) {
+          console.log('>>> [FCM][PushToken] 동일 토큰, 전송 스킵');
+          return;
+        }
+
         const payload: PushTokenPayload = {
           deviceUuid: deviceUuid,
           deviceOs: 'ANDROID',
           deviceToken: fcmToken,
         };
-        const userId = resolvedUserId;
         const send = async () => {
-          // 최근 전송 토큰과 동일하면 중복 전송을 스킵한다.
-          const lastToken = await getLastSentPushToken(userId);
-          if (lastToken === fcmToken) {
-            console.log('>>> [FCM][PushToken] 동일 토큰, 전송 스킵');
-            return { skipped: true };
-          }
-
-          console.log('>>> [FCM][PushToken] PATCH /devices/push-token', {
-            ...payload,
-            userId,
-          });
-          await patchPushToken(payload, accessToken, userId);
-          await setLastSentPushToken(userId, fcmToken);
+          console.log(
+            '>>> [FCM][PushToken] PATCH /devices/push-token',
+            payload
+          );
+          await patchPushToken(payload, accessToken);
+          await setLastSentPushToken(fcmToken);
           return { skipped: false };
         };
 
@@ -296,7 +292,7 @@ function AppInner() {
     });
 
     return unsubscribe;
-  }, [accessToken, isLoggedIn, isSignUpInProgress, resolvedUserId]);
+  }, [accessToken, isLoggedIn, isSignUpInProgress]);
 
   if (loading) {
     console.log('>>> Rendering loading indicator');
