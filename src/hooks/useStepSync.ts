@@ -34,7 +34,7 @@ export const useStepSync = () => {
       // distanceKm, burnCaloreis는 현재 계산하는 로직이 없어 0으로 전송,
       // 프론트에서 계산해서 보내줘야할지??
       await postDailyWalks({
-        increment: stepsToSend,
+        step: stepsToSend,
         distanceKm: 0,
         burnCalories: 0,
       });

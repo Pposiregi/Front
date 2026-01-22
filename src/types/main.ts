@@ -3,7 +3,7 @@
  * 현재는 increment만 보내주는 중, distanceKm랑 burnCalories는 계산식이 필요함!
  */
 export type DailyWalkRequest = {
-  increment: number;
+  step: number;
   distanceKm: number | 0;
   burnCalories: number | 0;
 };
