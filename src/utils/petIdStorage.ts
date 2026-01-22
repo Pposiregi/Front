@@ -27,6 +27,10 @@ export const getResolvedPetId = async (
   logPrefix = '>>> [PetId]'
 ) => {
   const raw = await getPetId();
+  if (raw === null || raw === '') {
+    console.warn(`${logPrefix} 저장된 petId가 없어 기본값 ${fallback} 사용`);
+    return fallback;
+  }
   const parsed = Number(raw);
   if (!Number.isFinite(parsed)) {
     console.warn(`${logPrefix} 저장된 petId가 없어 기본값 ${fallback} 사용`);
