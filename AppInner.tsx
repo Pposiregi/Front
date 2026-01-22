@@ -21,7 +21,7 @@ import SplashScreen from 'react-native-splash-screen';
 import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
-import { getOrCreateDeviceUuid } from '@utils/deviceUuid';
+import { getDeviceUuid } from '@utils/deviceUuid';
 import {
   patchPushToken,
   postPushToken,
@@ -149,7 +149,7 @@ function AppInner() {
             await ensurePetIdStored(DEV_PET_ID);
           }
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
-          const deviceUuid = await getOrCreateDeviceUuid();
+          const deviceUuid = await getDeviceUuid();
           console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
         } catch (err) {
           console.warn(
@@ -211,7 +211,7 @@ function AppInner() {
           return;
         }
 
-        const deviceUuid = await getOrCreateDeviceUuid();
+        const deviceUuid = await getDeviceUuid();
         const userId = resolvedUserId;
         const send = async () => {
           const fcmToken = await messaging().getToken();
@@ -264,7 +264,7 @@ function AppInner() {
           return;
         }
 
-        const deviceUuid = await getOrCreateDeviceUuid();
+        const deviceUuid = await getDeviceUuid();
         const payload: PushTokenPayload = {
           deviceUuid: deviceUuid,
           deviceOs: 'ANDROID',

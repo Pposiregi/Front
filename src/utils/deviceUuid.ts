@@ -15,7 +15,7 @@ const assertAndroidOnly = () => {
 const getAndroidId = async () => {
   try {
     assertAndroidOnly();
-    const androidId = await DeviceInfo.getUniqueIdSync(); // getAndroidId();
+    const androidId = await DeviceInfo.getUniqueId();
     if (!androidId) {
       throw new Error('ANDROID_ID를 가져올 수 없습니다.');
     }
@@ -27,18 +27,9 @@ const getAndroidId = async () => {
 };
 
 /**
- * GET 디바이스 UUID in 스토리지
+ * GET 디바이스 UUID
  * @returns Device UUID
  */
 export const getDeviceUuid = async () => {
-  return getAndroidId();
-};
-
-/**
- * GET 디바이스 UUID in 스토리지
- * - 없을 경우, 새롭게 생성
- * @returns
- */
-export const getOrCreateDeviceUuid = async () => {
   return getAndroidId();
 };
