@@ -41,7 +41,9 @@ export const styles = StyleSheet.create({
     color: '#555',
     fontFamily: 'GowunDodum',
   },
-  // 뱃지
+  /**
+   * 뱃지
+   */
   badgeCard: {
     marginTop: 10,
     backgroundColor: '#fff',
@@ -87,9 +89,12 @@ export const styles = StyleSheet.create({
   tabText: {
     fontWeight: 'bold',
   },
+  /**
+   * 랭킹
+   */
   rankingNumberText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontFamily: 'JUA',
     marginRight: 15,
     width: 30,
     textAlign: 'center',
@@ -107,7 +112,8 @@ export const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   listItemText: {
-    fontSize: 16,
+    fontSize: 22,
+    fontFamily: 'JUA',
   },
   filterButton: {
     flexDirection: 'row',
@@ -133,7 +139,16 @@ export const styles = StyleSheet.create({
   rankingFilterButtonTextActive: {
     color: '#FFF', // 활성화 글자색
   },
-  // 미션
+  myRankingText: {
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    fontSize: 20,
+    fontFamily: 'JUA',
+  },
+  /**
+   * 미션
+   */
   sectionHeader: {
     paddingHorizontal: 16,
     paddingVertical: 5,

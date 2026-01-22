@@ -1,4 +1,4 @@
-import { postMissionsStep } from '@api/missionApi';
+import { postDailyWalks } from '@api/mainApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback } from 'react';
 
@@ -31,7 +31,13 @@ export const useStepSync = () => {
       const sendCount = Math.floor(diff / STEP_UNIT);
       const stepsToSend = sendCount * STEP_UNIT;
 
-      await postMissionsStep({ increment: stepsToSend });
+      // distanceKm, burnCaloreis는 현재 계산하는 로직이 없어 0으로 전송,
+      // 프론트에서 계산해서 보내줘야할지??
+      await postDailyWalks({
+        step: stepsToSend,
+        distanceKm: 0,
+        burnCalories: 0,
+      });
 
       await AsyncStorage.setItem(
         STORAGE_KEY,

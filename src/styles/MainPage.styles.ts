@@ -192,7 +192,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
   emptyMissionContainer: {
-    height: 96,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

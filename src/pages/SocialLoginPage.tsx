@@ -1,10 +1,8 @@
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   Image,
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -14,16 +12,12 @@ import {
   getProfile as getKakaoProfile,
   shippingAddresses as getKakaoShippingAddresses,
   serviceTerms as getKakaoServiceTerms,
-  unlink,
-  getProfile,
 } from '@react-native-seoul/kakao-login';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAppDispatch } from '../store';
 import userSlice from '../slices/user';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';

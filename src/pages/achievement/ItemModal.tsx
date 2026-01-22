@@ -1,5 +1,6 @@
 // ====================
 // 모달 컴포넌트
+// ====================
 
 import { styles } from '@styles/Achievement.styles';
 import {
@@ -11,7 +12,6 @@ import {
   View,
 } from 'react-native';
 
-// ====================
 type ItemModalProps = {
   visible: boolean;
   onClose: () => void;

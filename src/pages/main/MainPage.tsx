@@ -18,7 +18,6 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
@@ -42,6 +41,7 @@ import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
+import { getUser } from '@api/mainApi';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -88,7 +88,7 @@ export const MainPage = () => {
   const { syncSteps, resetSync } = useStepSync();
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
-  const { data, loading } = useMainData();
+  const userData = getUser();
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
@@ -296,8 +296,8 @@ export const MainPage = () => {
         }
       }
 
-      const data = await getMissionsActive();
-      setMissionApiItems(data.missions);
+      const activeMission = await getMissionsActive();
+      setMissionApiItems(activeMission.missions);
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
@@ -336,25 +336,14 @@ export const MainPage = () => {
     Alert.alert('걸음 수 연동 실패', healthError);
   }, [healthError]);
 
-  /* 로딩 상태
-   * - 데이터 로딩 중이거나 실패로 인해 데이터가 없을 때 스피너 표시
-   */
-  if (loading) {
+  // 유저 데이터가 아직 없다면 안전하게 스피너를 노출하고 미션 계산을 건너뛴다.
+  if (!userData) {
     return <ActivityIndicator size='large' />;
   }
-
-  // 데이터가 아직 없다면 안전하게 스피너를 노출하고 미션 계산을 건너뛴다.
-  if (!data) {
-    return <ActivityIndicator size='large' />;
-  }
-
-  // const missions = getMissions(data, {
-  //   // Health Connect를 우선 사용하고, 없으면 실시간 센서 값을 사용한다.
-  //   stepOverride,
-  // });
 
   // 표시할 걸음 수
-  const displayedSteps = healthSteps ?? data.daily_walk.step ?? 0;
+  // healthStep 권한 동의를 안했거나 불러오지 못했다면 8954로 표시
+  const displayedSteps = healthSteps ?? 8954;
   return (
     <View style={styles.container}>
       {/*

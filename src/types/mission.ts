@@ -46,38 +46,3 @@ export interface MissionActiveItem {
 export interface MissionActiveResponse {
   missions: MissionActiveItem[];
 }
-
-/**
- * 미션 체크 상태
- */
-export interface MissionCheckItem {
-  missionCheckId: number;
-  missionId: number;
-  userId: number;
-  completed: boolean;
-  progressValue: number;
-  periodType: MissionPeriodType;
-  periodStart: string;
-  periodEnd: string;
-  completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
- * 미션 진행 결과
- */
-export interface MissionProgressResult {
-  missionCheckId: number;
-  progressValue: number;
-  completed: boolean;
-  completedAt: string | null;
-}
-
-export interface MissionProgressResponse {
-  updatedMissions: MissionProgressResult[];
-}
-
-export type MissionProgressRequest = {
-  increment: number;
-};

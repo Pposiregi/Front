@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#F3F4F8',
   },
   monthHeaderContainer: {
     flexDirection: 'row',
