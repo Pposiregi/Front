@@ -232,7 +232,13 @@ function AppInner() {
             deviceToken: fcmToken,
           };
 
-          console.log('>>> [FCM][PushToken] POST /devices/push-token', payload);
+          if (__DEV__) {
+            console.log('>>> [FCM][PushToken] POST /devices/push-token', {
+              deviceUuid: payload.deviceUuid,
+              deviceOs: payload.deviceOs,
+              deviceToken: `${payload.deviceToken.slice(0, 8)}...`,
+            });
+          }
           await postPushToken(payload, accessToken);
           await setLastSentPushToken(fcmToken);
           return { skipped: false };
@@ -275,10 +281,13 @@ function AppInner() {
           deviceToken: fcmToken,
         };
         const send = async () => {
-          console.log(
-            '>>> [FCM][PushToken] PATCH /devices/push-token',
-            payload
-          );
+          if (__DEV__) {
+            console.log('>>> [FCM][PushToken] PATCH /devices/push-token', {
+              deviceUuid: payload.deviceUuid,
+              deviceOs: payload.deviceOs,
+              deviceToken: `${payload.deviceToken.slice(0, 8)}...`,
+            });
+          }
           await patchPushToken(payload, accessToken);
           await setLastSentPushToken(fcmToken);
           return { skipped: false };
