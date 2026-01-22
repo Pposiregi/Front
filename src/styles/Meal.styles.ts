@@ -1,7 +1,27 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const GRID_SIZE = Math.min(52, Math.round(SCREEN_WIDTH / 7.5)); // 요일 7개 기준으로 폭 맞추기
+const CONTENT_HORIZONTAL_PADDING = 24;
+const CALENDAR_HORIZONTAL_PADDING = 8;
+const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
+const CALENDAR_OUTER_GUTTER = Math.max(
+  4,
+  Math.round(SCREEN_WIDTH * CALENDAR_OUTER_GUTTER_RATIO)
+);
+const CALENDAR_CONTAINER_EXPAND = Math.max(
+  0,
+  CONTENT_HORIZONTAL_PADDING - CALENDAR_OUTER_GUTTER
+);
+const CALENDAR_AVAILABLE_WIDTH =
+  SCREEN_WIDTH -
+  CALENDAR_OUTER_GUTTER * 2 -
+  CALENDAR_HORIZONTAL_PADDING * 2;
+const DAY_CELL_GAP_RATIO = 0.045;
+const GRID_SIZE = Math.min(
+  52,
+  Math.floor(CALENDAR_AVAILABLE_WIDTH / (7 + DAY_CELL_GAP_RATIO * 14))
+); // 요일 7개 기준, gap 비율을 유지해 폭 맞추기
+const DAY_CELL_GAP = Math.max(1, Math.round(GRID_SIZE * DAY_CELL_GAP_RATIO));
 const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
@@ -38,7 +58,7 @@ export default StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: CONTENT_HORIZONTAL_PADDING,
     paddingTop: 12,
     paddingBottom: 40,
   },
@@ -74,7 +94,8 @@ export default StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 28,
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
+    marginHorizontal: -CALENDAR_CONTAINER_EXPAND,
     ...baseShadow,
   },
   calendarMonthRow: {
@@ -127,8 +148,8 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E4E6F1',
     backgroundColor: '#FFFFFF',
-    marginHorizontal: GRID_GAP * 1,
-    marginVertical: GRID_GAP * 0.3,
+    marginHorizontal: DAY_CELL_GAP,
+    marginVertical: DAY_CELL_GAP,
   },
   dayNumber: {
     fontFamily: 'JUA',

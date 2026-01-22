@@ -22,7 +22,6 @@ import { useMainData } from '@hooks/useMainData';
 import { StepProgress } from '@components/StepProgress';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
-import { getMissions } from './missions';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
@@ -31,7 +30,6 @@ import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
-import { BODY_HISTORY_USER_ID } from '@env';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
 
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
@@ -90,7 +88,7 @@ export const MainPage = () => {
   const { syncSteps, resetSync } = useStepSync();
 
   // 사용자 요약정보 가져오기, 현재 임시 유저
-  const { data, loading } = useMainData('u12345');
+  const { data, loading } = useMainData();
   // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
@@ -99,30 +97,19 @@ export const MainPage = () => {
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
-  const parsedBodyHistoryUserId = Number(BODY_HISTORY_USER_ID);
-  const bodyHistoryUserId = Number.isFinite(parsedBodyHistoryUserId)
-    ? parsedBodyHistoryUserId
-    : 1;
-  useEffect(() => {
-    if (!Number.isFinite(parsedBodyHistoryUserId)) {
-      console.warn(
-        '>>> [BodyHistory] BODY_HISTORY_USER_ID가 설정되지 않아 기본값 1을 사용합니다.'
-      );
-    }
-  }, [parsedBodyHistoryUserId]);
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
   useEffect(() => {
     // 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
-    loadBodyGoals(bodyHistoryUserId).then(setBodyGoals);
-  }, [bodyHistoryUserId]);
+    loadBodyGoals().then(setBodyGoals);
+  }, []);
 
   const checkTodayBodyHistory = useCallback(async () => {
     const todayKey = formatDateKey(new Date());
     try {
-      const existing = await getBodyHistoryByDate(bodyHistoryUserId, todayKey);
+      const existing = await getBodyHistoryByDate(todayKey);
       if (existing) {
         // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
         await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
@@ -136,7 +123,7 @@ export const MainPage = () => {
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
     }
     return false;
-  }, [bodyHistoryUserId]);
+  }, []);
 
   useEffect(() => {
     const loadPromptState = async () => {
@@ -217,7 +204,6 @@ export const MainPage = () => {
       setSavingBodyHistory(true);
       try {
         await createBodyHistory({
-          userId: bodyHistoryUserId,
           heightCm: values.heightCm,
           weightKg: values.weightKg,
           pbf: values.pbf,
@@ -233,7 +219,7 @@ export const MainPage = () => {
         setSavingBodyHistory(false);
       }
     },
-    [markSkipToday, bodyHistoryUserId]
+    [markSkipToday]
   );
 
   const handleSkipBodyPromptToday = useCallback(async () => {
