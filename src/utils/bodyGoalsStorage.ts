@@ -5,12 +5,12 @@ export type BodyGoals = {
   bodyFatAim?: number;
 };
 
-const buildKey = (userId: number) => `fitpet:bodyGoals:${userId}`;
+const BODY_GOALS_KEY = 'fitpet:bodyGoals';
 
 // 목표값 로컬 저장소에서 읽기 (잘못된 타입은 무시)
-export const loadBodyGoals = async (userId: number): Promise<BodyGoals> => {
+export const loadBodyGoals = async (): Promise<BodyGoals> => {
   try {
-    const raw = await AsyncStorage.getItem(buildKey(userId));
+    const raw = await AsyncStorage.getItem(BODY_GOALS_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as BodyGoals;
     return {
@@ -26,9 +26,9 @@ export const loadBodyGoals = async (userId: number): Promise<BodyGoals> => {
 };
 
 // 목표값을 AsyncStorage에 저장
-export const saveBodyGoals = async (userId: number, goals: BodyGoals) => {
+export const saveBodyGoals = async (goals: BodyGoals) => {
   try {
-    await AsyncStorage.setItem(buildKey(userId), JSON.stringify(goals));
+    await AsyncStorage.setItem(BODY_GOALS_KEY, JSON.stringify(goals));
   } catch (err) {
     console.warn('[BodyGoals] 저장 실패', err);
   }

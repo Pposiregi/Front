@@ -9,7 +9,6 @@ export type BodyHistoryResponse = {
 };
 
 export type BodyHistoryCreateRequest = {
-  userId: number;
   heightCm: number;
   weightKg: number;
   pbf: number;

@@ -28,23 +28,20 @@ export const updateBodyHistory = async (
   return data;
 };
 
-export const getBodyHistoriesByUser = async (
-  userId: number
-): Promise<BodyHistoryResponse[]> => {
+export const getBodyHistoriesByUser =
+  async (): Promise<BodyHistoryResponse[]> => {
   const { data } = await apiClient.get<BodyHistoryResponse[]>(
-    `${BASE_PATH}`,
-    { params: { userId } }
+    `${BASE_PATH}`
   );
   return data;
 };
 
 export const getBodyHistoryByDate = async (
-  userId: number,
   date: string
 ): Promise<BodyHistoryResponse> => {
   const { data } = await apiClient.get<BodyHistoryResponse>(
     `${BASE_PATH}/date`,
-    { params: { userId, date } }
+    { params: { date } }
   );
   return data;
 };

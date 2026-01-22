@@ -1,6 +1,8 @@
 import axios from 'axios';
-import { API_BASE_URL, BODY_HISTORY_USER_ID } from '@env';
+
+import { API_BASE_URL } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import { DEV_USER_ID } from '@env';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -20,16 +22,52 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+const redactHeaders = (headers: unknown) => {
+  const rawHeaders =
+    typeof (headers as { toJSON?: () => unknown })?.toJSON === 'function'
+      ? (headers as { toJSON: () => unknown }).toJSON()
+      : headers;
+
+  if (!rawHeaders || typeof rawHeaders !== 'object') {
+    return rawHeaders;
+  }
+
+  const redacted = { ...(rawHeaders as Record<string, unknown>) };
+  const sensitiveKeys = ['authorization', 'cookie', 'set-cookie', 'x-api-key'];
+
+  Object.keys(redacted).forEach((key) => {
+    if (sensitiveKeys.includes(key.toLowerCase())) {
+      redacted[key] = '***';
+    }
+  });
+
+  return redacted;
+};
+
 apiClient.interceptors.request.use(async (config) => {
-  try {
+  if (__DEV__ && DEV_USER_ID) {
+    // 개발환경에서는 env 값으로 dev_user_id를 고정한다.
+    config.headers = config.headers ?? {};
+    config.headers['dev_user_id'] = DEV_USER_ID;
+    console.log('>>> dev_user_id: ' + DEV_USER_ID);
+  }
+
+  const hasAuthHeader =
+    Boolean(config.headers?.Authorization) ||
+    Boolean(
+      (config.headers as Record<string, unknown> | undefined)?.authorization
+    );
+  if (!hasAuthHeader) {
     const accessToken = await EncryptedStorage.getItem('serverAccessToken');
     if (accessToken) {
+      config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${accessToken}`;
+      if (__DEV__) {
+        console.log('>>> [JWT] accesstoken: ' + accessToken);
+      }
     }
-    return config;
-  } catch (error) {
-    return Promise.reject(error);
   }
+  return config;
 });
 
 /***
@@ -54,9 +92,19 @@ apiClient.interceptors.response.use(
     const data = response?.data;
 
     if (__DEV__) {
+      const requestInfo = {
+        baseURL: config?.baseURL,
+        url,
+        method,
+        params: config?.params,
+        data: config?.data,
+        headers: redactHeaders(config?.headers),
+      };
+      const responseInfo = { status, data };
+
       console.error(
         `>>> [API][${method}] ${url} ${status ?? ''}`.trim(),
-        toLogString(data)
+        toLogString({ request: requestInfo, response: responseInfo })
       );
     }
 

@@ -27,7 +27,7 @@ import type {
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
-const API_USER_ID = 3;
+
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
 const FALLBACK_BODY_FAT = 0;
@@ -95,7 +95,7 @@ function ProfilePage() {
 
   const loadBodyHistories = useCallback(async () => {
     try {
-      const data = await getBodyHistoriesByUser(API_USER_ID);
+      const data = await getBodyHistoriesByUser();
       const sorted = [...data].sort((a, b) =>
         b.baseDate.localeCompare(a.baseDate)
       );
@@ -109,7 +109,7 @@ function ProfilePage() {
 
   const loadGoals = useCallback(async () => {
     // 저장된 목표 체중/체지방률을 로컬에서 불러와 진행률 계산에 사용
-    const goals = await loadBodyGoals(API_USER_ID);
+    const goals = await loadBodyGoals();
     setBodyGoals(goals);
   }, []);
 
@@ -226,7 +226,6 @@ function ProfilePage() {
           });
         } else {
           await createBodyHistory({
-            userId: API_USER_ID,
             heightCm: values.heightCm,
             weightKg: values.weightKg,
             pbf: values.pbf,
@@ -340,15 +339,15 @@ function ProfilePage() {
         <View style={styles.chartCard}>
           <LineChart
             data={chartData}
-          width={chartWidth}
-          height={200}
-          chartConfig={chartConfig}
-          bezier
-          fromZero
-          style={styles.chartStyle}
-          withInnerLines
-          withOuterLines={false}
-        />
+            width={chartWidth}
+            height={200}
+            chartConfig={chartConfig}
+            bezier
+            fromZero
+            style={styles.chartStyle}
+            withInnerLines
+            withOuterLines={false}
+          />
         </View>
       </ScrollView>
 
