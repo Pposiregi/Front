@@ -22,6 +22,7 @@ import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
 import { getDeviceUuid } from '@utils/deviceUuid';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   patchPushToken,
   postPushToken,
@@ -160,18 +161,29 @@ function AppInner() {
         }
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
-          const result = await refreshAccessToken();
-          if (result?.serverAccessToken) {
-            dispatch(
-              userSlice.actions.setUser({
-                accessToken: result.serverAccessToken,
-              })
-            );
-            dispatch(
-              userSlice.actions.setSignUpInProgress(
-                result.registrationStatus === 'INCOMPLETE'
-              )
-            );
+          try {
+            const result = await refreshAccessToken();
+            if (result?.serverAccessToken) {
+              dispatch(
+                userSlice.actions.setUser({
+                  accessToken: result.serverAccessToken,
+                })
+              );
+              dispatch(
+                userSlice.actions.setSignUpInProgress(
+                  result.registrationStatus === 'INCOMPLETE'
+                )
+              );
+            }
+          } catch (err: any) {
+            const status = err?.response?.status;
+            if (status === 401) {
+              await EncryptedStorage.removeItem('refreshToken');
+              await EncryptedStorage.removeItem('serverAccessToken');
+              await AsyncStorage.removeItem('isSignUpInProgress');
+              dispatch(userSlice.actions.resetUser());
+            }
+            console.error('[AuthError] 자동로그인 실패', err);
           }
         }
       } catch (err) {

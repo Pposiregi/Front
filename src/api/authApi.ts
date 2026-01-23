@@ -20,7 +20,7 @@ export const signUp = async (
 export const refreshAccessToken = async (): Promise<{
   serverAccessToken: string;
   registrationStatus: 'INCOMPLETE' | 'COMPLETE';
-} | null> => {
+}> => {
   try {
     const refreshToken = await EncryptedStorage.getItem('refreshToken');
 
@@ -40,6 +40,6 @@ export const refreshAccessToken = async (): Promise<{
     return response.data;
   } catch (err) {
     console.error('[Auth] accessToken 갱신 실패', err);
-    return null;
+    throw err;
   }
 };
