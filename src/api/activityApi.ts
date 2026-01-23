@@ -1,11 +1,20 @@
 import { SessionDetail } from '@pages/activity/activityDetail/types';
-import { GPS_SESSION, WeeklyStepItem } from '../types/activity';
+import { DailyActivity, GPS_SESSION, WeeklyStepItem } from '../types/activity';
 import apiClient from './httpClient';
 
 export const getWeeklySteps = async (): Promise<WeeklyStepItem[]> => {
   const { data } = await apiClient.get<WeeklyStepItem[]>(
     `/daily/walks/steps/weekly`
   );
+  return data;
+};
+
+export const getDailyActivity = async (
+  date: string
+): Promise<DailyActivity> => {
+  const { data } = await apiClient.get<DailyActivity>('/report/activity/daily', {
+    params: { date },
+  });
   return data;
 };
 

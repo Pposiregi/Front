@@ -32,16 +32,16 @@ export const mockSessionMetadata: Record<
   Omit<SessionDetail, 'routeLogs'>
 > = {
   S_AM_0830: {
-    startTime: '2025-11-09T08:30:00.000Z',
-    endTime: '2025-11-09T11:00:17.000Z',
+    startTime: '2026-01-09T08:30:00.000Z',
+    endTime: '2026-01-09T11:00:17.000Z',
     totalDistance: 6.5,
     avgSpeedKmh: 4.5,
     stepCount: 8900,
     burnCalories: 246,
   },
   S_PM_1930: {
-    startTime: '2025-11-09T19:30:00.000Z',
-    endTime: '2025-11-09T21:00:00.000Z',
+    startTime: '2026-01-09T19:30:00.000Z',
+    endTime: '2026-01-09T21:00:00.000Z',
     totalDistance: 4.8,
     avgSpeedKmh: 3.2,
     stepCount: 6100,

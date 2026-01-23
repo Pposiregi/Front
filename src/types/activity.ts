@@ -14,6 +14,13 @@ export type WeeklyStepItem = {
   step: number;
 };
 
+export type DailyActivity = {
+  date: string;
+  steps: number;
+  distanceKm: number;
+  burnCalories: number;
+};
+
 export type ActivityDetailNavigationProp = NavigationProp<
   ActivityStackParamList,
   'ActivityDetailPage'

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
@@ -6,25 +6,25 @@ import MapOverlayPolyline from '@components/MapOverlayPolyline';
 import { ActivityDetailRouteProp, SessionDetail } from './types';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
-import { getSessionDetail } from '@api/activityApi';
+import { mock_gps_log, mockSessionMetadata } from './mock';
 
 // 목업 데이터
-// const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
-//   return new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       const logs = mock_gps_log[id];
-//       const metadata = mockSessionMetadata[id];
-//       if (logs && metadata) {
-//         resolve({
-//           ...metadata,
-//           routeLogs: logs,
-//         });
-//       } else {
-//         reject(new Error(`데이터를 찾지 못했습니다.`));
-//       }
-//     }, 1000);
-//   });
-// };
+const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const logs = mock_gps_log[id];
+      const metadata = mockSessionMetadata[id];
+      if (logs && metadata) {
+        resolve({
+          ...metadata,
+          routeLogs: logs,
+        });
+      } else {
+        reject(new Error(`데이터를 찾지 못했습니다.`));
+      }
+    }, 1000);
+  });
+};
 
 // 받은 경로 중 센터 찾기
 const getCenterRegion = (
@@ -45,6 +45,18 @@ const ActivityDetailPage = () => {
   const [detailData, setDetailData] = useState<SessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const mapRef = useRef<MapView | null>(null);
+  const centerRegion = useMemo(() => {
+    if (!detailData || detailData.routeLogs.length === 0) return null;
+
+    console.log(
+      '>>> GET CENTER REGION',
+      sessionId,
+      detailData,
+      centerRegion?.latitude
+    );
+
+    return getCenterRegion(detailData.routeLogs);
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,8 +64,8 @@ const ActivityDetailPage = () => {
       setLoading(true);
       try {
         //기존 목업 데이터
-        //const data = await fetchSessionDetail(sessionId);
-        const data = await getSessionDetail(sessionId);
+        const data = await fetchSessionDetail(sessionId);
+        //const data = await getSessionDetail(sessionId);
         setDetailData(data);
       } catch (error) {
         console.error('상세 데이터 로드 실패:', error);
@@ -67,13 +79,12 @@ const ActivityDetailPage = () => {
 
   // 로딩과 CENTER_REGION 값이 정해지면 지도를 이동
   useEffect(() => {
+    if (!centerRegion || !mapRef.current) return;
     const timer = setTimeout(() => {
-      if (mapRef.current) {
-        mapRef.current.animateToRegion(CENTER_REGION, 0);
-      }
+      mapRef.current?.animateToRegion(centerRegion, 0);
     }, 100);
     return () => clearTimeout(timer);
-  }, [loading, detailData]);
+  }, [centerRegion]);
 
   if (loading) {
     return (
@@ -116,7 +127,12 @@ const ActivityDetailPage = () => {
   }
 
   // 중앙 값
-  const CENTER_REGION = getCenterRegion(detailData.routeLogs);
+  const mapRegion = centerRegion ?? {
+    latitude: 37.5665,
+    longitude: 126.978,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
 
   return (
     <ScrollView>
@@ -131,10 +147,10 @@ const ActivityDetailPage = () => {
             zoomEnabled={false} // 핀치 줌 비활성화
             rotateEnabled={false} // 회전 비활성화
             pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
-            region={CENTER_REGION}
+            region={mapRegion}
           />
           <MapOverlayPolyline
-            region={CENTER_REGION}
+            region={mapRegion}
             coordinates={detailData.routeLogs}
             height={SCREEN_HEIGHT * 0.4}
             width={SCREEN_WIDTH * 0.8}
