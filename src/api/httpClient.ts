@@ -84,12 +84,48 @@ apiClient.interceptors.response.use(
     console.log(`>>> [API][${status}] :`, toLogString(data));
     return response;
   },
-  (error) => {
+  async (error) => {
     const { config, response } = error || {};
     const method = config?.method?.toUpperCase?.() || 'UNKNOWN';
     const url = config?.url || 'UNKNOWN';
     const status = response?.status;
     const data = response?.data;
+    const originalRequest = config;
+    // accessToekn 시간 만료로 인해 401(인증 오류) 발생 시 refreshToken을 기준으로 재 발급
+    if (
+      response?.status === 401 &&
+      !originalRequest?._retry &&
+      !originalRequest?.url?.includes('/auth/refresh')
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        if (!refreshToken) throw new Error('No refresh token');
+
+        const refreshRes = await apiClient.post(
+          '/auth/refresh',
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          }
+        );
+
+        const newAccessToken = refreshRes.data.serverAccessToken;
+
+        await EncryptedStorage.setItem('serverAccessToken', newAccessToken);
+
+        // 원본 요청에 새 토큰 주입
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        return apiClient(originalRequest);
+      } catch (refreshErr) {
+        await EncryptedStorage.clear();
+        return Promise.reject(refreshErr);
+      }
+    }
 
     if (__DEV__) {
       const requestInfo = {
