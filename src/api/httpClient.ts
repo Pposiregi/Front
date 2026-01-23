@@ -48,8 +48,8 @@ apiClient.interceptors.request.use(async (config) => {
   if (__DEV__ && DEV_USER_ID) {
     // 개발환경에서는 env 값으로 dev_user_id를 고정한다.
     config.headers = config.headers ?? {};
-    config.headers['dev_user_id'] = DEV_USER_ID;
-    console.log('>>> dev_user_id: ' + DEV_USER_ID);
+    config.headers['dev-user-id'] = DEV_USER_ID;
+    console.log('>>> dev-user-id: ' + DEV_USER_ID);
   }
 
   const hasAuthHeader =
