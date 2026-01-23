@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  LayoutChangeEvent,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -40,6 +41,44 @@ function ActivityPage() {
     datasets: [{ data: [] }],
   });
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
+  const [chartContainerWidth, setChartContainerWidth] = useState<number>(0);
+
+  const weeklyStepStats = useMemo(() => {
+    if (weeklySteps.length === 0) {
+      return { average: 0, max: 0 };
+    }
+
+    const steps = weeklySteps.map((item) => item.step);
+    const total = steps.reduce((acc, value) => acc + value, 0);
+    return {
+      average: Math.round(total / steps.length),
+      max: Math.max(...steps),
+    };
+  }, [weeklySteps]);
+
+  const handleChartLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width } = event.nativeEvent.layout;
+      setChartContainerWidth(width);
+    },
+    [setChartContainerWidth]
+  );
+
+  const chartMetrics = useMemo(() => {
+    const baseWidth = chartContainerWidth || SCREEN_WIDTH;
+    const innerWidth = Math.round(baseWidth * 0.92);
+    const unitColumnWidth = Math.round(innerWidth * 0.1);
+    const chartWidth = Math.round(innerWidth - unitColumnWidth);
+    const chartHeight = Math.round(SCREEN_HEIGHT * 0.22);
+    const chartRowWidth = unitColumnWidth + chartWidth;
+
+    return {
+      unitColumnWidth,
+      chartWidth,
+      chartHeight,
+      chartRowWidth,
+    };
+  }, [chartContainerWidth]);
 
   const SessionItem = ({ session }: { session: GPS_SESSION }) => {
     const handlePress = () => {
@@ -333,7 +372,7 @@ function ActivityPage() {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>최근 7일 걸음수</Text>
       </View>
-      <View style={styles.chartCard}>
+      <View style={styles.chartCard} onLayout={handleChartLayout}>
         {chartData.labels.length === 0 ? (
           <View style={styles.chartEmpty}>
             <Text style={styles.chartEmptyText}>
@@ -341,34 +380,80 @@ function ActivityPage() {
             </Text>
           </View>
         ) : (
-          <LineChart
-            data={chartData}
-            width={SCREEN_WIDTH - 40}
-            height={190}
-            yAxisLabel=''
-            yAxisSuffix=''
-            withHorizontalLabels={false}
-            withVerticalLabels
-            fromZero
-            chartConfig={{
-              backgroundGradientFrom: '#FFFFFF',
-              backgroundGradientTo: '#FFFFFF',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 145, 77, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
-              propsForBackgroundLines: {
-                stroke: '#E5E7EB',
-                strokeDasharray: '0',
-              },
-              propsForDots: {
-                r: '3',
-                strokeWidth: '2',
-                stroke: '#FFFFFF',
-              },
-            }}
-            bezier
-            style={styles.lineChartStyle}
-          />
+          <>
+            <View style={styles.chartMetaRow}>
+              <View style={styles.chartMetaItem}>
+                <Text style={styles.chartMetaLabel}>주간 평균</Text>
+                <Text style={styles.chartMetaValue}>
+                  {weeklyStepStats.average.toLocaleString()}
+                  <Text style={styles.chartMetaUnit}> 걸음</Text>
+                </Text>
+              </View>
+              <View style={styles.chartMetaDivider} />
+              <View style={styles.chartMetaItem}>
+                <Text style={styles.chartMetaLabel}>최고</Text>
+                <Text style={styles.chartMetaValue}>
+                  {weeklyStepStats.max.toLocaleString()}
+                  <Text style={styles.chartMetaUnit}> 걸음</Text>
+                </Text>
+              </View>
+            </View>
+            <View
+              style={[styles.chartRow, { width: chartMetrics.chartRowWidth }]}
+            >
+              <View
+                style={[
+                  styles.chartUnitColumn,
+                  { width: chartMetrics.unitColumnWidth },
+                ]}
+              >
+                <Text style={styles.chartUnitText}>걸음</Text>
+              </View>
+              <LineChart
+                data={chartData}
+                width={chartMetrics.chartWidth}
+                height={chartMetrics.chartHeight}
+                yAxisLabel=''
+                yAxisSuffix=''
+                withHorizontalLabels={false}
+                withVerticalLabels
+                withShadow
+                withDots
+                withInnerLines
+                withOuterLines={false}
+                fromZero
+                chartConfig={{
+                  backgroundGradientFrom: '#FFF7ED',
+                  backgroundGradientTo: '#FFFFFF',
+                  backgroundGradientFromOpacity: 1,
+                  backgroundGradientToOpacity: 1,
+                  decimalPlaces: 0,
+                  color: (opacity = 1) =>
+                    `rgba(249, 115, 22, ${opacity})`,
+                  labelColor: (opacity = 1) =>
+                    `rgba(107, 114, 128, ${opacity})`,
+                  fillShadowGradient: '#FB923C',
+                  fillShadowGradientOpacity: 0.18,
+                  strokeWidth: 3,
+                  propsForBackgroundLines: {
+                    stroke: '#FDE68A',
+                    strokeDasharray: '6 6',
+                  },
+                  propsForDots: {
+                    r: '4.5',
+                    strokeWidth: '2',
+                    stroke: '#FFFFFF',
+                  },
+                  propsForLabels: {
+                    fontFamily: 'GowunDodum',
+                    fontSize: 10,
+                  },
+                }}
+                bezier
+                style={styles.lineChartStyle}
+              />
+            </View>
+          </>
         )}
       </View>
     </ScrollView>

@@ -22,11 +22,14 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#555',
+    fontFamily: 'GowunDodum',
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 20,
+    fontFamily: 'JUA',
+    fontWeight: 'normal',
+    color: '#1F2937',
   },
   dataCard: {
     flexDirection: 'row',
@@ -38,11 +41,13 @@ export const styles = StyleSheet.create({
   dataLabel: {
     fontSize: 16,
     color: '#555',
+    fontFamily: 'JUA',
   },
   dataValue: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#333',
+    fontFamily: 'GowunDodum',
+    fontWeight: '600',
   },
   mapPlaceholder: {
     marginBottom: 10,
@@ -61,5 +66,10 @@ export const styles = StyleSheet.create({
   mapBlocker: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
+  },
+  emptyText: {
+    fontSize: 15,
+    color: '#555',
+    fontFamily: 'GowunDodum',
   },
 });

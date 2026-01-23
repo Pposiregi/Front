@@ -98,7 +98,7 @@ const ActivityDetailPage = () => {
   if (!detailData) {
     return (
       <View style={styles.centerContainer}>
-        <Text>데이터를 찾을 수 없습니다.</Text>
+        <Text style={styles.emptyText}>데이터를 찾을 수 없습니다.</Text>
       </View>
     );
   }
@@ -169,7 +169,7 @@ const ActivityDetailPage = () => {
             onStartShouldSetResponder={() => true}
           />
         </View>
-        <Text style={styles.header}>활동 상세 기록</Text>
+        <Text style={styles.header}>활동 상세 정보</Text>
         <View style={styles.dataCard}>
           <Text style={styles.dataLabel}>총 거리 :</Text>
           <Text style={styles.dataValue}>
