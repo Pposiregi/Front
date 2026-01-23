@@ -58,4 +58,8 @@ export const styles = StyleSheet.create({
     height: SCREEN_HEIGHT * 0.4,
     width: SCREEN_WIDTH * 0.8,
   },
+  mapBlocker: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+  },
 });

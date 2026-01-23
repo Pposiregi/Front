@@ -143,10 +143,17 @@ const ActivityDetailPage = () => {
             ref={mapRef}
             provider={PROVIDER_GOOGLE}
             style={styles.map}
+            pointerEvents='none'
+            // liteMode + overlay blocker로 모든 제스처/마우스 입력 차단
+            liteMode
             scrollEnabled={false} // 드래그 이동 비활성화
             zoomEnabled={false} // 핀치 줌 비활성화
+            zoomTapEnabled={false} // 더블탭 줌 비활성화
+            scrollDuringRotateOrZoomEnabled={false}
             rotateEnabled={false} // 회전 비활성화
             pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
+            toolbarEnabled={false}
+            moveOnMarkerPress={false}
             region={mapRegion}
           />
           <MapOverlayPolyline
@@ -154,6 +161,12 @@ const ActivityDetailPage = () => {
             coordinates={detailData.routeLogs}
             height={SCREEN_HEIGHT * 0.4}
             width={SCREEN_WIDTH * 0.8}
+          />
+          <View
+            style={styles.mapBlocker}
+            pointerEvents='auto'
+            // 투명 레이어가 터치를 가로채 지도 상호작용을 완전히 막는다.
+            onStartShouldSetResponder={() => true}
           />
         </View>
         <Text style={styles.header}>활동 상세 기록</Text>
