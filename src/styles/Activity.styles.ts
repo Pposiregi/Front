@@ -1,4 +1,9 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
+
+const { width: deviceWidth } = Dimensions.get('window');
+const contentPadding = Math.max(16, Math.round(deviceWidth * 0.05));
+const chartPadding = Math.max(12, Math.round(deviceWidth * 0.035));
+const chartRadius = Math.max(10, Math.round(deviceWidth * 0.03));
 
 export const styles = StyleSheet.create({
   container: {
@@ -6,7 +11,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   contentContainer: {
-    padding: 20,
+    padding: contentPadding,
     paddingBottom: 40,
   },
   topSection: {
@@ -206,8 +211,8 @@ export const styles = StyleSheet.create({
   chartCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
+    paddingVertical: chartPadding,
+    paddingHorizontal: chartPadding,
     borderWidth: 1,
     borderColor: '#FDE68A',
     overflow: 'hidden',
@@ -247,23 +252,8 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     color: '#9CA3AF',
   },
-  chartRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-  chartUnitColumn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chartUnitText: {
-    fontFamily: 'GowunDodum',
-    fontSize: 11,
-    color: '#9CA3AF',
-  },
   lineChartStyle: {
-    borderRadius: 12,
-    marginTop: 12,
+    borderRadius: chartRadius,
     alignSelf: 'center',
   },
   loadingIndicator: {

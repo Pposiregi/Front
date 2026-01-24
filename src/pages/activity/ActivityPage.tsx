@@ -2,8 +2,8 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  LayoutChangeEvent,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -41,7 +41,13 @@ function ActivityPage() {
     datasets: [{ data: [] }],
   });
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
-  const [chartContainerWidth, setChartContainerWidth] = useState<number>(0);
+
+  const chartPadding = Math.max(12, Math.round(SCREEN_WIDTH * 0.035));
+  const contentPadding = Math.max(16, Math.round(SCREEN_WIDTH * 0.05));
+  const chartWidth =
+    SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
+  const chartHeight = Math.round(SCREEN_HEIGHT * 0.23);
+  const chartTopInset = Math.round(chartPadding * 0.6);
 
   const weeklyStepStats = useMemo(() => {
     if (weeklySteps.length === 0) {
@@ -56,29 +62,35 @@ function ActivityPage() {
     };
   }, [weeklySteps]);
 
-  const handleChartLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const { width } = event.nativeEvent.layout;
-      setChartContainerWidth(width);
-    },
-    [setChartContainerWidth]
+  const chartConfig = useMemo(
+    () => ({
+      backgroundGradientFrom: '#FFFFFF',
+      backgroundGradientTo: '#FFFFFF',
+      decimalPlaces: 0,
+      color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
+      propsForBackgroundLines: {
+        stroke: '#F3F4F6',
+        strokeDasharray: '0',
+      },
+      propsForDots: {
+        r: '4',
+        strokeWidth: '2',
+        stroke: '#FFFFFF',
+      },
+      useShadowColorFromDataset: false,
+    }),
+    []
   );
 
-  const chartMetrics = useMemo(() => {
-    const baseWidth = chartContainerWidth || SCREEN_WIDTH;
-    const innerWidth = Math.round(baseWidth * 0.92);
-    const unitColumnWidth = Math.round(innerWidth * 0.1);
-    const chartWidth = Math.round(innerWidth - unitColumnWidth);
-    const chartHeight = Math.round(SCREEN_HEIGHT * 0.22);
-    const chartRowWidth = unitColumnWidth + chartWidth;
-
-    return {
-      unitColumnWidth,
-      chartWidth,
-      chartHeight,
-      chartRowWidth,
-    };
-  }, [chartContainerWidth]);
+  const formatStepLabel = useCallback((value: string) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return value;
+    }
+    const rounded = Math.round(numeric / 1000) * 1000;
+    return Math.max(0, rounded).toLocaleString();
+  }, []);
 
   const SessionItem = ({ session }: { session: GPS_SESSION }) => {
     const handlePress = () => {
@@ -229,15 +241,6 @@ function ActivityPage() {
     return `${month}월의 활동기록`;
   }, [currentMonth]);
 
-  const handleStartGps = () => {
-    const parent = navigation.getParent();
-    if (parent) {
-      parent.navigate('Main' as never);
-      return;
-    }
-    Alert.alert('GPS 산책 시작', '메인 화면에서 산책을 시작해주세요.');
-  };
-
   const handleRefreshToday = () => {
     fetchDailySummary();
     fetchWeeklySteps();
@@ -289,13 +292,6 @@ function ActivityPage() {
           <Text style={styles.subHeaderText}>이번 달 첫 기록을 만들어보자</Text>
         )}
         <View style={styles.ctaRow}>
-          <TouchableOpacity
-            onPress={handleStartGps}
-            style={styles.ctaPrimary}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.ctaPrimaryText}>GPS 산책 시작</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleRefreshToday}
             style={styles.ctaGhost}
@@ -372,7 +368,7 @@ function ActivityPage() {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>최근 7일 걸음수</Text>
       </View>
-      <View style={styles.chartCard} onLayout={handleChartLayout}>
+      <View style={styles.chartCard}>
         {chartData.labels.length === 0 ? (
           <View style={styles.chartEmpty}>
             <Text style={styles.chartEmptyText}>
@@ -398,61 +394,25 @@ function ActivityPage() {
                 </Text>
               </View>
             </View>
-            <View
-              style={[styles.chartRow, { width: chartMetrics.chartRowWidth }]}
-            >
-              <View
-                style={[
-                  styles.chartUnitColumn,
-                  { width: chartMetrics.unitColumnWidth },
-                ]}
-              >
-                <Text style={styles.chartUnitText}>걸음</Text>
-              </View>
-              <LineChart
-                data={chartData}
-                width={chartMetrics.chartWidth}
-                height={chartMetrics.chartHeight}
-                yAxisLabel=''
-                yAxisSuffix=''
-                withHorizontalLabels={false}
-                withVerticalLabels
-                withShadow
-                withDots
-                withInnerLines
-                withOuterLines={false}
-                fromZero
-                chartConfig={{
-                  backgroundGradientFrom: '#FFF7ED',
-                  backgroundGradientTo: '#FFFFFF',
-                  backgroundGradientFromOpacity: 1,
-                  backgroundGradientToOpacity: 1,
-                  decimalPlaces: 0,
-                  color: (opacity = 1) =>
-                    `rgba(249, 115, 22, ${opacity})`,
-                  labelColor: (opacity = 1) =>
-                    `rgba(107, 114, 128, ${opacity})`,
-                  fillShadowGradient: '#FB923C',
-                  fillShadowGradientOpacity: 0.18,
-                  strokeWidth: 3,
-                  propsForBackgroundLines: {
-                    stroke: '#FDE68A',
-                    strokeDasharray: '6 6',
-                  },
-                  propsForDots: {
-                    r: '4.5',
-                    strokeWidth: '2',
-                    stroke: '#FFFFFF',
-                  },
-                  propsForLabels: {
-                    fontFamily: 'GowunDodum',
-                    fontSize: 10,
-                  },
-                }}
-                bezier
-                style={styles.lineChartStyle}
-              />
-            </View>
+            <LineChart
+              data={chartData}
+              width={chartWidth}
+              height={chartHeight}
+              yAxisLabel=''
+              yAxisSuffix=''
+              withVerticalLabels
+              withInnerLines
+              withOuterLines={false}
+              fromZero
+              segments={2}
+              formatYLabel={formatStepLabel}
+              chartConfig={chartConfig}
+              bezier
+              style={StyleSheet.flatten([
+                styles.lineChartStyle,
+                { marginTop: chartTopInset },
+              ])}
+            />
           </>
         )}
       </View>

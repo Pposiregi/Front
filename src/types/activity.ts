@@ -28,5 +28,6 @@ export type ActivityDetailNavigationProp = NavigationProp<
 
 export type ChartData = {
   labels: string[];
-  datasets: { data: number[] }[];
+  // strokeWidth: 차트 내의 선 두께
+  datasets: { data: number[]; strokeWidth?: number }[];
 };
