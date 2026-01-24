@@ -16,11 +16,11 @@ function SessionItem({ session }: SessionItemProps) {
 
   const formattedDate = useMemo(
     () =>
-      new Date(session.start_time)
+      new Date(session.startTime)
         .toISOString()
         .slice(2, 10)
         .replace(/-/g, '/'),
-    [session.start_time]
+    [session.startTime]
   );
 
   const timeRange = useMemo(() => {
@@ -30,27 +30,27 @@ function SessionItem({ session }: SessionItemProps) {
       hour12: false,
     };
 
-    return `${new Date(session.start_time).toLocaleTimeString(
+    return `${new Date(session.startTime).toLocaleTimeString(
       [],
       options
-    )} - ${new Date(session.end_time).toLocaleTimeString([], options)}`;
-  }, [session.start_time, session.end_time]);
+    )} - ${new Date(session.endTime).toLocaleTimeString([], options)}`;
+  }, [session.startTime, session.endTime]);
 
   const handlePress = () => {
     navigation.navigate('ActivityDetailPage', {
-      sessionId: session.session_id,
+      sessionId: String(session.sessionId),
     });
   };
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.itemContainer}>
       <Text style={styles.indexText}>🚩</Text>
-      <View style={{ flexDirection: 'column' }}>
+      <View style={styles.sessionTextColumn}>
         <Text style={styles.dateText}>{formattedDate}</Text>
         <Text style={styles.timeText}>{timeRange}</Text>
       </View>
       <Text style={styles.distanceText}>
-        {session.total_distance.toFixed(2)} km
+        {session.totalDistance.toFixed(2)} km
       </Text>
       <Text style={styles.detailLink}> &gt;</Text>
     </TouchableOpacity>

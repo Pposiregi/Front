@@ -47,16 +47,8 @@ const ActivityDetailPage = () => {
   const mapRef = useRef<MapView | null>(null);
   const centerRegion = useMemo(() => {
     if (!detailData || detailData.routeLogs.length === 0) return null;
-
-    console.log(
-      '>>> GET CENTER REGION',
-      sessionId,
-      detailData,
-      centerRegion?.latitude
-    );
-
     return getCenterRegion(detailData.routeLogs);
-  });
+  }, [detailData]);
 
   useEffect(() => {
     const loadData = async () => {

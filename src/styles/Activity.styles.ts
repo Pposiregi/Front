@@ -184,6 +184,9 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
+  sessionTextColumn: {
+    flexDirection: 'column',
+  },
   dateText: {
     fontFamily: 'JUA',
     fontSize: 14,

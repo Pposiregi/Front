@@ -18,10 +18,13 @@ import {
 import SessionItem from './SessionItem';
 import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
-import { getDailyActivity, getWeeklySteps } from '@api/activityApi';
+import {
+  getDailyActivity,
+  getMonthlySessions,
+  getWeeklySteps,
+} from '@api/activityApi';
 import { getUser } from '@api/mainApi';
 import type { getUserResponse } from 'types/main';
-import { mock_data_by_month } from './mock';
 
 function ActivityPage() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -122,20 +125,18 @@ function ActivityPage() {
     return Math.max(0, rounded).toLocaleString();
   }, []);
 
-  // 월별 활동 기록을 가져오는 함수 (추후 API 호출 로직으로 대체 필요)
+  // 월별 활동 기록을 가져오는 함수
   const fetchMonthlyActivities = useCallback(async (date: Date) => {
     setLoading(true);
     try {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
-      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-      const data = mock_data_by_month[monthKey] || [];
+      const data = await getMonthlySessions(year, month);
 
-      // 데이터 로딩 구현
-      // start_time을 기준으로 최신순 정렬
+      // startTime을 기준으로 최신순 정렬
       const sortedData = [...data].sort(
         (a, b) =>
-          new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
       );
       setMonthlyActivities(sortedData);
     } catch (err) {
@@ -420,7 +421,7 @@ function ActivityPage() {
         </View>
       ) : (
         monthlyActivities.map((session) => (
-          <SessionItem key={session.session_id} session={session} />
+          <SessionItem key={session.sessionId} session={session} />
         ))
       )}
     </ScrollView>
