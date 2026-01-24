@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import {
-  ActivityDetailNavigationProp,
   ChartData,
   DailyActivity,
   GPS_SESSION,
   WeeklyStepItem,
 } from '../../types/activity';
-import { styles } from '@styles/Activity.styles';
+import SessionItem from './SessionItem';
+import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import { getDailyActivity, getWeeklySteps } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
@@ -24,7 +24,6 @@ import type { getUserResponse } from 'types/main';
 import { mock_data_by_month } from './mock';
 
 function ActivityPage() {
-  const navigation = useNavigation<ActivityDetailNavigationProp>();
   const [loading, setLoading] = useState<boolean>(true);
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [currentMonth, setCurrentMonth] = useState(
@@ -34,53 +33,84 @@ function ActivityPage() {
   const [dailyActivity, setDailyActivity] = useState<DailyActivity | null>(
     null
   );
-  const [dailyLoading, setDailyLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<getUserResponse | null>(null);
   const [chartData, setChartData] = useState<ChartData>({
     labels: [],
     datasets: [{ data: [] }],
   });
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const chartPadding = Math.max(12, Math.round(SCREEN_WIDTH * 0.035));
-  const contentPadding = Math.max(16, Math.round(SCREEN_WIDTH * 0.05));
-  const chartWidth =
-    SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
-  const chartHeight = Math.round(SCREEN_HEIGHT * 0.23);
+  const chartPadding = activityTheme.spacing.lg;
+  const contentPadding = activityTheme.spacing.xl;
+  const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
+  const chartHeight = Math.round(SCREEN_HEIGHT * 0.2);
   const chartTopInset = Math.round(chartPadding * 0.6);
 
+  const normalizedWeeklySteps = useMemo(
+    () =>
+      weeklySteps
+        .map((item) => ({
+          date: item.date ?? '',
+          step: Number(item.step) || 0,
+        }))
+        .filter((item) => item.date),
+    [weeklySteps]
+  );
+
+  const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
+
   const weeklyStepStats = useMemo(() => {
-    if (weeklySteps.length === 0) {
+    if (normalizedWeeklySteps.length === 0) {
       return { average: 0, max: 0 };
     }
 
-    const steps = weeklySteps.map((item) => item.step);
+    const steps = normalizedWeeklySteps.map((item) => item.step);
     const total = steps.reduce((acc, value) => acc + value, 0);
     return {
       average: Math.round(total / steps.length),
       max: Math.max(...steps),
     };
-  }, [weeklySteps]);
+  }, [normalizedWeeklySteps]);
+
+  const toRgba = useCallback((hex: string, opacity = 1) => {
+    const normalized = hex.replace('#', '');
+    const value =
+      normalized.length === 3
+        ? normalized
+            .split('')
+            .map((char) => `${char}${char}`)
+            .join('')
+        : normalized;
+    const red = Number.parseInt(value.slice(0, 2), 16);
+    const green = Number.parseInt(value.slice(2, 4), 16);
+    const blue = Number.parseInt(value.slice(4, 6), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+  }, []);
 
   const chartConfig = useMemo(
     () => ({
-      backgroundGradientFrom: '#FFFFFF',
-      backgroundGradientTo: '#FFFFFF',
+      backgroundGradientFrom: activityTheme.colors.surface,
+      backgroundGradientTo: activityTheme.colors.surface,
+      backgroundGradientFromOpacity: 1,
+      backgroundGradientToOpacity: 1,
       decimalPlaces: 0,
-      color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
+      color: (opacity = 1) => toRgba(activityTheme.colors.accent, opacity),
+      labelColor: (opacity = 1) =>
+        toRgba(activityTheme.colors.textSecondary, opacity),
       propsForBackgroundLines: {
-        stroke: '#F3F4F6',
+        stroke: activityTheme.colors.divider,
         strokeDasharray: '0',
       },
       propsForDots: {
         r: '4',
         strokeWidth: '2',
-        stroke: '#FFFFFF',
+        stroke: activityTheme.colors.surface,
       },
       useShadowColorFromDataset: false,
     }),
-    []
+    [toRgba]
   );
 
   const formatStepLabel = useCallback((value: string) => {
@@ -92,47 +122,8 @@ function ActivityPage() {
     return Math.max(0, rounded).toLocaleString();
   }, []);
 
-  const SessionItem = ({ session }: { session: GPS_SESSION }) => {
-    const handlePress = () => {
-      // ActivityDetailPage로 이동 시 세션 ID 전달
-      navigation.navigate('ActivityDetailPage', {
-        sessionId: session.session_id,
-      });
-    };
-
-    // 날짜 포매팅
-    const formattedDate = new Date(session.start_time)
-      .toISOString()
-      .slice(2, 10)
-      .replace(/-/g, '/');
-
-    // 시간 포매팅 옵션
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    };
-
-    return (
-      <TouchableOpacity onPress={handlePress} style={styles.itemContainer}>
-        <Text style={styles.indexText}>🚩</Text>
-        <View style={{ flexDirection: 'column' }}>
-          <Text style={styles.dateText}>{formattedDate}</Text>
-          <Text style={styles.timeText}>
-            {new Date(session.start_time).toLocaleTimeString([], options)} -
-            {new Date(session.end_time).toLocaleTimeString([], options)}
-          </Text>
-        </View>
-        <Text style={styles.distanceText}>
-          *{session.total_distance.toFixed(2)} km*
-        </Text>
-        <Text style={styles.detailLink}> &gt;</Text>
-      </TouchableOpacity>
-    );
-  };
-
   // 월별 활동 기록을 가져오는 함수 (추후 API 호출 로직으로 대체 필요)
-  const fetchMonthlyActivities = async (date: Date) => {
+  const fetchMonthlyActivities = useCallback(async (date: Date) => {
     setLoading(true);
     try {
       const year = date.getFullYear();
@@ -153,7 +144,7 @@ function ActivityPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // 월 이동 핸들러 (MealPage의 로직 응용)
   const handleChangeMonth = (offset: number) => {
@@ -161,12 +152,12 @@ function ActivityPage() {
       const next = new Date(prev.getFullYear(), prev.getMonth() + offset, 1);
 
       // 현재 월이거나 미래 월일 경우 (오른쪽 화살표 사용 X)
-      const today = new Date();
+      const todayDate = new Date();
       if (
         offset === 1 &&
-        (next.getFullYear() > today.getFullYear() ||
-          (next.getFullYear() === today.getFullYear() &&
-            next.getMonth() > today.getMonth()))
+        (next.getFullYear() > todayDate.getFullYear() ||
+          (next.getFullYear() === todayDate.getFullYear() &&
+            next.getMonth() > todayDate.getMonth()))
       ) {
         return prev;
       }
@@ -175,15 +166,12 @@ function ActivityPage() {
   };
 
   const fetchDailySummary = useCallback(async () => {
-    setDailyLoading(true);
     try {
       const response = await getDailyActivity(today);
       setDailyActivity(response);
     } catch (err) {
       console.warn('오늘 활동 요약 fetch 실패', err);
       setDailyActivity(null);
-    } finally {
-      setDailyLoading(false);
     }
   }, [today]);
 
@@ -209,20 +197,26 @@ function ActivityPage() {
 
   // 주간 걸음을 계산하고 그래프 데이터를 생성하는 함수
   const calculateWeeklyChart = useCallback(() => {
-    if (weeklySteps.length === 0) return;
-    const labels = weeklySteps.map((item) =>
+    if (normalizedWeeklySteps.length === 0) {
+      setChartData({
+        labels: [],
+        datasets: [{ data: [] }],
+      });
+      return;
+    }
+    const labels = normalizedWeeklySteps.map((item) =>
       item.date.substring(5).replace('-', '/')
     );
-    const dataValues = weeklySteps.map((item) => item.step);
+    const dataValues = normalizedWeeklySteps.map((item) => item.step);
     setChartData({
       labels,
       datasets: [{ data: dataValues, strokeWidth: 3 }],
     });
-  }, [weeklySteps]);
+  }, [normalizedWeeklySteps]);
 
   useEffect(() => {
     fetchMonthlyActivities(currentMonth);
-  }, [currentMonth]);
+  }, [currentMonth, fetchMonthlyActivities]);
 
   useEffect(() => {
     fetchWeeklySteps();
@@ -231,20 +225,31 @@ function ActivityPage() {
   }, [fetchDailySummary, fetchUserProfile, fetchWeeklySteps]);
 
   useEffect(() => {
-    if (weeklySteps.length > 0) {
-      calculateWeeklyChart();
-    }
-  }, [calculateWeeklyChart, weeklySteps]);
+    calculateWeeklyChart();
+  }, [calculateWeeklyChart]);
 
   const headerText = useMemo(() => {
     const month = currentMonth.getMonth() + 1;
     return `${month}월의 활동기록`;
   }, [currentMonth]);
 
-  const handleRefreshToday = () => {
-    fetchDailySummary();
-    fetchWeeklySteps();
-  };
+  const handlePullToRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchDailySummary(),
+        fetchWeeklySteps(),
+        fetchMonthlyActivities(currentMonth),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [
+    currentMonth,
+    fetchDailySummary,
+    fetchMonthlyActivities,
+    fetchWeeklySteps,
+  ]);
 
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
@@ -252,11 +257,17 @@ function ActivityPage() {
   const targetSteps = userProfile?.targetStepCount ?? 0;
 
   const badgeInfo = useMemo(() => {
-    if (targetSteps > 0 && stepsValue >= targetSteps) {
-      return { label: '목표 달성', style: styles.badgeSuccess };
+    if (targetSteps > 0) {
+      if (stepsValue >= targetSteps) {
+        return { label: '목표 달성', style: styles.badgeSuccess };
+      }
+      if (stepsValue <= 0) {
+        return { label: '걸음 목표 미달', style: styles.badgeMuted };
+      }
+      return { label: '진행중', style: styles.badgeProgress };
     }
     if (stepsValue <= 0) {
-      return { label: '미달성', style: styles.badgeMuted };
+      return { label: '오늘 걸음 없음', style: styles.badgeMuted };
     }
     return { label: '진행중', style: styles.badgeProgress };
   }, [stepsValue, targetSteps]);
@@ -267,8 +278,15 @@ function ActivityPage() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handlePullToRefresh}
+          tintColor={activityTheme.colors.accent}
+        />
+      }
     >
-      <View style={[styles.topSection, { minHeight: SCREEN_HEIGHT * 0.3 }]}>
+      <View style={styles.topSection}>
         <View style={styles.monthHeaderContainer}>
           <TouchableOpacity
             onPress={() => handleChangeMonth(-1)}
@@ -291,18 +309,6 @@ function ActivityPage() {
         {showEmptyMonthly && (
           <Text style={styles.subHeaderText}>이번 달 첫 기록을 만들어보자</Text>
         )}
-        <View style={styles.ctaRow}>
-          <TouchableOpacity
-            onPress={handleRefreshToday}
-            style={styles.ctaGhost}
-            activeOpacity={0.8}
-            disabled={dailyLoading}
-          >
-            <Text style={styles.ctaGhostText}>
-              {dailyLoading ? '불러오는 중...' : '오늘 걸음수 불러오기'}
-            </Text>
-          </TouchableOpacity>
-        </View>
         <View style={styles.summaryCard}>
           <View style={styles.summaryHeader}>
             <View>
@@ -342,37 +348,13 @@ function ActivityPage() {
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>이번 달 기록</Text>
-      </View>
-      {loading ? (
-        <ActivityIndicator
-          size='large'
-          color='#A5B4FC'
-          style={styles.loadingIndicator}
-        />
-      ) : showEmptyMonthly ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyCardTitle}>
-            이번 달 첫 기록을 만들어보자
-          </Text>
-          <Text style={styles.emptyCardText}>
-            메인 화면에서 산책을 시작하면 자동으로 기록돼요.
-          </Text>
-        </View>
-      ) : (
-        monthlyActivities.map((session) => (
-          <SessionItem key={session.session_id} session={session} />
-        ))
-      )}
-
-      <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>최근 7일 걸음수</Text>
       </View>
       <View style={styles.chartCard}>
-        {chartData.labels.length === 0 ? (
+        {chartData.labels.length === 0 || !hasWeeklySteps ? (
           <View style={styles.chartEmpty}>
             <Text style={styles.chartEmptyText}>
-              이번 주 기록이 모이면 그래프가 채워져요.
+              이번 주 걸음 기록이 없어요.
             </Text>
           </View>
         ) : (
@@ -403,6 +385,7 @@ function ActivityPage() {
               withVerticalLabels
               withInnerLines
               withOuterLines={false}
+              withShadow={false}
               fromZero
               segments={2}
               formatYLabel={formatStepLabel}
@@ -416,6 +399,30 @@ function ActivityPage() {
           </>
         )}
       </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>이번 달 기록</Text>
+      </View>
+      {loading ? (
+        <ActivityIndicator
+          size='large'
+          color='#A5B4FC'
+          style={styles.loadingIndicator}
+        />
+      ) : showEmptyMonthly ? (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyCardTitle}>
+            이번 달 첫 기록을 만들어보자
+          </Text>
+          <Text style={styles.emptyCardText}>
+            메인 화면에서 산책을 시작하면 자동으로 기록돼요.
+          </Text>
+        </View>
+      ) : (
+        monthlyActivities.map((session) => (
+          <SessionItem key={session.session_id} session={session} />
+        ))
+      )}
     </ScrollView>
   );
 }
