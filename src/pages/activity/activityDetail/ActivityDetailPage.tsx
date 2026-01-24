@@ -6,9 +6,10 @@ import MapOverlayPolyline from '@components/MapOverlayPolyline';
 import { ActivityDetailRouteProp, SessionDetail } from './types';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
+import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
 
-// 목업 데이터
+// 목업 데이터 (API 실패 시 fallback)
 const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -22,7 +23,7 @@ const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
       } else {
         reject(new Error(`데이터를 찾지 못했습니다.`));
       }
-    }, 1000);
+    }, 300);
   });
 };
 
@@ -55,12 +56,24 @@ const ActivityDetailPage = () => {
       if (!sessionId) return;
       setLoading(true);
       try {
-        //기존 목업 데이터
-        const data = await fetchSessionDetail(sessionId);
-        //const data = await getSessionDetail(sessionId);
+        const data = await getSessionDetail(sessionId);
         setDetailData(data);
       } catch (error) {
-        console.error('상세 데이터 로드 실패:', error);
+        console.error('>>> [ActivityDetail] 상세 데이터 로드 실패:', error);
+        if (__DEV__) {
+          console.warn(
+            '>>> [ActivityDetail] API 실패로 목업 데이터를 사용합니다.'
+          );
+          try {
+            const fallbackData = await fetchSessionDetail(sessionId);
+            setDetailData(fallbackData);
+          } catch (fallbackError) {
+            console.error(
+              '>>> [ActivityDetail] 목업 데이터 로드 실패:',
+              fallbackError
+            );
+          }
+        }
       } finally {
         setLoading(false);
       }

@@ -140,7 +140,7 @@ function ActivityPage() {
       );
       setMonthlyActivities(sortedData);
     } catch (err) {
-      console.log('월별 활동 조회 실패', err);
+      console.log('>>> 월별 활동 조회 실패', err);
       setMonthlyActivities([]);
     } finally {
       setLoading(false);
