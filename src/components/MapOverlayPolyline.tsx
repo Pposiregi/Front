@@ -17,23 +17,49 @@ export const MapOverlayPolyline = ({
   width,
   height,
 }: Props) => {
-  const points = useMemo(() => {
-    if (coordinates.length < 2) {
-      return '';
+  const { points, fallbackPoints } = useMemo(() => {
+    if (coordinates.length === 0) {
+      return { points: '', fallbackPoints: '' };
     }
     const latDelta = region.latitudeDelta || 0.0001;
     const lonDelta = region.longitudeDelta || 0.0001;
     const minLat = region.latitude - latDelta / 2;
     const minLon = region.longitude - lonDelta / 2;
-    return coordinates
-      .map(({ latitude, longitude }) => {
+    const mapped = coordinates.map(({ latitude, longitude }) => {
         const xRatio = clamp((longitude - minLon) / lonDelta, 0, 1);
         const yRatio = clamp((latitude - minLat) / latDelta, 0, 1);
         const x = xRatio * width;
         const y = height - yRatio * height;
-        return `${x.toFixed(2)},${y.toFixed(2)}`;
-      })
+        return { x, y };
+      });
+
+    const xs = mapped.map((p) => p.x);
+    const ys = mapped.map((p) => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const COLLAPSE_PX_THRESHOLD = 1;
+    const FALLBACK_LINE_PX = 8;
+    const isCollapsed =
+      maxX - minX < COLLAPSE_PX_THRESHOLD &&
+      maxY - minY < COLLAPSE_PX_THRESHOLD;
+
+    if (isCollapsed) {
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      const half = FALLBACK_LINE_PX / 2;
+      const fallbackPoints = `${(cx - half).toFixed(2)},${(
+        cy - half
+      ).toFixed(2)} ${(cx + half).toFixed(2)},${(cy + half).toFixed(2)}`;
+      return { points: '', fallbackPoints };
+    }
+
+    const points = mapped
+      .map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`)
       .join(' ');
+    return { points, fallbackPoints: '' };
   }, [
     coordinates,
     height,
@@ -43,7 +69,8 @@ export const MapOverlayPolyline = ({
     region.longitudeDelta,
     width,
   ]);
-  if (!points) {
+  const polylinePoints = points || fallbackPoints;
+  if (!polylinePoints) {
     return null;
   }
   return (
@@ -54,7 +81,7 @@ export const MapOverlayPolyline = ({
       height={height}
     >
       <SvgPolyline
-        points={points}
+        points={polylinePoints}
         stroke='#7450FF'
         strokeWidth={4}
         strokeLinecap='round'
