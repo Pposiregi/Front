@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   tabBar: {
-    height: 80,
+    height: 60,
     paddingTop: 10,
     paddingBottom: 16,
     backgroundColor: '#fff',
