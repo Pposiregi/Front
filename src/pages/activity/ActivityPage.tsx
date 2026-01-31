@@ -32,12 +32,11 @@ function ActivityPage() {
     const handlePress = () => {
       // ActivityDetailPage로 이동 시 세션 ID 전달
       navigation.navigate('ActivityDetailPage', {
-        sessionId: session.session_id,
+        sessionId: session.sessionId,
       });
     };
-
     // 날짜 포매팅
-    const formattedDate = new Date(session.start_time)
+    const formattedDate = new Date(session.startTime)
       .toISOString()
       .slice(2, 10)
       .replace(/-/g, '/');
@@ -55,19 +54,19 @@ function ActivityPage() {
         <View style={{ flexDirection: 'column' }}>
           <Text style={styles.dateText}>{formattedDate}</Text>
           <Text style={styles.timeText}>
-            {new Date(session.start_time).toLocaleTimeString([], options)} -
-            {new Date(session.end_time).toLocaleTimeString([], options)}
+            {new Date(session.startTime).toLocaleTimeString([], options)} -
+            {new Date(session.endTime).toLocaleTimeString([], options)}
           </Text>
         </View>
         <Text style={styles.distanceText}>
-          *{session.total_distance.toFixed(2)} km*
+          *{session.totalDistance.toFixed(2)} km*
         </Text>
         <Text style={styles.detailLink}> &gt;</Text>
       </TouchableOpacity>
     );
   };
 
-  // 월별 활동 기록을 가져오는 함수 (추후 API 호출 로직으로 대체 필요)
+  // 월별 활동 기록을 가져오는 함수
   const fetchMonthlyActivities = async (date: Date) => {
     setLoading(true);
     try {
@@ -79,12 +78,12 @@ function ActivityPage() {
 
       // api 연결
       const data = await getMonthlySessions(year, month);
-
+      console.log('raw session:', data[0]);
       // 데이터 로딩 구현
       // start_time을 기준으로 최신순 정렬
       const sortedData = [...data].sort(
         (a, b) =>
-          new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
       );
       setMonthlyActivities(sortedData);
     } catch (err) {
@@ -186,7 +185,7 @@ function ActivityPage() {
         </Text>
       ) : (
         monthlyActivities.map((session) => (
-          <SessionItem key={session.session_id} session={session} />
+          <SessionItem key={session.sessionId} session={session} />
         ))
       )}
 

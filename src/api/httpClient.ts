@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from '@env';
+import { API_BASE_URL, YOUR_API_KEY } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { DEV_USER_ID } from '@env';
 
@@ -7,11 +7,16 @@ if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
 }
 
-console.log('API_BASE_URL', API_BASE_URL);
+/**
+ * local 은 your_api_key
+ * 원격은 API_BASE_URL
+ */
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: YOUR_API_KEY,
   withCredentials: true,
 });
+
+console.log(YOUR_API_KEY);
 
 const toLogString = (payload: unknown) => {
   try {
@@ -91,19 +96,18 @@ apiClient.interceptors.response.use(
     const status = response?.status;
     const data = response?.data;
     const originalRequest = config;
-    // accessToekn 시간 만료로 인해 401(인증 오류) 발생 시 refreshToken을 기준으로 재 발급
+    /** 1. accessToekn 시간 만료로 인해 401(인증 오류) 발생 시 refreshToken을 기준으로 재 발급
+     * 2. 만약 api 호출 경로가 /auth일 경우 제외 */
+    const isAuthRequest = originalRequest?.url?.startsWith('/auth');
     if (
       response?.status === 401 &&
       !originalRequest?._retry &&
-      !originalRequest?.url?.includes('/auth/refresh') &&
-      !originalRequest?.url?.includes('/auth/oauth')
+      !isAuthRequest
     ) {
       originalRequest._retry = true;
-
       try {
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
-
         const refreshRes = await apiClient.post(
           '/auth/refresh',
           {},
@@ -113,11 +117,8 @@ apiClient.interceptors.response.use(
             },
           }
         );
-
         const newAccessToken = refreshRes.data.serverAccessToken;
-
         await EncryptedStorage.setItem('serverAccessToken', newAccessToken);
-
         // 원본 요청에 새 토큰 주입
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 

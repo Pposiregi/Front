@@ -3,10 +3,10 @@ import { NavigationProp } from '@react-navigation/native';
 
 // 타입 지정
 export type GPS_SESSION = {
-  session_id: string;
-  start_time: string;
-  end_time: string;
-  total_distance: number;
+  sessionId: string;
+  startTime: string;
+  endTime: string;
+  totalDistance: number;
 };
 
 export type WeeklyStepItem = {
