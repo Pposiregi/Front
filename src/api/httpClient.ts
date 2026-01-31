@@ -7,6 +7,7 @@ if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
 }
 
+console.log('API_BASE_URL', API_BASE_URL);
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -94,7 +95,8 @@ apiClient.interceptors.response.use(
     if (
       response?.status === 401 &&
       !originalRequest?._retry &&
-      !originalRequest?.url?.includes('/auth/refresh')
+      !originalRequest?.url?.includes('/auth/refresh') &&
+      !originalRequest?.url?.includes('/auth/oauth')
     ) {
       originalRequest._retry = true;
 
