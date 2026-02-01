@@ -82,8 +82,16 @@ export const MainPage = () => {
     []
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
+  const [trans, setTrans] = useState(false); // 미션 완료 트리거
   const handleOpenMission = () => setShowMissionModal(true);
-  const handleCloseMission = () => setShowMissionModal(false);
+  const handleCloseMission = () => {
+    // 모달 닫힐 때 강아지 웃음 트리거
+    if (trans) {
+      changePetState(PetStates.HAPPY, { duration: 1500 });
+      setTrans(false); // 초기화
+    }
+    setShowMissionModal(false);
+  };
 
   // 걸음수 1000보가 되면 서버로 전송 resetSync는 로컬 저장된 데이터 삭제용
   const { syncSteps, resetSync } = useStepSync();
@@ -286,22 +294,14 @@ export const MainPage = () => {
   }, [addSteps]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
-  console.log('lastSyncedSteps : ', lastSyncedSteps);
   // Health Steps 서버 전송 + 미션 최신화
   const refreshMissions = useCallback(async () => {
     try {
       if (healthSteps != null) {
         const diff = healthSteps - lastSyncedSteps;
-        console.log(
-          `전송 전 diff : ${diff}, healthStpes : ${healthSteps}, lastSyncedSteps : ${lastSyncedSteps} `
-        );
         if (diff >= 1000) {
           await syncSteps(healthSteps);
           setLastSyncedSteps(healthSteps);
-
-          console.log(
-            `전송 후 diff : ${diff}, healthStpes : ${healthSteps}, lastSyncedSteps : ${lastSyncedSteps} `
-          );
         }
       }
       const activeMission = await getMissionsActive();
@@ -467,7 +467,7 @@ export const MainPage = () => {
             missions={missionApiItems}
             onComplete={() => {
               refreshMissions(); // 기존 미션 새로고침
-              changePetState(PetStates.HAPPY, { duration: 1500 }); // 1.5초 웃음 유지 후 자동 IDLE
+              setTrans(true);
             }}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
