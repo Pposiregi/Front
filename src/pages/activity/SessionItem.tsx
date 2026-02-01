@@ -17,8 +17,10 @@ type SessionItemProps = {
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 /**
- * 월간 GPS 세션 리스트 아이템
- * - 클릭 시 상세 화면으로 이동한다.
+ * Render a touchable list item for a GPS session that navigates to the session's detail page when pressed.
+ *
+ * @param session - GPS session data containing at least `startTime`, `endTime`, `totalDistance`, and `sessionId`
+ * @returns A React element representing a list row that displays the formatted date, time range, duration (`HH:MM:SS`), and total distance; tapping the row navigates to the activity detail page for the session
  */
 function SessionItem({ session }: SessionItemProps) {
   const navigation = useNavigation<ActivityDetailNavigationProp>();

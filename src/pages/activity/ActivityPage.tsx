@@ -110,8 +110,9 @@ const ProgressRing = ({
 };
 
 /**
- * 활동 기록 메인 화면.
- * - 오늘 요약, 최근 7일, 이달 기록(일별/활동별) 제공
+ * Renders the activity dashboard with today's summary, a recent 7-day steps chart, and the current month's records (daily summaries and GPS sessions).
+ *
+ * @returns The rendered ActivityPage component as a `JSX.Element`.
  */
 function ActivityPage() {
   const [loading, setLoading] = useState<boolean>(true);

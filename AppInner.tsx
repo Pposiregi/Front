@@ -146,8 +146,13 @@ const runWithRetry = async <T,>(
 };
 
 /**
- * 앱 진입 루트 컴포넌트.
- * - 로그인/회원가입 상태에 따라 스택을 분기한다.
+ * Root application component that renders navigation and manages startup side effects.
+ *
+ * Performs initial authentication refresh, ensures device UUID and development seeds,
+ * requests and registers FCM push tokens (with retry), listens for FCM token refreshes,
+ * and conditionally renders authentication, onboarding (Intro), or main tab navigation.
+ *
+ * @returns The top-level React element for the app, including navigation and any loading UI.
  */
 function AppInner() {
   const dispatch = useAppDispatch();
