@@ -46,7 +46,6 @@ export const StepProgress = ({
       disabled={disabled}
       style={[styles.card, isReadyToComplete && styles.readyCard]}
     >
-      {/* 🔹 타이틀 행 */}
       <View style={styles.titleRow}>
         <Text style={styles.title}>{title}</Text>
 

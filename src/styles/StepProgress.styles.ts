@@ -12,12 +12,14 @@ const CARD_HEIGHT = Math.max(
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0',
     padding: 12,
     borderRadius: 12,
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginRight: 10,
+    borderColor: '#E0E0E0',
+    borderWidth: 1,
   },
   titleRow: {
     flexDirection: 'row',

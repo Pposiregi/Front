@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import type { MissionActiveItem } from 'types/mission';
-import styles from '@styles/MainPage.styles';
+import styles from '@styles/missionModal.styles';
+import MissionCard from './missionCard';
 
 interface MissionModalProps {
   visible: boolean;
@@ -30,9 +38,7 @@ const MissionModal: React.FC<MissionModalProps> = ({
     >
       <View style={styles.missionView}>
         <View style={styles.modalBox}>
-          <Text style={styles.missionTitle}>미션</Text>
-
-          {/* 탭 버튼 */}
+          <Text style={styles.missionTitle}>진행중인 미션</Text>
           <View style={styles.tabRow}>
             {['DAILY', 'WEEKLY', 'MONTHLY'].map((tab) => (
               <TouchableOpacity
@@ -42,14 +48,14 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 }
                 style={[
                   styles.tabButton,
-                  activeTab === tab && {
-                    borderBottomWidth: 2,
-                    borderBottomColor: '#2196F3',
-                  },
+                  activeTab === tab && styles.tabButtonActive,
                 ]}
               >
                 <Text
-                  style={{ fontWeight: activeTab === tab ? 'bold' : 'normal' }}
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.tabTextActive, // 텍스트 스타일도 동일하게 조건부
+                  ]}
                 >
                   {tab === 'DAILY'
                     ? '일일'
@@ -65,36 +71,16 @@ const MissionModal: React.FC<MissionModalProps> = ({
             {filteredMissions.length === 0 ? (
               <Text style={styles.emptyMissionText}>미션이 없습니다.</Text>
             ) : (
-              filteredMissions.map((mission) => {
-                const progress =
-                  mission.goalValue > 0
-                    ? mission.progressValue / mission.goalValue
-                    : 0;
-
-                return (
-                  <View
-                    key={mission.missionCheckId}
-                    style={styles.missionUICard}
-                  >
-                    {/* 한 줄로 타이틀과 진행값 배치 */}
-                    <View style={styles.missionUICardHeader}>
-                      <Text style={styles.missionUITextTitle}>
-                        {mission.title}
-                      </Text>
-                      <Text style={styles.missionUIText}>
-                        {mission.progressValue} / {mission.goalValue}{' '}
-                        {mission.category === 'STEP'
-                          ? '보'
-                          : mission.category === 'MEAL'
-                          ? '회'
-                          : '장'}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })
+              filteredMissions.map((mission) => (
+                <MissionCard
+                  key={mission.missionCheckId}
+                  mission={mission}
+                  onComplete={(id) => console.log(`미션 완료: ${id}`)}
+                />
+              ))
             )}
           </ScrollView>
+
           <TouchableOpacity
             onPress={onClose}
             style={styles.missionUIExitButton}
