@@ -169,6 +169,17 @@ function ActivityPage() {
   const fetchDailySummary = useCallback(async () => {
     try {
       const response = await getDailyActivity(today);
+      console.log(
+        '>>> [Activity] daily summary',
+        JSON.stringify(
+          {
+            date: today,
+            response,
+          },
+          null,
+          0
+        )
+      );
       setDailyActivity(response);
     } catch (err) {
       console.warn('오늘 활동 요약 fetch 실패', err);
