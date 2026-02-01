@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
@@ -8,23 +8,17 @@ import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
-
-const DEFAULT_REGION = {
-  latitude: 37.5665,
-  longitude: 126.978,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01,
-};
+import useActivityDetailMap from '@hooks/useActivityDetailMap';
 
 const MAP_HEIGHT = SCREEN_HEIGHT * 0.36;
 const MAP_WIDTH = SCREEN_WIDTH - 40;
 
-const E7_SCALE = 1e7;
-const MAP_EDGE_PADDING = { top: 40, right: 40, bottom: 40, left: 40 };
-const NEAR_ZERO_THRESHOLD = 0.0001;
-const MIN_REGION_DELTA = 0.01;
-const FIT_SPAN_EPSILON = 0.00001;
+const E7_SCALE = 1e7; // GPS에 대해, 소수점 좌표 대신 E7정수 포맷
+const NEAR_ZERO_THRESHOLD = 0.0001; // GPS, API 실패 시 좌표 무효처리를 위함
 
+/**
+ * 유효한 숫자 타입 반환
+ */
 const toFiniteNumber = (value: unknown): number | null => {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null;
@@ -51,7 +45,7 @@ const normalizeLatLon = (
     lon = lon / E7_SCALE;
   }
 
-  // 위/경도가 뒤집힌 케이스 보정 (lat가 90 초과이고 lon이 90 이하일 때)
+  // 위/경도가 뒤집힌 케이스 보정 (lat가 90 초과이고 lon이 90 이하일 때, 휴리스틱)
   if (Math.abs(lat) > 90 && Math.abs(lon) <= 90) {
     const swappedLat = lon;
     const swappedLon = lat;
@@ -75,6 +69,15 @@ const normalizeLatLon = (
   return { latitude: lat, longitude: lon };
 };
 
+/**
+ * 경로 좌표의 형식/단위 정규화
+ * - 값이 문자열일 경우 숫자로 변환
+ * - 위/경도가 뒤집혔을 경우 보정
+ * - (0,0) 근처나 범위밖 좌표 제거
+ * - altitude 없을 경우 기본값 0 적용
+ * @param logs
+ * @returns
+ */
 const normalizeRouteLogs = (logs: unknown[]): GPS_LOG[] => {
   const normalized: GPS_LOG[] = [];
 
@@ -135,43 +138,14 @@ const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
   });
 };
 
-// 받은 경로 중 센터 찾기
-const getCenterRegion = (
-  coordinates: { latitude: number; longitude: number }[]
-) => {
-  const lats = coordinates.map((c) => c.latitude);
-  const lons = coordinates.map((c) => c.longitude);
-  const latitude = (Math.min(...lats) + Math.max(...lats)) / 2;
-  const longitude = (Math.min(...lons) + Math.max(...lons)) / 2;
-  const latSpan = Math.max(...lats) - Math.min(...lats);
-  const lonSpan = Math.max(...lons) - Math.min(...lons);
-  const latitudeDelta = Math.max(latSpan + 0.002, MIN_REGION_DELTA);
-  const longitudeDelta = Math.max(lonSpan + 0.002, MIN_REGION_DELTA);
-  return { latitude, longitude, latitudeDelta, longitudeDelta };
-};
-
-const hasMeaningfulSpan = (coordinates: GPS_LOG[]) => {
-  if (coordinates.length < 2) return false;
-  const lats = coordinates.map((c) => c.latitude);
-  const lons = coordinates.map((c) => c.longitude);
-  const latSpan = Math.max(...lats) - Math.min(...lats);
-  const lonSpan = Math.max(...lons) - Math.min(...lons);
-  return latSpan > FIT_SPAN_EPSILON || lonSpan > FIT_SPAN_EPSILON;
-};
-
 const ActivityDetailPage = () => {
   const route = useRoute<ActivityDetailRouteProp>();
   const { sessionId } = route.params;
   const [detailData, setDetailData] = useState<SessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mapReady, setMapReady] = useState(false);
-  const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
-  const mapRef = useRef<MapView | null>(null);
-  const centerRegion = useMemo(() => {
-    if (!detailData || detailData.routeLogs.length === 0) return null;
-    return getCenterRegion(detailData.routeLogs);
-  }, [detailData]);
-  const mapKey = `${mapRegion.latitude},${mapRegion.longitude},${mapRegion.latitudeDelta},${mapRegion.longitudeDelta}`;
+  const routeLogs = detailData?.routeLogs ?? [];
+  const { mapRef, mapRegion, mapKey, onMapReady, onMapLayout } =
+    useActivityDetailMap(routeLogs, sessionId);
 
   useEffect(() => {
     const loadData = async () => {
@@ -238,60 +212,6 @@ const ActivityDetailPage = () => {
     loadData();
   }, [sessionId]);
 
-  // 지도 준비 완료 이후 centerRegion이 바뀌면 해당 좌표로 이동
-  useEffect(() => {
-    if (!centerRegion) return;
-
-    console.log(
-      '>>> [ActivityDetail] centerRegion 계산',
-      JSON.stringify(
-        {
-          sessionId,
-          centerRegion,
-          routeCount: detailData?.routeLogs.length ?? 0,
-        },
-        null,
-        0
-      )
-    );
-    setMapRegion(centerRegion);
-  }, [centerRegion, detailData?.routeLogs.length, sessionId]);
-
-  useEffect(() => {
-    if (!mapReady || !mapRef.current) return;
-    if (!centerRegion) return;
-
-    const routeLogs = detailData?.routeLogs ?? [];
-    const canFitToCoordinates = hasMeaningfulSpan(routeLogs);
-
-    console.log(
-      '>>> [ActivityDetail] map move',
-      JSON.stringify(
-        {
-          sessionId,
-          mapReady,
-          centerRegion,
-          routeCount: routeLogs.length,
-          canFitToCoordinates,
-        },
-        null,
-        0
-      )
-    );
-
-    // 가능한 경우 경로 전체가 보이도록 맞춘다.
-    if (routeLogs.length >= 2 && canFitToCoordinates) {
-      mapRef.current.fitToCoordinates(routeLogs, {
-        edgePadding: MAP_EDGE_PADDING,
-        animated: true,
-      });
-      return;
-    }
-
-    // 단일 좌표이거나 모든 좌표가 동일한 경우에는 센터로 이동
-    mapRef.current.animateToRegion(centerRegion, 250);
-  }, [centerRegion, detailData?.routeLogs, mapReady, mapRegion, sessionId]);
-
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -345,22 +265,13 @@ const ActivityDetailPage = () => {
             pitchEnabled={false} // 3D 뷰(기울이기) 비활성화
             toolbarEnabled={false}
             moveOnMarkerPress={false}
-            onMapReady={() => {
-              console.log('>>> [ActivityDetail] onMapReady', {
-                sessionId,
-                mapRegion,
-              });
-              setMapReady(true);
-            }}
-            onLayout={() => {
-              // 일부 환경에서 onMapReady가 늦거나 누락되는 경우 대비
-              setMapReady(true);
-            }}
+            onMapReady={onMapReady}
+            onLayout={onMapLayout}
             initialRegion={mapRegion}
           />
           <MapOverlayPolyline
             region={mapRegion}
-            coordinates={detailData.routeLogs}
+            coordinates={routeLogs}
             height={MAP_HEIGHT}
             width={MAP_WIDTH}
           />
@@ -384,7 +295,7 @@ const ActivityDetailPage = () => {
             onStartShouldSetResponder={() => true}
           />
         </View>
-        <Text style={styles.sectionTitle}>활동 요약</Text>
+        <Text style={styles.sectionTitle}>러닝 요약</Text>
         <View style={styles.specCard}>
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>총 거리</Text>

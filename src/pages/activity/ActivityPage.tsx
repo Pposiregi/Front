@@ -242,7 +242,10 @@ function ActivityPage() {
     async (date: Date) => {
       setLoading(true);
       try {
-        await Promise.all([fetchMonthlySessions(date), fetchMonthlyDaily(date)]);
+        await Promise.all([
+          fetchMonthlySessions(date),
+          fetchMonthlyDaily(date),
+        ]);
       } finally {
         setLoading(false);
       }
@@ -343,7 +346,7 @@ function ActivityPage() {
     calculateWeeklyChart();
   }, [calculateWeeklyChart]);
 
-  const headerTitle = '활동';
+  const headerTitle = '러닝';
   const headerSubtitle = useMemo(
     () => `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`,
     [currentMonth]
@@ -365,12 +368,7 @@ function ActivityPage() {
     } finally {
       setRefreshing(false);
     }
-  }, [
-    currentMonth,
-    fetchDailySummary,
-    fetchMonthlyBundle,
-    fetchWeeklySteps,
-  ]);
+  }, [currentMonth, fetchDailySummary, fetchMonthlyBundle, fetchWeeklySteps]);
 
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
@@ -381,8 +379,8 @@ function ActivityPage() {
     targetSteps > 0
       ? Math.min(stepsValue / targetSteps, 1)
       : stepsValue > 0
-        ? 1
-        : 0;
+      ? 1
+      : 0;
   const remainingSteps = targetSteps > 0 ? targetSteps - stepsValue : 0;
 
   const progressComment = useMemo(() => {
@@ -465,7 +463,7 @@ function ActivityPage() {
           </TouchableOpacity>
         </View>
         <Text style={styles.summaryNotice}>
-          오늘 [운동]한 내용에 대해서만 집계되요! (그냥 걸은 건 말구요!)
+          오늘 러닝한 내용에 대해서만 집계돼요! (그냥 걸은 건 말구요!)
         </Text>
       </View>
 
@@ -601,7 +599,7 @@ function ActivityPage() {
                 listTab === 'sessions' && styles.segmentedTextActive,
               ]}
             >
-              활동별
+              러닝별
             </Text>
           </Pressable>
         </View>
@@ -645,9 +643,7 @@ function ActivityPage() {
         )
       ) : showEmptySessions ? (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyCardTitle}>
-            이달의 GPS 세션이 없어요.
-          </Text>
+          <Text style={styles.emptyCardTitle}>이달의 GPS 세션이 없어요.</Text>
           <Text style={styles.emptyCardText}>
             메인 화면에서 산책을 시작하면 자동으로 기록돼요.
           </Text>

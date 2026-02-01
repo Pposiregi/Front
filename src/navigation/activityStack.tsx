@@ -20,7 +20,7 @@ const ActivityStack = () => {
       <Stack.Screen
         name='ActivityDetailPage'
         component={ActivityDetailPage}
-        options={{ headerShown: true, title: '활동 상세 정보' }}
+        options={{ headerShown: true, title: '이렇게 달렸어요!' }}
       />
     </Stack.Navigator>
   );
