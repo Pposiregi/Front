@@ -19,6 +19,9 @@ const NEAR_ZERO_THRESHOLD = 0.0001; // GPS, API 실패 시 좌표 무효처리�
 /**
  * 유효한 숫자 타입 반환
  */
+/**
+ * 숫자/문자열을 안전하게 number로 변환한다.
+ */
 const toFiniteNumber = (value: unknown): number | null => {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null;
@@ -30,6 +33,12 @@ const toFiniteNumber = (value: unknown): number | null => {
   return null;
 };
 
+/**
+ * 위/경도 값의 단위/범위를 보정하고 유효성 검사를 수행한다.
+ * - E7 정수 → 실수 변환
+ * - 위/경도 뒤집힘 가능성 보정
+ * - (0,0) 근처 등 비정상 값 제외
+ */
 const normalizeLatLon = (
   latitude: number,
   longitude: number
@@ -78,6 +87,11 @@ const normalizeLatLon = (
  * @param logs
  * @returns
  */
+/**
+ * 다양한 형태의 경로 로그를 GPS_LOG[]로 정규화한다.
+ * - 배열형/객체형 좌표를 모두 처리
+ * - 문자열 숫자, E7 정수 등 보정
+ */
 const normalizeRouteLogs = (logs: unknown[]): GPS_LOG[] => {
   const normalized: GPS_LOG[] = [];
 
@@ -120,7 +134,9 @@ const normalizeRouteLogs = (logs: unknown[]): GPS_LOG[] => {
   return normalized;
 };
 
-// 목업 데이터 (API 실패 시 fallback)
+/**
+ * 목업 데이터 (API 실패 시 fallback).
+ */
 const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {

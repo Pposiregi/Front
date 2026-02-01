@@ -11,21 +11,25 @@ type SessionItemProps = {
   session: GPS_SESSION;
 };
 
+/**
+ * 요일 라벨 (일요일 시작)
+ */
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
+/**
+ * 월간 GPS 세션 리스트 아이템
+ * - 클릭 시 상세 화면으로 이동한다.
+ */
 function SessionItem({ session }: SessionItemProps) {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
 
-  const formattedDate = useMemo(
-    () => {
-      const date = new Date(session.startTime);
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const weekday = WEEKDAY_LABELS[date.getDay()] ?? '';
-      return `${month}월 ${day}일 (${weekday})`;
-    },
-    [session.startTime]
-  );
+  const formattedDate = useMemo(() => {
+    const date = new Date(session.startTime);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const weekday = WEEKDAY_LABELS[date.getDay()] ?? '';
+    return `${month}월 ${day}일 (${weekday})`;
+  }, [session.startTime]);
 
   const timeRange = useMemo(() => {
     const options: Intl.DateTimeFormatOptions = {

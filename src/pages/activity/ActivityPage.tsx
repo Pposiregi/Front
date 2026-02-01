@@ -30,8 +30,14 @@ import { getUser } from '@api/mainApi';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import type { getUserResponse } from 'types/main';
 
+/**
+ * 요일 라벨 (일요일 시작).
+ */
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
+/**
+ * 해당 월의 시작/끝 날짜 키를 반환한다.
+ */
 const getMonthRange = (date: Date) => {
   const start = new Date(date.getFullYear(), date.getMonth(), 1);
   const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -41,6 +47,10 @@ const getMonthRange = (date: Date) => {
   };
 };
 
+/**
+ * 일별 리스트용 날짜 라벨을 생성한다.
+ * - 포맷: MM/DD (요일)
+ */
 const formatDailyLabel = (dateKey: string) => {
   const parsed = parseDateKey(dateKey);
   const month = String(parsed.getMonth() + 1).padStart(2, '0');
@@ -57,6 +67,10 @@ type ProgressRingProps = {
   progressColor: string;
 };
 
+/**
+ * 원형 진행률 컴포넌트.
+ * - progress(0~1)를 strokeDashoffset으로 표현한다.
+ */
 const ProgressRing = ({
   size,
   strokeWidth,
@@ -160,6 +174,9 @@ function ActivityPage() {
     };
   }, [normalizedWeeklySteps]);
 
+  /**
+   * HEX 컬러를 RGBA 문자열로 변환한다.
+   */
   const toRgba = useCallback((hex: string, opacity = 1) => {
     const normalized = hex.replace('#', '');
     const value =
@@ -200,6 +217,9 @@ function ActivityPage() {
     [toRgba]
   );
 
+  /**
+   * Y축 레이블을 보기 좋은 값(천 단위)으로 보정한다.
+   */
   const formatStepLabel = useCallback((value: string) => {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) {
@@ -209,6 +229,9 @@ function ActivityPage() {
     return Math.max(0, rounded).toLocaleString();
   }, []);
 
+  /**
+   * 월간 GPS 세션 리스트
+   */
   const fetchMonthlySessions = useCallback(async (date: Date) => {
     try {
       const year = date.getFullYear();
@@ -227,6 +250,9 @@ function ActivityPage() {
     }
   }, []);
 
+  /**
+   * 월간 일별 요약 리스트
+   */
   const fetchMonthlyDaily = useCallback(async (date: Date) => {
     try {
       const { from, to } = getMonthRange(date);
@@ -238,6 +264,9 @@ function ActivityPage() {
     }
   }, []);
 
+  /**
+   * 월간 데이터(세션/일별)를 동시에 갱신한다.
+   */
   const fetchMonthlyBundle = useCallback(
     async (date: Date) => {
       setLoading(true);
@@ -253,7 +282,10 @@ function ActivityPage() {
     [fetchMonthlyDaily, fetchMonthlySessions]
   );
 
-  // 월 이동 핸들러 (MealPage의 로직 응용)
+  /**
+   * 월 이동 핸들러.
+   * - 미래 월로는 이동하지 않는다.
+   */
   const handleChangeMonth = (offset: number) => {
     setCurrentMonth((prev) => {
       const next = new Date(prev.getFullYear(), prev.getMonth() + offset, 1);
@@ -272,6 +304,9 @@ function ActivityPage() {
     });
   };
 
+  /**
+   * 오늘의 활동 요약
+   */
   const fetchDailySummary = useCallback(async () => {
     try {
       const response = await getDailyActivity(today);
@@ -293,6 +328,9 @@ function ActivityPage() {
     }
   }, [today]);
 
+  /**
+   * 최근 7일 걸음수
+   */
   const fetchWeeklySteps = useCallback(async () => {
     try {
       const response = await getWeeklySteps();
@@ -303,6 +341,9 @@ function ActivityPage() {
     }
   }, []);
 
+  /**
+   * 유저 프로필(목표 걸음수 포함)
+   */
   const fetchUserProfile = useCallback(async () => {
     try {
       const response = await getUser();
@@ -313,7 +354,9 @@ function ActivityPage() {
     }
   }, []);
 
-  // 주간 걸음을 계산하고 그래프 데이터를 생성하는 함수
+  /**
+   * 주간 차트 데이터와 목표선(점선) 구성
+   */
   const calculateWeeklyChart = useCallback(() => {
     if (normalizedWeeklySteps.length === 0) {
       setChartData({
@@ -357,6 +400,10 @@ function ActivityPage() {
     return `${date.getMonth() + 1}월 ${date.getDate()}일`;
   }, []);
 
+  /**
+   * 풀투리프레시 핸들러.
+   * - 오늘 요약/주간/월간 데이터를 한번에 갱신한다.
+   */
   const handlePullToRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
