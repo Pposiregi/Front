@@ -39,7 +39,7 @@ const ANDROID_PERMISSIONS = [
 ].filter((permission): permission is Permission => Boolean(permission));
 
 /**
- * 지정한 필수권한 가운데 거부된 항목 재요청
+ * 안드로이드 위치 권한 확인 -> 필요한 항목만 요청
  */
 const requestAndroidPermissions = async () => {
   const ungranted: Permission[] = [];
@@ -59,27 +59,12 @@ const requestAndroidPermissions = async () => {
   );
 };
 
-/* ios SKIP!! */
-const requestIOSPermission = async () => {
-  try {
-    type IOSAuthStatus =
-      | 'granted'
-      | 'denied'
-      | 'restricted'
-      | 'disabled'
-      | 'authorized';
-
-    const status = (await Geolocation.requestAuthorization?.('whenInUse')) as
-      | IOSAuthStatus
-      | undefined;
-    if (!status) return true;
-    return status === 'granted' || status === 'authorized';
-  } catch (error) {
-    console.warn('Location permission request failed', error);
-    return false;
-  }
-};
-
+/**
+ * 실시간 경로 추적 훅.
+ * - 위치 권한 요청
+ * - 위치 워치 시작/종료
+ * - 폴리라인 좌표/카메라 영역 관리
+ */
 export const useRouteTracking = () => {
   const [state, setState] = useState<TrackingState>({
     isTracking: false,
@@ -94,6 +79,9 @@ export const useRouteTracking = () => {
    * Resurce Deallocation
    * 백그라운드에서 돌아가는 위치 워치(Geolocation.watchPosition) 자원해제
    */
+  /**
+   * 위치 워치를 해제한다.
+   */
   const clearWatch = useCallback(() => {
     if (watchIdRef.current !== null) {
       try {
@@ -105,6 +93,9 @@ export const useRouteTracking = () => {
     }
   }, []);
 
+  /**
+   * 보조 위치 갱신 타이머를 해제한다.
+   */
   const clearRefreshTimer = useCallback(() => {
     if (refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
@@ -113,18 +104,17 @@ export const useRouteTracking = () => {
   }, []);
 
   /**
-   * 플랫폼별 위치 권한을 요청하고, 허용 여부를 boolean으로 반환한다.
+   * 플랫폼별 위치 권한을 요청한다.
+   * - Android만 목표로 한다
    */
   const requestPermission = useCallback(async () => {
     if (Platform.OS === 'android') {
       return requestAndroidPermissions();
     }
-
-    return requestIOSPermission();
   }, []);
 
   /**
-   * 두 좌표 사이 거리를 미터 단위로 계산한다. (하버사인)
+   * 두 좌표 간 거리를 하버사인 공식으로 계산 (미터)
    */
   const getDistanceMeters = useCallback((a: LatLng, b: LatLng) => {
     const toRad = (value: number) => (value * Math.PI) / 180;
@@ -145,7 +135,10 @@ export const useRouteTracking = () => {
   }, []);
 
   /**
-   * 새 좌표를 수신하면 경로 배열과 카메라 중심(region)을 최신 값으로 갱신한다.
+   * 위치 업데이트 처리
+   * - 좌표 유효성 검사
+   * - 지터 필터링
+   * - 경로/카메라 갱신
    */
   const handlePosition = useCallback(
     (latitude: number, longitude: number) => {
@@ -162,7 +155,7 @@ export const useRouteTracking = () => {
           // GPS 소수점 떨림(수십 cm)을 중복 포인트로 추가하지 않도록 필터링한다.
           if (delta < MIN_POINT_DISTANCE_METERS) {
             if (__DEV__) {
-              console.debug('[RouteTracking] ignore jitter', {
+              console.debug('>>> [RouteTracking] ignore jitter', {
                 latitude,
                 longitude,
                 delta,
@@ -182,7 +175,7 @@ export const useRouteTracking = () => {
         };
 
         if (__DEV__) {
-          console.debug('[RouteTracking] push point', {
+          console.debug('>>> [RouteTracking] push point', {
             latitude,
             longitude,
             nextLength: nextPath.length,
@@ -201,6 +194,9 @@ export const useRouteTracking = () => {
     [getDistanceMeters]
   );
 
+  /**
+   * 단일 현재 위치를 요청한다.
+   */
   const requestSingleLocation = useCallback(() => {
     Geolocation.getCurrentPosition(
       (position) => {
@@ -219,7 +215,9 @@ export const useRouteTracking = () => {
   }, [handlePosition]);
 
   /**
-   * 권한을 확인한 뒤 현재 위치를 기준으로 워치를 등록하고, 추적 상태를 true로 만든다.
+   * 위치 추적 시작
+   * - 권한 확인
+   * - 워치/타이머 초기화 및 등록
    */
   const startTracking = useCallback(async () => {
     const granted = await requestPermission();
@@ -262,7 +260,7 @@ export const useRouteTracking = () => {
       const last = lastUpdateRef.current;
       if (!last || Date.now() - last > 4000) {
         if (__DEV__) {
-          console.debug('[RouteTracking] force single location');
+          console.debug('>>> [RouteTracking] force single location');
         }
         requestSingleLocation();
       }
@@ -277,6 +275,9 @@ export const useRouteTracking = () => {
     requestSingleLocation,
   ]);
 
+  /**
+   * 위치 추적을 종료한다.
+   */
   const stopTracking = useCallback(() => {
     clearWatch();
     clearRefreshTimer();

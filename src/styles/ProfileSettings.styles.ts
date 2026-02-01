@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     borderColor: '#F3F4F6',
   },
   rowLabel: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 16,
     color: '#111827',
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logoutText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 15,
     color: '#111827',
   },
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
   },
   withdrawText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 15,
     color: '#991B1B',
   },
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     marginTop: 10,
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
     color: '#4B5563',
     lineHeight: 20,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   modalCancelText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
     color: '#111827',
   },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   modalConfirmText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
     color: '#FFFFFF',
   },
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF7ED',
   },
   chipText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
     color: '#4B5563',
   },

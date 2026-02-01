@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -31,6 +25,9 @@ import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
 
+/**
+ * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
+ */
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 
 import { usePetFSM } from '@utils/petFSM';
@@ -48,7 +45,9 @@ import { getUser } from '@api/mainApi';
  * - 미션 목록을 가로 스크롤로 표시
  */
 export const MainPage = () => {
-  // 애니메이션
+  /**
+   * 달리기 상태 애니메이션 프레임 목록.
+   */
   const runDogFrames = [
     require('@assets/images/pet/tile000-Photoroom.png'),
     require('@assets/images/pet/tile001-Photoroom.png'),
@@ -58,7 +57,9 @@ export const MainPage = () => {
     require('@assets/images/pet/tile005-Photoroom.png'),
   ];
 
-  // 런닝 시작 시 프레임 애니메이션 실행
+  /**
+   * 러닝 중 펫 애니메이션 컴포넌트.
+   */
   const AnimatedDog = () => {
     const [frame, setFrame] = useState(0);
 
@@ -71,12 +72,16 @@ export const MainPage = () => {
 
     return <Image source={runDogFrames[frame]} style={styles.running_pet} />;
   };
-  // START 버튼 누른 후 카운트 다운
+  /**
+   * START 버튼 누른 후 카운트다운 상태.
+   */
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  // Mission
+  /**
+   * 미션 데이터/모달 상태.
+   */
   const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
     []
   );
@@ -84,12 +89,20 @@ export const MainPage = () => {
   const handleOpenMission = () => setShowMissionModal(true);
   const handleCloseMission = () => setShowMissionModal(false);
 
-  // 걸음수 1000보가 되면 서버로 전송 resetSync는 로컬 저장된 데이터 삭제용
+  /**
+   * 걸음수 동기화 훅.
+   * - 1000보 단위로 서버 동기화
+   * - resetSync는 로컬 동기화 상태 초기화용
+   */
   const { syncSteps, resetSync } = useStepSync();
 
-  // 사용자 요약정보 가져오기, 현재 임시 유저
+  /**
+   * 사용자 요약정보 조회 (현재 임시 유저).
+   */
   const userData = getUser();
-  // {러닝여부, 이동 경로, 맵 영역, 추적 시작/종료 핸들러}
+  /**
+   * 러닝 추적 상태/경로/카메라 영역/시작·종료 핸들러.
+   */
   const { isTracking, path, region, startTracking, stopTracking } =
     useRouteTracking();
 
@@ -102,10 +115,16 @@ export const MainPage = () => {
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
   useEffect(() => {
-    // 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
+    /**
+     * 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
+     */
     loadBodyGoals().then(setBodyGoals);
   }, []);
 
+  /**
+   * 오늘 몸 기록이 있는지 확인
+   * - 기록이 있으면 프롬프트를 스킵한다.
+   */
   const checkTodayBodyHistory = useCallback(async () => {
     const todayKey = formatDateKey(new Date());
     try {
@@ -125,6 +144,9 @@ export const MainPage = () => {
     return false;
   }, []);
 
+  /**
+   * 프롬프트 표시 여부를 초기화
+   */
   useEffect(() => {
     const loadPromptState = async () => {
       const todayKey = formatDateKey(new Date());
@@ -146,16 +168,21 @@ export const MainPage = () => {
     loadPromptState();
   }, [checkTodayBodyHistory]);
 
-  /* 펫 표정 관리 위해 FSM 상태 추가 */
+  /**
+   * 펫 FSM 상태 훅.
+   */
   const { state: petState, transition: changePetState } = usePetFSM();
 
-  /* 펫 터치 시 상태 전환 */
+  /**
+   * 펫 터치 시 상태 전환.
+   */
   const onPetTouch = () => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });
   };
 
-  /* 지도 카메라 이동
+  /**
+   * 지도 카메라 이동
    * - isTracking: 추적 중일 때만 카메라 이동
    * - path.length: 좌표가 하나도 없으면 이동하지 않음
    * - region: region이 바뀔 때마다 카메라 이동
@@ -176,7 +203,8 @@ export const MainPage = () => {
     );
   }, [isTracking, path, region]);
 
-  /* 산책 시작/종료 핸들러
+  /**
+   * 산책 시작/종료 핸들러
    * - isTracking이 true면 산책 중이므로 종료
    * - isTracking이 false면 산책 전이므로 시작
    */
@@ -190,6 +218,9 @@ export const MainPage = () => {
     setCountdown(3);
   }, [isTracking, stopTracking]);
 
+  /**
+   * 오늘 프롬프트를 스킵 처리한다.
+   */
   const markSkipToday = useCallback(async () => {
     const todayKey = formatDateKey(new Date());
     try {
@@ -199,6 +230,9 @@ export const MainPage = () => {
     }
   }, []);
 
+  /**
+   * 몸 기록 저장 처리.
+   */
   const handleSaveBodyPrompt = useCallback(
     async (values: BodyHistoryFormValues) => {
       setSavingBodyHistory(true);
@@ -222,16 +256,24 @@ export const MainPage = () => {
     [markSkipToday]
   );
 
+  /**
+   * 오늘은 안 볼래요 처리
+   */
   const handleSkipBodyPromptToday = useCallback(async () => {
     await markSkipToday();
     setShowBodyPrompt(false);
   }, [markSkipToday]);
 
+  /**
+   * 나중에 할게요 처리 (오늘은 숨김만)
+   */
   const handleLaterBodyPrompt = useCallback(() => {
     setShowBodyPrompt(false);
   }, []);
 
-  // 카운트 다운 애니메이션 적용
+  /**
+   * 카운트다운 애니메이션 처리
+   */
   useEffect(() => {
     if (countdown === null) return;
 
@@ -263,7 +305,9 @@ export const MainPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startTracking]);
 
-  // Health Connect 오늘 걸음 수
+  /**
+   * Health Connect 오늘 걸음 수
+   */
   const {
     steps: healthSteps,
     addSteps,
@@ -271,6 +315,9 @@ export const MainPage = () => {
     writing: healthWriting,
   } = useHealthSteps();
   const healthErrorShownRef = useRef(false);
+  /**
+   * 개발용 걸음수 +1000 버튼.
+   */
   const handleDevAddSteps = useCallback(async () => {
     try {
       await addSteps(1000);
@@ -285,7 +332,9 @@ export const MainPage = () => {
   }, [addSteps]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
-  // Health Steps 서버 전송 + 미션 최신화
+  /**
+   * Health Steps 서버 전송 + 미션 최신화.
+   */
   const refreshMissions = useCallback(async () => {
     try {
       if (healthSteps != null) {
@@ -303,19 +352,25 @@ export const MainPage = () => {
     }
   }, [healthSteps, lastSyncedSteps, syncSteps]);
 
-  // Health Steps 변화 시 호출 (1000보 단위로 제한)
+  /**
+   * Health Steps 변화 시 호출 (1000보 단위로 제한).
+   */
   useEffect(() => {
     refreshMissions();
   }, [healthSteps, refreshMissions]);
 
-  // 화면 포커스 시 항상 최신 미션 불러오기
+  /**
+   * 화면 포커스 시 최신 미션 불러오기.
+   */
   useFocusEffect(
     useCallback(() => {
       refreshMissions();
     }, [refreshMissions])
   );
 
-  // Progress Bar 가공
+  /**
+   * 일일 미션 중 진행 중 항목만 필터링한다.
+   */
   const progressMissions = missionApiItems
     .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
     .map((m) => ({
@@ -336,13 +391,17 @@ export const MainPage = () => {
     Alert.alert('걸음 수 연동 실패', healthError);
   }, [healthError]);
 
-  // 유저 데이터가 아직 없다면 안전하게 스피너를 노출하고 미션 계산을 건너뛴다.
+  /**
+   * 유저 데이터가 아직 없다면 스피너 표시.
+   */
   if (!userData) {
     return <ActivityIndicator size='large' />;
   }
 
-  // 표시할 걸음 수
-  // healthStep 권한 동의를 안했거나 불러오지 못했다면 8954로 표시
+  /**
+   * 표시할 걸음 수
+   * - 권한 거부/불러오기 실패 시 기본값으로 대체
+   */
   const displayedSteps = healthSteps ?? 8954;
   return (
     <View style={styles.container}>
