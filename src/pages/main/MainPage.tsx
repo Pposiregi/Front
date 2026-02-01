@@ -320,22 +320,32 @@ export const MainPage = () => {
   );
 
   // Progress Bar 가공
-  const progressMissions = missionApiItems
-    .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
-    .map((m) => {
-      const isReadyToComplete = m.progressValue >= m.goalValue;
+  const progressMissions = useMemo(() => {
+    return missionApiItems
+      .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+      .map((m) => {
+        // 기본값은 서버 데이터
+        let currentDisplayValue = m.progressValue;
 
-      return {
-        id: m.missionCheckId.toString(),
-        title: m.title,
-        current: m.progressValue,
-        goal: m.goalValue,
-        unit:
-          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-        isReadyToComplete,
-        missionCheckId: m.missionCheckId,
-      };
-    });
+        // 만약 걸음수 미션(STEP)이라면, 실시간 기기 걸음수(healthSteps)를 반영
+        if (m.category === 'STEP' && healthSteps !== null) {
+          // 서버의 마지막 동기화 값보다 현재 기기 걸음수가 더 크면 기기 값을 사용
+          currentDisplayValue = Math.max(m.progressValue, healthSteps);
+        }
+        const isReadyToComplete = m.progressValue >= m.goalValue;
+
+        return {
+          id: m.missionCheckId.toString(),
+          title: m.title,
+          current: currentDisplayValue,
+          goal: m.goalValue,
+          unit:
+            m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+          isReadyToComplete,
+          missionCheckId: m.missionCheckId,
+        };
+      });
+  }, [missionApiItems, healthSteps]);
 
   useEffect(() => {
     if (!healthError) {
