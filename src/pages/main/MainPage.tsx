@@ -325,19 +325,26 @@ export const MainPage = () => {
       .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
       .map((m) => {
         // 기본값은 서버 데이터
-        let currentDisplayValue = m.progressValue;
+        let currentDisplayValue = m.progressValue ?? 0;
 
         // 만약 걸음수 미션(STEP)이라면, 실시간 기기 걸음수(healthSteps)를 반영
         if (m.category === 'STEP' && healthSteps !== null) {
           // 서버의 마지막 동기화 값보다 현재 기기 걸음수가 더 크면 기기 값을 사용
           currentDisplayValue = Math.max(m.progressValue, healthSteps);
         }
+
+        // 미션 진행도(progressValue)가 goalValue를 초과할 수 없도록 고정
+        const completeDisplayValue = Math.min(
+          currentDisplayValue,
+          m.goalValue ?? 0
+        );
+
         const isReadyToComplete = m.progressValue >= m.goalValue;
 
         return {
           id: m.missionCheckId.toString(),
           title: m.title,
-          current: currentDisplayValue,
+          current: completeDisplayValue,
           goal: m.goalValue,
           unit:
             m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
