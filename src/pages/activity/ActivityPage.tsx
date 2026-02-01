@@ -609,7 +609,7 @@ function ActivityPage() {
       {loading ? (
         <ActivityIndicator
           size='large'
-          color='#A5B4FC'
+          color={activityTheme.colors.accent}
           style={styles.loadingIndicator}
         />
       ) : listTab === 'daily' ? (
