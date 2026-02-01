@@ -91,10 +91,12 @@ export const useActivityDetailMap = (
    * - onMapReady가 호출되면 fallback 타이머를 정리하고 mapReady를 true로 만든다.
    */
   const onMapReady = useCallback(() => {
-    console.log('>>> [ActivityDetail] onMapReady', {
-      sessionId,
-      mapRegion,
-    });
+    if (__DEV__) {
+      console.log('>>> [ActivityDetail] onMapReady', {
+        sessionId,
+        mapRegion,
+      });
+    }
     if (mapReadyFallbackRef.current) {
       clearTimeout(mapReadyFallbackRef.current);
       mapReadyFallbackRef.current = null;
@@ -120,20 +122,25 @@ export const useActivityDetailMap = (
    * - 이 값은 MapView initialRegion과 mapKey에 사용된다.
    */
   useEffect(() => {
-    if (!centerRegion) return;
+    if (!centerRegion) {
+      setMapRegion(DEFAULT_REGION);
+      return;
+    }
 
-    console.log(
-      '>>> [ActivityDetail] centerRegion 계산',
-      JSON.stringify(
-        {
-          sessionId,
-          centerRegion,
-          routeCount: routeLogs.length,
-        },
-        null,
-        0
-      )
-    );
+    if (__DEV__) {
+      console.log(
+        '>>> [ActivityDetail] centerRegion 계산',
+        JSON.stringify(
+          {
+            sessionId,
+            centerRegion,
+            routeCount: routeLogs.length,
+          },
+          null,
+          0
+        )
+      );
+    }
     setMapRegion(centerRegion);
   }, [centerRegion, routeLogs.length, sessionId]);
 
@@ -148,20 +155,22 @@ export const useActivityDetailMap = (
 
     const canFitToCoordinates = hasMeaningfulSpan(routeLogs);
 
-    console.log(
-      '>>> [ActivityDetail] map move',
-      JSON.stringify(
-        {
-          sessionId,
-          mapReady,
-          centerRegion,
-          routeCount: routeLogs.length,
-          canFitToCoordinates,
-        },
-        null,
-        0
-      )
-    );
+    if (__DEV__) {
+      console.log(
+        '>>> [ActivityDetail] map move',
+        JSON.stringify(
+          {
+            sessionId,
+            mapReady,
+            centerRegion,
+            routeCount: routeLogs.length,
+            canFitToCoordinates,
+          },
+          null,
+          0
+        )
+      );
+    }
 
     if (routeLogs.length >= 2 && canFitToCoordinates) {
       mapRef.current.fitToCoordinates(routeLogs, {
