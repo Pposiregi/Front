@@ -18,6 +18,7 @@ interface MissionModalProps {
   onClose: () => void;
   missions: MissionActiveItem[];
   onComplete?: () => void;
+  healthStpes?: () => number | null;
 }
 
 const MissionModal: React.FC<MissionModalProps> = ({
@@ -25,6 +26,7 @@ const MissionModal: React.FC<MissionModalProps> = ({
   onClose,
   missions,
   onComplete,
+  healthStpes,
 }) => {
   const [activeTab, setActiveTab] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
     'DAILY'

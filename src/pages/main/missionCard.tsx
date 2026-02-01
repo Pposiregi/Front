@@ -7,9 +7,28 @@ import styles from '@styles/missionModal.styles';
 interface MissionCardProps {
   mission: MissionActiveItem;
   onComplete: (id: number) => void;
+  healthSteps?: number | null;
 }
 
-const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete }) => {
+const MissionCard: React.FC<MissionCardProps> = ({
+  mission,
+  onComplete,
+  healthSteps,
+}) => {
+  // 서버 값 기본
+  let currentDisplayValue = mission.progressValue ?? 0;
+
+  // STEP 미션이면 HealthSteps 반영
+  if (mission.category === 'STEP' && typeof healthSteps === 'number') {
+    currentDisplayValue = Math.max(currentDisplayValue, healthSteps);
+  }
+
+  // goalValue 이상은 막기
+  const completeDisplayValue = Math.min(
+    currentDisplayValue,
+    mission.goalValue ?? 0
+  );
+
   const progress =
     mission.goalValue > 0 ? mission.progressValue / mission.goalValue : 0;
   const isReadyToComplete =
@@ -66,7 +85,7 @@ const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete }) => {
       </View>
 
       <Text style={styles.missionUIText}>
-        {mission.progressValue} / {mission.goalValue}{' '}
+        {completeDisplayValue} / {mission.goalValue}{' '}
         {mission.category === 'STEP'
           ? '보'
           : mission.category === 'MEAL'
