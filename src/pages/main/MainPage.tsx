@@ -465,7 +465,10 @@ export const MainPage = () => {
             visible={showMissionModal}
             onClose={handleCloseMission}
             missions={missionApiItems}
-            onComplete={refreshMissions}
+            onComplete={() => {
+              refreshMissions(); // 기존 미션 새로고침
+              changePetState(PetStates.HAPPY, { duration: 1500 }); // 1.5초 웃음 유지 후 자동 IDLE
+            }}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>

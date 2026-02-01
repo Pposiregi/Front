@@ -79,7 +79,6 @@ const MissionModal: React.FC<MissionModalProps> = ({
                   key={mission.missionCheckId}
                   mission={mission}
                   onComplete={async (missionCheckId) => {
-                    console.log('API 호출 전 missionCheckId:', missionCheckId); // 로그 확인
                     try {
                       await postMissionComplete(missionCheckId);
                       onComplete?.();
