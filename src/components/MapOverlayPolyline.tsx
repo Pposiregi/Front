@@ -3,14 +3,27 @@ import { StyleSheet } from 'react-native';
 import Svg, { Polyline as SvgPolyline } from 'react-native-svg';
 import type { LatLng } from '@shared-types/location';
 import type { MapRegion } from '@shared-types/location';
+
+/**
+ * 지도 위에 표시할 폴리라인 컴포넌트 props.
+ */
 type Props = {
   region: MapRegion;
   coordinates: LatLng[];
   width: number;
   height: number;
 };
+
+/**
+ * 범위를 벗어나는 값을 제한한다.
+ */
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
+
+/**
+ * 지도 좌표를 SVG 좌표로 변환해 폴리라인을 그린다.
+ * - 좌표가 한 점으로 수렴할 경우 짧은 대체 선분을 표시한다.
+ */
 export const MapOverlayPolyline = ({
   region,
   coordinates,
@@ -26,12 +39,12 @@ export const MapOverlayPolyline = ({
     const minLat = region.latitude - latDelta / 2;
     const minLon = region.longitude - lonDelta / 2;
     const mapped = coordinates.map(({ latitude, longitude }) => {
-        const xRatio = clamp((longitude - minLon) / lonDelta, 0, 1);
-        const yRatio = clamp((latitude - minLat) / latDelta, 0, 1);
-        const x = xRatio * width;
-        const y = height - yRatio * height;
-        return { x, y };
-      });
+      const xRatio = clamp((longitude - minLon) / lonDelta, 0, 1);
+      const yRatio = clamp((latitude - minLat) / latDelta, 0, 1);
+      const x = xRatio * width;
+      const y = height - yRatio * height;
+      return { x, y };
+    });
 
     const xs = mapped.map((p) => p.x);
     const ys = mapped.map((p) => p.y);

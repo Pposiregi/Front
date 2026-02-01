@@ -8,11 +8,18 @@ if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
 }
 
+/**
+ * 공통 API 클라이언트
+ * - baseURL, 인증 헤더, 응답 로깅 등을 일괄 관리
+ */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
+/**
+ * 로그 출력용 문자열 변환 유틸
+ */
 const toLogString = (payload: unknown) => {
   try {
     if (typeof payload === 'string') return payload;
@@ -22,6 +29,9 @@ const toLogString = (payload: unknown) => {
   }
 };
 
+/**
+ * 민감한 헤더 값을 마스킹
+ */
 const redactHeaders = (headers: unknown) => {
   const rawHeaders =
     typeof (headers as { toJSON?: () => unknown })?.toJSON === 'function'
@@ -44,6 +54,11 @@ const redactHeaders = (headers: unknown) => {
   return redacted;
 };
 
+/**
+ * 요청 인터셉터.
+ * - 개발 환경 dev-user-id 주입
+ * - accessToken 자동 부착
+ */
 apiClient.interceptors.request.use(async (config) => {
   if (__DEV__ && DEV_USER_ID) {
     // 개발환경에서는 env 값으로 dev_user_id를 고정한다.
@@ -70,11 +85,10 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-/***
- * 응답 인터셉터: 에러 로깅
- * - 모든 응답에서 에러를 잡아내어 메서드, URL, 상태 코드, 응답 데이터를 콘솔에 로깅
- * - 명령어: adb logcat | grep '>>> [API]'
- * - 2025.12.16 KGYURY
+/**
+ * 응답 인터셉터
+ * - 성공 응답 요약 로깅
+ * - 실패 응답은 개발 환경에서 상세 로깅
  */
 apiClient.interceptors.response.use(
   (response) => {

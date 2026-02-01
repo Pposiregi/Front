@@ -1,5 +1,8 @@
 import { GPS_LOG, SessionDetail } from './types';
 
+/**
+ * 세션별 GPS 경로 목업 데이터.
+ */
 export const mock_gps_log: Record<string, GPS_LOG[]> = {
   S_AM_0830: [
     { latitude: 35.1516, longitude: 128.9976, altitude: 15.0 },
@@ -26,7 +29,9 @@ export const mock_gps_log: Record<string, GPS_LOG[]> = {
   ],
 };
 
-// --- 목업 메타데이터 (GPS_Session 상세) ---
+/**
+ * GPS 세션 상세 목업 메타데이터.
+ */
 export const mockSessionMetadata: Record<
   string,
   Omit<SessionDetail, 'routeLogs'>

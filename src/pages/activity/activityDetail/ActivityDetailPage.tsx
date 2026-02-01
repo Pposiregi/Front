@@ -154,6 +154,10 @@ const fetchSessionDetail = (id: string): Promise<SessionDetail> => {
   });
 };
 
+/**
+ * 활동 상세 화면.
+ * - GPS 세션 상세/경로/요약 데이터를 표시한다.
+ */
 const ActivityDetailPage = () => {
   const route = useRoute<ActivityDetailRouteProp>();
   const { sessionId } = route.params;

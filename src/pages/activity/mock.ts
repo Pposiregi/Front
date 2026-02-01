@@ -1,5 +1,8 @@
 import { GPS_SESSION } from 'types/activity';
 
+/**
+ * daysAgo만큼 이전 날짜를 YYYY-MM-DD 문자열로 반환한다.
+ */
 export const getDateString = (daysAgo: number): string => {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);

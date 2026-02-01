@@ -109,6 +109,10 @@ const ProgressRing = ({
   );
 };
 
+/**
+ * 활동 기록 메인 화면.
+ * - 오늘 요약, 최근 7일, 이달 기록(일별/활동별) 제공
+ */
 function ActivityPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const today = useMemo(() => formatDateKey(new Date()), []);
