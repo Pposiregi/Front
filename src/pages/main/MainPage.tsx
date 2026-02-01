@@ -347,7 +347,7 @@ export const MainPage = () => {
           m.goalValue ?? 0
         );
 
-        const isReadyToComplete = m.progressValue >= m.goalValue;
+        const isReadyToComplete = currentDisplayValue >= m.goalValue;
 
         return {
           id: m.missionCheckId.toString(),

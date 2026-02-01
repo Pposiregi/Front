@@ -78,7 +78,6 @@ function ActivityPage() {
 
       // api 연결
       const data = await getMonthlySessions(year, month);
-      console.log('raw session:', data[0]);
       // 데이터 로딩 구현
       // start_time을 기준으로 최신순 정렬
       const sortedData = [...data].sort(

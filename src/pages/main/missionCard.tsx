@@ -30,9 +30,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
   );
 
   const progress =
-    mission.goalValue > 0 ? mission.progressValue / mission.goalValue : 0;
+    mission.goalValue > 0 ? completeDisplayValue / mission.goalValue : 0;
   const isReadyToComplete =
-    !mission.isCompleted && mission.progressValue >= mission.goalValue;
+    !mission.isCompleted && currentDisplayValue >= mission.goalValue;
 
   const progressAnim = useRef(new Animated.Value(0)).current;
 

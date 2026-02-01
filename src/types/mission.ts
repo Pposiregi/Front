@@ -51,7 +51,7 @@ export interface MissionActiveResponse {
  * 미션 완료 요청 타입
  */
 export interface MissionCompleteRequest {
-  missionCheckId: string;
+  missionCheckId: number;
 }
 
 /**
