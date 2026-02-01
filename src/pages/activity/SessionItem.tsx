@@ -11,15 +11,19 @@ type SessionItemProps = {
   session: GPS_SESSION;
 };
 
+const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
 function SessionItem({ session }: SessionItemProps) {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
 
   const formattedDate = useMemo(
-    () =>
-      new Date(session.startTime)
-        .toISOString()
-        .slice(2, 10)
-        .replace(/-/g, '/'),
+    () => {
+      const date = new Date(session.startTime);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const weekday = WEEKDAY_LABELS[date.getDay()] ?? '';
+      return `${month}월 ${day}일 (${weekday})`;
+    },
     [session.startTime]
   );
 
@@ -36,6 +40,19 @@ function SessionItem({ session }: SessionItemProps) {
     )} - ${new Date(session.endTime).toLocaleTimeString([], options)}`;
   }, [session.startTime, session.endTime]);
 
+  const durationLabel = useMemo(() => {
+    const start = new Date(session.startTime).getTime();
+    const end = new Date(session.endTime).getTime();
+    const durationSeconds = Math.max(0, Math.floor((end - start) / 1000));
+    const hours = Math.floor(durationSeconds / 3600);
+    const minutes = Math.floor((durationSeconds % 3600) / 60);
+    const seconds = durationSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+      2,
+      '0'
+    )}:${String(seconds).padStart(2, '0')}`;
+  }, [session.endTime, session.startTime]);
+
   const handlePress = () => {
     navigation.navigate('ActivityDetailPage', {
       sessionId: String(session.sessionId),
@@ -43,16 +60,19 @@ function SessionItem({ session }: SessionItemProps) {
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.itemContainer}>
-      <Text style={styles.indexText}>🚩</Text>
-      <View style={styles.sessionTextColumn}>
-        <Text style={styles.dateText}>{formattedDate}</Text>
-        <Text style={styles.timeText}>{timeRange}</Text>
+    <TouchableOpacity onPress={handlePress} style={styles.listCard}>
+      <View style={styles.listMarker} />
+      <View style={styles.listTextColumn}>
+        <Text style={styles.listTitle}>{formattedDate}</Text>
+        <Text style={styles.listSubtitle}>{timeRange}</Text>
+        <Text style={styles.listMeta}>{durationLabel}</Text>
       </View>
-      <Text style={styles.distanceText}>
-        {session.totalDistance.toFixed(2)} km
-      </Text>
-      <Text style={styles.detailLink}> &gt;</Text>
+      <View style={styles.listRight}>
+        <Text style={[styles.listValue, styles.listValueAccent]}>
+          {session.totalDistance.toFixed(2)} km
+        </Text>
+        <Text style={styles.detailLink}>&gt;</Text>
+      </View>
     </TouchableOpacity>
   );
 }

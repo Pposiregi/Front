@@ -32,10 +32,10 @@ const colors = {
 
 const cardShadow = {
   shadowColor: colors.shadow,
-  shadowOpacity: 0.06,
+  shadowOpacity: 0.07,
   shadowRadius: 12,
   shadowOffset: { width: 0, height: 6 },
-  elevation: 3,
+  elevation: 4,
 };
 
 export const activityTheme = {
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xxl * 2,
   },
   topSection: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   monthHeaderContainer: {
     flexDirection: 'row',
@@ -66,24 +66,39 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
+  headerTextWrapper: {
+    alignItems: 'center',
+    flex: 1,
+  },
   header: {
     fontFamily: 'JUA',
     fontSize: 24,
     color: colors.textTitle,
     textAlign: 'center',
-    flex: 1,
+  },
+  headerSub: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: spacing.xxs,
   },
   arrowButton: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
+  },
+  arrowButtonDisabled: {
+    opacity: 0.4,
   },
   arrowText: {
     fontSize: 20,
     color: colors.textSecondary,
     fontFamily: 'JUA',
   },
+  arrowTextDisabled: {
+    color: colors.textMuted,
+  },
   subHeaderText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: spacing.xs,
@@ -92,25 +107,77 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
-    marginTop: spacing.md,
     ...cardShadow,
   },
-  summaryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  summaryMetaRow: {
+    alignItems: 'flex-end',
     marginBottom: spacing.md,
   },
-  summaryTitle: {
+  summaryDateText: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  summaryNotice: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  heroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  progressWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressCenter: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  progressValue: {
     fontFamily: 'JUA',
-    fontSize: 18,
+    fontSize: 20,
     color: colors.textPrimary,
   },
-  summaryDateText: {
-    fontFamily: 'GowunDodum',
-    fontSize: 12,
+  progressTarget: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
     color: colors.textMuted,
     marginTop: spacing.xxs,
+  },
+  heroMetrics: {
+    flex: 1,
+    marginLeft: spacing.lg,
+  },
+  heroMetricRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.sm,
+  },
+  heroMetricLabel: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
+    color: colors.textSecondary,
+  },
+  heroMetricValue: {
+    fontFamily: 'JUA',
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  heroMetricDivider: {
+    height: 1,
+    backgroundColor: colors.divider,
+    alignSelf: 'stretch',
+  },
+  heroComment: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
   },
   badge: {
     paddingHorizontal: spacing.lg,
@@ -127,7 +194,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   badgeText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 11,
     color: colors.textPrimary,
   },
@@ -140,7 +207,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryLabel: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 12,
     color: colors.textSecondary,
   },
@@ -151,7 +218,7 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   summaryUnit: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 11,
     color: colors.textMuted,
     marginTop: spacing.xxs,
@@ -162,13 +229,53 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.divider,
   },
   sectionHeader: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     marginBottom: spacing.sm,
+  },
+  sectionHeaderRow: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   sectionTitle: {
     fontFamily: 'JUA',
     fontSize: 18,
     color: colors.textTitle,
+    marginRight: spacing.md,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    padding: spacing.xxs,
+    borderWidth: 1,
+    borderColor: colors.divider,
+  },
+  segmentedButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: Math.max(64, Math.round(deviceWidth * 0.18)),
+  },
+  segmentedButtonActive: {
+    backgroundColor: colors.surface,
+    borderColor: colors.accent,
+    ...cardShadow,
+  },
+  segmentedText: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  segmentedTextActive: {
+    fontFamily: 'JUA',
+    color: colors.accent,
   },
   itemContainer: {
     padding: spacing.lg,
@@ -178,11 +285,63 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    ...cardShadow,
+  },
+  listCard: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    marginVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: cardRadius,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.divider,
+    ...cardShadow,
+  },
+  listMarker: {
+    width: Math.max(10, Math.round(deviceWidth * 0.03)),
+    height: Math.max(10, Math.round(deviceWidth * 0.03)),
+    borderRadius: 999,
+    backgroundColor: colors.accent,
+    marginRight: spacing.md,
+  },
+  listTextColumn: {
+    flex: 1,
+    paddingRight: spacing.md,
+  },
+  listTitle: {
+    fontFamily: 'JUA',
+    fontSize: 14,
+    color: colors.textPrimary,
+    lineHeight: 18,
+  },
+  listSubtitle: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: spacing.xxs,
+    lineHeight: 16,
+  },
+  listMeta: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: spacing.xxs,
+  },
+  listRight: {
+    alignItems: 'flex-end',
+    marginLeft: spacing.lg,
+    marginRight: spacing.sm,
+  },
+  listValue: {
+    fontFamily: 'JUA',
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  listValueAccent: {
+    color: colors.accent,
   },
   sessionTextColumn: {
     flexDirection: 'column',
@@ -194,7 +353,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xxs,
   },
   timeText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 12,
     color: colors.textSecondary,
     marginRight: spacing.xxl,
@@ -206,11 +365,10 @@ export const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   detailLink: {
-    fontSize: 20,
+    fontSize: 16,
     color: colors.textMuted,
-    fontWeight: 'bold',
-    marginLeft: spacing.lg,
     fontFamily: 'JUA',
+    marginTop: spacing.xxs,
   },
   indexText: {
     fontSize: 18,
@@ -241,7 +399,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: spacing.lg,
   },
   chartMetaLabel: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 11,
     color: colors.textMuted,
     marginBottom: spacing.xxs,
@@ -252,7 +410,7 @@ export const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   chartMetaUnit: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 10,
     color: colors.textMuted,
   },
@@ -268,11 +426,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: colors.divider,
+    ...cardShadow,
   },
   emptyCardTitle: {
     fontFamily: 'JUA',
@@ -281,7 +437,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyCardText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 12,
     color: colors.textSecondary,
   },
@@ -291,7 +447,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xxl,
   },
   chartEmptyText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 12,
     color: colors.textMuted,
   },

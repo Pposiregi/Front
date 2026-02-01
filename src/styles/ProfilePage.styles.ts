@@ -79,7 +79,7 @@ export default StyleSheet.create({
   },
   caption: {
     marginTop: Math.max(4, Math.round(baseUnit * 0.8)),
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: bodyFont,
     color: '#6B7280',
   },
@@ -107,7 +107,7 @@ export default StyleSheet.create({
     marginRight: Math.max(4, Math.round(baseUnit * 0.8)),
   },
   recordText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: bodyFont,
     fontWeight: '600',
     color: '#4B5563',
@@ -141,7 +141,7 @@ export default StyleSheet.create({
     color: '#111827',
   },
   metricAim: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: smallFont,
     color: '#9CA3AF',
     marginTop: Math.max(2, Math.round(baseUnit * 0.5)),
@@ -150,7 +150,7 @@ export default StyleSheet.create({
     alignItems: 'flex-end',
   },
   metricValue: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
     lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#4B5563',
@@ -162,7 +162,7 @@ export default StyleSheet.create({
     color: '#111827',
   },
   metricUnit: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
     lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#6B7280',

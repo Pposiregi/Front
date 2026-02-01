@@ -16,6 +16,9 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.01,
 };
 
+const MAP_HEIGHT = SCREEN_HEIGHT * 0.36;
+const MAP_WIDTH = SCREEN_WIDTH - 40;
+
 const E7_SCALE = 1e7;
 const MAP_EDGE_PADDING = { top: 40, right: 40, bottom: 40, left: 40 };
 const NEAR_ZERO_THRESHOLD = 0.0001;
@@ -306,34 +309,27 @@ const ActivityDetailPage = () => {
     );
   }
 
-  // 총 달린 시간 계산
+  // 총 달린 시간 계산 (항상 HH:MM:SS)
   const startDate = new Date(detailData.startTime);
   const endDate = new Date(detailData.endTime);
-  const durationMs = endDate.getTime() - startDate.getTime();
-  const totalHours = Math.floor(durationMs / (1000 * 60 * 60));
-  const totalMinutes = Math.floor(
-    (durationMs % (1000 * 60 * 60)) / (1000 * 60)
-  );
-  const totalSeconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-  let formattedDuration;
+  const durationMs = Math.max(0, endDate.getTime() - startDate.getTime());
+  const totalSeconds = Math.floor(durationMs / 1000);
+  const totalHours = Math.floor(totalSeconds / 3600);
+  const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+  const formattedDuration = `${String(totalHours).padStart(2, '0')}:${String(
+    totalMinutes
+  ).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 
-  if (totalHours > 0) {
-    // 1시간 이상일 경우: H:M:S 형식
-    formattedDuration = `${String(totalHours).padStart(2, '0')}:${String(
-      totalMinutes
-    ).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`;
-  } else {
-    // 1시간 미만일 경우 (totalHours가 0일 때): M:S 형식
-    formattedDuration = `${String(totalMinutes).padStart(2, '0')}:${String(
-      totalSeconds
-    ).padStart(2, '0')}`;
-  }
+  const chipStepOrCalorie =
+    detailData.stepCount > 0
+      ? `${detailData.stepCount.toLocaleString()} 걸음`
+      : `${detailData.burnCalories.toLocaleString()} kcal`;
 
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.mapPlaceholder}>활동 경로 기록</Text>
-        <View style={styles.rowContainer}>
+        <View style={styles.mapFrame}>
           <MapView
             key={mapKey}
             ref={mapRef}
@@ -365,9 +361,22 @@ const ActivityDetailPage = () => {
           <MapOverlayPolyline
             region={mapRegion}
             coordinates={detailData.routeLogs}
-            height={SCREEN_HEIGHT * 0.4}
-            width={SCREEN_WIDTH * 0.8}
+            height={MAP_HEIGHT}
+            width={MAP_WIDTH}
           />
+          <View style={styles.mapOverlay}>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>
+                {detailData.totalDistance.toFixed(2)} km
+              </Text>
+            </View>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>{formattedDuration}</Text>
+            </View>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>{chipStepOrCalorie}</Text>
+            </View>
+          </View>
           <View
             style={styles.mapBlocker}
             pointerEvents='auto'
@@ -375,34 +384,36 @@ const ActivityDetailPage = () => {
             onStartShouldSetResponder={() => true}
           />
         </View>
-        <Text style={styles.header}>활동 상세 정보</Text>
-        <View style={styles.dataCard}>
-          <Text style={styles.dataLabel}>총 거리 :</Text>
-          <Text style={styles.dataValue}>
-            {detailData.totalDistance.toFixed(2)} km
-          </Text>
-        </View>
-        <View style={styles.dataCard}>
-          <Text style={styles.dataLabel}>시간 :</Text>
-          <Text style={styles.dataValue}>{formattedDuration}</Text>
-        </View>
-        <View style={styles.dataCard}>
-          <Text style={styles.dataLabel}>페이스 :</Text>
-          <Text style={styles.dataValue}>
-            {detailData.avgSpeedKmh.toFixed(2)} km/h
-          </Text>
-        </View>
-        <View style={styles.dataCard}>
-          <Text style={styles.dataLabel}>걸음수 :</Text>
-          <Text style={styles.dataValue}>
-            {detailData.stepCount.toLocaleString()} 걸음
-          </Text>
-        </View>
-        <View style={styles.dataCard}>
-          <Text style={styles.dataLabel}>칼로리 :</Text>
-          <Text style={styles.dataValue}>
-            {detailData.burnCalories.toLocaleString()} 칼로리
-          </Text>
+        <Text style={styles.sectionTitle}>활동 요약</Text>
+        <View style={styles.specCard}>
+          <View style={styles.specRow}>
+            <Text style={styles.specLabel}>총 거리</Text>
+            <Text style={styles.specValue}>
+              {detailData.totalDistance.toFixed(2)} km
+            </Text>
+          </View>
+          <View style={styles.specRow}>
+            <Text style={styles.specLabel}>총 시간</Text>
+            <Text style={styles.specValue}>{formattedDuration}</Text>
+          </View>
+          <View style={styles.specRow}>
+            <Text style={styles.specLabel}>평균 속도</Text>
+            <Text style={styles.specValue}>
+              {detailData.avgSpeedKmh.toFixed(2)} km/h
+            </Text>
+          </View>
+          <View style={styles.specRow}>
+            <Text style={styles.specLabel}>걸음수</Text>
+            <Text style={styles.specValue}>
+              {detailData.stepCount.toLocaleString()} 걸음
+            </Text>
+          </View>
+          <View style={[styles.specRow, styles.specRowLast]}>
+            <Text style={styles.specLabel}>소모 칼로리</Text>
+            <Text style={styles.specValue}>
+              {detailData.burnCalories.toLocaleString()} kcal
+            </Text>
+          </View>
         </View>
       </View>
     </ScrollView>

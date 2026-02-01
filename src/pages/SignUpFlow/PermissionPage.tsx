@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     marginLeft: 10,
     fontSize: 16,
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
   },
   startButton: {
     backgroundColor: '#FF6347',

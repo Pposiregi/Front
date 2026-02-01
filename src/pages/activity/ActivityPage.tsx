@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import Svg, { Circle } from 'react-native-svg';
 import {
   ChartData,
   DailyActivity,
@@ -19,12 +21,79 @@ import SessionItem from './SessionItem';
 import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import {
+  getActivityRange,
   getDailyActivity,
   getMonthlySessions,
   getWeeklySteps,
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
+import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import type { getUserResponse } from 'types/main';
+
+const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
+const getMonthRange = (date: Date) => {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return {
+    from: formatDateKey(start),
+    to: formatDateKey(end),
+  };
+};
+
+const formatDailyLabel = (dateKey: string) => {
+  const parsed = parseDateKey(dateKey);
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  const weekday = WEEKDAY_LABELS[parsed.getDay()] ?? '';
+  return `${month}/${day} (${weekday})`;
+};
+
+type ProgressRingProps = {
+  size: number;
+  strokeWidth: number;
+  progress: number;
+  trackColor: string;
+  progressColor: string;
+};
+
+const ProgressRing = ({
+  size,
+  strokeWidth,
+  progress,
+  trackColor,
+  progressColor,
+}: ProgressRingProps) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(progress, 1));
+  const dashOffset = circumference * (1 - clamped);
+
+  return (
+    <Svg width={size} height={size}>
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={trackColor}
+        strokeWidth={strokeWidth}
+        fill='none'
+      />
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={progressColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap='round'
+        strokeDasharray={`${circumference} ${circumference}`}
+        strokeDashoffset={dashOffset}
+        fill='none'
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    </Svg>
+  );
+};
 
 function ActivityPage() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,6 +102,9 @@ function ActivityPage() {
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
   const [monthlyActivities, setMonthlyActivities] = useState<GPS_SESSION[]>([]);
+  const [monthlyDailyActivities, setMonthlyDailyActivities] = useState<
+    DailyActivity[]
+  >([]);
   const [dailyActivity, setDailyActivity] = useState<DailyActivity | null>(
     null
   );
@@ -43,6 +115,7 @@ function ActivityPage() {
   });
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [listTab, setListTab] = useState<'daily' | 'sessions'>('daily');
 
   const chartPadding = activityTheme.spacing.lg;
   const contentPadding = activityTheme.spacing.xl;
@@ -62,6 +135,17 @@ function ActivityPage() {
   );
 
   const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
+
+  const normalizedMonthlyDaily = useMemo(
+    () =>
+      [...monthlyDailyActivities]
+        .filter((item) => item.date)
+        .sort(
+          (a, b) =>
+            parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
+        ),
+    [monthlyDailyActivities]
+  );
 
   const weeklyStepStats = useMemo(() => {
     if (normalizedWeeklySteps.length === 0) {
@@ -125,9 +209,7 @@ function ActivityPage() {
     return Math.max(0, rounded).toLocaleString();
   }, []);
 
-  // 월별 활동 기록을 가져오는 함수
-  const fetchMonthlyActivities = useCallback(async (date: Date) => {
-    setLoading(true);
+  const fetchMonthlySessions = useCallback(async (date: Date) => {
     try {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
@@ -142,10 +224,31 @@ function ActivityPage() {
     } catch (err) {
       console.log('>>> 월별 활동 조회 실패', err);
       setMonthlyActivities([]);
-    } finally {
-      setLoading(false);
     }
   }, []);
+
+  const fetchMonthlyDaily = useCallback(async (date: Date) => {
+    try {
+      const { from, to } = getMonthRange(date);
+      const data = await getActivityRange(from, to);
+      setMonthlyDailyActivities(data ?? []);
+    } catch (err) {
+      console.log('>>> 월별 일일 활동 조회 실패', err);
+      setMonthlyDailyActivities([]);
+    }
+  }, []);
+
+  const fetchMonthlyBundle = useCallback(
+    async (date: Date) => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchMonthlySessions(date), fetchMonthlyDaily(date)]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMonthlyDaily, fetchMonthlySessions]
+  );
 
   // 월 이동 핸들러 (MealPage의 로직 응용)
   const handleChangeMonth = (offset: number) => {
@@ -227,8 +330,8 @@ function ActivityPage() {
   }, [normalizedWeeklySteps]);
 
   useEffect(() => {
-    fetchMonthlyActivities(currentMonth);
-  }, [currentMonth, fetchMonthlyActivities]);
+    fetchMonthlyBundle(currentMonth);
+  }, [currentMonth, fetchMonthlyBundle]);
 
   useEffect(() => {
     fetchWeeklySteps();
@@ -240,10 +343,16 @@ function ActivityPage() {
     calculateWeeklyChart();
   }, [calculateWeeklyChart]);
 
-  const headerText = useMemo(() => {
-    const month = currentMonth.getMonth() + 1;
-    return `${month}월의 활동기록`;
-  }, [currentMonth]);
+  const headerTitle = '활동';
+  const headerSubtitle = useMemo(
+    () => `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`,
+    [currentMonth]
+  );
+
+  const todayLabel = useMemo(() => {
+    const date = new Date();
+    return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  }, []);
 
   const handlePullToRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -251,7 +360,7 @@ function ActivityPage() {
       await Promise.all([
         fetchDailySummary(),
         fetchWeeklySteps(),
-        fetchMonthlyActivities(currentMonth),
+        fetchMonthlyBundle(currentMonth),
       ]);
     } finally {
       setRefreshing(false);
@@ -259,7 +368,7 @@ function ActivityPage() {
   }, [
     currentMonth,
     fetchDailySummary,
-    fetchMonthlyActivities,
+    fetchMonthlyBundle,
     fetchWeeklySteps,
   ]);
 
@@ -268,23 +377,46 @@ function ActivityPage() {
   const burnValue = dailyActivity?.burnCalories ?? 0;
   const targetSteps = userProfile?.targetStepCount ?? 0;
 
-  const badgeInfo = useMemo(() => {
+  const progressValue =
+    targetSteps > 0
+      ? Math.min(stepsValue / targetSteps, 1)
+      : stepsValue > 0
+        ? 1
+        : 0;
+  const remainingSteps = targetSteps > 0 ? targetSteps - stepsValue : 0;
+
+  const progressComment = useMemo(() => {
     if (targetSteps > 0) {
       if (stepsValue >= targetSteps) {
-        return { label: '목표 달성', style: styles.badgeSuccess };
+        return '목표 달성! 펫 표정이 바뀐 것 같아요.';
       }
       if (stepsValue <= 0) {
-        return { label: '걸음 목표 미달', style: styles.badgeMuted };
+        return '오늘의 첫 걸음을 시작해볼까요?';
       }
-      return { label: '진행중', style: styles.badgeProgress };
+      return `오늘은 목표까지 ${Math.max(
+        0,
+        remainingSteps
+      ).toLocaleString()}걸음 남았어요.`;
     }
     if (stepsValue <= 0) {
-      return { label: '오늘 걸음 없음', style: styles.badgeMuted };
+      return '오늘의 첫 걸음을 시작해볼까요?';
     }
-    return { label: '진행중', style: styles.badgeProgress };
-  }, [stepsValue, targetSteps]);
+    return '오늘도 잘 걷고 있어요.';
+  }, [remainingSteps, stepsValue, targetSteps]);
 
-  const showEmptyMonthly = !loading && monthlyActivities.length === 0;
+  const progressSize = Math.max(112, Math.round(SCREEN_WIDTH * 0.28));
+  const progressStroke = Math.max(10, Math.round(progressSize * 0.1));
+
+  const showEmptySessions = !loading && monthlyActivities.length === 0;
+  const showEmptyDaily = !loading && normalizedMonthlyDaily.length === 0;
+  const isNextDisabled = useMemo(() => {
+    const todayDate = new Date();
+    return (
+      currentMonth.getFullYear() > todayDate.getFullYear() ||
+      (currentMonth.getFullYear() === todayDate.getFullYear() &&
+        currentMonth.getMonth() >= todayDate.getMonth())
+    );
+  }, [currentMonth]);
   return (
     <ScrollView
       style={styles.container}
@@ -308,59 +440,83 @@ function ActivityPage() {
             <Text style={styles.arrowText}>{'<'}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.header}>{headerText}</Text>
+          <View style={styles.headerTextWrapper}>
+            <Text style={styles.header}>{headerTitle}</Text>
+            <Text style={styles.headerSub}>{headerSubtitle}</Text>
+          </View>
 
           <TouchableOpacity
             onPress={() => handleChangeMonth(1)}
-            style={styles.arrowButton}
+            style={[
+              styles.arrowButton,
+              isNextDisabled && styles.arrowButtonDisabled,
+            ]}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            disabled={isNextDisabled}
           >
-            <Text style={styles.arrowText}>{'>'}</Text>
+            <Text
+              style={[
+                styles.arrowText,
+                isNextDisabled && styles.arrowTextDisabled,
+              ]}
+            >
+              {'>'}
+            </Text>
           </TouchableOpacity>
         </View>
-        {showEmptyMonthly && (
-          <Text style={styles.subHeaderText}>이번 달 첫 기록을 만들어보자</Text>
-        )}
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryHeader}>
-            <View>
-              <Text style={styles.summaryTitle}>오늘 요약</Text>
-              <Text style={styles.summaryDateText}>{today}</Text>
-            </View>
-            <View style={[styles.badge, badgeInfo.style]}>
-              <Text style={styles.badgeText}>{badgeInfo.label}</Text>
-            </View>
-          </View>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>걸음수</Text>
-              <Text style={styles.summaryValue}>
-                {stepsValue.toLocaleString()}
-              </Text>
-              <Text style={styles.summaryUnit}>걸음</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>거리</Text>
-              <Text style={styles.summaryValue}>
-                {distanceValue.toFixed(2)}
-              </Text>
-              <Text style={styles.summaryUnit}>km</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>소모 칼로리</Text>
-              <Text style={styles.summaryValue}>
-                {burnValue.toLocaleString()}
-              </Text>
-              <Text style={styles.summaryUnit}>kcal</Text>
-            </View>
-          </View>
-        </View>
+        <Text style={styles.summaryNotice}>
+          오늘 [운동]한 내용에 대해서만 집계되요! (그냥 걸은 건 말구요!)
+        </Text>
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>최근 7일 걸음수</Text>
+        <Text style={styles.sectionTitle}>오늘 하루 요약</Text>
+      </View>
+      <View style={styles.summaryCard}>
+        <View style={styles.summaryMetaRow}>
+          <Text style={styles.summaryDateText}>{todayLabel}</Text>
+        </View>
+        <View style={styles.heroRow}>
+          <View style={styles.progressWrapper}>
+            <ProgressRing
+              size={progressSize}
+              strokeWidth={progressStroke}
+              progress={progressValue}
+              trackColor={activityTheme.colors.divider}
+              progressColor={activityTheme.colors.accent}
+            />
+            <View style={styles.progressCenter}>
+              <Text style={styles.progressValue}>
+                {stepsValue.toLocaleString()}
+              </Text>
+              <Text style={styles.progressTarget}>
+                {targetSteps > 0
+                  ? `/ ${targetSteps.toLocaleString()} 걸음`
+                  : '목표 미설정'}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.heroMetrics}>
+            <View style={styles.heroMetricRow}>
+              <Text style={styles.heroMetricLabel}>거리</Text>
+              <Text style={styles.heroMetricValue}>
+                {distanceValue.toFixed(2)} km
+              </Text>
+            </View>
+            <View style={styles.heroMetricDivider} />
+            <View style={styles.heroMetricRow}>
+              <Text style={styles.heroMetricLabel}>칼로리</Text>
+              <Text style={styles.heroMetricValue}>
+                {burnValue.toLocaleString()} kcal
+              </Text>
+            </View>
+          </View>
+        </View>
+        <Text style={styles.heroComment}>{progressComment}</Text>
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>최근 7일</Text>
       </View>
       <View style={styles.chartCard}>
         {chartData.labels.length === 0 || !hasWeeklySteps ? (
@@ -395,6 +551,7 @@ function ActivityPage() {
               yAxisLabel=''
               yAxisSuffix=''
               withVerticalLabels
+              withHorizontalLabels={false}
               withInnerLines
               withOuterLines={false}
               withShadow={false}
@@ -412,8 +569,42 @@ function ActivityPage() {
         )}
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>이번 달 기록</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>이달 기록</Text>
+        <View style={styles.segmentedControl}>
+          <Pressable
+            onPress={() => setListTab('daily')}
+            style={[
+              styles.segmentedButton,
+              listTab === 'daily' && styles.segmentedButtonActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.segmentedText,
+                listTab === 'daily' && styles.segmentedTextActive,
+              ]}
+            >
+              일별
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setListTab('sessions')}
+            style={[
+              styles.segmentedButton,
+              listTab === 'sessions' && styles.segmentedButtonActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.segmentedText,
+                listTab === 'sessions' && styles.segmentedTextActive,
+              ]}
+            >
+              활동별
+            </Text>
+          </Pressable>
+        </View>
       </View>
       {loading ? (
         <ActivityIndicator
@@ -421,10 +612,41 @@ function ActivityPage() {
           color='#A5B4FC'
           style={styles.loadingIndicator}
         />
-      ) : showEmptyMonthly ? (
+      ) : listTab === 'daily' ? (
+        showEmptyDaily ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyCardTitle}>
+              이달의 일별 기록이 없어요.
+            </Text>
+            <Text style={styles.emptyCardText}>
+              오늘 산책을 시작하면 자동으로 기록돼요.
+            </Text>
+          </View>
+        ) : (
+          normalizedMonthlyDaily.map((item) => (
+            <View key={item.date} style={styles.listCard}>
+              <View style={styles.listMarker} />
+              <View style={styles.listTextColumn}>
+                <Text style={styles.listTitle}>
+                  {formatDailyLabel(item.date)}
+                </Text>
+                <Text style={styles.listSubtitle}>
+                  {(Number(item.distanceKm) || 0).toFixed(2)} km ·{' '}
+                  {(Number(item.burnCalories) || 0).toLocaleString()} kcal
+                </Text>
+              </View>
+              <View style={styles.listRight}>
+                <Text style={[styles.listValue, styles.listValueAccent]}>
+                  {(Number(item.steps) || 0).toLocaleString()} 걸음
+                </Text>
+              </View>
+            </View>
+          ))
+        )
+      ) : showEmptySessions ? (
         <View style={styles.emptyCard}>
           <Text style={styles.emptyCardTitle}>
-            이번 달 첫 기록을 만들어보자
+            이달의 GPS 세션이 없어요.
           </Text>
           <Text style={styles.emptyCardText}>
             메인 화면에서 산책을 시작하면 자동으로 기록돼요.

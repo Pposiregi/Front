@@ -37,7 +37,7 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     textAlign: 'center',
     color: '#000000ff',
     fontSize: 24,
@@ -81,7 +81,7 @@ export default StyleSheet.create({
     elevation: 4,
   },
   locateText: {
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontWeight: '600',
     fontSize: 12,
     color: '#1F1F1F',
@@ -111,7 +111,7 @@ export default StyleSheet.create({
   },
   overlayText: {
     color: '#fff',
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
   },
   startButton: {
