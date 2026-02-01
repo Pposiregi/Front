@@ -42,6 +42,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
+import { mockActiveMissions } from './mockMission';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -295,9 +296,12 @@ export const MainPage = () => {
           setLastSyncedSteps(healthSteps);
         }
       }
-
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
+      if (__DEV__) {
+        const activeMission = mockActiveMissions;
+        setMissionApiItems(activeMission.missions);
+      }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
@@ -318,13 +322,20 @@ export const MainPage = () => {
   // Progress Bar 가공
   const progressMissions = missionApiItems
     .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
-    .map((m) => ({
-      id: m.missionCheckId.toString(),
-      title: m.title,
-      current: m.progressValue,
-      goal: m.goalValue,
-      unit: m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-    }));
+    .map((m) => {
+      const isReadyToComplete = m.progressValue >= m.goalValue;
+
+      return {
+        id: m.missionCheckId.toString(),
+        title: m.title,
+        current: m.progressValue,
+        goal: m.goalValue,
+        unit:
+          m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+        isReadyToComplete,
+        missionCheckId: m.missionCheckId,
+      };
+    });
 
   useEffect(() => {
     if (!healthError) {
@@ -388,6 +399,11 @@ export const MainPage = () => {
                 current={item.current}
                 goal={item.goal}
                 unit={item.unit}
+                isReadyToComplete={item.isReadyToComplete}
+                onPress={() => {
+                  if (!item.isReadyToComplete) return;
+                  handleOpenMission();
+                }}
               />
             )}
             showsHorizontalScrollIndicator={false}

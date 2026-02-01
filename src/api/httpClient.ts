@@ -12,11 +12,9 @@ if (!API_BASE_URL) {
  * 원격은 API_BASE_URL
  */
 const apiClient = axios.create({
-  baseURL: YOUR_API_KEY,
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
-
-console.log(YOUR_API_KEY);
 
 const toLogString = (payload: unknown) => {
   try {

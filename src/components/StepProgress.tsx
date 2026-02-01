@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, Pressable } from 'react-native';
 import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
 
@@ -9,6 +9,8 @@ type Props = {
   goal: number;
   unit?: string;
   isCompleted?: boolean;
+  isReadyToComplete?: boolean;
+  onPress?: () => void;
 };
 
 /**
@@ -17,6 +19,7 @@ type Props = {
  * @param current - current progress value
  * @param goal - goal value
  * @param unit - optional unit string (ex: "보", "km")
+ * @param isReadyToComplete
  */
 export const StepProgress = ({
   title,
@@ -24,6 +27,8 @@ export const StepProgress = ({
   goal,
   unit,
   isCompleted,
+  isReadyToComplete,
+  onPress,
 }: Props) => {
   const progress = goal > 0 ? current / goal : 0;
   const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -33,11 +38,28 @@ export const StepProgress = ({
   );
   const barWidth = Math.max(100, cardWidth - 20); // padding 고려
 
+  const disabled = !isReadyToComplete;
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>{title}</Text>
-      <Progress.Bar progress={progress} width={barWidth} color='#7450FF' />
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={[styles.card, isReadyToComplete && styles.readyCard]}
+    >
+      {/* 🔹 타이틀 행 */}
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{title}</Text>
+
+        {isReadyToComplete && !isCompleted && (
+          <Text style={styles.completeHint}>완료하기</Text>
+        )}
+      </View>
+      <Progress.Bar
+        progress={progress}
+        width={barWidth}
+        color={isReadyToComplete ? '#4CAF50' : '#7450FF'}
+      />
       <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
-    </View>
+    </Pressable>
   );
 };

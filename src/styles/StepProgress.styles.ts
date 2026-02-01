@@ -19,9 +19,22 @@ export default StyleSheet.create({
     height: CARD_HEIGHT,
     marginRight: 10,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   title: {
     fontFamily: 'JUA',
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  completeHint: {
+    fontSize: 13,
+    fontFamily: 'JUA',
+    color: '#4CAF50',
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -30,5 +43,12 @@ export default StyleSheet.create({
     marginTop: 4,
     fontSize: 12,
     textAlign: 'right',
+  },
+  readyCard: {
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+    backgroundColor: '#F4FFF6',
+    shadowOpacity: 0.15,
+    elevation: 6,
   },
 });
