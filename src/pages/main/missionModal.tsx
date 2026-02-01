@@ -6,21 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  Alert,
 } from 'react-native';
 import type { MissionActiveItem } from 'types/mission';
 import styles from '@styles/missionModal.styles';
 import MissionCard from './missionCard';
+import { postMissionComplete } from '@api/missionApi';
 
 interface MissionModalProps {
   visible: boolean;
   onClose: () => void;
   missions: MissionActiveItem[];
+  onComplete?: () => void;
 }
 
 const MissionModal: React.FC<MissionModalProps> = ({
   visible,
   onClose,
   missions,
+  onComplete,
 }) => {
   const [activeTab, setActiveTab] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
     'DAILY'
@@ -54,7 +58,7 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 <Text
                   style={[
                     styles.tabText,
-                    activeTab === tab && styles.tabTextActive, // 텍스트 스타일도 동일하게 조건부
+                    activeTab === tab && styles.tabTextActive,
                   ]}
                 >
                   {tab === 'DAILY'
@@ -66,7 +70,6 @@ const MissionModal: React.FC<MissionModalProps> = ({
               </TouchableOpacity>
             ))}
           </View>
-
           <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
             {filteredMissions.length === 0 ? (
               <Text style={styles.emptyMissionText}>미션이 없습니다.</Text>
@@ -75,12 +78,19 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 <MissionCard
                   key={mission.missionCheckId}
                   mission={mission}
-                  onComplete={(id) => console.log(`미션 완료: ${id}`)}
+                  onComplete={async (missionCheckId) => {
+                    console.log('API 호출 전 missionCheckId:', missionCheckId); // 로그 확인
+                    try {
+                      await postMissionComplete(missionCheckId);
+                      onComplete?.();
+                    } catch (error) {
+                      console.error('오류 발생!!:', error);
+                    }
+                  }}
                 />
               ))
             )}
           </ScrollView>
-
           <TouchableOpacity
             onPress={onClose}
             style={styles.missionUIExitButton}

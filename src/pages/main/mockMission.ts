@@ -25,7 +25,7 @@ export const mockActiveMissions: MissionActiveResponse = {
       periodStart: '2026-02-01',
       periodEnd: '2026-02-01',
       goalValue: 5000,
-      progressValue: 0,
+      progressValue: 3000,
       isCompleted: false,
       completedAt: null,
     },

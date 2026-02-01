@@ -6,7 +6,7 @@ import styles from '@styles/missionModal.styles';
 
 interface MissionCardProps {
   mission: MissionActiveItem;
-  onComplete: (id: string) => void;
+  onComplete: (id: number) => void;
 }
 
 const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete }) => {
@@ -44,11 +44,11 @@ const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete }) => {
         <View style={styles.flexEndContainer}>
           <TouchableOpacity
             disabled={!isReadyToComplete}
-            onPress={() => console.log('눌림')}
+            onPress={() => onComplete(mission.missionCheckId)}
             style={[
               styles.completeButton,
               isReadyToComplete
-                ? { backgroundColor: '#2196F3' }
+                ? { backgroundColor: '#FEC288' }
                 : { backgroundColor: '#ccc' },
             ]}
           >

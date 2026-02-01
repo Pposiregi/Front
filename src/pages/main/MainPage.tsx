@@ -298,10 +298,10 @@ export const MainPage = () => {
       }
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
-      if (__DEV__) {
-        const activeMission = mockActiveMissions;
-        setMissionApiItems(activeMission.missions);
-      }
+      // if (__DEV__) {
+      //   const activeMission = mockActiveMissions;
+      //   setMissionApiItems(activeMission.missions);
+      // }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
@@ -440,6 +440,7 @@ export const MainPage = () => {
             visible={showMissionModal}
             onClose={handleCloseMission}
             missions={missionApiItems}
+            onComplete={refreshMissions}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>

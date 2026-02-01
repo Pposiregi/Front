@@ -56,7 +56,7 @@ export const StepProgress = ({
       <Progress.Bar
         progress={progress}
         width={barWidth}
-        color={isReadyToComplete ? '#4CAF50' : '#7450FF'}
+        color={isReadyToComplete ? '#FEC288' : '#cf8b8b'}
       />
       <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
     </Pressable>

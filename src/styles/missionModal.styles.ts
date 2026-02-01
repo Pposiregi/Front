@@ -34,7 +34,7 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#FEC288',
   },
   tabText: {
     fontFamily: 'JUA',
@@ -59,9 +59,9 @@ export default StyleSheet.create({
     borderRadius: 12,
   },
   missionUICardReadbyBorder: {
-    backgroundColor: '#F4FFF6',
+    backgroundColor: '#ffefe0',
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: '#FEC288',
     borderRadius: 12,
   },
   missionUICardHeader: {
@@ -115,13 +115,13 @@ export default StyleSheet.create({
   progressBarForeground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#FEC288',
   },
   missionUIExitButton: {
     marginTop: 12,
     alignSelf: 'flex-end',
     padding: 8,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#FEC288',
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',

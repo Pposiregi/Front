@@ -18,8 +18,8 @@ export default StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginRight: 10,
-    borderColor: '#E0E0E0',
     borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   titleRow: {
     flexDirection: 'row',
@@ -36,7 +36,7 @@ export default StyleSheet.create({
   completeHint: {
     fontSize: 13,
     fontFamily: 'JUA',
-    color: '#4CAF50',
+    color: '#FEC288',
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -48,8 +48,8 @@ export default StyleSheet.create({
   },
   readyCard: {
     borderWidth: 2,
-    borderColor: '#4CAF50',
-    backgroundColor: '#F4FFF6',
+    borderColor: '#FEC288',
+    backgroundColor: '#ffefe0',
     shadowOpacity: 0.15,
     elevation: 6,
   },
