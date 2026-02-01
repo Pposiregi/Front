@@ -111,7 +111,7 @@ const ProgressRing = ({
 
 function ActivityPage() {
   const [loading, setLoading] = useState<boolean>(true);
-  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const today = useMemo(() => formatDateKey(new Date()), []);
   const [currentMonth, setCurrentMonth] = useState(
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
@@ -310,17 +310,19 @@ function ActivityPage() {
   const fetchDailySummary = useCallback(async () => {
     try {
       const response = await getDailyActivity(today);
-      console.log(
-        '>>> [Activity] daily summary',
-        JSON.stringify(
-          {
-            date: today,
-            response,
-          },
-          null,
-          0
-        )
-      );
+      if (__DEV__) {
+        console.log(
+          '>>> [Activity] daily summary',
+          JSON.stringify(
+            {
+              date: today,
+              response,
+            },
+            null,
+            0
+          )
+        );
+      }
       setDailyActivity(response);
     } catch (err) {
       console.warn('오늘 활동 요약 fetch 실패', err);
@@ -396,9 +398,11 @@ function ActivityPage() {
   );
 
   const todayLabel = useMemo(() => {
-    const date = new Date();
+    const date = dailyActivity?.date
+      ? parseDateKey(dailyActivity.date)
+      : new Date();
     return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-  }, []);
+  }, [dailyActivity?.date]);
 
   /**
    * 풀투리프레시 핸들러.

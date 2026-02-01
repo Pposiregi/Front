@@ -165,7 +165,10 @@ const ActivityDetailPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!sessionId) return;
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const data = await getSessionDetail(sessionId);
