@@ -286,14 +286,22 @@ export const MainPage = () => {
   }, [addSteps]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
+  console.log('lastSyncedSteps : ', lastSyncedSteps);
   // Health Steps 서버 전송 + 미션 최신화
   const refreshMissions = useCallback(async () => {
     try {
       if (healthSteps != null) {
         const diff = healthSteps - lastSyncedSteps;
+        console.log(
+          `전송 전 diff : ${diff}, healthStpes : ${healthSteps}, lastSyncedSteps : ${lastSyncedSteps} `
+        );
         if (diff >= 1000) {
           await syncSteps(healthSteps);
           setLastSyncedSteps(healthSteps);
+
+          console.log(
+            `전송 후 diff : ${diff}, healthStpes : ${healthSteps}, lastSyncedSteps : ${lastSyncedSteps} `
+          );
         }
       }
       const activeMission = await getMissionsActive();

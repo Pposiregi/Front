@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Dimensions, Pressable } from 'react-native';
+import { View, Text, Dimensions, Pressable, Image } from 'react-native';
 import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
 
@@ -46,18 +46,18 @@ export const StepProgress = ({
       disabled={disabled}
       style={[styles.card, isReadyToComplete && styles.readyCard]}
     >
-      <View style={styles.titleRow}>
-        <Text style={styles.title}>{title}</Text>
-
-        {isReadyToComplete && !isCompleted && (
-          <Text style={styles.completeHint}>완료하기</Text>
-        )}
-      </View>
+      <Text style={styles.title}>{title}</Text>
       <Progress.Bar
         progress={progress}
         width={barWidth}
         color={isReadyToComplete ? '#FEC288' : '#cf8b8b'}
       />
+      {isReadyToComplete && !isCompleted && (
+        <Image
+          source={require('../assets/images/paw_stamp.png')}
+          style={styles.completeHint}
+        />
+      )}
       <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
     </Pressable>
   );

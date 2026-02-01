@@ -30,15 +30,13 @@ export default StyleSheet.create({
   title: {
     fontFamily: 'JUA',
     fontSize: 16,
-    fontWeight: '600',
     marginBottom: 8,
   },
   completeHint: {
-    fontSize: 13,
-    fontFamily: 'JUA',
-    color: '#FEC288',
-    fontWeight: '600',
-    marginBottom: 8,
+    position: 'absolute',
+    left: '10%', // 가로 중앙
+    width: 130, // 크기 조절
+    height: 80,
   },
   text: {
     fontFamily: 'JUA',
