@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   modalKcalText: {
     fontSize: 18,
     color: '#555',
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
   },
   /**
    * 뱃지

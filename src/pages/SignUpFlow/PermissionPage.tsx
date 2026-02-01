@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
-//props로 받아오기 위해 작성
+/**
+ * 약관 동의 단계에서 사용할 props.
+ */
 type PermissionProps = {
   onNext: (data: {
     permissions: {
@@ -13,12 +15,19 @@ type PermissionProps = {
   }) => void;
 };
 
+/**
+ * 약관 동의 화면.
+ * - 필수 동의가 완료되면 다음 단계로 진행한다.
+ */
 const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
   const [agreeAll, setAgreeAll] = useState(false);
   const [locationAgree, setLocationAgree] = useState(false);
   const [privacyAgree, setPrivacyAgree] = useState(false);
   const [pushAgree, setPushAgree] = useState(false);
 
+  /**
+   * 전체 동의 토글 처리.
+   */
   const handleAgreeAll = (newValue: boolean) => {
     setAgreeAll(newValue);
     setLocationAgree(newValue);
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     marginLeft: 10,
     fontSize: 16,
-    fontFamily: 'GowunDodum',
+    fontFamily: 'Roboto-VariableFont',
   },
   startButton: {
     backgroundColor: '#FF6347',

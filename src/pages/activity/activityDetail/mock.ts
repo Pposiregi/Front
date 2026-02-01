@@ -1,5 +1,8 @@
 import { GPS_LOG, SessionDetail } from './types';
 
+/**
+ * 세션별 GPS 경로 목업 데이터.
+ */
 export const mock_gps_log: Record<string, GPS_LOG[]> = {
   S_AM_0830: [
     { latitude: 35.1516, longitude: 128.9976, altitude: 15.0 },
@@ -26,22 +29,24 @@ export const mock_gps_log: Record<string, GPS_LOG[]> = {
   ],
 };
 
-// --- 목업 메타데이터 (GPS_Session 상세) ---
+/**
+ * GPS 세션 상세 목업 메타데이터.
+ */
 export const mockSessionMetadata: Record<
   string,
   Omit<SessionDetail, 'routeLogs'>
 > = {
   S_AM_0830: {
-    startTime: '2025-11-09T08:30:00.000Z',
-    endTime: '2025-11-09T11:00:17.000Z',
+    startTime: '2026-01-09T08:30:00.000Z',
+    endTime: '2026-01-09T11:00:17.000Z',
     totalDistance: 6.5,
     avgSpeedKmh: 4.5,
     stepCount: 8900,
     burnCalories: 246,
   },
   S_PM_1930: {
-    startTime: '2025-11-09T19:30:00.000Z',
-    endTime: '2025-11-09T21:00:00.000Z',
+    startTime: '2026-01-09T19:30:00.000Z',
+    endTime: '2026-01-09T21:00:00.000Z',
     totalDistance: 4.8,
     avgSpeedKmh: 3.2,
     stepCount: 6100,

@@ -8,7 +8,14 @@ export type ActivityStackParamList = {
     sessionId: string;
   };
 };
+
+/**
+ * 활동 탭 네비게이션 스택.
+ */
 const Stack = createNativeStackNavigator<ActivityStackParamList>();
+/**
+ * Activity 스택을 렌더링한다.
+ */
 const ActivityStack = () => {
   return (
     <Stack.Navigator>
@@ -20,7 +27,7 @@ const ActivityStack = () => {
       <Stack.Screen
         name='ActivityDetailPage'
         component={ActivityDetailPage}
-        options={{ headerShown: true, title: '활동 상세 정보' }}
+        options={{ headerShown: true, title: '이렇게 달렸어요!' }}
       />
     </Stack.Navigator>
   );

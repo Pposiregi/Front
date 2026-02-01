@@ -22,6 +22,7 @@ import { tabIcons, TabIconKey } from '@assets/icons';
 import { refreshAccessToken } from '@api/authApi';
 import ProfileStack from '@navigation/profileStack';
 import { getDeviceUuid } from '@utils/deviceUuid';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   patchPushToken,
   postPushToken,
@@ -46,6 +47,9 @@ export type RootStackParamList = {
   Intro: undefined;
 };
 
+/**
+ * Google OAuth 설정 (로그인).
+ */
 GoogleSignin.configure({
   webClientId: GOOGLE_CLIENT_ID,
   offlineAccess: true,
@@ -54,8 +58,8 @@ GoogleSignin.configure({
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-/***
- * tabBarIcon 생성 함수
+/**
+ * 탭바 아이콘 생성 함수.
  * @param routeName - 탭 네비게이션의 라우트 이름
  * @returns 탭 아이콘 컴포넌트
  */
@@ -77,6 +81,9 @@ const createTabBarIcon =
     );
   };
 
+/**
+ * 탭 스크린 옵션을 생성한다.
+ */
 const getTabScreenOptions = (routeName: TabIconKey) => ({
   headerShown: false,
   tabBarStyle: styles.tabBar,
@@ -85,9 +92,15 @@ const getTabScreenOptions = (routeName: TabIconKey) => ({
   tabBarShowLabel: false,
 });
 
+/**
+ * 지정 시간(ms) 대기 유틸.
+ */
 const wait = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
+/**
+ * FCM 권한 상태를 라벨로 변환한다.
+ */
 const getPermissionLabel = (status: number) => {
   switch (status) {
     case messaging.AuthorizationStatus.AUTHORIZED:
@@ -103,6 +116,10 @@ const getPermissionLabel = (status: number) => {
   }
 };
 
+/**
+ * 작업을 최대 attempts 만큼 재시도한다.
+ * - 실패 시 지수적 딜레이로 재시도
+ */
 const runWithRetry = async <T,>(
   label: string,
   task: () => Promise<T>,
@@ -128,6 +145,10 @@ const runWithRetry = async <T,>(
   }
 };
 
+/**
+ * 앱 진입 루트 컴포넌트.
+ * - 로그인/회원가입 상태에 따라 스택을 분기한다.
+ */
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
@@ -140,6 +161,10 @@ function AppInner() {
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
+  /**
+   * 앱 진입 시 자동 로그인 처리.
+   * - refreshToken 갱신 및 유저 상태 초기화
+   */
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -160,18 +185,29 @@ function AppInner() {
         }
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
-          const result = await refreshAccessToken();
-          if (result?.serverAccessToken) {
-            dispatch(
-              userSlice.actions.setUser({
-                accessToken: result.serverAccessToken,
-              })
-            );
-            dispatch(
-              userSlice.actions.setSignUpInProgress(
-                result.registrationStatus === 'INCOMPLETE'
-              )
-            );
+          try {
+            const result = await refreshAccessToken();
+            if (result?.serverAccessToken) {
+              dispatch(
+                userSlice.actions.setUser({
+                  accessToken: result.serverAccessToken,
+                })
+              );
+              dispatch(
+                userSlice.actions.setSignUpInProgress(
+                  result.registrationStatus === 'INCOMPLETE'
+                )
+              );
+            }
+          } catch (err: any) {
+            const status = err?.response?.status;
+            if (status === 401) {
+              await EncryptedStorage.removeItem('refreshToken');
+              await EncryptedStorage.removeItem('serverAccessToken');
+              await AsyncStorage.removeItem('isSignUpInProgress');
+              dispatch(userSlice.actions.resetUser());
+            }
+            console.error('[AuthError] 자동로그인 실패', err);
           }
         }
       } catch (err) {
@@ -185,11 +221,10 @@ function AppInner() {
     checkAuthStatus();
   }, [dispatch]);
 
+  /**
+   * 푸시 토큰 등록 처리.
+   */
   useEffect(() => {
-    /**
-     * PushToken
-     * @returns
-     */
     const registerPushToken = async () => {
       // 로그인 || 회원가입 상태에서만.
       if (!isLoggedIn || isSignUpInProgress || !accessToken) {
@@ -254,6 +289,9 @@ function AppInner() {
     registerPushToken();
   }, [accessToken, isLoggedIn, isSignUpInProgress]);
 
+  /**
+   * FCM 토큰 갱신 시 서버 반영.
+   */
   useEffect(() => {
     if (!isLoggedIn || isSignUpInProgress || !accessToken) {
       return;

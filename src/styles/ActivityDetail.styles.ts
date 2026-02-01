@@ -1,61 +1,115 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
+const colors = {
+  background: '#F3F4F6',
+  surface: '#FFFFFF',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
+  divider: '#E5E7EB',
+  chipBackground: 'rgba(17, 24, 39, 0.75)',
+  chipText: '#FFFFFF',
+  shadow: '#000000',
+};
+
+const cardShadow = {
+  shadowColor: colors.shadow,
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 3,
+};
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#555',
+    color: colors.textSecondary,
+    fontFamily: 'Roboto-VariableFont',
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  dataCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  dataLabel: {
-    fontSize: 16,
-    color: '#555',
-  },
-  dataValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  mapPlaceholder: {
-    marginBottom: 10,
-    padding: 14,
-    backgroundColor: '#e8e8e8',
-    textAlign: 'center',
-    color: '#333',
-    fontSize: 18,
-    fontFamily: 'JUA',
-    borderRadius: 8,
+  mapFrame: {
+    height: SCREEN_HEIGHT * 0.36,
+    width: SCREEN_WIDTH - 40,
+    borderRadius: 18,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+    marginBottom: 16,
+    ...cardShadow,
   },
   map: {
-    height: SCREEN_HEIGHT * 0.4,
-    width: SCREEN_WIDTH * 0.8,
+    ...StyleSheet.absoluteFillObject,
+  },
+  mapOverlay: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    top: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chip: {
+    backgroundColor: colors.chipBackground,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  chipText: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 12,
+    color: colors.chipText,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    marginBottom: 12,
+    fontFamily: 'JUA',
+    color: colors.textPrimary,
+  },
+  specCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    ...cardShadow,
+  },
+  specRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
+  },
+  specLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontFamily: 'Roboto-VariableFont',
+  },
+  specValue: {
+    fontSize: 14,
+    color: colors.textPrimary,
+    fontFamily: 'JUA',
+  },
+  specRowLast: {
+    borderBottomWidth: 0,
+  },
+  mapBlocker: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+  },
+  emptyText: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    fontFamily: 'Roboto-VariableFont',
   },
 });
