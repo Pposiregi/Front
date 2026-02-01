@@ -174,27 +174,31 @@ const ActivityDetailPage = () => {
         const data = await getSessionDetail(sessionId);
         const normalizedRouteLogs = normalizeRouteLogs(data.routeLogs);
 
-        console.log(
-          '>>> [ActivityDetail] routeLogs 정규화',
-          JSON.stringify(
-            {
-              sessionId,
-              originalCount: data.routeLogs?.length ?? 0,
-              normalizedCount: normalizedRouteLogs.length,
-              first: normalizedRouteLogs[0],
-              rawFirst: data.routeLogs?.[0],
-            },
-            null,
-            0
-          )
-        );
+        if (__DEV__) {
+          console.log(
+            '>>> [ActivityDetail] routeLogs 정규화',
+            JSON.stringify(
+              {
+                sessionId,
+                originalCount: data.routeLogs?.length ?? 0,
+                normalizedCount: normalizedRouteLogs.length,
+                first: normalizedRouteLogs[0],
+                rawFirst: data.routeLogs?.[0],
+              },
+              null,
+              0
+            )
+          );
+        }
         if (
           (data.routeLogs?.length ?? 0) > 0 &&
           normalizedRouteLogs.length === 0
         ) {
-          console.warn(
-            '>>> [ActivityDetail] routeLogs 정규화 결과가 0개입니다. rawFirst를 확인하세요.'
-          );
+          if (__DEV__) {
+            console.warn(
+              '>>> [ActivityDetail] routeLogs 정규화 결과가 0개입니다. rawFirst를 확인하세요.'
+            );
+          }
         }
 
         setDetailData({
