@@ -134,7 +134,6 @@ function ActivityPage() {
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [listTab, setListTab] = useState<'daily' | 'sessions'>('daily');
-
   const chartPadding = activityTheme.spacing.lg;
   const contentPadding = activityTheme.spacing.xl;
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
@@ -177,7 +176,7 @@ function ActivityPage() {
       max: Math.max(...steps),
     };
   }, [normalizedWeeklySteps]);
-
+  
   /**
    * HEX 컬러를 RGBA 문자열로 변환한다.
    */
@@ -521,7 +520,6 @@ function ActivityPage() {
           오늘 러닝한 내용에 대해서만 집계돼요! (그냥 걸은 건 말구요!)
         </Text>
       </View>
-
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>오늘 하루 요약</Text>
       </View>

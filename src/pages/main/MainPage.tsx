@@ -39,6 +39,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
+import { mockActiveMissions } from './mockMission';
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -86,8 +87,16 @@ export const MainPage = () => {
     []
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
+  const [trans, setTrans] = useState(false); // 미션 완료 트리거
   const handleOpenMission = () => setShowMissionModal(true);
-  const handleCloseMission = () => setShowMissionModal(false);
+  const handleCloseMission = () => {
+    // 모달 닫힐 때 강아지 웃음 트리거
+    if (trans) {
+      changePetState(PetStates.HAPPY, { duration: 1500 });
+      setTrans(false); // 초기화
+    }
+    setShowMissionModal(false);
+  };
 
   /**
    * 걸음수 동기화 훅.
@@ -344,9 +353,12 @@ export const MainPage = () => {
           setLastSyncedSteps(healthSteps);
         }
       }
-
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
+      // if (__DEV__) {
+      //   const activeMission = mockActiveMissions;
+      //   setMissionApiItems(activeMission.missions);
+      // }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
@@ -368,18 +380,40 @@ export const MainPage = () => {
     }, [refreshMissions])
   );
 
-  /**
-   * 일일 미션 중 진행 중 항목만 필터링한다.
-   */
-  const progressMissions = missionApiItems
-    .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
-    .map((m) => ({
-      id: m.missionCheckId.toString(),
-      title: m.title,
-      current: m.progressValue,
-      goal: m.goalValue,
-      unit: m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
-    }));
+  // Progress Bar 가공
+  const progressMissions = useMemo(() => {
+    return missionApiItems
+      .filter((m) => !m.isCompleted && m.periodType === 'DAILY')
+      .map((m) => {
+        // 기본값은 서버 데이터
+        let currentDisplayValue = m.progressValue ?? 0;
+
+        // 만약 걸음수 미션(STEP)이라면, 실시간 기기 걸음수(healthSteps)를 반영
+        if (m.category === 'STEP' && healthSteps !== null) {
+          // 서버의 마지막 동기화 값보다 현재 기기 걸음수가 더 크면 기기 값을 사용
+          currentDisplayValue = Math.max(m.progressValue, healthSteps);
+        }
+
+        // 미션 진행도(progressValue)가 goalValue를 초과할 수 없도록 고정
+        const completeDisplayValue = Math.min(
+          currentDisplayValue,
+          m.goalValue ?? 0
+        );
+
+        const isReadyToComplete = currentDisplayValue >= m.goalValue;
+
+        return {
+          id: m.missionCheckId.toString(),
+          title: m.title,
+          current: completeDisplayValue,
+          goal: m.goalValue,
+          unit:
+            m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+          isReadyToComplete,
+          missionCheckId: m.missionCheckId,
+        };
+      });
+  }, [missionApiItems, healthSteps]);
 
   useEffect(() => {
     if (!healthError) {
@@ -447,6 +481,11 @@ export const MainPage = () => {
                 current={item.current}
                 goal={item.goal}
                 unit={item.unit}
+                isReadyToComplete={item.isReadyToComplete}
+                onPress={() => {
+                  if (!item.isReadyToComplete) return;
+                  handleOpenMission();
+                }}
               />
             )}
             showsHorizontalScrollIndicator={false}
@@ -483,6 +522,10 @@ export const MainPage = () => {
             visible={showMissionModal}
             onClose={handleCloseMission}
             missions={missionApiItems}
+            onComplete={() => {
+              refreshMissions(); // 기존 미션 새로고침
+              setTrans(true);
+            }}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>

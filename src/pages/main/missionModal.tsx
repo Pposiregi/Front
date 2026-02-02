@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  Alert,
+} from 'react-native';
 import type { MissionActiveItem } from 'types/mission';
-import styles from '@styles/MainPage.styles';
+import styles from '@styles/missionModal.styles';
+import MissionCard from './missionCard';
+import { postMissionComplete } from '@api/missionApi';
 
 interface MissionModalProps {
   visible: boolean;
   onClose: () => void;
   missions: MissionActiveItem[];
+  onComplete?: () => void;
+  healthSteps?: number | null;
 }
 
 const MissionModal: React.FC<MissionModalProps> = ({
   visible,
   onClose,
   missions,
+  onComplete,
+  healthSteps,
 }) => {
   const [activeTab, setActiveTab] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
     'DAILY'
@@ -30,9 +44,7 @@ const MissionModal: React.FC<MissionModalProps> = ({
     >
       <View style={styles.missionView}>
         <View style={styles.modalBox}>
-          <Text style={styles.missionTitle}>미션</Text>
-
-          {/* 탭 버튼 */}
+          <Text style={styles.missionTitle}>진행중인 미션</Text>
           <View style={styles.tabRow}>
             {['DAILY', 'WEEKLY', 'MONTHLY'].map((tab) => (
               <TouchableOpacity
@@ -42,14 +54,14 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 }
                 style={[
                   styles.tabButton,
-                  activeTab === tab && {
-                    borderBottomWidth: 2,
-                    borderBottomColor: '#2196F3',
-                  },
+                  activeTab === tab && styles.tabButtonActive,
                 ]}
               >
                 <Text
-                  style={{ fontWeight: activeTab === tab ? 'bold' : 'normal' }}
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.tabTextActive,
+                  ]}
                 >
                   {tab === 'DAILY'
                     ? '일일'
@@ -60,39 +72,25 @@ const MissionModal: React.FC<MissionModalProps> = ({
               </TouchableOpacity>
             ))}
           </View>
-
           <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
             {filteredMissions.length === 0 ? (
               <Text style={styles.emptyMissionText}>미션이 없습니다.</Text>
             ) : (
-              filteredMissions.map((mission) => {
-                const progress =
-                  mission.goalValue > 0
-                    ? mission.progressValue / mission.goalValue
-                    : 0;
-
-                return (
-                  <View
-                    key={mission.missionCheckId}
-                    style={styles.missionUICard}
-                  >
-                    {/* 한 줄로 타이틀과 진행값 배치 */}
-                    <View style={styles.missionUICardHeader}>
-                      <Text style={styles.missionUITextTitle}>
-                        {mission.title}
-                      </Text>
-                      <Text style={styles.missionUIText}>
-                        {mission.progressValue} / {mission.goalValue}{' '}
-                        {mission.category === 'STEP'
-                          ? '보'
-                          : mission.category === 'MEAL'
-                          ? '회'
-                          : '장'}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })
+              filteredMissions.map((mission) => (
+                <MissionCard
+                  key={mission.missionCheckId}
+                  mission={mission}
+                  healthSteps={healthSteps}
+                  onComplete={async (missionCheckId) => {
+                    try {
+                      await postMissionComplete(missionCheckId);
+                      onComplete?.();
+                    } catch (error) {
+                      console.error('오류 발생!!:', error);
+                    }
+                  }}
+                />
+              ))
             )}
           </ScrollView>
           <TouchableOpacity

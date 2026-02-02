@@ -46,3 +46,27 @@ export interface MissionActiveItem {
 export interface MissionActiveResponse {
   missions: MissionActiveItem[];
 }
+
+/**
+ * 미션 완료 요청 타입
+ */
+export interface MissionCompleteRequest {
+  missionCheckId: number;
+}
+
+/**
+ * 미션 완료 응답 타입
+ */
+export interface MissionCompleteResponse {
+  missionCheckId: number;
+  missionId: number;
+  userId: number;
+  completed: boolean;
+  progressValue: number;
+  periodType: MissionPeriodType;
+  periodStart: string;
+  periodEnd: string;
+  completedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -23,6 +23,7 @@ export const getSocialLogin = async ({
 
   try {
     const response = await apiClient.post<SocialLoginApiResponse>(url, body);
+
     const setCookieHeader = response.headers['set-cookie'];
     if (setCookieHeader) {
       const cookieString = Array.isArray(setCookieHeader)

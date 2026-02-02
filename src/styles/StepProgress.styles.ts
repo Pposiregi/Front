@@ -12,23 +12,43 @@ const CARD_HEIGHT = Math.max(
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0',
     padding: 12,
     borderRadius: 12,
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
   },
   title: {
     fontFamily: 'JUA',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 16,
     marginBottom: 8,
+  },
+  completeHint: {
+    position: 'absolute',
+    left: '10%', // 가로 중앙
+    width: 130, // 크기 조절
+    height: 80,
   },
   text: {
     fontFamily: 'JUA',
     marginTop: 4,
     fontSize: 12,
     textAlign: 'right',
+  },
+  readyCard: {
+    borderWidth: 2,
+    borderColor: '#FEC288',
+    backgroundColor: '#ffefe0',
+    shadowOpacity: 0.15,
+    elevation: 6,
   },
 });
