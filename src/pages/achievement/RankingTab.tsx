@@ -75,13 +75,13 @@ function RankingTab() {
   const top3 = rankingData.top10.slice(0, 3);
   return (
     <ImageBackground
-      source={require('@assets/images/배경2.png')}
+      source={require('@assets/images/ranking_background.png')}
       style={{ flex: 1 }}
       resizeMode='cover'
     >
       {/* 상단 장식 이미지 (반투명 오버레이 가능) */}
       <Image
-        source={require('@assets/images/강아지들-Photoroom.png')}
+        source={require('@assets/images/pet_podium.png')}
         style={{ width: '100%', height: 150 }}
         resizeMode='contain'
       />
