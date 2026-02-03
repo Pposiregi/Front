@@ -6,6 +6,7 @@ const initialState = {
   isSignUpInProgress: false,
   userId: null as number | null,
   nickname: '',
+  gender: null as 'female' | 'male' | null,
 };
 
 const userSlice = createSlice({
@@ -19,6 +20,7 @@ const userSlice = createSlice({
     setUser(state, action) {
       state.userId = action.payload.userId;
       state.nickname = action.payload.nickname;
+      state.gender = action.payload.gender;
     },
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
       state.isSignUpInProgress = action.payload;

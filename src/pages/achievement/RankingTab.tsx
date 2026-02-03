@@ -23,6 +23,12 @@ function RankingTab() {
     'ALL'
   );
   const myUserId = useSelector((state: RootState) => state.user.userId);
+  const myGender = useSelector((state: RootState) => state.user.gender);
+  // 추후에 랭킹 남성, 여성 별 탭에도 본인에게 맞는 성별 선택 시 랭킹 띄우기 위해 남겨둠
+  const showMyRanking =
+    rankingFilter === 'ALL' ||
+    (rankingFilter === 'MALE' && myGender === 'male') ||
+    (rankingFilter === 'FEMALE' && myGender === 'female');
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -142,15 +148,17 @@ function RankingTab() {
         </View>
       </ScrollView>
       {/* 내 순위 표시 */}
-      <View style={[styles.myRankingBox, { backgroundColor: '#FEC288' }]}>
-        <Text style={styles.rankingNumberText}>{rankingData.myRank}</Text>
-        <View style={styles.rankingNameScoreContainer}>
-          <Text style={styles.listItemText}>나</Text>
-          <Text style={styles.listItemText}>
-            {rankingData.myStepCount ?? 0}보
-          </Text>
+      {rankingFilter === 'ALL' && (
+        <View style={[styles.myRankingBox, { backgroundColor: '#FEC288' }]}>
+          <Text style={styles.rankingNumberText}>{rankingData.myRank}</Text>
+          <View style={styles.rankingNameScoreContainer}>
+            <Text style={styles.listItemText}>나</Text>
+            <Text style={styles.listItemText}>
+              {rankingData.myStepCount ?? 0}보
+            </Text>
+          </View>
         </View>
-      </View>
+      )}
     </ImageBackground>
   );
 }

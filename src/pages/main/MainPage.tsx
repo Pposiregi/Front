@@ -127,6 +127,7 @@ export const MainPage = () => {
           userSlice.actions.setUser({
             userId: data.userId,
             nickname: data.nickname,
+            gender: data.gender,
           })
         );
       } catch (e) {
