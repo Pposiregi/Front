@@ -5,21 +5,46 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/reducer';
 
 function RankingTab() {
+  const mockRankingData = {
+    top10: [
+      { userId: 11, nickname: 'user11', dailyStepCount: 1200 },
+      { userId: 12, nickname: 'user12', dailyStepCount: 1150 },
+      { userId: 13, nickname: 'user13', dailyStepCount: 1100 },
+      { userId: 14, nickname: 'user14', dailyStepCount: 1050 },
+      { userId: 15, nickname: 'user15', dailyStepCount: 1000 },
+      { userId: 16, nickname: 'user16', dailyStepCount: 950 },
+      { userId: 17, nickname: 'user17', dailyStepCount: 900 },
+      { userId: 18, nickname: 'user18', dailyStepCount: 850 },
+      { userId: 19, nickname: 'user19', dailyStepCount: 800 },
+      { userId: 20, nickname: 'user20', dailyStepCount: 750 },
+    ],
+    myRank: 5, // 내 순위는 top10 안에 없지만 5위라고 가정
+  };
   const [loading, setLoading] = useState(false);
   const [rankingData, setRankingData] =
-    useState<DailyStepRankingResponse | null>(null);
+    useState<DailyStepRankingResponse | null>(mockRankingData);
   const [rankingFilter, setRankingFilter] = useState<'ALL' | 'MALE' | 'FEMALE'>(
     'ALL'
   );
+  const myUserId = useSelector((state: RootState) => state.user.userId);
 
   useEffect(() => {
     const fetchRanking = async () => {
+      // if (__DEV__) {
+      //   setRankingData(mockRankingData);
+      //   return;
+      // }
       try {
         setLoading(true);
         const data = await getDailyStepRanking({
@@ -47,10 +72,20 @@ function RankingTab() {
       </View>
     );
   }
-
+  const top3 = rankingData.top10.slice(0, 3);
   return (
-    <View style={{ flex: 1, paddingHorizontal: 10 }}>
-      {/* 필터 */}
+    <ImageBackground
+      source={require('@assets/images/배경2.png')}
+      style={{ flex: 1 }}
+      resizeMode='cover'
+    >
+      {/* 상단 장식 이미지 (반투명 오버레이 가능) */}
+      <Image
+        source={require('@assets/images/강아지들-Photoroom.png')}
+        style={{ width: '100%', height: 150 }}
+        resizeMode='contain'
+      />
+      {/* 필터 버튼 */}
       <View style={styles.filterButton}>
         {['ALL', 'MALE', 'FEMALE'].map((filter) => {
           const isActive = rankingFilter === filter;
@@ -81,31 +116,62 @@ function RankingTab() {
           );
         })}
       </View>
-
-      {/* 랭킹 리스트 */}
-      <FlatList
-        data={rankingData.top10}
-        keyExtractor={(item, index) =>
-          item?.userId?.toString() ?? index.toString()
-        }
-        renderItem={({ item, index }) => (
-          <View style={styles.listItem}>
-            <Text style={styles.rankingNumberText}>{index + 1}</Text>
-            <View style={styles.rankingNameScoreContainer}>
-              <Text style={styles.listItemText}>{item.nickname}</Text>
-              <Text style={styles.listItemText}>{item.dailyStepCount}보</Text>
+      {/* 랭킹 리스트와 버튼을 담는 카드 박스 */}
+      <ScrollView
+        style={{
+          flex: 1,
+        }}
+      >
+        {/* 카드 스타일로 배경 */}
+        <View>
+          {/* 랭킹 리스트 */}
+          {rankingData.top10.length === 0 ? (
+            <View style={styles.noRankingContainer}>
+              <Text style={styles.noRankingText}>
+                랭킹에 아직 기록이 없어요!
+              </Text>
             </View>
-          </View>
-        )}
-      />
-
-      {rankingFilter === 'ALL' && (
-        <Text style={styles.myRankingText}>
-          나의 순위: {rankingData.myRank}위
-        </Text>
-      )}
-    </View>
+          ) : (
+            <FlatList
+              data={rankingData.top10}
+              keyExtractor={(item, index) =>
+                item?.userId?.toString() ?? index.toString()
+              }
+              renderItem={({ item, index }) => {
+                const Me = item.userId === myUserId;
+                return (
+                  <View
+                    style={[
+                      styles.listItemBox,
+                      Me && styles.myRankingHighlight,
+                    ]}
+                  >
+                    <Text style={styles.rankingNumberText}>{index + 1}</Text>
+                    <View style={styles.rankingNameScoreContainer}>
+                      <Text style={styles.listItemText}>{item.nickname}</Text>
+                      <Text style={styles.listItemText}>
+                        {item.dailyStepCount}보
+                      </Text>
+                    </View>
+                  </View>
+                );
+              }}
+              scrollEnabled={false}
+            />
+          )}
+        </View>
+      </ScrollView>
+      {/* 내 순위 표시 */}
+      <View style={[styles.myRankingBox, { backgroundColor: '#FEC288' }]}>
+        <Text style={styles.rankingNumberText}>{rankingData.myRank}</Text>
+        <View style={styles.rankingNameScoreContainer}>
+          <Text style={styles.listItemText}>나</Text>
+          <Text style={styles.listItemText}>
+            {rankingData.myStepCount ?? 0}보
+          </Text>
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
-
 export default RankingTab;

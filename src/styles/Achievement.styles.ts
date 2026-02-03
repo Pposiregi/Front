@@ -6,6 +6,57 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  podiumImageBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  podiumContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginVertical: 20,
+  },
+  podiumBlock: {
+    width: 80,
+    alignItems: 'center',
+    marginHorizontal: 8,
+    borderRadius: 10,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  first: {
+    height: 120,
+    backgroundColor: '#FFD700', // 금색
+  },
+  second: {
+    height: 100,
+    backgroundColor: '#C0C0C0', // 은색
+  },
+  third: {
+    height: 100,
+    backgroundColor: '#CD7F32', // 동색
+  },
+  podiumRank: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  podiumName: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 4,
+  },
+  podiumScore: {
+    fontSize: 14,
+    color: '#555',
+  },
   // 모달
   modalBackground: {
     flex: 1,
@@ -73,7 +124,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -82,43 +133,62 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
   },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabUnderline: {
+    width: 100, // 밑줄 길이 조절
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#333', // 밑줄 색
   },
   tabText: {
-    fontWeight: 'bold',
+    fontFamily: 'JUA',
+    fontSize: 24,
+    color: '#888',
+  },
+  activeTabText: {
+    color: '#333',
+    marginBottom: 3,
   },
   /**
    * 랭킹
    */
   rankingNumberText: {
-    fontSize: 22,
+    fontSize: 22, // 가독성을 위해 살짝 조절
     fontFamily: 'JUA',
     marginRight: 15,
     width: 30,
     textAlign: 'center',
+    color: '#333',
   },
   rankingNameScoreContainer: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  listItem: {
+  listItemBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 8,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    elevation: 4,
   },
   listItemText: {
     fontSize: 22,
     fontFamily: 'JUA',
+    color: '#444',
   },
   filterButton: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginBottom: 10,
   },
   rankingFilterButton: {
     paddingHorizontal: 12,
@@ -139,12 +209,33 @@ export const styles = StyleSheet.create({
   rankingFilterButtonTextActive: {
     color: '#FFF', // 활성화 글자색
   },
-  myRankingText: {
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    fontSize: 20,
+  noRankingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  noRankingText: {
+    fontSize: 25,
+    color: '#333',
     fontFamily: 'JUA',
+  },
+  myRankingHighlight: {
+    backgroundColor: '#FFF3E0',
+  },
+  myRankingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  myRankingText: {
+    fontSize: 22,
+    fontFamily: 'JUA',
+    textAlign: 'center',
+    color: '#fff', // 흰색 글자
   },
   /**
    * 미션

@@ -116,7 +116,7 @@ const MissionTab = () => {
         </View>
       )}
       renderItem={({ item }) => (
-        <View style={styles.listItem}>
+        <View style={styles.listItemBox}>
           <Text style={styles.listItemTitle}>{item.title}</Text>
         </View>
       )}
