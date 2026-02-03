@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 
 import RankingTab from './RankingTab';
-import MissionTab from './mission/MissionTab';
+import MissionTab from './MissionTab';
 import BadgeTab from './BadgeTab';
 
 type TabType = 'RANKING' | 'MISSION' | 'BADGE';

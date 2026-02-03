@@ -9,31 +9,16 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { styles } from '@styles/Achievement.styles';
+import { styles } from '@styles/Achievement_Ranking.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/reducer';
 
 function RankingTab() {
-  const mockRankingData = {
-    top10: [
-      { userId: 11, nickname: 'user11', dailyStepCount: 1200 },
-      { userId: 12, nickname: 'user12', dailyStepCount: 1150 },
-      { userId: 13, nickname: 'user13', dailyStepCount: 1100 },
-      { userId: 14, nickname: 'user14', dailyStepCount: 1050 },
-      { userId: 15, nickname: 'user15', dailyStepCount: 1000 },
-      { userId: 16, nickname: 'user16', dailyStepCount: 950 },
-      { userId: 17, nickname: 'user17', dailyStepCount: 900 },
-      { userId: 18, nickname: 'user18', dailyStepCount: 850 },
-      { userId: 19, nickname: 'user19', dailyStepCount: 800 },
-      { userId: 20, nickname: 'user20', dailyStepCount: 750 },
-    ],
-    myRank: 5, // 내 순위는 top10 안에 없지만 5위라고 가정
-  };
   const [loading, setLoading] = useState(false);
   const [rankingData, setRankingData] =
-    useState<DailyStepRankingResponse | null>(mockRankingData);
+    useState<DailyStepRankingResponse | null>();
   const [rankingFilter, setRankingFilter] = useState<'ALL' | 'MALE' | 'FEMALE'>(
     'ALL'
   );
@@ -41,10 +26,6 @@ function RankingTab() {
 
   useEffect(() => {
     const fetchRanking = async () => {
-      // if (__DEV__) {
-      //   setRankingData(mockRankingData);
-      //   return;
-      // }
       try {
         setLoading(true);
         const data = await getDailyStepRanking({
@@ -79,7 +60,6 @@ function RankingTab() {
       style={{ flex: 1 }}
       resizeMode='cover'
     >
-      {/* 상단 장식 이미지 (반투명 오버레이 가능) */}
       <Image
         source={require('@assets/images/pet_podium.png')}
         style={{ width: '100%', height: 150 }}

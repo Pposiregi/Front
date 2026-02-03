@@ -254,4 +254,14 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
   },
+  listItemSub: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#888',
+  },
+  checkIcon: {
+    fontSize: 18,
+    color: '#4CAF50',
+    marginLeft: 12,
+  },
 });

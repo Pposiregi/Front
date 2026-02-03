@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
-import { styles } from '@styles/Achievement.styles';
+import { styles } from '@styles/Achievement_Badge.styles';
 import { Badge } from './types';
 import { ItemModal } from './ItemModal';
 

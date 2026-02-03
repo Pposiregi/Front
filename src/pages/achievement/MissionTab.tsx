@@ -2,15 +2,20 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, ActivityIndicator, SectionList } from 'react-native';
 import dayjs from 'dayjs';
 
-import { styles } from '@styles/Achievement.styles';
-import { MissionHistoryItem } from '../../../types/mission';
+import { styles } from '@styles/Achievement_Mission.styles';
+import { MissionHistoryItem } from '../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
 
 type MissionStatus = 'LOADING' | 'READY' | 'ERROR';
 
 type MissionSection = {
-  title: string; // 날짜
+  title: string;
   data: MissionHistoryItem[];
+};
+
+const CATEGORY_META = {
+  STEP: { icon: '👟', color: '#4CAF50' },
+  MEAL: { icon: '🍽️', color: '#FF9800' },
 };
 
 const MissionTab = () => {
@@ -109,17 +114,46 @@ const MissionTab = () => {
     <SectionList
       sections={sections}
       keyExtractor={(item) => item.missionCheckId.toString()}
-      contentContainerStyle={{ paddingBottom: 20 }}
       renderSectionHeader={({ section }) => (
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>{section.title}</Text>
         </View>
       )}
-      renderItem={({ item }) => (
-        <View style={styles.listItemBox}>
-          <Text style={styles.listItemTitle}>{item.title}</Text>
-        </View>
-      )}
+      renderItem={({ item }) => {
+        const meta = CATEGORY_META[item.category];
+
+        return (
+          <View style={styles.listItemBox}>
+            {/* 아이콘 */}
+            <View
+              style={[
+                styles.iconCircle,
+                { backgroundColor: meta.color + '22' },
+              ]}
+            >
+              <Text style={styles.iconText}>{meta.icon}</Text>
+            </View>
+
+            {/* 텍스트 영역 */}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.listItemTitle}>{item.title}</Text>
+
+              <Text style={styles.listItemSub}>
+                {item.progressValue} / {item.goalValue}
+                {item.category === 'STEP' ? ' 걸음' : ''}
+              </Text>
+            </View>
+
+            {/* 완료 시간 */}
+            <View style={styles.rightBox}>
+              <Text style={styles.completedText}>완료</Text>
+              <Text style={styles.timeText}>
+                {dayjs(item.completedAt).format('HH:mm')}
+              </Text>
+            </View>
+          </View>
+        );
+      }}
     />
   );
 };
