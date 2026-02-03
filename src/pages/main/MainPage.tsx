@@ -124,8 +124,9 @@ export const MainPage = () => {
       try {
         const data = await getUser();
         dispatch(
-          userSlice.actions.setUserId({
+          userSlice.actions.setUser({
             userId: data.userId,
+            nickname: data.nickname,
           })
         );
       } catch (e) {

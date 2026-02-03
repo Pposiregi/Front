@@ -24,6 +24,8 @@ import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/reducer';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
@@ -264,6 +266,8 @@ function ProfilePage() {
     useShadowColorFromDataset: false,
   };
 
+  const nickname = useSelector((state: RootState) => state.user.nickname);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -292,7 +296,7 @@ function ProfilePage() {
               <Text style={styles.gearText}>⚙️</Text>
             </Pressable>
           </View>
-          <Text style={styles.name}>김왈왈</Text>
+          <Text style={styles.name}>{nickname || '김돌돌'}</Text>
           <Text style={styles.caption}>오늘도 반려펫과 함께 건강관리</Text>
         </View>
 

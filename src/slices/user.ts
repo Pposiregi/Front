@@ -5,6 +5,7 @@ const initialState = {
   accessToken: '',
   isSignUpInProgress: false,
   userId: null as number | null,
+  nickname: '',
 };
 
 const userSlice = createSlice({
@@ -15,8 +16,9 @@ const userSlice = createSlice({
       state.email = action.payload.email;
       state.accessToken = action.payload.accessToken;
     },
-    setUserId(state, action) {
+    setUser(state, action) {
       state.userId = action.payload.userId;
+      state.nickname = action.payload.nickname;
     },
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
       state.isSignUpInProgress = action.payload;
