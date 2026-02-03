@@ -23,6 +23,9 @@ const userSlice = createSlice({
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
       state.isSignUpInProgress = action.payload;
     },
+    updateNickname(state, action: PayloadAction<string>) {
+      state.nickname = action.payload;
+    },
     resetUser() {
       // 상태를 초기 상태(initialState)로 재설정합니다.
       return initialState;
