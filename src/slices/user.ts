@@ -4,15 +4,19 @@ const initialState = {
   email: '',
   accessToken: '',
   isSignUpInProgress: false,
+  userId: null as number | null,
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser(state, action) {
+    setAuth(state, action) {
       state.email = action.payload.email;
       state.accessToken = action.payload.accessToken;
+    },
+    setUserId(state, action) {
+      state.userId = action.payload.userId;
     },
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
       state.isSignUpInProgress = action.payload;
