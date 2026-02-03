@@ -13,6 +13,7 @@ type MissionSection = {
   data: MissionHistoryItem[];
 };
 
+// 카테고리 메타 정보
 const CATEGORY_META = {
   STEP: { icon: '👟', color: '#4CAF50' },
   MEAL: { icon: '🍽️', color: '#FF9800' },
@@ -41,9 +42,7 @@ const MissionTab = () => {
     fetchMissions();
   }, []);
 
-  // ====================
-  // 날짜별 섹션 데이터 생성
-  // ====================
+  // 날짜별 그룹
   const sections: MissionSection[] = useMemo(() => {
     const completed = missions
       .filter((m) => m.completedAt)
@@ -57,11 +56,7 @@ const MissionTab = () => {
 
     completed.forEach((mission) => {
       const dateKey = dayjs(mission.completedAt).format('YYYY.MM.DD');
-
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
-      }
-
+      if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(mission);
     });
 
@@ -71,45 +66,31 @@ const MissionTab = () => {
     }));
   }, [missions]);
 
-  // ====================
-  // LOADING
-  // ====================
   if (status === 'LOADING') {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#777' />
+        <ActivityIndicator size='large' />
         <Text>불러오는 중...</Text>
       </View>
     );
   }
-  // ====================
-  // ERROR
-  // ====================
+
   if (status === 'ERROR') {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={{ fontSize: 16 }}>{errorMessage}</Text>
+        <Text>{errorMessage}</Text>
       </View>
     );
   }
 
-  // ====================
-  // EMPTY
-  // ====================
   if (sections.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={{ fontSize: 16 }}>아직 완료된 미션이 없어요 🙂</Text>
-        <Text style={{ marginTop: 6, color: '#999' }}>
-          미션을 달성하면 이곳에 기록이 남아요!
-        </Text>
+        <Text>아직 완료된 미션이 없어요 🙂</Text>
       </View>
     );
   }
 
-  // ====================
-  // SECTION LIST
-  // ====================
   return (
     <SectionList
       sections={sections}

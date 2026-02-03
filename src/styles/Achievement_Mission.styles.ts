@@ -27,7 +27,6 @@ export const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
   },
-
   iconCircle: {
     width: 40,
     height: 40,
