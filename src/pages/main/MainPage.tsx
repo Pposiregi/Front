@@ -128,6 +128,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
+            profileImageId: data.profileImageId ?? 2,
           })
         );
       } catch (e) {

@@ -176,7 +176,7 @@ function ActivityPage() {
       max: Math.max(...steps),
     };
   }, [normalizedWeeklySteps]);
-  
+
   /**
    * HEX 컬러를 RGBA 문자열로 변환한다.
    */

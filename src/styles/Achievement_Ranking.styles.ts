@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
    * 랭킹
    */
   rankingNumberText: {
-    fontSize: 22, // 가독성을 위해 살짝 조절
+    fontSize: 18, // 가독성을 위해 살짝 조절
     fontFamily: 'JUA',
     marginRight: 15,
     width: 30,
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     elevation: 4,
   },
   listItemText: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: 'JUA',
     color: '#444',
   },
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: 20,
   },
   myRankingText: {
-    fontSize: 22,
+    fontSize: 16,
     fontFamily: 'JUA',
     textAlign: 'center',
     color: '#fff', // 흰색 글자

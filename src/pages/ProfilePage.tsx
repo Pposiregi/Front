@@ -26,6 +26,7 @@ import type {
 } from 'types/bodyHistory';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/reducer';
+import { ProfileAvatar } from '@components/ProfileAvatar';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
@@ -267,6 +268,9 @@ function ProfilePage() {
   };
 
   const nickname = useSelector((state: RootState) => state.user.nickname);
+  const profileImageId = useSelector(
+    (state: RootState) => state.user.profileImageId
+  );
 
   if (loading) {
     return (
@@ -286,7 +290,7 @@ function ProfilePage() {
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>😺</Text>
+              <ProfileAvatar profileImageId={profileImageId} />
             </View>
             <Pressable
               style={styles.gearButton}
