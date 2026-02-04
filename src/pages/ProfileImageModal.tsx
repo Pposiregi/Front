@@ -22,11 +22,7 @@ export default function ProfileImageModal({
   const [selectedId, setSelectedId] = useState(currentImageId);
 
   const handleSave = () => {
-    dispatch(
-      userSlice.actions.setUser({
-        profileImageId: selectedId,
-      })
-    );
+    dispatch(userSlice.actions.updateProfileImageId(selectedId));
     onClose();
   };
 

@@ -33,4 +33,39 @@ export const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 3,
   },
+  // 모달
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    alignItems: 'center',
+    width: '85%',
+  },
+  fullScreenImage: {
+    width: '100%',
+    aspectRatio: 1,
+    resizeMode: 'cover',
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  modalTextContainer: {
+    alignItems: 'center',
+  },
+  modalTitleText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    fontFamily: 'JUA',
+  },
+  modalKcalText: {
+    fontSize: 18,
+    color: '#555',
+    fontFamily: 'Roboto-VariableFont',
+  },
 });

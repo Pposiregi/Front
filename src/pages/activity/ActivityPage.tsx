@@ -601,19 +601,19 @@ function ActivityPage() {
               height={chartHeight}
               yAxisLabel=''
               yAxisSuffix=''
-              withVerticalLabels
-              withHorizontalLabels={false}
+              withVerticalLabels={true}
+              withHorizontalLabels={true}
               withInnerLines
               withOuterLines={false}
               withShadow={false}
               fromZero
-              segments={2}
+              segments={4}
               formatYLabel={formatStepLabel}
               chartConfig={chartConfig}
               bezier
               style={StyleSheet.flatten([
                 styles.lineChartStyle,
-                { marginTop: chartTopInset },
+                { marginTop: chartTopInset, paddingBottom: 1 },
               ])}
             />
           </>
