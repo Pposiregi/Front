@@ -25,7 +25,9 @@ import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
-import useGpsSession from '@hooks/useGpsSession';
+import useGpsSession, {
+  type GpsSessionSummary,
+} from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
@@ -46,6 +48,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
+import RunningSummaryModal from './RunningSummaryModal';
 
 /**
  * 메인 화면 컴포넌트
@@ -121,6 +124,8 @@ export const MainPage = () => {
    */
   const { isTracking, path, region, startSession, endSession } =
     useGpsSession();
+  const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
+  const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
 
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
@@ -273,7 +278,11 @@ export const MainPage = () => {
         }
       }
       try {
-        await endSession();
+        const result = await endSession();
+        if (result?.summary) {
+          setRunSummary(result.summary);
+          setShowRunSummaryModal(true);
+        }
       } catch (err: any) {
         Alert.alert(
           '산책 종료 실패',
@@ -466,6 +475,13 @@ export const MainPage = () => {
     Alert.alert('걸음 수 연동 실패', healthError);
   }, [healthError]);
 
+  const formatDuration = (durationMs: number) => {
+    const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}분 ${seconds}초`;
+  };
+
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
    */
@@ -567,6 +583,15 @@ export const MainPage = () => {
               refreshMissions(); // 기존 미션 새로고침
               setTrans(true);
             }}
+          />
+          <RunningSummaryModal
+            visible={showRunSummaryModal}
+            onClose={() => setShowRunSummaryModal(false)}
+            durationText={
+              runSummary ? formatDuration(runSummary.durationMs) : '0분 0초'
+            }
+            stepCount={runSummary?.stepCount ?? 0}
+            avgSpeedKmh={runSummary?.avgSpeedKmh ?? 0}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>

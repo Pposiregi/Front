@@ -32,7 +32,19 @@ export type UseGpsSessionResult = {
   path: LatLng[];
   region: MapRegion;
   startSession: () => Promise<boolean>;
-  endSession: () => Promise<GpsEndResponse | null>;
+  endSession: () => Promise<GpsSessionEndResult | null>;
+};
+
+export type GpsSessionSummary = {
+  durationMs: number;
+  stepCount: number;
+  distanceMeters: number;
+  avgSpeedKmh: number;
+};
+
+export type GpsSessionEndResult = {
+  response: GpsEndResponse;
+  summary: GpsSessionSummary;
 };
 
 /**
@@ -158,7 +170,11 @@ export const useGpsSession = (): UseGpsSessionResult => {
     await flushLogs();
 
     const endTime = new Date();
+    const startTimeValue = new Date(startTimeRef.current);
+    const durationMs = Math.max(0, endTime.getTime() - startTimeValue.getTime());
     const distance = calculateTotalDistanceMeters(path);
+    const avgSpeedKmh =
+      durationMs > 0 ? (distance / durationMs) * 3600 : 0;
     const stepCount = await getHealthConnectStepCount(
       startTimeRef.current,
       endTime
@@ -177,6 +193,12 @@ export const useGpsSession = (): UseGpsSessionResult => {
       stepCount,
       distance,
     });
+    const summary: GpsSessionSummary = {
+      durationMs,
+      stepCount,
+      distanceMeters: distance,
+      avgSpeedKmh,
+    };
 
     clearLogTimer();
     pendingLogsRef.current = [];
@@ -192,7 +214,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
     }
 
-    return response;
+    return { response, summary };
   }, [clearLogTimer, clearPersistedSession, flushLogs, path, stopTracking]);
 
   useEffect(() => {
