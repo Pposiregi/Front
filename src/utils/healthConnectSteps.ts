@@ -51,7 +51,7 @@ export const getHealthConnectStepCount = async (
       0
     );
   } catch (err) {
-    console.error('>>> [HC] 구간 걸음 수 합산 실패', err);
+    console.error('>>>[RUNNING][HC] 구간 걸음 수 합산 실패', err);
     throw err;
   }
 };

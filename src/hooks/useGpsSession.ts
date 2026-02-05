@@ -68,7 +68,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       }
     } catch (err) {
       if (__DEV__) {
-        console.warn('>>> [RUN] 세션 저장 실패', err);
+        console.warn('>>>[RUNNING][RUN] 세션 저장 실패', err);
       }
     }
   }, []);
@@ -78,7 +78,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       await AsyncStorage.multiRemove([SESSION_ID_KEY, SESSION_START_KEY]);
     } catch (err) {
       if (__DEV__) {
-        console.warn('>>> [RUN] 세션 삭제 실패', err);
+        console.warn('>>>[RUNNING][RUN] 세션 삭제 실패', err);
       }
     }
   }, []);
@@ -97,7 +97,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
         await logGps({ sessionId: currentSessionId, ...log });
       } catch (err) {
         if (__DEV__) {
-          console.error('>>> [RUN] GPS 로그 전송 실패', err);
+          console.error('>>>[RUNNING][RUN] GPS 로그 전송 실패', err);
         }
         // 실패한 로그와 남은 로그를 다시 큐에 적재
         pendingLogsRef.current = [
@@ -137,7 +137,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       await persistSession(response);
       startLogTimer();
       if (__DEV__) {
-        console.debug('>>> [RUN] 세션 시작', response.sessionId);
+        console.debug('>>>[RUNNING][RUN] 세션 시작', response.sessionId);
       }
       return true;
     } catch (err) {
@@ -164,7 +164,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       endTime
     );
     if (__DEV__) {
-      console.log('>>> [HC] 세션 구간 걸음 수', {
+      console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
         startTime: startTimeRef.current,
         endTime: endTime.toISOString(),
         stepCount,
@@ -189,7 +189,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
     stopTracking();
 
     if (__DEV__) {
-      console.debug('>>> [RUN] 세션 종료', response?.sessionId);
+      console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
     }
 
     return response;

@@ -135,7 +135,7 @@ export const useRouteTracking = () => {
           // GPS 소수점 떨림(수십 cm)을 중복 포인트로 추가하지 않도록 필터링한다.
           if (delta < MIN_POINT_DISTANCE_METERS) {
             if (__DEV__) {
-              console.debug('>>> [RouteTracking] ignore jitter', {
+              console.debug('>>>[RUNNING][RUN] ignore jitter', {
                 latitude,
                 longitude,
                 delta,
@@ -155,7 +155,7 @@ export const useRouteTracking = () => {
         };
 
         if (__DEV__) {
-          console.debug('>>> [RouteTracking] push point', {
+          console.debug('>>>[RUNNING][RUN] push point', {
             latitude,
             longitude,
             nextLength: nextPath.length,
@@ -240,7 +240,7 @@ export const useRouteTracking = () => {
       const last = lastUpdateRef.current;
       if (!last || Date.now() - last > 4000) {
         if (__DEV__) {
-          console.debug('>>> [RouteTracking] force single location');
+          console.debug('>>>[RUNNING][RUN] force single location');
         }
         requestSingleLocation();
       }
