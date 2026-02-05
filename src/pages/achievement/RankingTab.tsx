@@ -14,6 +14,8 @@ import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/reducer';
+import { ProfileAvatar } from '@components/ProfileAvatar';
+import { RankingItem } from '@components/RankingItem';
 
 function RankingTab() {
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,10 @@ function RankingTab() {
     rankingFilter === 'ALL' ||
     (rankingFilter === 'MALE' && myGender === 'male') ||
     (rankingFilter === 'FEMALE' && myGender === 'female');
+  // 추후에는 랭킹 데이터에서 ID 받아오기
+  const profileImageId = useSelector(
+    (state: RootState) => state.user.profileImageId
+  );
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -62,12 +68,12 @@ function RankingTab() {
   const top3 = rankingData.top10.slice(0, 3);
   return (
     <ImageBackground
-      source={require('@assets/images/ranking_background.png')}
+      source={require('@assets/images/ranking/ranking_background.png')}
       style={{ flex: 1 }}
       resizeMode='cover'
     >
       <Image
-        source={require('@assets/images/pet_podium.png')}
+        source={require('@assets/images/ranking/pet_podium.png')}
         style={{ width: '100%', height: 150 }}
         resizeMode='contain'
       />
@@ -123,25 +129,20 @@ function RankingTab() {
               keyExtractor={(item, index) =>
                 item?.userId?.toString() ?? index.toString()
               }
-              renderItem={({ item, index }) => {
-                const Me = item.userId === myUserId;
-                return (
-                  <View
-                    style={[
-                      styles.listItemBox,
-                      Me && styles.myRankingHighlight,
-                    ]}
-                  >
-                    <Text style={styles.rankingNumberText}>{index + 1}</Text>
-                    <View style={styles.rankingNameScoreContainer}>
-                      <Text style={styles.listItemText}>{item.nickname}</Text>
-                      <Text style={styles.listItemText}>
-                        {item.dailyStepCount}보
-                      </Text>
-                    </View>
-                  </View>
-                );
-              }}
+              renderItem={({ item, index }) => (
+                <RankingItem
+                  rank={index + 1}
+                  nickname={item.nickname}
+                  dailyStepCount={item.dailyStepCount}
+                  profileImageId={
+                    profileImageId
+                    // 추후에는 내려주는 값으로 변경해주기
+                    //item.userId === myUserId ? profileImageId : undefined
+                  }
+                  isTop3={index < 3}
+                  highlight={item.userId === myUserId}
+                />
+              )}
               scrollEnabled={false}
             />
           )}
@@ -149,14 +150,22 @@ function RankingTab() {
       </ScrollView>
       {/* 내 순위 표시 */}
       {rankingFilter === 'ALL' && (
-        <View style={[styles.myRankingBox, { backgroundColor: '#FEC288' }]}>
-          <Text style={styles.rankingNumberText}>{rankingData.myRank}</Text>
-          <View style={styles.rankingNameScoreContainer}>
-            <Text style={styles.listItemText}>나</Text>
-            <Text style={styles.listItemText}>
-              {rankingData.myStepCount ?? 0}보
-            </Text>
-          </View>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 16,
+          }}
+        >
+          <RankingItem
+            rank={rankingData.myRank}
+            nickname='나'
+            dailyStepCount={rankingData.myStepCount ?? 0}
+            profileImageId={profileImageId}
+            highlight={true}
+          />
         </View>
       )}
     </ImageBackground>

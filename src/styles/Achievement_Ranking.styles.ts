@@ -9,11 +9,17 @@ export const styles = StyleSheet.create({
   /**
    * 랭킹
    */
+  rankAvatarContainer: {
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingRight: 10,
+  },
+  rankingNumberImage: { width: 50, height: 50, resizeMode: 'contain' },
   rankingNumberText: {
-    fontSize: 18, // 가독성을 위해 살짝 조절
+    fontSize: 22, // 가독성을 위해 살짝 조절
     fontFamily: 'JUA',
-    marginRight: 15,
-    width: 30,
     textAlign: 'center',
     color: '#333',
   },
@@ -22,17 +28,19 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginLeft: 5,
   },
   listItemBox: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingRight: 16,
+    paddingLeft: 4,
     marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     elevation: 4,
+    minHeight: 70,
   },
   listItemText: {
     fontSize: 18,
