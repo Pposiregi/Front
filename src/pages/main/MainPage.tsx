@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -10,6 +16,7 @@ import {
   Image,
   Animated,
   Alert,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StepProgress } from '@components/StepProgress';
@@ -39,7 +46,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
-import { mockActiveMissions } from './mockMission';
+
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -213,19 +220,64 @@ export const MainPage = () => {
   }, [isTracking, path, region]);
 
   /**
-   * 산책 시작/종료 핸들러
-   * - isTracking이 true면 산책 중이므로 종료
-   * - isTracking이 false면 산책 전이므로 시작
+   * Health Connect 오늘 걸음 수
+   */
+  const {
+    steps: healthSteps,
+    addSteps,
+    error: healthError,
+    writing: healthWriting,
+    loading: healthLoading,
+  } = useHealthSteps();
+  const healthErrorShownRef = useRef(false);
+  /**
+   * 개발용 걸음수 +1000 버튼.
+   */
+  const handleDevAddSteps = useCallback(async () => {
+    try {
+      await addSteps(1000);
+    } catch (err: any) {
+      // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
+      healthErrorShownRef.current = true;
+      Alert.alert(
+        '걸음 추가 실패',
+        err?.message ?? '걸음 수를 추가하지 못했습니다.'
+      );
+    }
+  }, [addSteps]);
+
+  /**
+   * Running 시작/종료 핸들러
+   * - isTracking이 true면 산책 종료를 시도하되,
+   *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
+   * - isTracking이 false면 산책 전이므로 카운트다운 후 시작
    */
   const handleToggleTracking = useCallback(() => {
-    // 이미 추적 중이면 즉시 종료하고, 그렇지 않으면 권한 확인 후 추적을 시작한다.
+    // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
     if (isTracking) {
+      if (Platform.OS === 'android') {
+        if (healthLoading) {
+          Alert.alert(
+            '걸음 수 확인 중',
+            'Health Connect 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.'
+          );
+          return;
+        }
+        if (healthError || healthSteps == null) {
+          Alert.alert(
+            '걸음 수 권한 필요',
+            healthError ??
+              'Health Connect 권한/데이터가 없어 종료할 수 없습니다. 권한을 허용하고 다시 시도해 주세요.'
+          );
+          return;
+        }
+      }
       stopTracking();
       // 이곳에 서버에게 데이터 전송
       return;
     }
     setCountdown(3);
-  }, [isTracking, stopTracking]);
+  }, [healthError, healthLoading, healthSteps, isTracking, stopTracking]);
 
   /**
    * 오늘 프롬프트를 스킵 처리한다.
@@ -313,32 +365,6 @@ export const MainPage = () => {
 
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startTracking]);
-
-  /**
-   * Health Connect 오늘 걸음 수
-   */
-  const {
-    steps: healthSteps,
-    addSteps,
-    error: healthError,
-    writing: healthWriting,
-  } = useHealthSteps();
-  const healthErrorShownRef = useRef(false);
-  /**
-   * 개발용 걸음수 +1000 버튼.
-   */
-  const handleDevAddSteps = useCallback(async () => {
-    try {
-      await addSteps(1000);
-    } catch (err: any) {
-      // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
-      healthErrorShownRef.current = true;
-      Alert.alert(
-        '걸음 추가 실패',
-        err?.message ?? '걸음 수를 추가하지 못했습니다.'
-      );
-    }
-  }, [addSteps]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
