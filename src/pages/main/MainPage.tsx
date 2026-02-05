@@ -25,7 +25,7 @@ import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
-import { useRouteTracking } from '@hooks/useRouteTracking';
+import useGpsSession from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
@@ -117,10 +117,10 @@ export const MainPage = () => {
    */
   const userData = getUser();
   /**
-   * 러닝 추적 상태/경로/카메라 영역/시작·종료 핸들러.
+   * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
-  const { isTracking, path, region, startTracking, stopTracking } =
-    useRouteTracking();
+  const { isTracking, path, region, startSession, endSession } =
+    useGpsSession();
 
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
@@ -252,7 +252,7 @@ export const MainPage = () => {
    *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
    * - isTracking이 false면 산책 전이므로 카운트다운 후 시작
    */
-  const handleToggleTracking = useCallback(() => {
+  const handleToggleTracking = useCallback(async () => {
     // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
     if (isTracking) {
       if (Platform.OS === 'android') {
@@ -272,12 +272,18 @@ export const MainPage = () => {
           return;
         }
       }
-      stopTracking();
-      // 이곳에 서버에게 데이터 전송
+      try {
+        await endSession();
+      } catch (err: any) {
+        Alert.alert(
+          '산책 종료 실패',
+          err?.message ?? '산책 종료 중 문제가 발생했어요.'
+        );
+      }
       return;
     }
     setCountdown(3);
-  }, [healthError, healthLoading, healthSteps, isTracking, stopTracking]);
+  }, [endSession, healthError, healthLoading, healthSteps, isTracking]);
 
   /**
    * 오늘 프롬프트를 스킵 처리한다.
@@ -340,7 +346,16 @@ export const MainPage = () => {
 
     if (countdown === 0) {
       setCountdown(null);
-      startTracking();
+      (async () => {
+        try {
+          await startSession();
+        } catch (err: any) {
+          Alert.alert(
+            '산책 시작 실패',
+            err?.message ?? '산책 시작 중 문제가 발생했어요.'
+          );
+        }
+      })();
       return;
     }
     scaleAnim.setValue(0.6);
@@ -364,7 +379,7 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, scaleAnim, opacityAnim, startTracking]);
+  }, [countdown, scaleAnim, opacityAnim, startSession]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
