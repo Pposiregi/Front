@@ -8,6 +8,14 @@ import type {
   GpsSessionStartResponse,
 } from 'types/gps';
 
+const toLogString = (payload: unknown) => {
+  try {
+    return JSON.stringify(payload);
+  } catch {
+    return String(payload);
+  }
+};
+
 /**
  * GPS 세션 시작
  * - TODO: 임시 userId 전송 제거(토큰 식별 전제)
@@ -16,17 +24,17 @@ export const startGpsSession = async (
   payload: GpsSessionStartRequest
 ): Promise<GpsSessionStartResponse> => {
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/start request', {
-      ...payload,
-      userId: 1,
-    });
+    console.log(
+      '>>>[RUNNING][API] /gps/start request ' +
+        toLogString({ ...payload, userId: 1 })
+    );
   }
   const { data } = await apiClient.post<GpsSessionStartResponse>('/gps/start', {
     ...payload,
     userId: 1,
   });
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/start response', data);
+    console.log('>>>[RUNNING][API] /gps/start response ' + toLogString(data));
   }
   return data;
 };
@@ -38,17 +46,16 @@ export const logGps = async (
   payload: GpsLogRequest
 ): Promise<GpsLogResponse> => {
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/log request', {
-      ...payload,
-      userId: 1,
-    });
+    console.log(
+      '>>>[RUNNING][API] /gps/log request ' +
+        toLogString({ ...payload, userId: 1 })
+    );
   }
   const { data } = await apiClient.post<GpsLogResponse>('/gps/log', {
     ...payload,
-    userId: 1,
   });
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/log response', data);
+    console.log('>>>[RUNNING][API] /gps/log response ' + toLogString(data));
   }
   return data;
 };
@@ -60,17 +67,15 @@ export const endGpsSession = async (
   payload: GpsEndRequest
 ): Promise<GpsEndResponse> => {
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/end request', {
-      ...payload,
-      userId: 1,
-    });
+    console.log(
+      '>>>[RUNNING][API] /gps/end request ' + toLogString({ ...payload })
+    );
   }
   const { data } = await apiClient.post<GpsEndResponse>('/gps/end', {
     ...payload,
-    userId: 1,
   });
   if (__DEV__) {
-    console.log('>>>[RUNNING][API] /gps/end response', data);
+    console.log('>>>[RUNNING][API] /gps/end response ' + toLogString(data));
   }
   return data;
 };
