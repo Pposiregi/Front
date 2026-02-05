@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import type { LatLng, MapRegion } from '@shared-types/location';
+import { getDistanceMeters } from '@utils/distance';
 
 // 초기 지도 위치 (서울 시청 근방) — 실제 위치를 받으면 곧바로 덮어쓴다.
 const DEFAULT_REGION: MapRegion = {
@@ -114,27 +115,6 @@ export const useRouteTracking = () => {
   }, []);
 
   /**
-   * 두 좌표 간 거리를 하버사인 공식으로 계산 (미터)
-   */
-  const getDistanceMeters = useCallback((a: LatLng, b: LatLng) => {
-    const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371e3; // 지구 반지름 (m)
-    const dLat = toRad(b.latitude - a.latitude);
-    const dLon = toRad(b.longitude - a.longitude);
-    const lat1 = toRad(a.latitude);
-    const lat2 = toRad(b.latitude);
-
-    const sinLat = Math.sin(dLat / 2);
-    const sinLon = Math.sin(dLon / 2);
-
-    const aVal =
-      sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
-    const c = 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
-
-    return R * c;
-  }, []);
-
-  /**
    * 위치 업데이트 처리
    * - 좌표 유효성 검사
    * - 지터 필터링
@@ -191,7 +171,7 @@ export const useRouteTracking = () => {
         };
       });
     },
-    [getDistanceMeters]
+    []
   );
 
   /**
