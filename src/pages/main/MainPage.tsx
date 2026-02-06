@@ -25,9 +25,7 @@ import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
-import useGpsSession, {
-  type GpsSessionSummary,
-} from '@hooks/useGpsSession';
+import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
@@ -126,6 +124,18 @@ export const MainPage = () => {
     useGpsSession();
   const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
+  const isAndroid13OrLower =
+    Platform.OS === 'android' &&
+    Number(Platform.Version) > 0 &&
+    Number(Platform.Version) <= 33;
+  const getSamsungHealthGuide = useCallback(() => {
+    return (
+      'Android 13 이하에서는 삼성 헬스 연동이 필요합니다.\n' +
+      '1) 삼성 헬스 → 더 보기(⋮) → 설정 → 헬스 커넥트 → 앱 권한 → 삼성 헬스 → 모두 허용\n' +
+      '2) 삼성 헬스 → 설정 → 개인정보 → 민감정보 동의\n' +
+      '3) 삼성 헬스 → 설정 → 삼성 클라우드 동기화 → 지금 동기화'
+    );
+  }, []);
 
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
@@ -269,10 +279,14 @@ export const MainPage = () => {
           return;
         }
         if (healthError || healthSteps == null) {
+          const baseMessage =
+            healthError ??
+            'Health Connect 권한/데이터가 없습니다. 권한을 허용하고 다시 시도해 주세요.';
           Alert.alert(
             '걸음 수 권한 필요',
-            healthError ??
-              'Health Connect 권한/데이터가 없어 종료할 수 없습니다. 권한을 허용하고 다시 시도해 주세요.'
+            isAndroid13OrLower
+              ? `${baseMessage}\n\n${getSamsungHealthGuide()}`
+              : baseMessage
           );
           return;
         }
@@ -292,7 +306,15 @@ export const MainPage = () => {
       return;
     }
     setCountdown(3);
-  }, [endSession, healthError, healthLoading, healthSteps, isTracking]);
+  }, [
+    endSession,
+    getSamsungHealthGuide,
+    healthError,
+    healthLoading,
+    healthSteps,
+    isAndroid13OrLower,
+    isTracking,
+  ]);
 
   /**
    * 오늘 프롬프트를 스킵 처리한다.
@@ -472,8 +494,13 @@ export const MainPage = () => {
     }
     if (healthErrorShownRef.current) return;
     healthErrorShownRef.current = true;
-    Alert.alert('걸음 수 연동 실패', healthError);
-  }, [healthError]);
+    Alert.alert(
+      '걸음 수 연동 실패',
+      isAndroid13OrLower
+        ? `${healthError}\n\n${getSamsungHealthGuide()}`
+        : healthError
+    );
+  }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
 
   const formatDuration = (durationMs: number) => {
     const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));

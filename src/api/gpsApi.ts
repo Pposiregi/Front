@@ -47,8 +47,7 @@ export const logGps = async (
 ): Promise<GpsLogResponse> => {
   if (__DEV__) {
     console.log(
-      '>>>[RUNNING][API] /gps/log request ' +
-        toLogString({ ...payload, userId: 1 })
+      '>>>[RUNNING][API] /gps/log request ' + toLogString({ ...payload })
     );
   }
   const { data } = await apiClient.post<GpsLogResponse>('/gps/log', {
