@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL, YOUR_API_KEY } from '@env';
+import { API_BASE_URL } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { DEV_USER_ID } from '@env';
 
