@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { LatLng, MapRegion } from '@shared-types/location';
-import { useRouteTracking } from '@hooks/useRouteTracking';
+import { useRouteTracking, type RouteTrackPoint } from '@hooks/useRouteTracking';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';
 import { getHealthConnectStepCount } from '@utils/healthConnectSteps';
@@ -66,7 +66,7 @@ export type GpsSessionEndResult = {
  * - 필요 시 AsyncStorage에 sessionId/startTime 보관
  */
 export const useGpsSession = (): UseGpsSessionResult => {
-  const { isTracking, path, region, startTracking, stopTracking } =
+  const { isTracking, path, trackPoints, region, startTracking, stopTracking } =
     useRouteTracking();
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -75,7 +75,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
   const startTimeRef = useRef<string | null>(null);
   const logTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingLogsRef = useRef<PendingLog[]>([]);
-  const lastPathIndexRef = useRef(0);
+  const lastTrackPointIndexRef = useRef(0);
 
   const clearLogTimer = useCallback(() => {
     if (!logTimerRef.current) return;
@@ -155,7 +155,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       startTimeRef.current = startTime.toISOString();
       setSessionId(response.sessionId);
       setIsSessionActive(true);
-      lastPathIndexRef.current = 0;
+      lastTrackPointIndexRef.current = 0;
       pendingLogsRef.current = [];
       await persistSession(response);
       startLogTimer();
@@ -226,7 +226,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
 
     clearLogTimer();
     pendingLogsRef.current = [];
-    lastPathIndexRef.current = 0;
+    lastTrackPointIndexRef.current = 0;
     sessionIdRef.current = null;
     startTimeRef.current = null;
     setSessionId(null);
@@ -243,22 +243,24 @@ export const useGpsSession = (): UseGpsSessionResult => {
 
   useEffect(() => {
     if (!isTracking) return;
-    if (path.length === 0) {
-      lastPathIndexRef.current = 0;
+    if (trackPoints.length === 0) {
+      lastTrackPointIndexRef.current = 0;
       return;
     }
-    if (path.length <= lastPathIndexRef.current) return;
+    if (trackPoints.length <= lastTrackPointIndexRef.current) return;
 
-    const newPoints = path.slice(lastPathIndexRef.current);
-    newPoints.forEach((point) => {
+    const newPoints = trackPoints.slice(lastTrackPointIndexRef.current);
+    newPoints.forEach((point: RouteTrackPoint) => {
       pendingLogsRef.current.push({
         latitude: point.latitude,
         longitude: point.longitude,
-        recordedAt: new Date().toISOString(),
+        recordedAt: point.recordedAt,
+        speed: point.speed,
+        altitude: point.altitude,
       });
     });
-    lastPathIndexRef.current = path.length;
-  }, [isTracking, path]);
+    lastTrackPointIndexRef.current = trackPoints.length;
+  }, [isTracking, trackPoints]);
 
   useEffect(
     () => () => {
