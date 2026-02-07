@@ -192,75 +192,79 @@ export const useGpsSession = (): UseGpsSessionResult => {
   const endSession = useCallback(async (options?: EndSessionOptions) => {
     if (!sessionIdRef.current || !startTimeRef.current) return null;
 
-    clearLogTimer();
-    const allLogsFlushed = await flushAllPendingLogs();
-    if (!allLogsFlushed) {
-      // 종료 중 전송 실패 시 세션을 유지하고 주기 전송을 재개한다.
+    try {
+      clearLogTimer();
+      const allLogsFlushed = await flushAllPendingLogs();
+      if (!allLogsFlushed) {
+        throw new Error(
+          'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
+        );
+      }
+
+      const endTime = new Date();
+      const startTimeValue = new Date(startTimeRef.current);
+      const durationMs = Math.max(
+        0,
+        endTime.getTime() - startTimeValue.getTime()
+      );
+      const distance = calculateTotalDistanceMeters(path);
+      const avgSpeedKmh =
+        durationMs > 0 ? (distance / durationMs) * 3600 : 0;
+      let stepCount = 0;
+      let stepCountMissing = false;
+      if (options?.forceNoSteps) {
+        stepCountMissing = true;
+        if (__DEV__) {
+          console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
+        }
+      } else {
+        stepCount = await getHealthConnectStepCount(
+          startTimeRef.current,
+          endTime
+        );
+        if (__DEV__) {
+          console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
+            startTime: startTimeRef.current,
+            endTime: endTime.toISOString(),
+            stepCount,
+          });
+        }
+      }
+
+      const response = await endGpsSession({
+        sessionId: sessionIdRef.current,
+        endTime: endTime.toISOString(),
+        stepCount,
+        distance,
+      });
+      const summary: GpsSessionSummary = {
+        durationMs,
+        stepCount,
+        distanceMeters: distance,
+        avgSpeedKmh,
+        stepCountMissing,
+      };
+
+      clearLogTimer();
+      pendingLogsRef.current = [];
+      lastTrackPointIndexRef.current = 0;
+      sessionIdRef.current = null;
+      startTimeRef.current = null;
+      setSessionId(null);
+      setIsSessionActive(false);
+      await clearPersistedSession();
+      stopTracking();
+
+      if (__DEV__) {
+        console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
+      }
+
+      return { response, summary };
+    } catch (err) {
+      // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
       startLogTimer();
-      throw new Error(
-        'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
-      );
+      throw err;
     }
-
-    const endTime = new Date();
-    const startTimeValue = new Date(startTimeRef.current);
-    const durationMs = Math.max(
-      0,
-      endTime.getTime() - startTimeValue.getTime()
-    );
-    const distance = calculateTotalDistanceMeters(path);
-    const avgSpeedKmh =
-      durationMs > 0 ? (distance / durationMs) * 3600 : 0;
-    let stepCount = 0;
-    let stepCountMissing = false;
-    if (options?.forceNoSteps) {
-      stepCountMissing = true;
-      if (__DEV__) {
-        console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
-      }
-    } else {
-      stepCount = await getHealthConnectStepCount(
-        startTimeRef.current,
-        endTime
-      );
-      if (__DEV__) {
-        console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
-          startTime: startTimeRef.current,
-          endTime: endTime.toISOString(),
-          stepCount,
-        });
-      }
-    }
-
-    const response = await endGpsSession({
-      sessionId: sessionIdRef.current,
-      endTime: endTime.toISOString(),
-      stepCount,
-      distance,
-    });
-    const summary: GpsSessionSummary = {
-      durationMs,
-      stepCount,
-      distanceMeters: distance,
-      avgSpeedKmh,
-      stepCountMissing,
-    };
-
-    clearLogTimer();
-    pendingLogsRef.current = [];
-    lastTrackPointIndexRef.current = 0;
-    sessionIdRef.current = null;
-    startTimeRef.current = null;
-    setSessionId(null);
-    setIsSessionActive(false);
-    await clearPersistedSession();
-    stopTracking();
-
-    if (__DEV__) {
-      console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
-    }
-
-    return { response, summary };
   }, [
     clearLogTimer,
     clearPersistedSession,
