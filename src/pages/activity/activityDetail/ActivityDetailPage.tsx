@@ -256,9 +256,23 @@ const ActivityDetailPage = () => {
     );
   }
 
+  // 숫자 필드는 null/undefined가 내려올 수 있어 렌더 전에 안전하게 정규화한다.
+  const totalDistanceValue = toFiniteNumber(detailData.totalDistance) ?? 0;
+  const avgSpeedKmhValue = toFiniteNumber(detailData.avgSpeedKmh) ?? 0;
+  const stepCountValue = Math.max(
+    0,
+    Math.trunc(toFiniteNumber(detailData.stepCount) ?? 0)
+  );
+  const burnCaloriesValue = Math.max(
+    0,
+    Math.trunc(toFiniteNumber(detailData.burnCalories) ?? 0)
+  );
+
   // 총 달린 시간 계산 (항상 HH:MM:SS)
   const startDate = new Date(detailData.startTime);
-  const endDate = new Date(detailData.endTime);
+  const endDate = detailData.endTime
+    ? new Date(detailData.endTime)
+    : new Date(detailData.startTime);
   const durationMs = Math.max(0, endDate.getTime() - startDate.getTime());
   const totalSeconds = Math.floor(durationMs / 1000);
   const totalHours = Math.floor(totalSeconds / 3600);
@@ -269,9 +283,9 @@ const ActivityDetailPage = () => {
   ).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 
   const chipStepOrCalorie =
-    detailData.stepCount > 0
-      ? `${detailData.stepCount.toLocaleString()} 걸음`
-      : `${detailData.burnCalories.toLocaleString()} kcal`;
+    stepCountValue > 0
+      ? `${stepCountValue.toLocaleString()} 걸음`
+      : `${burnCaloriesValue.toLocaleString()} kcal`;
 
   return (
     <ScrollView>
@@ -305,7 +319,7 @@ const ActivityDetailPage = () => {
           <View style={styles.mapOverlay}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
-                {detailData.totalDistance.toFixed(2)} km
+                {totalDistanceValue.toFixed(2)} km
               </Text>
             </View>
             <View style={styles.chip}>
@@ -327,7 +341,7 @@ const ActivityDetailPage = () => {
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>총 거리</Text>
             <Text style={styles.specValue}>
-              {detailData.totalDistance.toFixed(2)} km
+              {totalDistanceValue.toFixed(2)} km
             </Text>
           </View>
           <View style={styles.specRow}>
@@ -337,19 +351,19 @@ const ActivityDetailPage = () => {
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>평균 속도</Text>
             <Text style={styles.specValue}>
-              {detailData.avgSpeedKmh.toFixed(2)} km/h
+              {avgSpeedKmhValue.toFixed(2)} km/h
             </Text>
           </View>
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>걸음수</Text>
             <Text style={styles.specValue}>
-              {detailData.stepCount.toLocaleString()} 걸음
+              {stepCountValue.toLocaleString()} 걸음
             </Text>
           </View>
           <View style={[styles.specRow, styles.specRowLast]}>
             <Text style={styles.specLabel}>소모 칼로리</Text>
             <Text style={styles.specValue}>
-              {detailData.burnCalories.toLocaleString()} kcal
+              {burnCaloriesValue.toLocaleString()} kcal
             </Text>
           </View>
         </View>

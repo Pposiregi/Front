@@ -17,10 +17,10 @@ export type GPS_LOG = {
 
 export type SessionDetail = {
   startTime: string;
-  endTime: string;
-  totalDistance: number;
-  avgSpeedKmh: number;
-  stepCount: number;
-  burnCalories: number;
+  endTime: string | null;
+  totalDistance: number | null;
+  avgSpeedKmh: number | null;
+  stepCount: number | null;
+  burnCalories: number | null;
   routeLogs: GPS_LOG[];
 };

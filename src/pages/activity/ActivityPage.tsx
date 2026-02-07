@@ -154,13 +154,40 @@ function ActivityPage() {
   const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
 
   const normalizedMonthlyDaily = useMemo(
-    () =>
-      [...monthlyDailyActivities]
-        .filter((item) => item.date)
-        .sort(
-          (a, b) =>
-            parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
-        ),
+    () => {
+      const byDate = new Map<string, DailyActivity>();
+
+      monthlyDailyActivities.forEach((item) => {
+        if (!item.date) return;
+        // 백엔드가 date-time 문자열을 내려줄 수 있어 일 단위 키로 정규화한다.
+        const dayKey = item.date.slice(0, 10);
+
+        const prev = byDate.get(dayKey);
+        if (!prev) {
+          byDate.set(dayKey, {
+            date: dayKey,
+            steps: Number(item.steps) || 0,
+            distanceKm: Number(item.distanceKm) || 0,
+            burnCalories: Number(item.burnCalories) || 0,
+          });
+          return;
+        }
+
+        byDate.set(dayKey, {
+          date: dayKey,
+          steps: (Number(prev.steps) || 0) + (Number(item.steps) || 0),
+          distanceKm:
+            (Number(prev.distanceKm) || 0) + (Number(item.distanceKm) || 0),
+          burnCalories:
+            (Number(prev.burnCalories) || 0) + (Number(item.burnCalories) || 0),
+        });
+      });
+
+      return [...byDate.values()].sort(
+        (a, b) =>
+          parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
+      );
+    },
     [monthlyDailyActivities]
   );
 
@@ -176,7 +203,7 @@ function ActivityPage() {
       max: Math.max(...steps),
     };
   }, [normalizedWeeklySteps]);
-  
+
   /**
    * HEX 컬러를 RGBA 문자열로 변환한다.
    */
@@ -664,47 +691,55 @@ function ActivityPage() {
           style={styles.loadingIndicator}
         />
       ) : listTab === 'daily' ? (
-        showEmptyDaily ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyCardTitle}>
-              이달의 일별 기록이 없어요.
-            </Text>
-            <Text style={styles.emptyCardText}>
-              오늘 산책을 시작하면 자동으로 기록돼요.
-            </Text>
-          </View>
-        ) : (
-          normalizedMonthlyDaily.map((item) => (
-            <View key={item.date} style={styles.listCard}>
-              <View style={styles.listMarker} />
-              <View style={styles.listTextColumn}>
-                <Text style={styles.listTitle}>
-                  {formatDailyLabel(item.date)}
-                </Text>
-                <Text style={styles.listSubtitle}>
-                  {(Number(item.distanceKm) || 0).toFixed(2)} km ·{' '}
-                  {(Number(item.burnCalories) || 0).toLocaleString()} kcal
-                </Text>
-              </View>
-              <View style={styles.listRight}>
-                <Text style={[styles.listValue, styles.listValueAccent]}>
-                  {(Number(item.steps) || 0).toLocaleString()} 걸음
-                </Text>
-              </View>
+        <View key='monthly-daily-list'>
+          {showEmptyDaily ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyCardTitle}>
+                이달의 일별 기록이 없어요.
+              </Text>
+              <Text style={styles.emptyCardText}>
+                오늘 러닝을 START 하면 자동으로 기록돼요.
+              </Text>
             </View>
-          ))
-        )
-      ) : showEmptySessions ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyCardTitle}>이달의 GPS 세션이 없어요.</Text>
-          <Text style={styles.emptyCardText}>
-            메인 화면에서 산책을 시작하면 자동으로 기록돼요.
-          </Text>
+          ) : (
+            normalizedMonthlyDaily.map((item) => (
+              <View key={item.date} style={styles.listCard}>
+                <View style={styles.listMarker} />
+                <View style={styles.listTextColumn}>
+                  <Text style={styles.listTitle}>
+                    {formatDailyLabel(item.date)}
+                  </Text>
+                  <Text style={styles.listSubtitle}>
+                    {(Number(item.distanceKm) || 0).toFixed(2)} km ·{' '}
+                    {(Number(item.burnCalories) || 0).toLocaleString()} kcal
+                  </Text>
+                </View>
+                <View style={styles.listRight}>
+                  <Text style={[styles.listValue, styles.listValueAccent]}>
+                    {(Number(item.steps) || 0).toLocaleString()} 걸음
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
         </View>
       ) : (
-        monthlyActivities.map((session) => (
-          <SessionItem key={session.sessionId} session={session} />
-        ))
+        <View key='monthly-session-list'>
+          {showEmptySessions ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyCardTitle}>
+                이달의 러닝기록이 없어요.
+              </Text>
+              <Text style={styles.emptyCardText}>
+                메인 화면에서 러닝(START)을 시작하면 자동으로 기록돼요.
+              </Text>
+            </View>
+          ) : (
+            monthlyActivities.map((session) => (
+              <SessionItem key={session.sessionId} session={session} />
+            ))
+          )}
+        </View>
       )}
     </ScrollView>
   );

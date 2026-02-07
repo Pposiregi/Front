@@ -44,16 +44,16 @@ export const useStepSync = () => {
         String(lastSyncedSteps + stepsToSend)
       );
     } catch (error) {
-      console.error('[useStepSync] step sync failed', error);
+      console.error('>>> [useStepSync] step sync failed', error);
     }
   }, []);
   //로컬 걸음 동기화 초기화
   const resetSync = useCallback(async () => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, '0');
-      console.log('[useStepSync] LAST_SYNCED_STEPS 초기화 완료');
+      console.log('>>> [useStepSync] LAST_SYNCED_STEPS 초기화 완료');
     } catch (error) {
-      console.error('[useStepSync] 초기화 실패', error);
+      console.error('>>> [useStepSync] 초기화 실패', error);
     }
   }, []);
 

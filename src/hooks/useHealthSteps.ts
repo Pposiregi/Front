@@ -94,7 +94,7 @@ const useHealthSteps = (): HealthStepsState => {
         setSteps(cached.steps);
       }
     } catch (err) {
-      console.warn('[HC] 캐시된 걸음 수 로드 실패', err);
+      console.warn('>>>[RUNNING][HC] 캐시된 걸음 수 로드 실패', err);
     }
   };
 
@@ -129,10 +129,10 @@ const useHealthSteps = (): HealthStepsState => {
           JSON.stringify({ date: start.toISOString(), steps: total })
         );
       } catch (err) {
-        console.warn('[HC] 걸음 수 캐시 저장 실패', err);
+        console.warn('>>>[RUNNING][HC] 걸음 수 캐시 저장 실패', err);
       }
     } catch (err: any) {
-      console.error('>>> [HC] 걸음 수 읽기 실패', err);
+      console.error('>>>[RUNNING][HC] 걸음 수 읽기 실패', err);
       setError(err?.message ?? '걸음 수를 불러오지 못했습니다.');
       setSteps(null);
     } finally {
@@ -168,7 +168,7 @@ const useHealthSteps = (): HealthStepsState => {
       lastWriteEndRef.current = now;
       await fetchSteps();
     } catch (err: any) {
-      console.error('>>> [HC] 걸음 수 쓰기 실패', err);
+      console.error('>>>[RUNNING][HC] 걸음 수 쓰기 실패', err);
       setError(err?.message ?? '걸음 수를 기록하지 못했습니다.');
       throw err;
     } finally {
