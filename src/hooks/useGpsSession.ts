@@ -114,6 +114,8 @@ export const useGpsSession = (): UseGpsSessionResult => {
   const logTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingLogsRef = useRef<PendingLog[]>([]);
   const lastTrackPointIndexRef = useRef(0);
+  const isEndingRef = useRef(false);
+  const trackPointsRef = useRef<RouteTrackPoint[]>([]);
 
   const clearLogTimer = useCallback(() => {
     if (!logTimerRef.current) return;
@@ -142,6 +144,23 @@ export const useGpsSession = (): UseGpsSessionResult => {
         console.warn('>>>[RUNNING][RUN] 세션 삭제 실패', err);
       }
     }
+  }, []);
+
+  const appendNewTrackPointsToPending = useCallback(() => {
+    const latestTrackPoints = trackPointsRef.current;
+    if (latestTrackPoints.length <= lastTrackPointIndexRef.current) return;
+
+    const newPoints = latestTrackPoints.slice(lastTrackPointIndexRef.current);
+    newPoints.forEach((point: RouteTrackPoint) => {
+      pendingLogsRef.current.push({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        recordedAt: point.recordedAt,
+        speed: point.speed,
+        altitude: point.altitude,
+      });
+    });
+    lastTrackPointIndexRef.current = latestTrackPoints.length;
   }, []);
 
   const flushLogs = useCallback(async (): Promise<FlushLogsResult> => {
@@ -255,6 +274,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       startTimeRef.current = startTime.toISOString();
       setSessionId(response.sessionId);
       setIsSessionActive(true);
+      isEndingRef.current = false;
       lastTrackPointIndexRef.current = 0;
       pendingLogsRef.current = [];
       await persistSession(response);
@@ -279,6 +299,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
     if (!sessionIdRef.current || !startTimeRef.current) return null;
 
     try {
+      isEndingRef.current = true;
       clearLogTimer();
       const allLogsFlushed = await flushAllPendingLogs();
       if (!allLogsFlushed) {
@@ -340,6 +361,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       setIsSessionActive(false);
       await clearPersistedSession();
       stopTracking();
+      isEndingRef.current = false;
 
       if (__DEV__) {
         console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
@@ -348,10 +370,13 @@ export const useGpsSession = (): UseGpsSessionResult => {
       return { response, summary };
     } catch (err) {
       // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
+      isEndingRef.current = false;
+      appendNewTrackPointsToPending();
       startLogTimer();
       throw err;
     }
   }, [
+    appendNewTrackPointsToPending,
     clearLogTimer,
     clearPersistedSession,
     endGpsSessionWithRetry,
@@ -363,24 +388,14 @@ export const useGpsSession = (): UseGpsSessionResult => {
 
   useEffect(() => {
     if (!isTracking) return;
+    trackPointsRef.current = trackPoints;
     if (trackPoints.length === 0) {
       lastTrackPointIndexRef.current = 0;
       return;
     }
-    if (trackPoints.length <= lastTrackPointIndexRef.current) return;
-
-    const newPoints = trackPoints.slice(lastTrackPointIndexRef.current);
-    newPoints.forEach((point: RouteTrackPoint) => {
-      pendingLogsRef.current.push({
-        latitude: point.latitude,
-        longitude: point.longitude,
-        recordedAt: point.recordedAt,
-        speed: point.speed,
-        altitude: point.altitude,
-      });
-    });
-    lastTrackPointIndexRef.current = trackPoints.length;
-  }, [isTracking, trackPoints]);
+    if (isEndingRef.current) return;
+    appendNewTrackPointsToPending();
+  }, [appendNewTrackPointsToPending, isTracking, trackPoints]);
 
   useEffect(
     () => () => {
