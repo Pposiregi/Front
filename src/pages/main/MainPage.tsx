@@ -402,7 +402,11 @@ export const MainPage = () => {
       setCountdown(null);
       (async () => {
         try {
-          await startSession();
+          const started = await startSession();
+          if (!started) {
+            // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
+            return;
+          }
         } catch (err: any) {
           Alert.alert(
             '산책 시작 실패',
