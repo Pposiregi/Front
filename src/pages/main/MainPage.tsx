@@ -36,6 +36,7 @@ import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
  * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
  */
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const END_FAILURE_FORCE_THRESHOLD = 3;
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -124,6 +125,7 @@ export const MainPage = () => {
     useGpsSession();
   const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
+  const [endFailureCount, setEndFailureCount] = useState(0);
   const isAndroid13OrLower =
     Platform.OS === 'android' &&
     Number(Platform.Version) > 0 &&
@@ -261,11 +263,28 @@ export const MainPage = () => {
     }
   }, [addSteps]);
 
+  const handleForceEnd = useCallback(async () => {
+    try {
+      const result = await endSession({ forceNoSteps: true });
+      if (result?.summary) {
+        setRunSummary(result.summary);
+        setShowRunSummaryModal(true);
+      }
+      setEndFailureCount(0);
+    } catch (err: any) {
+      setEndFailureCount((prev) => prev + 1);
+      Alert.alert(
+        '러닝 종료 실패',
+        err?.message ?? '러닝 종료 중 문제가 발생했어요.'
+      );
+    }
+  }, [endSession]);
+
   /**
    * Running 시작/종료 핸들러
-   * - isTracking이 true면 산책 종료를 시도하되,
+   * - isTracking이 true면 러닝 종료를 시도하되,
    *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
-   * - isTracking이 false면 산책 전이므로 카운트다운 후 시작
+   * - isTracking이 false면 러닝 전이므로 카운트다운 후 시작
    */
   const handleToggleTracking = useCallback(async () => {
     // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
@@ -292,20 +311,7 @@ export const MainPage = () => {
                 text: '강제 종료',
                 style: 'destructive',
                 onPress: () => {
-                  (async () => {
-                    try {
-                      const result = await endSession({ forceNoSteps: true });
-                      if (result?.summary) {
-                        setRunSummary(result.summary);
-                        setShowRunSummaryModal(true);
-                      }
-                    } catch (err: any) {
-                      Alert.alert(
-                        '산책 종료 실패',
-                        err?.message ?? '산책 종료 중 문제가 발생했어요.'
-                      );
-                    }
-                  })();
+                  handleForceEnd();
                 },
               },
               { text: '취소', style: 'cancel' },
@@ -320,11 +326,32 @@ export const MainPage = () => {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
         }
+        setEndFailureCount(0);
       } catch (err: any) {
-        Alert.alert(
-          '산책 종료 실패',
-          err?.message ?? '산책 종료 중 문제가 발생했어요.'
-        );
+        const message = err?.message ?? '러닝 종료 중 문제가 발생했어요.';
+        const nextFailureCount = endFailureCount + 1;
+        setEndFailureCount(nextFailureCount);
+        if (nextFailureCount >= END_FAILURE_FORCE_THRESHOLD) {
+          Alert.alert(
+            '러닝 종료 반복 실패',
+            `${message}\n\n종료가 ${END_FAILURE_FORCE_THRESHOLD}회 이상 실패했습니다. 강제 종료로 종료할까요?`,
+            [
+              {
+                text: '강제 종료',
+                style: 'destructive',
+                onPress: () => {
+                  handleForceEnd();
+                },
+              },
+              { text: '취소', style: 'cancel' },
+            ]
+          );
+        } else {
+          Alert.alert(
+            '러닝 종료 실패',
+            `${message}\n(${nextFailureCount}/${END_FAILURE_FORCE_THRESHOLD})`
+          );
+        }
       }
       return;
     }
@@ -335,7 +362,9 @@ export const MainPage = () => {
     healthError,
     healthLoading,
     healthSteps,
+    handleForceEnd,
     isAndroid13OrLower,
+    endFailureCount,
     isTracking,
   ]);
 
@@ -407,10 +436,11 @@ export const MainPage = () => {
             // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
             return;
           }
+          setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(
-            '산책 시작 실패',
-            err?.message ?? '산책 시작 중 문제가 발생했어요.'
+            '러닝 시작 실패',
+            err?.message ?? '러닝 시작 중 문제가 발생했어요.'
           );
         }
       })();
@@ -686,7 +716,7 @@ export const MainPage = () => {
       <TouchableOpacity
         style={styles.startButton}
         accessibilityRole='button'
-        accessibilityLabel={isTracking ? '산책 종료' : '산책 시작'} // 스크린리더
+        accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
         onPress={handleToggleTracking}
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>

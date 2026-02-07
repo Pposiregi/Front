@@ -6,6 +6,7 @@ import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';
 import { getHealthConnectStepCount } from '@utils/healthConnectSteps';
 import type {
+  GpsEndRequest,
   GpsEndResponse,
   GpsLogRequest,
   GpsSessionStartResponse,
@@ -13,8 +14,45 @@ import type {
 
 const SESSION_ID_KEY = 'fitpet:gps:sessionId';
 const SESSION_START_KEY = 'fitpet:gps:startTime';
+const LOG_FLUSH_MAX_ATTEMPTS = 3;
+const END_API_MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 600;
 
 type PendingLog = Omit<GpsLogRequest, 'sessionId'>;
+type FlushLogsResult = {
+  ok: boolean;
+  retryable: boolean;
+};
+
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const getRetryDelayMs = (attempt: number) =>
+  RETRY_BASE_DELAY_MS * 2 ** attempt;
+
+const isRetryableNetworkError = (error: unknown): boolean => {
+  const maybe = error as {
+    code?: string;
+    request?: unknown;
+    response?: { status?: number };
+  };
+  const status = maybe?.response?.status;
+  if (typeof status === 'number') {
+    return status >= 500 || status === 429;
+  }
+  const code = maybe?.code;
+  if (
+    code === 'ERR_NETWORK' ||
+    code === 'ECONNABORTED' ||
+    code === 'ETIMEDOUT' ||
+    code === 'ENETUNREACH'
+  ) {
+    return true;
+  }
+  return maybe?.request != null && maybe?.response == null;
+};
 
 const calculateTotalDistanceMeters = (path: LatLng[]): number => {
   if (path.length < 2) return 0;
@@ -106,10 +144,12 @@ export const useGpsSession = (): UseGpsSessionResult => {
     }
   }, []);
 
-  const flushLogs = useCallback(async (): Promise<boolean> => {
+  const flushLogs = useCallback(async (): Promise<FlushLogsResult> => {
     const currentSessionId = sessionIdRef.current;
-    if (!currentSessionId) return false;
-    if (pendingLogsRef.current.length === 0) return true;
+    if (!currentSessionId) return { ok: false, retryable: false };
+    if (pendingLogsRef.current.length === 0) {
+      return { ok: true, retryable: false };
+    }
 
     const logsToSend = pendingLogsRef.current;
     pendingLogsRef.current = [];
@@ -128,18 +168,31 @@ export const useGpsSession = (): UseGpsSessionResult => {
           ...logsToSend.slice(i + 1),
           ...pendingLogsRef.current,
         ];
-        return false;
+        return { ok: false, retryable: isRetryableNetworkError(err) };
       }
     }
-    return pendingLogsRef.current.length === 0;
+    return { ok: pendingLogsRef.current.length === 0, retryable: false };
   }, []);
 
   const flushAllPendingLogs = useCallback(
-    async (maxAttempts = 3): Promise<boolean> => {
+    async (maxAttempts = LOG_FLUSH_MAX_ATTEMPTS): Promise<boolean> => {
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        const ok = await flushLogs();
-        if (ok && pendingLogsRef.current.length === 0) {
+        const result = await flushLogs();
+        if (result.ok && pendingLogsRef.current.length === 0) {
           return true;
+        }
+        if (!result.retryable) {
+          return false;
+        }
+        if (attempt < maxAttempts - 1) {
+          const delay = getRetryDelayMs(attempt);
+          if (__DEV__) {
+            console.warn(
+              '>>>[RUNNING][RUN] 로그 재전송 대기',
+              JSON.stringify({ attempt: attempt + 1, delay })
+            );
+          }
+          await wait(delay);
         }
       }
       return pendingLogsRef.current.length === 0;
@@ -147,10 +200,43 @@ export const useGpsSession = (): UseGpsSessionResult => {
     [flushLogs]
   );
 
+  const endGpsSessionWithRetry = useCallback(
+    async (
+      payload: GpsEndRequest,
+      maxAttempts = END_API_MAX_ATTEMPTS
+    ): Promise<GpsEndResponse> => {
+      let lastError: unknown = null;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        try {
+          return await endGpsSession(payload);
+        } catch (err) {
+          lastError = err;
+          if (!isRetryableNetworkError(err) || attempt === maxAttempts - 1) {
+            throw err;
+          }
+          const delay = getRetryDelayMs(attempt);
+          if (__DEV__) {
+            console.warn(
+              '>>>[RUNNING][API] /gps/end 재시도 대기',
+              JSON.stringify({ attempt: attempt + 1, delay })
+            );
+          }
+          await wait(delay);
+        }
+      }
+      throw lastError ?? new Error('/gps/end 재시도에 실패했습니다.');
+    },
+    []
+  );
+
   const startLogTimer = useCallback(() => {
     clearLogTimer();
     logTimerRef.current = setInterval(() => {
-      flushLogs();
+      flushLogs().catch((err) => {
+        if (__DEV__) {
+          console.error('>>>[RUNNING][RUN] 주기 로그 전송 실패', err);
+        }
+      });
     }, 5000);
   }, [clearLogTimer, flushLogs]);
 
@@ -231,7 +317,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
         }
       }
 
-      const response = await endGpsSession({
+      const response = await endGpsSessionWithRetry({
         sessionId: sessionIdRef.current,
         endTime: endTime.toISOString(),
         stepCount,
@@ -268,6 +354,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
   }, [
     clearLogTimer,
     clearPersistedSession,
+    endGpsSessionWithRetry,
     flushAllPendingLogs,
     path,
     startLogTimer,
