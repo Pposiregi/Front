@@ -25,6 +25,14 @@ const calculateTotalDistanceMeters = (path: LatLng[]): number => {
   return total;
 };
 
+export type EndSessionOptions = {
+  /**
+   * Health Connect를 건너뛰고 강제 종료한다.
+   * stepCount는 0으로 처리되고 요약에 미집계 표시가 포함된다.
+   */
+  forceNoSteps?: boolean;
+};
+
 export type UseGpsSessionResult = {
   isTracking: boolean;
   isSessionActive: boolean;
@@ -32,7 +40,9 @@ export type UseGpsSessionResult = {
   path: LatLng[];
   region: MapRegion;
   startSession: () => Promise<boolean>;
-  endSession: () => Promise<GpsSessionEndResult | null>;
+  endSession: (
+    options?: EndSessionOptions
+  ) => Promise<GpsSessionEndResult | null>;
 };
 
 export type GpsSessionSummary = {
@@ -40,6 +50,7 @@ export type GpsSessionSummary = {
   stepCount: number;
   distanceMeters: number;
   avgSpeedKmh: number;
+  stepCountMissing?: boolean;
 };
 
 export type GpsSessionEndResult = {
@@ -164,27 +175,39 @@ export const useGpsSession = (): UseGpsSessionResult => {
     stopTracking,
   ]);
 
-  const endSession = useCallback(async () => {
+  const endSession = useCallback(async (options?: EndSessionOptions) => {
     if (!sessionIdRef.current || !startTimeRef.current) return null;
 
     await flushLogs();
 
     const endTime = new Date();
     const startTimeValue = new Date(startTimeRef.current);
-    const durationMs = Math.max(0, endTime.getTime() - startTimeValue.getTime());
+    const durationMs = Math.max(
+      0,
+      endTime.getTime() - startTimeValue.getTime()
+    );
     const distance = calculateTotalDistanceMeters(path);
     const avgSpeedKmh =
       durationMs > 0 ? (distance / durationMs) * 3600 : 0;
-    const stepCount = await getHealthConnectStepCount(
-      startTimeRef.current,
-      endTime
-    );
-    if (__DEV__) {
-      console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
-        startTime: startTimeRef.current,
-        endTime: endTime.toISOString(),
-        stepCount,
-      });
+    let stepCount = 0;
+    let stepCountMissing = false;
+    if (options?.forceNoSteps) {
+      stepCountMissing = true;
+      if (__DEV__) {
+        console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
+      }
+    } else {
+      stepCount = await getHealthConnectStepCount(
+        startTimeRef.current,
+        endTime
+      );
+      if (__DEV__) {
+        console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
+          startTime: startTimeRef.current,
+          endTime: endTime.toISOString(),
+          stepCount,
+        });
+      }
     }
 
     const response = await endGpsSession({
@@ -198,6 +221,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
       stepCount,
       distanceMeters: distance,
       avgSpeedKmh,
+      stepCountMissing,
     };
 
     clearLogTimer();

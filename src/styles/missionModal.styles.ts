@@ -167,4 +167,11 @@ export default StyleSheet.create({
     height: 1,
     backgroundColor: '#eeeeee',
   },
+  summaryCaption: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#999999',
+    fontFamily: 'JUA',
+    textAlign: 'right',
+  },
 });
