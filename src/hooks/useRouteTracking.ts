@@ -27,7 +27,14 @@ const MIN_POINT_DISTANCE_METERS = 0.1;
 type TrackingState = {
   isTracking: boolean;
   path: LatLng[];
+  trackPoints: RouteTrackPoint[];
   region: MapRegion;
+};
+
+export type RouteTrackPoint = LatLng & {
+  recordedAt: string;
+  speed?: number;
+  altitude?: number;
 };
 
 /**
@@ -70,6 +77,7 @@ export const useRouteTracking = () => {
   const [state, setState] = useState<TrackingState>({
     isTracking: false,
     path: [],
+    trackPoints: [],
     region: DEFAULT_REGION,
   });
   const watchIdRef = useRef<number | null>(null);
@@ -121,13 +129,43 @@ export const useRouteTracking = () => {
    * - 경로/카메라 갱신
    */
   const handlePosition = useCallback(
-    (latitude: number, longitude: number) => {
+    ({
+      latitude,
+      longitude,
+      speed,
+      altitude,
+      timestamp,
+    }: {
+      latitude: number;
+      longitude: number;
+      speed?: number | null;
+      altitude?: number | null;
+      timestamp?: number;
+    }) => {
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         console.warn('Received invalid coordinate', { latitude, longitude });
         return;
       }
+
+      const safeSpeed = Number.isFinite(speed) && (speed ?? 0) >= 0
+        ? Number(speed)
+        : undefined;
+      const safeAltitude = Number.isFinite(altitude)
+        ? Number(altitude)
+        : undefined;
+      const recordedAt = new Date(
+        Number.isFinite(timestamp) ? Number(timestamp) : Date.now()
+      ).toISOString();
+
       setState((prev) => {
         const nextPoint: LatLng = { latitude, longitude };
+        const nextTrackPoint: RouteTrackPoint = {
+          latitude,
+          longitude,
+          recordedAt,
+          speed: safeSpeed,
+          altitude: safeAltitude,
+        };
         const lastPoint = prev.path[prev.path.length - 1];
 
         if (lastPoint) {
@@ -147,6 +185,7 @@ export const useRouteTracking = () => {
         }
 
         const nextPath = [...prev.path, nextPoint];
+        const nextTrackPoints = [...prev.trackPoints, nextTrackPoint];
         const nextRegion: MapRegion = {
           latitude,
           longitude,
@@ -167,6 +206,7 @@ export const useRouteTracking = () => {
         return {
           ...prev,
           path: nextPath,
+          trackPoints: nextTrackPoints,
           region: nextRegion,
         };
       });
@@ -180,7 +220,13 @@ export const useRouteTracking = () => {
   const requestSingleLocation = useCallback(() => {
     Geolocation.getCurrentPosition(
       (position) => {
-        handlePosition(position.coords.latitude, position.coords.longitude);
+        handlePosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          speed: position.coords.speed,
+          altitude: position.coords.altitude,
+          timestamp: position.timestamp,
+        });
       },
       (error) => {
         console.warn('현재 위치를 가져오지 못했습니다.', error);
@@ -214,14 +260,25 @@ export const useRouteTracking = () => {
     clearWatch();
     clearRefreshTimer();
 
-    setState((prev) => ({ ...prev, isTracking: true, path: [] }));
+    setState((prev) => ({
+      ...prev,
+      isTracking: true,
+      path: [],
+      trackPoints: [],
+    }));
     lastUpdateRef.current = null;
 
     requestSingleLocation();
 
     watchIdRef.current = Geolocation.watchPosition(
       (position) => {
-        handlePosition(position.coords.latitude, position.coords.longitude);
+        handlePosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          speed: position.coords.speed,
+          altitude: position.coords.altitude,
+          timestamp: position.timestamp,
+        });
       },
       (error) => {
         console.warn('위치 추적 중 오류 발생', error);
@@ -276,6 +333,7 @@ export const useRouteTracking = () => {
   return {
     isTracking: state.isTracking,
     path: state.path,
+    trackPoints: state.trackPoints,
     region: state.region,
     startTracking,
     stopTracking,
