@@ -106,10 +106,10 @@ export const useGpsSession = (): UseGpsSessionResult => {
     }
   }, []);
 
-  const flushLogs = useCallback(async () => {
+  const flushLogs = useCallback(async (): Promise<boolean> => {
     const currentSessionId = sessionIdRef.current;
-    if (!currentSessionId) return;
-    if (pendingLogsRef.current.length === 0) return;
+    if (!currentSessionId) return false;
+    if (pendingLogsRef.current.length === 0) return true;
 
     const logsToSend = pendingLogsRef.current;
     pendingLogsRef.current = [];
@@ -128,10 +128,24 @@ export const useGpsSession = (): UseGpsSessionResult => {
           ...logsToSend.slice(i + 1),
           ...pendingLogsRef.current,
         ];
-        break;
+        return false;
       }
     }
+    return pendingLogsRef.current.length === 0;
   }, []);
+
+  const flushAllPendingLogs = useCallback(
+    async (maxAttempts = 3): Promise<boolean> => {
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const ok = await flushLogs();
+        if (ok && pendingLogsRef.current.length === 0) {
+          return true;
+        }
+      }
+      return pendingLogsRef.current.length === 0;
+    },
+    [flushLogs]
+  );
 
   const startLogTimer = useCallback(() => {
     clearLogTimer();
@@ -178,7 +192,15 @@ export const useGpsSession = (): UseGpsSessionResult => {
   const endSession = useCallback(async (options?: EndSessionOptions) => {
     if (!sessionIdRef.current || !startTimeRef.current) return null;
 
-    await flushLogs();
+    clearLogTimer();
+    const allLogsFlushed = await flushAllPendingLogs();
+    if (!allLogsFlushed) {
+      // 종료 중 전송 실패 시 세션을 유지하고 주기 전송을 재개한다.
+      startLogTimer();
+      throw new Error(
+        'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
+      );
+    }
 
     const endTime = new Date();
     const startTimeValue = new Date(startTimeRef.current);
@@ -239,7 +261,14 @@ export const useGpsSession = (): UseGpsSessionResult => {
     }
 
     return { response, summary };
-  }, [clearLogTimer, clearPersistedSession, flushLogs, path, stopTracking]);
+  }, [
+    clearLogTimer,
+    clearPersistedSession,
+    flushAllPendingLogs,
+    path,
+    startLogTimer,
+    stopTracking,
+  ]);
 
   useEffect(() => {
     if (!isTracking) return;
