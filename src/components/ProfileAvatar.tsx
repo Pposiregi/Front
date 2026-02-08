@@ -7,10 +7,9 @@ import {
 
 interface Props {
   profileImageId?: number;
-  size?: number;
 }
 
-export const ProfileAvatar = ({ profileImageId, size = 40 }: Props) => {
+export const ProfileAvatar = ({ profileImageId }: Props) => {
   const source =
     PROFILE_ICONS[profileImageId ?? DEFAULT_PROFILE_ICON_ID] ??
     PROFILE_ICONS[DEFAULT_PROFILE_ICON_ID];
@@ -26,9 +25,3 @@ export const ProfileAvatar = ({ profileImageId, size = 40 }: Props) => {
     />
   );
 };
-
-const styles = StyleSheet.create({
-  image: {
-    resizeMode: 'contain',
-  },
-});
