@@ -131,4 +131,47 @@ export default StyleSheet.create({
     fontSize: 20,
     fontFamily: 'JUA',
   },
+  summaryBox: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+  },
+  summaryTitle: {
+    fontSize: 24,
+    marginBottom: 12,
+    fontFamily: 'JUA',
+    color: '#333333',
+    textAlign: 'center',
+  },
+  summaryList: {
+    marginBottom: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#666666',
+    fontFamily: 'JUA',
+  },
+  summaryValue: {
+    fontSize: 18,
+    color: '#333333',
+    fontFamily: 'JUA',
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: '#eeeeee',
+  },
+  summaryCaption: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#999999',
+    fontFamily: 'JUA',
+    textAlign: 'right',
+  },
 });

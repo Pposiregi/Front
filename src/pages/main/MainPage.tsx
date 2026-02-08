@@ -16,6 +16,7 @@ import {
   Image,
   Animated,
   Alert,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StepProgress } from '@components/StepProgress';
@@ -24,7 +25,7 @@ import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
-import { useRouteTracking } from '@hooks/useRouteTracking';
+import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
@@ -35,6 +36,7 @@ import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
  * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
  */
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const END_FAILURE_FORCE_THRESHOLD = 3;
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -50,6 +52,8 @@ import { useAppDispatch } from '@store/index';
 import userSlice from '@slices/user';
 import { getUserResponse } from 'types/main';
 import { useDispatch } from 'react-redux';
+import RunningSummaryModal from './RunningSummaryModal';
+
 /**
  * 메인 화면 컴포넌트
  * - 사용자 데이터 로딩
@@ -141,10 +145,25 @@ export const MainPage = () => {
     fetchUser();
   }, []);
   /**
-   * 러닝 추적 상태/경로/카메라 영역/시작·종료 핸들러.
+   * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
-  const { isTracking, path, region, startTracking, stopTracking } =
-    useRouteTracking();
+  const { isTracking, path, region, startSession, endSession } =
+    useGpsSession();
+  const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
+  const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
+  const [endFailureCount, setEndFailureCount] = useState(0);
+  const isAndroid13OrLower =
+    Platform.OS === 'android' &&
+    Number(Platform.Version) > 0 &&
+    Number(Platform.Version) <= 33;
+  const getSamsungHealthGuide = useCallback(() => {
+    return (
+      'Android 13 이하에서는 삼성 헬스 연동이 필요합니다.\n' +
+      '1) 삼성 헬스 → 더 보기(⋮) → 설정 → 헬스 커넥트 → 앱 권한 → 삼성 헬스 → 모두 허용\n' +
+      '2) 삼성 헬스 → 설정 → 개인정보 → 민감정보 동의\n' +
+      '3) 삼성 헬스 → 설정 → 삼성 클라우드 동기화 → 지금 동기화'
+    );
+  }, []);
 
   const mapRef = useRef<MapView | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
@@ -244,19 +263,136 @@ export const MainPage = () => {
   }, [isTracking, path, region]);
 
   /**
-   * 산책 시작/종료 핸들러
-   * - isTracking이 true면 산책 중이므로 종료
-   * - isTracking이 false면 산책 전이므로 시작
+   * Health Connect 오늘 걸음 수
    */
-  const handleToggleTracking = useCallback(() => {
-    // 이미 추적 중이면 즉시 종료하고, 그렇지 않으면 권한 확인 후 추적을 시작한다.
+  const {
+    steps: healthSteps,
+    addSteps,
+    error: healthError,
+    writing: healthWriting,
+    loading: healthLoading,
+  } = useHealthSteps();
+  const healthErrorShownRef = useRef(false);
+  /**
+   * 개발용 걸음수 +1000 버튼.
+   */
+  const handleDevAddSteps = useCallback(async () => {
+    try {
+      await addSteps(1000);
+    } catch (err: any) {
+      // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
+      healthErrorShownRef.current = true;
+      Alert.alert(
+        '걸음 추가 실패',
+        err?.message ?? '걸음 수를 추가하지 못했습니다.'
+      );
+    }
+  }, [addSteps]);
+
+  const handleForceEnd = useCallback(async () => {
+    try {
+      const result = await endSession({ forceNoSteps: true });
+      if (result?.summary) {
+        setRunSummary(result.summary);
+        setShowRunSummaryModal(true);
+      }
+      setEndFailureCount(0);
+    } catch (err: any) {
+      setEndFailureCount((prev) => prev + 1);
+      Alert.alert(
+        '러닝 종료 실패',
+        err?.message ?? '러닝 종료 중 문제가 발생했어요.'
+      );
+    }
+  }, [endSession]);
+
+  /**
+   * Running 시작/종료 핸들러
+   * - isTracking이 true면 러닝 종료를 시도하되,
+   *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
+   * - isTracking이 false면 러닝 전이므로 카운트다운 후 시작
+   */
+  const handleToggleTracking = useCallback(async () => {
+    // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
     if (isTracking) {
-      stopTracking();
-      // 이곳에 서버에게 데이터 전송
+      if (Platform.OS === 'android') {
+        if (healthLoading) {
+          Alert.alert(
+            '걸음 수 확인 중',
+            'Health Connect 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.'
+          );
+          return;
+        }
+        if (healthError || healthSteps == null) {
+          const baseMessage =
+            healthError ??
+            'Health Connect 권한/데이터가 없습니다. 권한을 허용하고 다시 시도해 주세요.';
+          Alert.alert(
+            '걸음 수 권한 필요',
+            isAndroid13OrLower
+              ? `${baseMessage}\n\n${getSamsungHealthGuide()}`
+              : baseMessage,
+            [
+              {
+                text: '강제 종료',
+                style: 'destructive',
+                onPress: () => {
+                  handleForceEnd();
+                },
+              },
+              { text: '취소', style: 'cancel' },
+            ]
+          );
+          return;
+        }
+      }
+      try {
+        const result = await endSession();
+        if (result?.summary) {
+          setRunSummary(result.summary);
+          setShowRunSummaryModal(true);
+        }
+        setEndFailureCount(0);
+      } catch (err: any) {
+        const message = err?.message ?? '러닝 종료 중 문제가 발생했어요.';
+        const nextFailureCount = endFailureCount + 1;
+        setEndFailureCount(nextFailureCount);
+        if (nextFailureCount >= END_FAILURE_FORCE_THRESHOLD) {
+          Alert.alert(
+            '러닝 종료 반복 실패',
+            `${message}\n\n종료가 ${END_FAILURE_FORCE_THRESHOLD}회 이상 실패했습니다. 강제 종료로 종료할까요?`,
+            [
+              {
+                text: '강제 종료',
+                style: 'destructive',
+                onPress: () => {
+                  handleForceEnd();
+                },
+              },
+              { text: '취소', style: 'cancel' },
+            ]
+          );
+        } else {
+          Alert.alert(
+            '러닝 종료 실패',
+            `${message}\n(${nextFailureCount}/${END_FAILURE_FORCE_THRESHOLD})`
+          );
+        }
+      }
       return;
     }
     setCountdown(3);
-  }, [isTracking, stopTracking]);
+  }, [
+    endSession,
+    getSamsungHealthGuide,
+    healthError,
+    healthLoading,
+    healthSteps,
+    handleForceEnd,
+    isAndroid13OrLower,
+    endFailureCount,
+    isTracking,
+  ]);
 
   /**
    * 오늘 프롬프트를 스킵 처리한다.
@@ -319,7 +455,21 @@ export const MainPage = () => {
 
     if (countdown === 0) {
       setCountdown(null);
-      startTracking();
+      (async () => {
+        try {
+          const started = await startSession();
+          if (!started) {
+            // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
+            return;
+          }
+          setEndFailureCount(0);
+        } catch (err: any) {
+          Alert.alert(
+            '러닝 시작 실패',
+            err?.message ?? '러닝 시작 중 문제가 발생했어요.'
+          );
+        }
+      })();
       return;
     }
     scaleAnim.setValue(0.6);
@@ -343,33 +493,7 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, scaleAnim, opacityAnim, startTracking]);
-
-  /**
-   * Health Connect 오늘 걸음 수
-   */
-  const {
-    steps: healthSteps,
-    addSteps,
-    error: healthError,
-    writing: healthWriting,
-  } = useHealthSteps();
-  const healthErrorShownRef = useRef(false);
-  /**
-   * 개발용 걸음수 +1000 버튼.
-   */
-  const handleDevAddSteps = useCallback(async () => {
-    try {
-      await addSteps(1000);
-    } catch (err: any) {
-      // 훅에서 error 상태를 설정하지만, 개발용 버튼은 즉시 안내한다.
-      healthErrorShownRef.current = true;
-      Alert.alert(
-        '걸음 추가 실패',
-        err?.message ?? '걸음 수를 추가하지 못했습니다.'
-      );
-    }
-  }, [addSteps]);
+  }, [countdown, scaleAnim, opacityAnim, startSession]);
 
   const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
@@ -453,8 +577,20 @@ export const MainPage = () => {
     }
     if (healthErrorShownRef.current) return;
     healthErrorShownRef.current = true;
-    Alert.alert('걸음 수 연동 실패', healthError);
-  }, [healthError]);
+    Alert.alert(
+      '걸음 수 연동 실패',
+      isAndroid13OrLower
+        ? `${healthError}\n\n${getSamsungHealthGuide()}`
+        : healthError
+    );
+  }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
+
+  const formatDuration = (durationMs: number) => {
+    const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}분 ${seconds}초`;
+  };
 
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
@@ -558,6 +694,16 @@ export const MainPage = () => {
               setTrans(true);
             }}
           />
+          <RunningSummaryModal
+            visible={showRunSummaryModal}
+            onClose={() => setShowRunSummaryModal(false)}
+            durationText={
+              runSummary ? formatDuration(runSummary.durationMs) : '0분 0초'
+            }
+            stepCount={runSummary?.stepCount ?? 0}
+            avgSpeedKmh={runSummary?.avgSpeedKmh ?? 0}
+            stepCountMissing={runSummary?.stepCountMissing}
+          />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <Image
@@ -596,7 +742,7 @@ export const MainPage = () => {
       <TouchableOpacity
         style={styles.startButton}
         accessibilityRole='button'
-        accessibilityLabel={isTracking ? '산책 종료' : '산책 시작'} // 스크린리더
+        accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
         onPress={handleToggleTracking}
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>

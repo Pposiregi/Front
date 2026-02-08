@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import type { LatLng, MapRegion } from '@shared-types/location';
+import { getDistanceMeters } from '@utils/distance';
 
 // 초기 지도 위치 (서울 시청 근방) — 실제 위치를 받으면 곧바로 덮어쓴다.
 const DEFAULT_REGION: MapRegion = {
@@ -26,7 +27,14 @@ const MIN_POINT_DISTANCE_METERS = 0.1;
 type TrackingState = {
   isTracking: boolean;
   path: LatLng[];
+  trackPoints: RouteTrackPoint[];
   region: MapRegion;
+};
+
+export type RouteTrackPoint = LatLng & {
+  recordedAt: string;
+  speed?: number;
+  altitude?: number;
 };
 
 /**
@@ -69,6 +77,7 @@ export const useRouteTracking = () => {
   const [state, setState] = useState<TrackingState>({
     isTracking: false,
     path: [],
+    trackPoints: [],
     region: DEFAULT_REGION,
   });
   const watchIdRef = useRef<number | null>(null);
@@ -114,40 +123,49 @@ export const useRouteTracking = () => {
   }, []);
 
   /**
-   * 두 좌표 간 거리를 하버사인 공식으로 계산 (미터)
-   */
-  const getDistanceMeters = useCallback((a: LatLng, b: LatLng) => {
-    const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371e3; // 지구 반지름 (m)
-    const dLat = toRad(b.latitude - a.latitude);
-    const dLon = toRad(b.longitude - a.longitude);
-    const lat1 = toRad(a.latitude);
-    const lat2 = toRad(b.latitude);
-
-    const sinLat = Math.sin(dLat / 2);
-    const sinLon = Math.sin(dLon / 2);
-
-    const aVal =
-      sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
-    const c = 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
-
-    return R * c;
-  }, []);
-
-  /**
    * 위치 업데이트 처리
    * - 좌표 유효성 검사
    * - 지터 필터링
    * - 경로/카메라 갱신
    */
   const handlePosition = useCallback(
-    (latitude: number, longitude: number) => {
+    ({
+      latitude,
+      longitude,
+      speed,
+      altitude,
+      timestamp,
+    }: {
+      latitude: number;
+      longitude: number;
+      speed?: number | null;
+      altitude?: number | null;
+      timestamp?: number;
+    }) => {
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         console.warn('Received invalid coordinate', { latitude, longitude });
         return;
       }
+
+      const safeSpeed = Number.isFinite(speed) && (speed ?? 0) >= 0
+        ? Number(speed)
+        : undefined;
+      const safeAltitude = Number.isFinite(altitude)
+        ? Number(altitude)
+        : undefined;
+      const recordedAt = new Date(
+        Number.isFinite(timestamp) ? Number(timestamp) : Date.now()
+      ).toISOString();
+
       setState((prev) => {
         const nextPoint: LatLng = { latitude, longitude };
+        const nextTrackPoint: RouteTrackPoint = {
+          latitude,
+          longitude,
+          recordedAt,
+          speed: safeSpeed,
+          altitude: safeAltitude,
+        };
         const lastPoint = prev.path[prev.path.length - 1];
 
         if (lastPoint) {
@@ -155,7 +173,7 @@ export const useRouteTracking = () => {
           // GPS 소수점 떨림(수십 cm)을 중복 포인트로 추가하지 않도록 필터링한다.
           if (delta < MIN_POINT_DISTANCE_METERS) {
             if (__DEV__) {
-              console.debug('>>> [RouteTracking] ignore jitter', {
+              console.debug('>>>[RUNNING][RUN] ignore jitter', {
                 latitude,
                 longitude,
                 delta,
@@ -167,6 +185,7 @@ export const useRouteTracking = () => {
         }
 
         const nextPath = [...prev.path, nextPoint];
+        const nextTrackPoints = [...prev.trackPoints, nextTrackPoint];
         const nextRegion: MapRegion = {
           latitude,
           longitude,
@@ -175,7 +194,7 @@ export const useRouteTracking = () => {
         };
 
         if (__DEV__) {
-          console.debug('>>> [RouteTracking] push point', {
+          console.debug('>>>[RUNNING][RUN] push point', {
             latitude,
             longitude,
             nextLength: nextPath.length,
@@ -187,11 +206,12 @@ export const useRouteTracking = () => {
         return {
           ...prev,
           path: nextPath,
+          trackPoints: nextTrackPoints,
           region: nextRegion,
         };
       });
     },
-    [getDistanceMeters]
+    []
   );
 
   /**
@@ -200,7 +220,13 @@ export const useRouteTracking = () => {
   const requestSingleLocation = useCallback(() => {
     Geolocation.getCurrentPosition(
       (position) => {
-        handlePosition(position.coords.latitude, position.coords.longitude);
+        handlePosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          speed: position.coords.speed,
+          altitude: position.coords.altitude,
+          timestamp: position.timestamp,
+        });
       },
       (error) => {
         console.warn('현재 위치를 가져오지 못했습니다.', error);
@@ -234,14 +260,25 @@ export const useRouteTracking = () => {
     clearWatch();
     clearRefreshTimer();
 
-    setState((prev) => ({ ...prev, isTracking: true, path: [] }));
+    setState((prev) => ({
+      ...prev,
+      isTracking: true,
+      path: [],
+      trackPoints: [],
+    }));
     lastUpdateRef.current = null;
 
     requestSingleLocation();
 
     watchIdRef.current = Geolocation.watchPosition(
       (position) => {
-        handlePosition(position.coords.latitude, position.coords.longitude);
+        handlePosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          speed: position.coords.speed,
+          altitude: position.coords.altitude,
+          timestamp: position.timestamp,
+        });
       },
       (error) => {
         console.warn('위치 추적 중 오류 발생', error);
@@ -260,7 +297,7 @@ export const useRouteTracking = () => {
       const last = lastUpdateRef.current;
       if (!last || Date.now() - last > 4000) {
         if (__DEV__) {
-          console.debug('>>> [RouteTracking] force single location');
+          console.debug('>>>[RUNNING][RUN] force single location');
         }
         requestSingleLocation();
       }
@@ -296,6 +333,7 @@ export const useRouteTracking = () => {
   return {
     isTracking: state.isTracking,
     path: state.path,
+    trackPoints: state.trackPoints,
     region: state.region,
     startTracking,
     stopTracking,
