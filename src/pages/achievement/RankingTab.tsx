@@ -64,7 +64,6 @@ function RankingTab() {
       </View>
     );
   }
-  const top3 = rankingData.topRankings.slice(0, 3);
   return (
     <ImageBackground
       source={require('@assets/images/ranking/ranking_background.png')}
