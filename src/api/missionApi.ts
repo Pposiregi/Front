@@ -25,6 +25,5 @@ export const postMissionComplete = async (
   const { data } = await apiClient.post<MissionCompleteResponse>(
     `/missions/checks/${missionCheckId}/complete`
   );
-  console.log('데이터보여주세요', data);
   return data;
 };
