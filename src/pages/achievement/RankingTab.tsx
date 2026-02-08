@@ -41,12 +41,11 @@ function RankingTab() {
       try {
         setLoading(true);
         const data = await getDailyStepRanking({
-          limit: 10,
           gender: rankingFilter,
         });
         setRankingData({
-          top10: data.top10,
-          myRank: data.myRank,
+          topRankings: data.topRankings,
+          myRanking: data.myRanking,
         });
       } catch (e) {
         console.log('랭킹 로드 실패', e);
@@ -65,7 +64,7 @@ function RankingTab() {
       </View>
     );
   }
-  const top3 = rankingData.top10.slice(0, 3);
+  const top3 = rankingData.topRankings.slice(0, 3);
   return (
     <ImageBackground
       source={require('@assets/images/ranking/ranking_background.png')}
@@ -117,7 +116,7 @@ function RankingTab() {
         {/* 카드 스타일로 배경 */}
         <View>
           {/* 랭킹 리스트 */}
-          {rankingData.top10.length === 0 ? (
+          {rankingData.topRankings.length === 0 ? (
             <View style={styles.noRankingContainer}>
               <Text style={styles.noRankingText}>
                 랭킹에 아직 기록이 없어요!
@@ -125,7 +124,7 @@ function RankingTab() {
             </View>
           ) : (
             <FlatList
-              data={rankingData.top10}
+              data={rankingData.topRankings}
               keyExtractor={(item, index) =>
                 item?.userId?.toString() ?? index.toString()
               }
@@ -133,7 +132,7 @@ function RankingTab() {
                 <RankingItem
                   rank={index + 1}
                   nickname={item.nickname}
-                  dailyStepCount={item.dailyStepCount}
+                  dailyStepCount={item.score}
                   profileImageId={
                     profileImageId
                     // 추후에는 내려주는 값으로 변경해주기
@@ -160,9 +159,9 @@ function RankingTab() {
           }}
         >
           <RankingItem
-            rank={rankingData.myRank}
+            rank={rankingData.myRanking?.rank ?? 0}
             nickname='나'
-            dailyStepCount={rankingData.myStepCount ?? 0}
+            dailyStepCount={rankingData.myRanking?.score ?? 0}
             profileImageId={profileImageId}
             highlight={true}
           />

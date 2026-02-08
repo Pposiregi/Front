@@ -48,13 +48,6 @@ export interface MissionActiveResponse {
 }
 
 /**
- * 미션 완료 요청 타입
- */
-export interface MissionCompleteRequest {
-  missionCheckId: number;
-}
-
-/**
  * 미션 완료 응답 타입
  */
 export interface MissionCompleteResponse {
