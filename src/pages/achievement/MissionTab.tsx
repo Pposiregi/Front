@@ -8,6 +8,7 @@ import {
   Modal,
   Button,
   Image,
+  Alert,
 } from 'react-native';
 import dayjs from 'dayjs';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -119,6 +120,10 @@ const MissionTab = () => {
   };
   const applyDateRange = () => {
     if (tempStart && tempEnd) {
+      if (tempStart > tempEnd) {
+        Alert.alert('종료일은 시작일 이후여야 합니다.');
+        return;
+      }
       setDateRange({ start: tempStart, end: tempEnd });
     }
     setModalVisible(false);
