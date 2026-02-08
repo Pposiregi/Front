@@ -14,11 +14,21 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setAuth(state, action) {
-      state.email = action.payload.email;
+    setAuth(
+      state,
+      action: PayloadAction<{ accessToken: string; platform?: string }>
+    ) {
       state.accessToken = action.payload.accessToken;
     },
-    setUser(state, action) {
+    setUser(
+      state,
+      action: PayloadAction<{
+        userId: number;
+        nickname: string;
+        gender: 'female' | 'male' | null;
+        profileImageId?: number;
+      }>
+    ) {
       state.userId = action.payload.userId;
       state.nickname = action.payload.nickname;
       state.gender = action.payload.gender;
