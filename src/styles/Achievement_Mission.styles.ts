@@ -36,6 +36,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   iconCircle: {
     width: 40,
