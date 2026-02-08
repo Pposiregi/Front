@@ -127,6 +127,10 @@ export const MainPage = () => {
     const fetchUser = async () => {
       try {
         const data = await getUser();
+        // null 값 체크
+        if (data.userId == null || data.nickname == null) {
+          throw new Error('유저 정보가 올바르지 않습니다.');
+        }
         dispatch(
           userSlice.actions.setUser({
             userId: data.userId,
