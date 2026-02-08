@@ -122,27 +122,17 @@ function RankingTab() {
               </Text>
             </View>
           ) : (
-            <FlatList
-              data={rankingData.topRankings}
-              keyExtractor={(item, index) =>
-                item?.userId?.toString() ?? index.toString()
-              }
-              renderItem={({ item, index }) => (
-                <RankingItem
-                  rank={index + 1}
-                  nickname={item.nickname}
-                  dailyStepCount={item.score}
-                  profileImageId={
-                    profileImageId
-                    // 추후에는 내려주는 값으로 변경해주기
-                    //item.userId === myUserId ? profileImageId : undefined
-                  }
-                  isTop3={index < 3}
-                  highlight={item.userId === myUserId}
-                />
-              )}
-              scrollEnabled={false}
-            />
+            rankingData.topRankings.map((item, index) => (
+              <RankingItem
+                key={item?.userId?.toString() ?? index.toString()}
+                rank={index + 1}
+                nickname={item.nickname}
+                dailyStepCount={item.score}
+                profileImageId={profileImageId}
+                isTop3={index < 3}
+                highlight={item.userId === myUserId}
+              />
+            ))
           )}
         </View>
       </ScrollView>
