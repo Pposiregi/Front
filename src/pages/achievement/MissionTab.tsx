@@ -2,12 +2,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
-  ActivityIndicator,
   SectionList,
   TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  Button,
+  Image,
 } from 'react-native';
 import dayjs from 'dayjs';
-
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { styles } from '@styles/Achievement_Mission.styles';
 import { MissionHistoryItem } from '../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
@@ -31,14 +34,20 @@ const MissionTab = () => {
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});
-  // 날짜 범위
+
+  // 선택된 기간
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
     null
   );
 
   // 모달 상태
+  const [isModalVisible, setModalVisible] = useState(false);
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
   const [isEndPickerVisible, setEndPickerVisible] = useState(false);
+
+  // 임시 모달 내 날짜
+  const [tempStart, setTempStart] = useState<Date | null>(null);
+  const [tempEnd, setTempEnd] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -54,76 +63,65 @@ const MissionTab = () => {
         setStatus('ERROR');
       }
     };
-
     fetchMissions();
   }, []);
 
   const sections: MissionSection[] = useMemo(() => {
     const completed = missions.filter((m) => m.completedAt);
-
-    // 날짜별
     const grouped: Record<string, MissionHistoryItem[]> = {};
-    completed.forEach((mission) => {
-      const dateKey = dayjs(mission.completedAt).format('YYYY.MM.DD');
+    completed.forEach((m) => {
+      const dateKey = dayjs(m.completedAt).format('YYYY.MM.DD');
       if (!grouped[dateKey]) grouped[dateKey] = [];
-      grouped[dateKey].push(mission);
+      grouped[dateKey].push(m);
     });
-
     let sectionList: MissionSection[] = Object.keys(grouped).map((date) => ({
       title: date,
-      // 기록은 오름차순
       data: grouped[date].sort(
         (a, b) =>
           new Date(a.completedAt!).getTime() -
           new Date(b.completedAt!).getTime()
       ),
     }));
-
-    sectionList = sectionList.sort(
+    return sectionList.sort(
       (a, b) =>
         new Date(b.title.replace(/\./g, '-')).getTime() -
         new Date(a.title.replace(/\./g, '-')).getTime()
     );
-
-    return sectionList;
   }, [missions]);
 
-  // 필터링 적용
   const filteredSections = useMemo(() => {
     if (!dateRange) return sections;
-
-    const start = dayjs(dateRange.start);
-    const end = dayjs(dateRange.end);
+    const start = dayjs(dateRange.start).startOf('day').valueOf();
+    const end = dayjs(dateRange.end).endOf('day').valueOf();
 
     return sections
       .map((section) => ({
         ...section,
         data: section.data.filter((item) => {
-          const completed = dayjs(item.completedAt);
-          return (
-            completed.isAfter(start.subtract(1, 'day')) &&
-            completed.isBefore(end.add(1, 'day'))
-          );
+          const completed = dayjs(item.completedAt).valueOf();
+          return completed >= start && completed <= end;
         }),
       }))
       .filter((section) => section.data.length > 0);
   }, [sections, dateRange]);
 
   const toggleSection = (title: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
+    setExpandedSections((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
-  // 날짜 선택 핸들러
   const handleStartConfirm = (date: Date) => {
     setStartPickerVisible(false);
-    setDateRange((prev) => ({ start: date, end: prev?.end || date }));
+    setTempStart(date);
   };
   const handleEndConfirm = (date: Date) => {
     setEndPickerVisible(false);
-    setDateRange((prev) => ({ start: prev?.start || date, end: date }));
+    setTempEnd(date);
+  };
+  const applyDateRange = () => {
+    if (tempStart && tempEnd) {
+      setDateRange({ start: tempStart, end: tempEnd });
+    }
+    setModalVisible(false);
   };
 
   if (status === 'LOADING') {
@@ -153,58 +151,83 @@ const MissionTab = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* 기간 선택 UI */}
-      <View style={{ flexDirection: 'row', padding: 16, alignItems: 'center' }}>
-        <TouchableOpacity onPress={() => setStartPickerVisible(true)}>
-          <Text style={{ marginRight: 8, fontSize: 14 }}>
-            {dateRange ? dayjs(dateRange.start).format('YYYY.MM.DD') : '시작일'}
-          </Text>
-        </TouchableOpacity>
-        <Text>~</Text>
-        <TouchableOpacity onPress={() => setEndPickerVisible(true)}>
-          <Text style={{ marginLeft: 8, fontSize: 14 }}>
-            {dateRange ? dayjs(dateRange.end).format('YYYY.MM.DD') : '종료일'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* 기간 선택 모달 */}
+      <Modal visible={isModalVisible} animationType='slide' transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>기간 선택</Text>
 
-      <DateTimePickerModal
-        isVisible={isStartPickerVisible}
-        mode='date'
-        onConfirm={handleStartConfirm}
-        onCancel={() => setStartPickerVisible(false)}
-      />
-      <DateTimePickerModal
-        isVisible={isEndPickerVisible}
-        mode='date'
-        onConfirm={handleEndConfirm}
-        onCancel={() => setEndPickerVisible(false)}
-      />
+            <TouchableOpacity
+              onPress={() => setStartPickerVisible(true)}
+              style={styles.modalButton}
+            >
+              <Text style={styles.modalButtonText}>
+                {tempStart
+                  ? dayjs(tempStart).format('YYYY.MM.DD')
+                  : '시작일 선택'}
+              </Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => setEndPickerVisible(true)}
+              style={styles.modalButton}
+            >
+              <Text style={styles.modalButtonText}>
+                {tempEnd ? dayjs(tempEnd).format('YYYY.MM.DD') : '종료일 선택'}
+              </Text>
+            </TouchableOpacity>
+
+            <Button title='확인' onPress={applyDateRange} />
+            <Button
+              title='취소'
+              color='gray'
+              onPress={() => setModalVisible(false)}
+            />
+
+            <DateTimePickerModal
+              isVisible={isStartPickerVisible}
+              mode='date'
+              locale='ko-KR'
+              onConfirm={handleStartConfirm}
+              onCancel={() => setStartPickerVisible(false)}
+            />
+            <DateTimePickerModal
+              isVisible={isEndPickerVisible}
+              mode='date'
+              locale='ko-KR'
+              onConfirm={handleEndConfirm}
+              onCancel={() => setEndPickerVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* SectionList */}
       <SectionList
         sections={filteredSections}
         keyExtractor={(item) => item.missionCheckId.toString()}
         ListHeaderComponent={() => (
-          <View style={{ padding: 16 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontFamily: 'Roboto-VariableFont',
-                color: '#000',
+          <View style={styles.listHeaderContainer}>
+            <View>
+              <Text style={styles.listHeaderTitle}>오늘도 열심히</Text>
+              <Text style={styles.listHeaderSubtitle}>
+                펫이랑 함께 완료한 미션들이에요 🙂
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => {
+                setTempStart(dateRange?.start || new Date());
+                setTempEnd(dateRange?.end || new Date());
+                setModalVisible(true);
               }}
+              style={styles.dateRangeButton}
             >
-              오늘도 열심히
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                fontFamily: 'VariableFont',
-                color: '#000',
-                marginTop: 4,
-              }}
-            >
-              펫이랑 함께 완료한 미션들이에요 🙂
-            </Text>
+              <Image
+                source={require('@assets/images/icon/setting_icon.png')}
+                style={styles.dateRangeIcon}
+              />
+            </TouchableOpacity>
           </View>
         )}
         renderSectionHeader={({ section }) => (
@@ -219,10 +242,9 @@ const MissionTab = () => {
         )}
         renderItem={({ item, section }) => {
           if (!expandedSections[section.title]) return null;
-
           const meta = CATEGORY_META[item.category];
           return (
-            <View style={styles.listItemBox}>
+            <View style={[styles.listItemBox, { borderLeftColor: meta.color }]}>
               <View
                 style={[
                   styles.iconCircle,
@@ -234,8 +256,8 @@ const MissionTab = () => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.listItemTitle}>{item.title}</Text>
                 <Text style={styles.listItemSub}>
-                  {item.progressValue} / {item.goalValue}
-                  {item.category === 'STEP' ? ' 걸음' : ''}
+                  {item.progressValue} / {item.goalValue}{' '}
+                  {item.category === 'STEP' ? '걸음' : ''}
                 </Text>
               </View>
               <View style={styles.rightBox}>

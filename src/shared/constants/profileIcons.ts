@@ -10,4 +10,10 @@ export const PROFILE_ICONS: Record<number, any> = {
   7: require('../../assets/images/profile/image_07.png'),
   8: require('../../assets/images/profile/image_08.png'),
   9: require('../../assets/images/profile/image_09.png'),
+  10: require('../../assets/images/profile/애니프사1.jpg'),
+  11: require('../../assets/images/profile/애니프사2.jpg'),
+  12: require('../../assets/images/profile/잠만보.jpg'),
+  13: require('../../assets/images/profile/기가차드.jpg'),
+  14: require('../../assets/images/profile/애니프사3.jpg'),
+  15: require('../../assets/images/profile/애니프사4.jpg'),
 };

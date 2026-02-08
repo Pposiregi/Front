@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingRight: 10,
+    marginRight: 10,
   },
   rankingNumberImage: { width: 50, height: 50, resizeMode: 'contain' },
   rankingNumberText: {
@@ -43,8 +43,8 @@ export const styles = StyleSheet.create({
     minHeight: 70,
   },
   listItemText: {
-    fontSize: 18,
-    fontFamily: 'JUA',
+    fontSize: 16,
+    fontFamily: 'Roboto-VariableFont',
     color: '#444',
   },
   filterButton: {
@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
   noRankingText: {
     fontSize: 25,
     color: '#333',
-    fontFamily: 'JUA',
+    fontFamily: 'Roboto-VariableFont',
   },
   myRankingHighlight: {
     backgroundColor: '#FFF3E0',
