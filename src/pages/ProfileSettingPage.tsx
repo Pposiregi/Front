@@ -314,7 +314,7 @@ const ProfileSettingPage = () => {
                   setSavingProfile(true);
                   try {
                     await updateUserProfile({
-                      nickname: nicknameInput.trim(),
+                      nickname: newNickname,
                     });
                     dispatch(userSlice.actions.updateNickname(newNickname));
                     Alert.alert('완료', '닉네임이 변경되었습니다.');
