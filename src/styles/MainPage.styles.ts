@@ -19,6 +19,12 @@ const PET_WIDTH = SCREEN_WIDTH * 0.45;
 const PET_HEIGHT = PET_WIDTH * 0.6;
 
 export default StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F3F4F8',

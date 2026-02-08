@@ -596,7 +596,11 @@ export const MainPage = () => {
    * 유저 데이터가 아직 없다면 스피너 표시.
    */
   if (isLoading) {
-    return <ActivityIndicator size='large' />;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' color='#111827' />
+      </View>
+    );
   }
 
   /**
