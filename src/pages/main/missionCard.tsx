@@ -54,9 +54,9 @@ const MissionCard: React.FC<MissionCardProps> = ({
       <View style={styles.missionUICardHeader}>
         <Text style={styles.missionIcon}>
           {mission.category === 'STEP'
-            ? '🌱'
+            ? '👟'
             : mission.category === 'MEAL'
-            ? '🍴'
+            ? '🍽️'
             : '📄'}
         </Text>
         <Text style={styles.missionUITextTitle}>{mission.title}</Text>

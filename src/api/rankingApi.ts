@@ -5,12 +5,12 @@ import type {
 } from 'types/ranking';
 
 export const getDailyStepRanking = async ({
-  limit = 10,
   gender = 'ALL',
 }: GetDailyStepRankingRequest): Promise<DailyStepRankingResponse> => {
-  let url = '/users/rankings/daily-step';
-  const params: any = { limit };
+  let url = '/ranking/summary';
+  const params: any = {};
 
+  // 남/여 필터 API 새로 수정되면 그거 가져다가 쓸 것
   if (gender === 'MALE') {
     url = '/users/rankings/daily-step/gender';
     params.gender = 'male';
@@ -23,12 +23,12 @@ export const getDailyStepRanking = async ({
     params,
   });
 
-  if (!data || !Array.isArray(data.top10)) {
+  if (!data || !Array.isArray(data.topRankings)) {
     throw new Error('부정확한 랭킹 데이터.');
   }
 
   return {
-    top10: data.top10,
-    myRank: data.myRank,
+    topRankings: data.topRankings,
+    myRanking: data.myRanking,
   };
 };

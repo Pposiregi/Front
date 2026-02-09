@@ -83,6 +83,10 @@ const MissionModal: React.FC<MissionModalProps> = ({
                   healthSteps={healthSteps}
                   onComplete={async (missionCheckId) => {
                     try {
+                      console.log(
+                        'postMissionComplete missionCheckId : ',
+                        missionCheckId
+                      );
                       await postMissionComplete(missionCheckId);
                       onComplete?.();
                     } catch (error) {

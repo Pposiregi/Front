@@ -34,4 +34,5 @@ export type getUserResponse = {
   targetPbf: number | null;
   targetStepCount: number | null;
   dailyStepCount: number;
+  profileImageId: number;
 };

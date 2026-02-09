@@ -24,6 +24,10 @@ import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
 } from 'types/bodyHistory';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/reducer';
+import { ProfileAvatar } from '@components/ProfileAvatar';
+import ProfileImageModal from './ProfileImageModal';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
@@ -264,6 +268,13 @@ function ProfilePage() {
     useShadowColorFromDataset: false,
   };
 
+  const nickname = useSelector((state: RootState) => state.user.nickname);
+  const profileImageId = useSelector(
+    (state: RootState) => state.user.profileImageId
+  );
+
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -281,9 +292,11 @@ function ProfilePage() {
       >
         <View style={styles.header}>
           <View style={styles.avatarWrapper}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>😺</Text>
-            </View>
+            <Pressable onPress={() => setProfileModalVisible(true)}>
+              <View style={styles.avatar}>
+                <ProfileAvatar profileImageId={profileImageId} />
+              </View>
+            </Pressable>
             <Pressable
               style={styles.gearButton}
               onPress={() => navigation.navigate('ProfileSettings')}
@@ -292,7 +305,7 @@ function ProfilePage() {
               <Text style={styles.gearText}>⚙️</Text>
             </Pressable>
           </View>
-          <Text style={styles.name}>김왈왈</Text>
+          <Text style={styles.name}>{nickname || '김돌돌'}</Text>
           <Text style={styles.caption}>오늘도 반려펫과 함께 건강관리</Text>
         </View>
 
@@ -350,7 +363,11 @@ function ProfilePage() {
           />
         </View>
       </ScrollView>
-
+      <ProfileImageModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
+        currentImageId={profileImageId}
+      />
       <BodyRecordPrompt
         visible={recordModalVisible}
         dateLabel={todayLabel}

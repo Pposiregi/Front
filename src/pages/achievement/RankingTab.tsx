@@ -5,17 +5,35 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
+  Image,
+  ScrollView,
 } from 'react-native';
-import { styles } from '@styles/Achievement.styles';
+import { styles } from '@styles/Achievement_Ranking.styles';
 import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/reducer';
+import { ProfileAvatar } from '@components/ProfileAvatar';
+import { RankingItem } from '@components/RankingItem';
 
 function RankingTab() {
   const [loading, setLoading] = useState(false);
   const [rankingData, setRankingData] =
-    useState<DailyStepRankingResponse | null>(null);
+    useState<DailyStepRankingResponse | null>();
   const [rankingFilter, setRankingFilter] = useState<'ALL' | 'MALE' | 'FEMALE'>(
     'ALL'
+  );
+  const myUserId = useSelector((state: RootState) => state.user.userId);
+  const myGender = useSelector((state: RootState) => state.user.gender);
+  // 추후에 랭킹 남성, 여성 별 탭에도 본인에게 맞는 성별 선택 시 랭킹 띄우기 위해 남겨둠
+  const showMyRanking =
+    rankingFilter === 'ALL' ||
+    (rankingFilter === 'MALE' && myGender === 'male') ||
+    (rankingFilter === 'FEMALE' && myGender === 'female');
+  // 추후에는 랭킹 데이터에서 ID 받아오기
+  const profileImageId = useSelector(
+    (state: RootState) => state.user.profileImageId
   );
 
   useEffect(() => {
@@ -23,12 +41,11 @@ function RankingTab() {
       try {
         setLoading(true);
         const data = await getDailyStepRanking({
-          limit: 10,
           gender: rankingFilter,
         });
         setRankingData({
-          top10: data.top10,
-          myRank: data.myRank,
+          topRankings: data.topRankings,
+          myRanking: data.myRanking,
         });
       } catch (e) {
         console.log('랭킹 로드 실패', e);
@@ -47,10 +64,18 @@ function RankingTab() {
       </View>
     );
   }
-
   return (
-    <View style={{ flex: 1, paddingHorizontal: 10 }}>
-      {/* 필터 */}
+    <ImageBackground
+      source={require('@assets/images/ranking/ranking_background.png')}
+      style={{ flex: 1 }}
+      resizeMode='cover'
+    >
+      <Image
+        source={require('@assets/images/ranking/pet_podium.png')}
+        style={{ width: '100%', height: 150 }}
+        resizeMode='contain'
+      />
+      {/* 필터 버튼 */}
       <View style={styles.filterButton}>
         {['ALL', 'MALE', 'FEMALE'].map((filter) => {
           const isActive = rankingFilter === filter;
@@ -81,31 +106,57 @@ function RankingTab() {
           );
         })}
       </View>
-
-      {/* 랭킹 리스트 */}
-      <FlatList
-        data={rankingData.top10}
-        keyExtractor={(item, index) =>
-          item?.userId?.toString() ?? index.toString()
-        }
-        renderItem={({ item, index }) => (
-          <View style={styles.listItem}>
-            <Text style={styles.rankingNumberText}>{index + 1}</Text>
-            <View style={styles.rankingNameScoreContainer}>
-              <Text style={styles.listItemText}>{item.nickname}</Text>
-              <Text style={styles.listItemText}>{item.dailyStepCount}보</Text>
+      {/* 랭킹 리스트와 버튼을 담는 카드 박스 */}
+      <ScrollView
+        style={{
+          flex: 1,
+        }}
+      >
+        {/* 카드 스타일로 배경 */}
+        <View>
+          {/* 랭킹 리스트 */}
+          {rankingData.topRankings.length === 0 ? (
+            <View style={styles.noRankingContainer}>
+              <Text style={styles.noRankingText}>
+                랭킹에 아직 기록이 없어요!
+              </Text>
             </View>
-          </View>
-        )}
-      />
-
+          ) : (
+            rankingData.topRankings.map((item, index) => (
+              <RankingItem
+                key={item?.userId?.toString() ?? index.toString()}
+                rank={index + 1}
+                nickname={item.nickname}
+                dailyStepCount={item.score}
+                profileImageId={profileImageId}
+                isTop3={index < 3}
+                highlight={item.userId === myUserId}
+              />
+            ))
+          )}
+        </View>
+      </ScrollView>
+      {/* 내 순위 표시 */}
       {rankingFilter === 'ALL' && (
-        <Text style={styles.myRankingText}>
-          나의 순위: {rankingData.myRank}위
-        </Text>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 16,
+          }}
+        >
+          <RankingItem
+            rank={rankingData.myRanking?.rank ?? 0}
+            nickname='나'
+            dailyStepCount={rankingData.myRanking?.score ?? 0}
+            profileImageId={profileImageId}
+            highlight={true}
+          />
+        </View>
       )}
-    </View>
+    </ImageBackground>
   );
 }
-
 export default RankingTab;

@@ -26,6 +26,7 @@ import { getDeviceUuid } from '@utils/deviceUuid';
 import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
+import { isValidNickname } from '@utils/validation';
 
 const PET_ID_FALLBACK = 1;
 
@@ -146,6 +147,15 @@ const ProfileSettingPage = () => {
     );
     await handleLogout();
   };
+
+  // 닉네임 변경 시 redux 업데이트
+  const nickname = useSelector((state: RootState) => state.user.nickname);
+  // 닉네임 창 열면 기존 닉네임 기본 설정 되어 있도록 설정
+  useEffect(() => {
+    if (nicknameModalVisible) {
+      setNicknameInput(nickname ?? '');
+    }
+  }, [nicknameModalVisible, nickname]);
 
   return (
     <View style={styles.container}>
@@ -293,15 +303,20 @@ const ProfileSettingPage = () => {
                 ]}
                 disabled={savingProfile}
                 onPress={async () => {
-                  if (nicknameInput.trim().length < 2) {
-                    Alert.alert('입력 오류', '닉네임을 2자 이상 입력하세요.');
+                  const newNickname = nicknameInput.trim();
+                  if (!isValidNickname(newNickname)) {
+                    Alert.alert(
+                      '닉네임 오류',
+                      '닉네임은 2~10자의 한글, 영문, 숫자만 가능하며 비속어는 사용할 수 없어요.'
+                    );
                     return;
                   }
                   setSavingProfile(true);
                   try {
                     await updateUserProfile({
-                      nickname: nicknameInput.trim(),
+                      nickname: newNickname,
                     });
+                    dispatch(userSlice.actions.updateNickname(newNickname));
                     Alert.alert('완료', '닉네임이 변경되었습니다.');
                     setNicknameModalVisible(false);
                   } catch (err) {

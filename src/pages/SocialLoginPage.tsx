@@ -86,7 +86,7 @@ const SocialLoginPage = () => {
           const mockToken = 'dev-bypass-token';
           await EncryptedStorage.setItem('serverAccessToken', mockToken);
           dispatch(
-            userSlice.actions.setUser({
+            userSlice.actions.setAuth({
               accessToken: mockToken,
               platform,
             })
@@ -121,7 +121,7 @@ const SocialLoginPage = () => {
 
       // Redux 저장
       dispatch(
-        userSlice.actions.setUser({
+        userSlice.actions.setAuth({
           accessToken: result.serverAccessToken,
           platform,
         })

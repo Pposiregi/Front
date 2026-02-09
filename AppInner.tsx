@@ -189,7 +189,7 @@ function AppInner() {
             const result = await refreshAccessToken();
             if (result?.serverAccessToken) {
               dispatch(
-                userSlice.actions.setUser({
+                userSlice.actions.setAuth({
                   accessToken: result.serverAccessToken,
                 })
               );

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
 
 import RankingTab from './RankingTab';
-import MissionTab from './mission/MissionTab';
+import MissionTab from './MissionTab';
 import BadgeTab from './BadgeTab';
 
 type TabType = 'RANKING' | 'MISSION' | 'BADGE';
@@ -16,26 +16,25 @@ function AchievementPage() {
   // ====================
   const TabHeader = () => (
     <View style={styles.tabHeaderContainer}>
-      <TouchableOpacity
-        style={[styles.tabButton, activeTab === 'RANKING' && styles.activeTab]}
-        onPress={() => setActiveTab('RANKING')}
-      >
-        <Text style={styles.tabText}>랭킹</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.tabButton, activeTab === 'MISSION' && styles.activeTab]}
-        onPress={() => setActiveTab('MISSION')}
-      >
-        <Text style={styles.tabText}>달성 미션</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.tabButton, activeTab === 'BADGE' && styles.activeTab]}
-        onPress={() => setActiveTab('BADGE')}
-      >
-        <Text style={styles.tabText}>획득한 뱃지</Text>
-      </TouchableOpacity>
+      {['RANKING', 'MISSION', 'BADGE'].map((tab) => {
+        const isActive = activeTab === (tab as TabType);
+        const label =
+          tab === 'RANKING' ? '랭킹' : tab === 'MISSION' ? '달성 미션' : '뱃지';
+        return (
+          <TouchableOpacity
+            key={tab}
+            style={styles.tabButton}
+            onPress={() => setActiveTab(tab as TabType)}
+          >
+            <View style={styles.tabInner}>
+              <Text style={[styles.tabText, isActive && styles.activeTabText]}>
+                {label}
+              </Text>
+              {isActive && <View style={styles.tabUnderline} />}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 
@@ -56,7 +55,7 @@ function AchievementPage() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#eee' }}>
       <TabHeader />
       <View style={{ flex: 1 }}>{renderActiveScreen()}</View>
     </View>

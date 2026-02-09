@@ -1,10 +1,37 @@
 import { Dimensions, StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  tabHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabUnderline: {
+    width: 100, // 밑줄 길이 조절
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#333', // 밑줄 색
+  },
+  tabText: {
+    fontFamily: 'JUA',
+    fontSize: 20,
+    color: '#888',
+  },
+  activeTabText: {
+    color: '#333',
+    marginBottom: 3,
   },
   // 모달
   modalBackground: {
@@ -40,127 +67,5 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     color: '#555',
     fontFamily: 'Roboto-VariableFont',
-  },
-  /**
-   * 뱃지
-   */
-  badgeCard: {
-    marginTop: 10,
-    backgroundColor: '#fff',
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 16,
-    elevation: 3,
-    marginHorizontal: 20,
-  },
-  badgeTitle: {
-    fontSize: 24,
-    fontFamily: 'JUA',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  badgeItem: {
-    marginRight: -3,
-  },
-  badgeIcon: {
-    width: 60,
-    height: 60,
-    marginBottom: 4,
-  },
-  tabHeaderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
-  },
-  tabText: {
-    fontWeight: 'bold',
-  },
-  /**
-   * 랭킹
-   */
-  rankingNumberText: {
-    fontSize: 22,
-    fontFamily: 'JUA',
-    marginRight: 15,
-    width: 30,
-    textAlign: 'center',
-  },
-  rankingNameScoreContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  listItemText: {
-    fontSize: 22,
-    fontFamily: 'JUA',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  rankingFilterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: '#EEE', // 기본 배경색
-    alignItems: 'center',
-  },
-  rankingFilterButtonText: {
-    fontSize: 14,
-    color: '#000', // 기본 글자색
-    fontWeight: 'bold',
-  },
-  rankingFilterButtonActive: {
-    backgroundColor: '#007AFF', // 활성화 배경색
-  },
-  rankingFilterButtonTextActive: {
-    color: '#FFF', // 활성화 글자색
-  },
-  myRankingText: {
-    textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    fontSize: 20,
-    fontFamily: 'JUA',
-  },
-  /**
-   * 미션
-   */
-  sectionHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 5,
-    backgroundColor: '#f6f6f6',
-  },
-  sectionHeaderText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-  },
-  listItemTitle: {
-    fontSize: 15,
-    color: '#222',
   },
 });

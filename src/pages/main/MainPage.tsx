@@ -1,7 +1,7 @@
 import React, {
   useCallback,
-  useMemo,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -47,6 +47,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
+import { mockActiveMissions } from './mockMission';
+import { useAppDispatch } from '@store/index';
+import userSlice from '@slices/user';
+import { getUserResponse } from 'types/main';
+import { useDispatch } from 'react-redux';
 import RunningSummaryModal from './RunningSummaryModal';
 
 /**
@@ -113,11 +118,36 @@ export const MainPage = () => {
    * - resetSync는 로컬 동기화 상태 초기화용
    */
   const { syncSteps, resetSync } = useStepSync();
-
+  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useAppDispatch();
   /**
-   * 사용자 요약정보 조회 (현재 임시 유저).
+   * 사용자 정보 받아오기
    */
-  const userData = getUser();
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        // null 값 체크
+        if (data.userId == null || data.nickname == null) {
+          throw new Error('유저 정보가 올바르지 않습니다.');
+        }
+        dispatch(
+          userSlice.actions.setUser({
+            userId: data.userId,
+            nickname: data.nickname,
+            gender: data.gender,
+            profileImageId: data.profileImageId ?? 2,
+          })
+        );
+      } catch (e) {
+        console.log('유저 정보 로드 실패', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
   /**
    * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
@@ -569,8 +599,12 @@ export const MainPage = () => {
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
    */
-  if (!userData) {
-    return <ActivityIndicator size='large' />;
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size='large' color='#111827' />
+      </View>
+    );
   }
 
   /**
