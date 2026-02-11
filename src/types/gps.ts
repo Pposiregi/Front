@@ -4,7 +4,6 @@
  */
 export type GpsSessionStartRequest = {
   startTime: string;
-  userId?: number;
 };
 
 /**

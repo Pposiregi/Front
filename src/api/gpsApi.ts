@@ -18,20 +18,17 @@ const toLogString = (payload: unknown) => {
 
 /**
  * GPS 세션 시작
- * - TODO: 임시 userId 전송 제거(토큰 식별 전제)
  */
 export const startGpsSession = async (
   payload: GpsSessionStartRequest
 ): Promise<GpsSessionStartResponse> => {
   if (__DEV__) {
     console.log(
-      '>>>[RUNNING][API] /gps/start request ' +
-        toLogString({ ...payload, userId: 1 })
+      '>>>[RUNNING][API] /gps/start request ' + toLogString({ ...payload })
     );
   }
   const { data } = await apiClient.post<GpsSessionStartResponse>('/gps/start', {
     ...payload,
-    userId: 1,
   });
   if (__DEV__) {
     console.log('>>>[RUNNING][API] /gps/start response ' + toLogString(data));
