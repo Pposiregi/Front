@@ -20,7 +20,7 @@ class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     SplashScreen.show(this)
-    super.onCreate(savedInstanceState)
+    super.onCreate(null)
 
     // Health Connect 권한 콜백을 연결 (패키지명: com.google.android.apps.healthdata)
     HealthConnectPermissionDelegate.setPermissionDelegate(this, "com.google.android.apps.healthdata")
