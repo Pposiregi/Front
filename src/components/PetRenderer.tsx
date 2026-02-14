@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Image, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Animated, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { getPetPartAsset, getPetTemplate } from '@utils/petAssetLoader';
 import { getTemplateAnchorRenderPx } from '@utils/petAnchorUtils';
 import { buildRenderablePetParts, sortPetPartsForRender } from '@utils/petRenderUtils';
@@ -55,7 +55,7 @@ export const PetRenderer = ({
           partTransform && pivot ? buildPivotTransform(pivot, partTransform) : undefined;
 
         return (
-          <Image
+          <Animated.Image
             key={`${part.zIndex}:${part.key}:${part.file}:${part._originalIndex}`}
             source={part.asset}
             style={[styles.layer, { zIndex: part.zIndex }, transform ? { transform } : null]}

@@ -40,6 +40,24 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
+const IDLE_BREATH_LOOP_MS = 3000;
+const HEAD_PART_KEYS = [
+  'face',
+  'ear_left',
+  'ear_right',
+  'eye_left',
+  'eye_right',
+  'eyebrow_left',
+  'eyebrow_right',
+  'mouth',
+  'flushing_left',
+  'flushing_right',
+  'beard_leftDown',
+  'beard_leftUp',
+  'beard_rightDown',
+  'beard_rightUp',
+  'neckRuff',
+] as const;
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -49,11 +67,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
-import { mockActiveMissions } from './mockMission';
 import { useAppDispatch } from '@store/index';
 import userSlice from '@slices/user';
-import { getUserResponse } from 'types/main';
 import RunningSummaryModal from './RunningSummaryModal';
+import type { PartTransformInput } from '@utils/petTransformUtils';
 
 /**
  * 메인 화면 컴포넌트
@@ -148,7 +165,7 @@ export const MainPage = () => {
     };
 
     fetchUser();
-  }, []);
+  }, [dispatch]);
   /**
    * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
@@ -236,6 +253,55 @@ export const MainPage = () => {
    * 펫 FSM 상태 훅.
    */
   const { transition: changePetState } = usePetFSM();
+  const idleBreathProgress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isTracking) {
+      idleBreathProgress.stopAnimation();
+      return;
+    }
+
+    const idleLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(idleBreathProgress, {
+          toValue: 1,
+          duration: IDLE_BREATH_LOOP_MS / 2,
+          useNativeDriver: true,
+        }),
+        Animated.timing(idleBreathProgress, {
+          toValue: 0,
+          duration: IDLE_BREATH_LOOP_MS / 2,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    idleLoop.start();
+    return () => {
+      idleLoop.stop();
+    };
+  }, [idleBreathProgress, isTracking]);
+
+  const idlePartTransforms: Record<string, PartTransformInput> = useMemo(() => {
+    const torsoScaleY = idleBreathProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 1.03],
+    });
+    const headTranslateY = idleBreathProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, -2],
+    });
+
+    const transforms: Record<string, PartTransformInput> = {
+      torso: { scaleY: torsoScaleY },
+    };
+
+    HEAD_PART_KEYS.forEach((partKey) => {
+      transforms[partKey] = { translateY: headTranslateY };
+    });
+
+    return transforms;
+  }, [idleBreathProgress]);
 
   /**
    * 펫 터치 시 상태 전환.
@@ -717,11 +783,15 @@ export const MainPage = () => {
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <PetRenderer
               size={PET_RENDER_SIZE}
+              partTransforms={idlePartTransforms}
               style={[
                 styles.petImage,
                 {
                   transform: [
-                    { translateY: PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO },
+                    {
+                      translateY:
+                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                    },
                   ],
                 },
               ]}

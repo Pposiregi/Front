@@ -1,12 +1,15 @@
 import type { TransformsStyle } from 'react-native';
+import type { Animated } from 'react-native';
 import type { AnchorPx } from '@utils/petAnchorUtils';
 
+type AnimatableNumeric = number | Animated.Value | Animated.AnimatedInterpolation<number>;
+
 export type PartTransformInput = {
-  scaleX?: number;
-  scaleY?: number;
+  scaleX?: AnimatableNumeric;
+  scaleY?: AnimatableNumeric;
   rotateDeg?: number;
-  translateX?: number;
-  translateY?: number;
+  translateX?: AnimatableNumeric;
+  translateY?: AnimatableNumeric;
 };
 
 function hasPivotTransform(transform: PartTransformInput): boolean {
