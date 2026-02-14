@@ -1,5 +1,5 @@
 /**
- * assets > pet 내의 templete.json 검사를 위함
+ * assets > pet 내의 template.json 검사를 위함
  * - 템플릿 데이터가 정상인지 검사, 문제 발견 시 기본 템플릿으로 복구
  *
  */
@@ -54,23 +54,41 @@ export const FALLBACK_PET_TEMPLATE: PetTemplate = {
   parts: [],
 };
 
+/**
+ * unknown 값을 일반 객체(배열/null 제외)인지 검사한다.
+ * 템플릿 파싱에서 가장 기초가 되는 타입 가드다.
+ */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/**
+ * 숫자이면서 NaN/Infinity가 아닌 유한값인지 검사한다.
+ */
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
+/**
+ * 앵커 포인트 객체 형태({x:number,y:number})인지 검사한다.
+ */
 function isAnchorPoint(value: unknown): value is AnchorPoint {
   if (!isRecord(value)) return false;
   return isFiniteNumber(value.x) && isFiniteNumber(value.y);
 }
 
+/**
+ * 정규화 앵커의 허용 범위(0..1) 검사.
+ * 렌더 좌표 계산 시 범위 이탈로 인한 오프스크린/왜곡을 미리 차단한다.
+ */
 function isAnchorInUnitRange(anchor: AnchorPoint): boolean {
   return anchor.x >= 0 && anchor.x <= 1 && anchor.y >= 0 && anchor.y <= 1;
 }
 
+/**
+ * part.morph 블록을 검증/정규화한다.
+ * 형식이 맞지 않으면 issue를 기록하고 undefined를 반환해 해당 morph만 무시한다.
+ */
 function validateMorph(
   value: unknown,
   path: string,
@@ -129,6 +147,11 @@ function validateMorph(
   };
 }
 
+/**
+ * raw 템플릿을 안전한 PetTemplate 구조로 검증/정규화한다.
+ * 필드 단위로 가능한 범위는 살리고, 불가능한 영역만 fallback을 적용한다.
+ * 결과에는 이슈 목록과 fallback 사용 여부를 함께 포함한다.
+ */
 export function validatePetTemplate(
   rawTemplate: unknown,
   fallbackTemplate: PetTemplate = FALLBACK_PET_TEMPLATE
@@ -275,6 +298,10 @@ export function validatePetTemplate(
   };
 }
 
+/**
+ * 검증 + 로깅 + fallback까지 포함한 고수준 로더.
+ * 호출자는 반환 템플릿만 사용하면 되고, 문제 진단은 로그에서 확인할 수 있다.
+ */
 export function loadPetTemplateWithFallback(
   rawTemplate: unknown,
   fallbackTemplate: PetTemplate = FALLBACK_PET_TEMPLATE
@@ -299,6 +326,10 @@ export function loadPetTemplateWithFallback(
 
 let cachedTemplate: PetTemplate | null = null;
 
+/**
+ * 번들된 기본 템플릿을 1회 로드 후 메모리에 캐시해 재사용한다.
+ * 앱 런타임에서 가장 기본이 되는 템플릿 진입점이다.
+ */
 export function getBundledPetTemplate(): PetTemplate {
   if (cachedTemplate) return cachedTemplate;
 

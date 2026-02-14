@@ -59,6 +59,11 @@ const petAssetRegistry: Record<PetTemplateId, PetAssetRegistryEntry> = {
   },
 };
 
+/**
+ * 템플릿 ID로 레지스트리 엔트리를 조회한다.
+ * 유효하지 않은 문자열 입력을 허용하기 위해 파라미터는 string으로 받고,
+ * 내부에서 안전하게 narrowing하여 없으면 null을 반환한다.
+ */
 export function getPetAssetRegistryEntry(
   templateId: string
 ): PetAssetRegistryEntry | null {
