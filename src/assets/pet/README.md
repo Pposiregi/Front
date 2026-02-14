@@ -1,8 +1,22 @@
 # FitPet Pet Asset Rules
 
 ## Scope
-- This rule set applies to composable pet part PNG files in `src/assets/pet/<pet_name>/`.
-- This rule set does not apply to source folders such as `origin/` and effect assets such as `fx/`.
+- This rule set applies to composable pet part PNG files in:
+  - `src/assets/pet/<pet_name>/main/` (main scene parts)
+  - `src/assets/pet/<pet_name>/run/` (running scene parts)
+- This rule set does not apply to:
+  - source folders such as `origin/`
+  - effect folders such as `fx/`
+
+## Folder Layout
+- `src/assets/pet/<pet_name>/main/`
+  - default/main pet composition parts
+- `src/assets/pet/<pet_name>/run/`
+  - run animation composition parts
+- `src/assets/pet/<pet_name>/origin/`
+  - source/reference files (not for runtime composition)
+- `src/assets/pet/fx/`
+  - fx/supplemental assets (not part-layer composition)
 
 ## Filename Format
 - Required format: `{pet}_{version}_{zIndex}_{part}_{direction}.png`
@@ -48,3 +62,4 @@
   - filename convention violations
   - missing/invalid direction token (including missing `_none`)
   - non-`1024x1024` PNG size
+  - target scope: `main/` and `run/` part folders under each pet

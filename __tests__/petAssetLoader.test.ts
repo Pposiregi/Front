@@ -73,4 +73,21 @@ describe('petAssetLoader cache', () => {
     expect(stats.templateCacheSize).toBe(0);
     expect(stats.partCacheSize).toBe(0);
   });
+
+  it('loads run template and run part assets from run folder set', () => {
+    const runTemplate = getPetTemplate({ templateId: 'browncat_v1_run' });
+    expect(runTemplate.id).toBe('browncat_v1_run');
+
+    const runFace = getPetPartAsset({
+      templateId: 'browncat_v1_run',
+      fileName: 'browncat_v1_07_face_none.png',
+    });
+    expect(runFace).toBeTruthy();
+
+    const mainOnlyPartInRunSet = getPetPartAsset({
+      templateId: 'browncat_v1_run',
+      fileName: 'browncat_v1_04_ear_left.png',
+    });
+    expect(mainOnlyPartInRunSet).toBeNull();
+  });
 });

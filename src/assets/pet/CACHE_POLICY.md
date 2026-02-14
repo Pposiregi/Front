@@ -10,6 +10,11 @@
 - Part asset cache key:
   - `{templateId}:{version}:{cacheBustToken}:{fileName}`
 
+## 에셋 폴더 구조 반영
+- 파츠는 `main/`과 `run/`으로 분리해 관리한다.
+- 레지스트리(`petAssetRegistry.ts`)에서 런타임에 사용할 세트를 선택한다.
+- 동일 파일명이 `main/`과 `run/`에 동시에 존재할 수 있으므로, 레지스트리에서 선택한 세트 기준으로 캐시가 구성된다.
+
 ## 캐시 무효화 조건
 - 앱에서 명시적으로 `invalidatePetAssetCache()` 호출 시 즉시 무효화
 - 동일 템플릿이라도 `cacheBustToken`이 달라지면 새 키로 분리되어 이전 캐시를 사용하지 않음

@@ -18,9 +18,6 @@ const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
 const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
-const PET_WIDTH = SCREEN_WIDTH * 0.45;
-const PET_HEIGHT = PET_WIDTH * 0.6;
-
 export default StyleSheet.create({
   loadingContainer: {
     flex: 1,
@@ -177,10 +174,8 @@ export default StyleSheet.create({
   },
   running_pet: {
     position: 'absolute',
-    bottom: SCREEN_WIDTH * 0.25,
-    width: PET_WIDTH * 2,
-    height: PET_HEIGHT * 2,
-    left: (SCREEN_WIDTH - PET_WIDTH * 2) / 2,
+    bottom: PET_BOTTOM_FROM_START,
+    alignSelf: 'center',
     resizeMode: 'contain',
   },
   countdownOverlay: {

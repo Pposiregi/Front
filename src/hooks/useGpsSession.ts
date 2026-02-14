@@ -342,7 +342,6 @@ export const useGpsSession = (): UseGpsSessionResult => {
         sessionId: sessionIdRef.current,
         endTime: endTime.toISOString(),
         stepCount,
-        distance,
       });
       const summary: GpsSessionSummary = {
         durationMs,

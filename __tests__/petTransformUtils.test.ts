@@ -50,4 +50,13 @@ describe('petTransformUtils', () => {
       { translateY: -2 },
     ]);
   });
+
+  it('uses part center rotation when useAnchorPivot is false', () => {
+    const transform = buildPivotTransform(
+      { x: 100, y: 120 },
+      { rotateDeg: '12deg', translateX: 4, useAnchorPivot: false }
+    );
+
+    expect(transform).toEqual([{ rotate: '12deg' }, { translateX: 4 }]);
+  });
 });

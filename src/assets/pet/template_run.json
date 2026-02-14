@@ -1,0 +1,90 @@
+{
+  "id": "browncat_v1_run",
+  "canvas": { "baseSize": 1024 },
+  "naming": {
+    "pattern": "{pet}_{version}_{zIndex}_{part}_{direction}.png",
+    "pet": "browncat",
+    "version": "v1"
+  },
+  "anchors": {
+    "root": { "x": 0.5, "y": 0.78 },
+    "torso": { "x": 0.5, "y": 0.62 },
+    "face": { "x": 0.5, "y": 0.43 },
+    "neck": { "x": 0.5, "y": 0.52 },
+    "tail": { "x": 0.7, "y": 0.62 }
+  },
+  "parts": [
+    {
+      "key": "tail",
+      "file": "browncat_v1_00_tail_none.png",
+      "zIndex": 0,
+      "anchor": "root"
+    },
+    {
+      "key": "leg_left",
+      "file": "browncat_v1_01_leg_left.png",
+      "zIndex": 1,
+      "anchor": "root"
+    },
+    {
+      "key": "torso",
+      "file": "browncat_v1_02_torso_none.png",
+      "zIndex": 2,
+      "anchor": "torso"
+    },
+    {
+      "key": "leg_right",
+      "file": "browncat_v1_03_leg_right.png",
+      "zIndex": 3,
+      "anchor": "root"
+    },
+    {
+      "key": "arm_left",
+      "file": "browncat_v1_05_arm_left.png",
+      "zIndex": 5,
+      "anchor": "torso"
+    },
+    {
+      "key": "arm_right",
+      "file": "browncat_v1_05_arm_right.png",
+      "zIndex": 5,
+      "anchor": "torso"
+    },
+    {
+      "key": "neckRuff",
+      "file": "browncat_v1_06_neckRuff_none.png",
+      "zIndex": 6,
+      "anchor": "neck"
+    },
+    {
+      "key": "face",
+      "file": "browncat_v1_07_face_none.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+    {
+      "key": "eye_left",
+      "file": "browncat_v1_08_eye_left.png",
+      "zIndex": 8,
+      "anchor": "face"
+    },
+    {
+      "key": "eye_right",
+      "file": "browncat_v1_08_eye_right.png",
+      "zIndex": 8,
+      "anchor": "face"
+    },
+    {
+      "key": "mouth",
+      "file": "browncat_v1_09_mouth_none.png",
+      "zIndex": 9,
+      "anchor": "face"
+    }
+  ],
+  "rendering": {
+    "sortBy": "zIndex",
+    "stableSort": true,
+    "tieBreak": ["key"],
+    "drawOrigin": { "x": 0, "y": 0 }
+  }
+}

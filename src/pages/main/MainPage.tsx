@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   ImageBackground,
   Pressable,
-  Image,
   Animated,
   Alert,
   Platform,
@@ -24,7 +23,7 @@ import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
-import mainBackGround_day from '@assets/images/mainBackground_day.png';
+import mainBackGround_day from '@assets/images/mainBackground_track.png';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
@@ -41,6 +40,7 @@ const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const IDLE_BREATH_LOOP_MS = 3000;
+const RUN_LOOP_MS = 520;
 const HEAD_PART_KEYS = [
   'face',
   'ear_left',
@@ -78,33 +78,6 @@ import type { PartTransformInput } from '@utils/petTransformUtils';
  * - 미션 목록을 가로 스크롤로 표시
  */
 export const MainPage = () => {
-  /**
-   * 달리기 상태 애니메이션 프레임 목록.
-   */
-  const runDogFrames = [
-    require('@assets/images/pet/tile000-Photoroom.png'),
-    require('@assets/images/pet/tile001-Photoroom.png'),
-    require('@assets/images/pet/tile002-Photoroom.png'),
-    require('@assets/images/pet/tile003-Photoroom.png'),
-    require('@assets/images/pet/tile004-Photoroom.png'),
-    require('@assets/images/pet/tile005-Photoroom.png'),
-  ];
-
-  /**
-   * 러닝 중 펫 애니메이션 컴포넌트.
-   */
-  const AnimatedDog = () => {
-    const [frame, setFrame] = useState(0);
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setFrame((prev) => (prev + 1) % runDogFrames.length);
-      }, 100); // 100ms마다 프레임 변경
-      return () => clearInterval(interval);
-    }, []);
-
-    return <Image source={runDogFrames[frame]} style={styles.running_pet} />;
-  };
   /**
    * START 버튼 누른 후 카운트다운 상태.
    */
@@ -254,6 +227,7 @@ export const MainPage = () => {
    */
   const { transition: changePetState } = usePetFSM();
   const idleBreathProgress = useRef(new Animated.Value(0)).current;
+  const runCycleProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (isTracking) {
@@ -282,6 +256,34 @@ export const MainPage = () => {
     };
   }, [idleBreathProgress, isTracking]);
 
+  useEffect(() => {
+    if (!isTracking) {
+      runCycleProgress.stopAnimation();
+      runCycleProgress.setValue(0);
+      return;
+    }
+
+    const runLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(runCycleProgress, {
+          toValue: 1,
+          duration: RUN_LOOP_MS / 2,
+          useNativeDriver: true,
+        }),
+        Animated.timing(runCycleProgress, {
+          toValue: 0,
+          duration: RUN_LOOP_MS / 2,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    runLoop.start();
+    return () => {
+      runLoop.stop();
+    };
+  }, [isTracking, runCycleProgress]);
+
   const idlePartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const torsoScaleY = idleBreathProgress.interpolate({
       inputRange: [0, 1],
@@ -302,6 +304,103 @@ export const MainPage = () => {
 
     return transforms;
   }, [idleBreathProgress]);
+
+  const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
+    const limbLeftX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [-5, 5, -5],
+    });
+    const limbRightX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [5, -5, 5],
+    });
+    const torsoX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [-2, 2, -2],
+    });
+    const torsoY = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0, -1.5, 0],
+    });
+    const faceX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [-3, 3, -3],
+    });
+    const faceY = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0, -1, 0],
+    });
+    const armLeftRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['-10deg', '10deg', '-10deg'],
+    });
+    const armRightRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['10deg', '-10deg', '10deg'],
+    });
+    const legLeftRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['8deg', '-8deg', '8deg'],
+    });
+    const legRightRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['-8deg', '8deg', '-8deg'],
+    });
+    const tailRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['-14deg', '14deg', '-14deg'],
+    });
+    const tailX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [-1.5, 1.5, -1.5],
+    });
+    const neckRuffX = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [-2, 2, -2],
+    });
+    const neckRuffRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['-2deg', '2deg', '-2deg'],
+    });
+
+    return {
+      torso: { translateX: torsoX, translateY: torsoY },
+      arm_left: {
+        translateX: limbLeftX,
+        rotateDeg: armLeftRotate,
+        useAnchorPivot: false,
+      },
+      arm_right: {
+        translateX: limbRightX,
+        rotateDeg: armRightRotate,
+        useAnchorPivot: false,
+      },
+      leg_left: {
+        translateX: limbRightX,
+        rotateDeg: legLeftRotate,
+        useAnchorPivot: false,
+      },
+      leg_right: {
+        translateX: limbLeftX,
+        rotateDeg: legRightRotate,
+        useAnchorPivot: false,
+      },
+      tail: {
+        translateX: tailX,
+        rotateDeg: tailRotate,
+        useAnchorPivot: false,
+      },
+      neckRuff: {
+        translateX: neckRuffX,
+        rotateDeg: neckRuffRotate,
+        useAnchorPivot: false,
+      },
+      face: { translateX: faceX, translateY: faceY },
+      eye_left: { translateX: faceX, translateY: faceY },
+      eye_right: { translateX: faceX, translateY: faceY },
+      mouth: { translateX: faceX, translateY: faceY },
+    };
+  }, [runCycleProgress]);
 
   /**
    * 펫 터치 시 상태 전환.
@@ -743,7 +842,22 @@ export const MainPage = () => {
             style={styles.mainBackground}
             resizeMode='cover'
           >
-            <AnimatedDog />
+            <PetRenderer
+              size={PET_RENDER_SIZE}
+              templateId='browncat_v1_run'
+              partTransforms={runPartTransforms}
+              style={[
+                styles.running_pet,
+                {
+                  transform: [
+                    {
+                      translateY:
+                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                    },
+                  ],
+                },
+              ]}
+            />
           </ImageBackground>
         </View>
       ) : (
