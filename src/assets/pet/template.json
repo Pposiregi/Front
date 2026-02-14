@@ -20,7 +20,7 @@
   "parts": [
     {
       "key": "tail",
-      "file": "browncat_v1_0_tail_none.png",
+      "file": "browncat_v1_00_tail_none.png",
       "zIndex": 0,
       "anchor": "root"
     },
