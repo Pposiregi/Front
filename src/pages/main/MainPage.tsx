@@ -27,6 +27,8 @@ import mainBackGround_day from '@assets/images/mainBackground_track.png';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import { getPetTemplate } from '@utils/petAssetLoader';
+import { getTorsoScaleByPbf } from '@utils/petMorphUtils';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
@@ -41,6 +43,10 @@ const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const IDLE_BREATH_LOOP_MS = 3000;
 const RUN_LOOP_MS = 520;
+const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
+const TORSO_TOP_Y = 535;
+const TORSO_BOTTOM_Y = 694;
+const TORSO_LOCK_PADDING_PX = 5;
 const HEAD_PART_KEYS = [
   'face',
   'ear_left',
@@ -58,6 +64,10 @@ const HEAD_PART_KEYS = [
   'beard_rightUp',
   'neckRuff',
 ] as const;
+const DEFAULT_BELLY_STRETCH_REGION = {
+  topLockNorm: (TORSO_TOP_Y + TORSO_LOCK_PADDING_PX) / 1024,
+  bottomLockNorm: (TORSO_BOTTOM_Y - TORSO_LOCK_PADDING_PX) / 1024,
+};
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -110,6 +120,7 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
+  const [fatVerIndex, setFatVerIndex] = useState(1);
   const dispatch = useAppDispatch();
   /**
    * 사용자 정보 받아오기
@@ -228,6 +239,33 @@ export const MainPage = () => {
   const { transition: changePetState } = usePetFSM();
   const idleBreathProgress = useRef(new Animated.Value(0)).current;
   const runCycleProgress = useRef(new Animated.Value(0)).current;
+  const selectedPreviewPbf = FAT_VER_PBF_PRESETS[fatVerIndex];
+  const mainPetTemplate = useMemo(
+    () => getPetTemplate({ templateId: 'browncat_v1' }),
+    []
+  );
+  const torsoTemplatePart = useMemo(
+    () => mainPetTemplate.parts.find((part) => part.key === 'torso'),
+    [mainPetTemplate.parts]
+  );
+  const bellyStretchRegion = useMemo(() => {
+    const anchors = mainPetTemplate.anchors;
+    const topLeft = anchors.belly_top_left;
+    const bottomLeft = anchors.belly_bottom_left;
+
+    if (!topLeft || !bottomLeft) {
+      return DEFAULT_BELLY_STRETCH_REGION;
+    }
+
+    return {
+      topLockNorm: topLeft.y + TORSO_LOCK_PADDING_PX / 1024,
+      bottomLockNorm: bottomLeft.y - TORSO_LOCK_PADDING_PX / 1024,
+    };
+  }, [mainPetTemplate.anchors]);
+  const torsoMorph = useMemo(
+    () => getTorsoScaleByPbf(torsoTemplatePart, selectedPreviewPbf),
+    [selectedPreviewPbf, torsoTemplatePart]
+  );
 
   useEffect(() => {
     if (isTracking) {
@@ -295,7 +333,13 @@ export const MainPage = () => {
     });
 
     const transforms: Record<string, PartTransformInput> = {
-      torso: { scaleY: torsoScaleY },
+      torso: {
+        scaleY: torsoScaleY,
+        stretchCenterX: torsoMorph.scaleX,
+        stretchTopLockNorm: bellyStretchRegion.topLockNorm,
+        stretchBottomLockNorm: bellyStretchRegion.bottomLockNorm,
+        useAnchorPivot: true,
+      },
     };
 
     HEAD_PART_KEYS.forEach((partKey) => {
@@ -303,7 +347,7 @@ export const MainPage = () => {
     });
 
     return transforms;
-  }, [idleBreathProgress]);
+  }, [bellyStretchRegion, idleBreathProgress, torsoMorph.scaleX]);
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const limbLeftX = runCycleProgress.interpolate({
@@ -368,32 +412,26 @@ export const MainPage = () => {
       arm_left: {
         translateX: limbLeftX,
         rotateDeg: armLeftRotate,
-        useAnchorPivot: false,
       },
       arm_right: {
         translateX: limbRightX,
         rotateDeg: armRightRotate,
-        useAnchorPivot: false,
       },
       leg_left: {
         translateX: limbRightX,
         rotateDeg: legLeftRotate,
-        useAnchorPivot: false,
       },
       leg_right: {
         translateX: limbLeftX,
         rotateDeg: legRightRotate,
-        useAnchorPivot: false,
       },
       tail: {
         translateX: tailX,
         rotateDeg: tailRotate,
-        useAnchorPivot: false,
       },
       neckRuff: {
         translateX: neckRuffX,
         rotateDeg: neckRuffRotate,
-        useAnchorPivot: false,
       },
       face: { translateX: faceX, translateY: faceY },
       eye_left: { translateX: faceX, translateY: faceY },
@@ -475,6 +513,10 @@ export const MainPage = () => {
       );
     }
   }, [endSession]);
+
+  const handleToggleFatVer = useCallback(() => {
+    setFatVerIndex((prev) => (prev + 1) % FAT_VER_PBF_PRESETS.length);
+  }, []);
 
   /**
    * Running 시작/종료 핸들러
@@ -932,6 +974,15 @@ export const MainPage = () => {
                 accessibilityLabel='걸음 동기화 초기화'
               >
                 <Text style={styles.devHealthButtonText}>RESET</Text>
+              </TouchableOpacity>
+            )}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devHealthButton}
+                onPress={handleToggleFatVer}
+                accessibilityLabel={`체형 테스트 pbf ${selectedPreviewPbf}`}
+              >
+                <Text style={styles.devHealthButtonText}>[fat.ver]</Text>
               </TouchableOpacity>
             )}
           </View>

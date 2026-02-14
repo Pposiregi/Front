@@ -7,24 +7,32 @@
     "version": "v1"
   },
   "anchors": {
-    "root": { "x": 0.5, "y": 0.78 },
-    "torso": { "x": 0.5, "y": 0.62 },
-    "face": { "x": 0.5, "y": 0.43 },
-    "neck": { "x": 0.5, "y": 0.52 },
-    "tail": { "x": 0.7, "y": 0.62 }
+    "root": { "x": 0.4501953125, "y": 0.650390625 },
+    "torso": { "x": 0.5, "y": 0.626953125 },
+    "face": { "x": 0.4501953125, "y": 0.5126953125 },
+    "neck": { "x": 0.4501953125, "y": 0.5126953125 },
+    "tail": { "x": 0.4970703125, "y": 0.6083984375 },
+    "shoulder_left": { "x": 0.3974609375, "y": 0.5263671875 },
+    "shoulder_right": { "x": 0.5419921875, "y": 0.5263671875 },
+    "hip_left": { "x": 0.4052734375, "y": 0.66796875 },
+    "hip_right": { "x": 0.5048828125, "y": 0.66796875 },
+    "belly_top_left": { "x": 0.4013671875, "y": 0.5146484375 },
+    "belly_top_right": { "x": 0.5146484375, "y": 0.5146484375 },
+    "belly_bottom_left": { "x": 0.376953125, "y": 0.66796875 },
+    "belly_bottom_right": { "x": 0.533203125, "y": 0.66796875 }
   },
   "parts": [
     {
       "key": "tail",
       "file": "browncat_v1_00_tail_none.png",
       "zIndex": 0,
-      "anchor": "root"
+      "anchor": "tail"
     },
     {
       "key": "leg_left",
       "file": "browncat_v1_01_leg_left.png",
       "zIndex": 1,
-      "anchor": "root"
+      "anchor": "hip_left"
     },
     {
       "key": "torso",
@@ -36,19 +44,19 @@
       "key": "leg_right",
       "file": "browncat_v1_03_leg_right.png",
       "zIndex": 3,
-      "anchor": "root"
+      "anchor": "hip_right"
     },
     {
       "key": "arm_left",
       "file": "browncat_v1_01_arm_left.png",
       "zIndex": 1,
-      "anchor": "torso"
+      "anchor": "shoulder_left"
     },
     {
       "key": "arm_right",
       "file": "browncat_v1_05_arm_right.png",
       "zIndex": 5,
-      "anchor": "torso"
+      "anchor": "shoulder_right"
     },
     {
       "key": "neckRuff",
