@@ -1,0 +1,174 @@
+{
+  "id": "browncat_v1",
+  "canvas": { "baseSize": 1024 },
+
+  "naming": {
+    "pattern": "{pet}_{version}_{zIndex}_{part}_{direction}.png",
+    "pet": "browncat",
+    "version": "v1",
+    "directionNotes": "direction은 none/left/right 외에도 leftUp,leftDown,rightUp,rightDown 같은 복합 값도 허용"
+  },
+
+  "anchors": {
+    "root": { "x": 0.5, "y": 0.78 },
+    "torso": { "x": 0.5, "y": 0.62 },
+    "face": { "x": 0.5, "y": 0.43 },
+    "neck": { "x": 0.5, "y": 0.52 },
+    "tail": { "x": 0.7, "y": 0.62 }
+  },
+
+  "parts": [
+    {
+      "key": "tail",
+      "file": "browncat_v1_0_tail_none.png",
+      "zIndex": 0,
+      "anchor": "root"
+    },
+
+    {
+      "key": "leg_left",
+      "file": "browncat_v1_01_leg_left.png",
+      "zIndex": 1,
+      "anchor": "root"
+    },
+    {
+      "key": "leg_right",
+      "file": "browncat_v1_01_leg_right.png",
+      "zIndex": 1,
+      "anchor": "root"
+    },
+
+    {
+      "key": "torso",
+      "file": "browncat_v1_02_torso_none.png",
+      "zIndex": 2,
+      "anchor": "torso",
+      "morph": {
+        "pbf": {
+          "range": { "min": 10, "max": 40 },
+          "scaleX": [1.0, 1.18],
+          "scaleY": [1.0, 1.05]
+        }
+      }
+    },
+
+    {
+      "key": "arm_left",
+      "file": "browncat_v1_03_arm_left.png",
+      "zIndex": 3,
+      "anchor": "torso"
+    },
+    {
+      "key": "arm_right",
+      "file": "browncat_v1_03_arm_right.png",
+      "zIndex": 3,
+      "anchor": "torso"
+    },
+
+    {
+      "key": "ear_left",
+      "file": "browncat_v1_04_ear_left.png",
+      "zIndex": 4,
+      "anchor": "face"
+    },
+    {
+      "key": "ear_right",
+      "file": "browncat_v1_04_ear_right.png",
+      "zIndex": 4,
+      "anchor": "face"
+    },
+
+    {
+      "key": "face",
+      "file": "browncat_v1_05_face_none.png",
+      "zIndex": 5,
+      "anchor": "face"
+    },
+
+    {
+      "key": "flushing_left",
+      "file": "browncat_v1_06_flushing_left.png",
+      "zIndex": 6,
+      "anchor": "face"
+    },
+    {
+      "key": "flushing_right",
+      "file": "browncat_v1_06_flushing_right.png",
+      "zIndex": 6,
+      "anchor": "face"
+    },
+
+    {
+      "key": "beard_leftDown",
+      "file": "browncat_v1_07_beard_leftDown.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+    {
+      "key": "beard_leftUp",
+      "file": "browncat_v1_07_beard_leftUp.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+    {
+      "key": "beard_rightDown",
+      "file": "browncat_v1_07_beard_rightDown.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+    {
+      "key": "beard_rightUp",
+      "file": "browncat_v1_07_beard_rightUp.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+
+    {
+      "key": "eye_left",
+      "file": "browncat_v1_08_eye_left.png",
+      "zIndex": 8,
+      "anchor": "face"
+    },
+    {
+      "key": "eye_right",
+      "file": "browncat_v1_08_eye_right.png",
+      "zIndex": 8,
+      "anchor": "face"
+    },
+
+    {
+      "key": "eyebrow_left",
+      "file": "browncat_v1_09_eyebrow_left.png",
+      "zIndex": 9,
+      "anchor": "face"
+    },
+    {
+      "key": "eyebrow_right",
+      "file": "browncat_v1_09_eyebrow_right.png",
+      "zIndex": 9,
+      "anchor": "face"
+    },
+
+    {
+      "key": "mouth",
+      "file": "browncat_v1_10_mouth_none.png",
+      "zIndex": 10,
+      "anchor": "face"
+    },
+
+    {
+      "key": "neckRuff",
+      "file": "browncat_v1_11_neckRuff_none.png",
+      "zIndex": 11,
+      "anchor": "neck"
+    }
+  ],
+
+  "rendering": {
+    "sortBy": "zIndex",
+    "stableSort": true,
+    "tieBreak": ["key"],
+    "drawOrigin": { "x": 0, "y": 0 },
+    "note": "모든 파츠는 1024x1024 동일 캔버스 정렬이므로 (0,0)에 레이어링하면 조립됨. anchor는 변형(토르소 스케일 등) 기준점에 사용."
+  }
+}
