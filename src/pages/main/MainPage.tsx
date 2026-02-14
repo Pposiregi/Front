@@ -308,11 +308,11 @@ export const MainPage = () => {
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const limbLeftX = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],
-      outputRange: [-5, 5, -5],
+      outputRange: [-10, 10, -10],
     });
     const limbRightX = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],
-      outputRange: [5, -5, 5],
+      outputRange: [10, -10, 10],
     });
     const torsoX = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],
@@ -340,11 +340,11 @@ export const MainPage = () => {
     });
     const legLeftRotate = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],
-      outputRange: ['8deg', '-8deg', '8deg'],
+      outputRange: ['18deg', '-18deg', '18deg'],
     });
     const legRightRotate = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],
-      outputRange: ['-8deg', '8deg', '-8deg'],
+      outputRange: ['-18deg', '18deg', '-18deg'],
     });
     const tailRotate = runCycleProgress.interpolate({
       inputRange: [0, 0.5, 1],

@@ -37,7 +37,7 @@ const browncatV1RunPartAssets: Record<string, ImageSourcePropType> = {
   'browncat_v1_01_leg_left.png': require('./brown_cat/run/browncat_v1_01_leg_left.png'),
   'browncat_v1_02_torso_none.png': require('./brown_cat/run/browncat_v1_02_torso_none.png'),
   'browncat_v1_03_leg_right.png': require('./brown_cat/run/browncat_v1_03_leg_right.png'),
-  'browncat_v1_05_arm_left.png': require('./brown_cat/run/browncat_v1_05_arm_left.png'),
+  'browncat_v1_01_arm_left.png': require('./brown_cat/run/browncat_v1_01_arm_left.png'),
   'browncat_v1_05_arm_right.png': require('./brown_cat/run/browncat_v1_05_arm_right.png'),
   'browncat_v1_06_neckRuff_none.png': require('./brown_cat/run/browncat_v1_06_neckRuff_none.png'),
   'browncat_v1_07_face_none.png': require('./brown_cat/run/browncat_v1_07_face_none.png'),
@@ -59,6 +59,8 @@ const petAssetRegistry: Record<PetTemplateId, PetAssetRegistryEntry> = {
   },
 };
 
-export function getPetAssetRegistryEntry(templateId: string): PetAssetRegistryEntry | null {
+export function getPetAssetRegistryEntry(
+  templateId: string
+): PetAssetRegistryEntry | null {
   return petAssetRegistry[templateId as PetTemplateId] ?? null;
 }

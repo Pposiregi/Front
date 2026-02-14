@@ -40,8 +40,8 @@
     },
     {
       "key": "arm_left",
-      "file": "browncat_v1_05_arm_left.png",
-      "zIndex": 5,
+      "file": "browncat_v1_01_arm_left.png",
+      "zIndex": 1,
       "anchor": "torso"
     },
     {
