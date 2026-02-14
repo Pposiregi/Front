@@ -1,6 +1,6 @@
 import type { PetTemplatePart } from '@utils/petTemplate';
 
-type TorsoMorphScale = {
+export type TorsoMorphScale = {
   scaleX: number;
   scaleY: number;
   clampedPbf: number;

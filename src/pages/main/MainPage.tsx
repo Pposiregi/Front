@@ -45,8 +45,10 @@ const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const IDLE_BREATH_LOOP_MS = 3000;
 const RUN_LOOP_MS = 520;
 const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
+// Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
+// Normalized follow-offset ratios (relative to PET_RENDER_SIZE).
 const MORPH_FOLLOW_ARM_RATIO = 0.018;
 const MORPH_FOLLOW_LEG_RATIO = 0.022;
 const MORPH_FOLLOW_TAIL_RATIO = 0.012;
@@ -240,6 +242,7 @@ export const MainPage = () => {
   /**
    * 펫 FSM 상태 훅.
    */
+  // FSM state value is intentionally not consumed yet; this page currently uses transition events only.
   const { transition: changePetState } = usePetFSM();
   const idleBreathProgress = useRef(new Animated.Value(0)).current;
   const runCycleProgress = useRef(new Animated.Value(0)).current;

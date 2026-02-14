@@ -15,6 +15,7 @@ const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
+// Approximation term for font descender/line-box differences in RN text layout.
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
 const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
@@ -122,7 +123,7 @@ export default StyleSheet.create({
   },
   startButton: {
     position: 'absolute',
-    bottom: BOTTOM_NAV_HEIGHT - 20,
+    bottom: START_BUTTON_BASE_BOTTOM,
     alignSelf: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: START_BUTTON_PADDING_H,

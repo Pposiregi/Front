@@ -16,7 +16,7 @@
 - `src/assets/pet/<pet_name>/origin/`
   - source/reference files (not for runtime composition)
 - `src/assets/pet/fx/`
-  - fx/supplemental assets (not part-layer composition)
+  - global/shared fx assets for all pets (not part-layer composition)
 
 ## Filename Format
 - Required format: `{pet}_{version}_{zIndex}_{part}_{direction}.png`
@@ -24,7 +24,9 @@
   - `pet`: pet key (lowercase letters/numbers, e.g. `browncat`)
   - `version`: `v` + number (e.g. `v1`)
   - `zIndex`: 2-digit layer index (e.g. `00`, `07`, `11`)
-  - `part`: part name (letters/numbers, `_` allowed)
+- `part`: part name (letters/numbers, `_` allowed)
+  - avoid ending `part` names with direction tokens (e.g. `left`, `right`, `up`, `down`)
+  - this keeps filename parsing deterministic because the last token is reserved for `direction`
   - `direction`: required. use `none` when direction is not needed
 
 ## Allowed Direction Values

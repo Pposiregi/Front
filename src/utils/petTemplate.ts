@@ -337,3 +337,11 @@ export function getBundledPetTemplate(): PetTemplate {
   cachedTemplate = loadPetTemplateWithFallback(bundledTemplate);
   return cachedTemplate;
 }
+
+/**
+ * 테스트/디버깅 용도로 번들 템플릿 캐시를 강제로 비운다.
+ * 프로덕션 코드에서는 일반적으로 호출할 필요가 없다.
+ */
+export function resetBundledPetTemplateCache(): void {
+  cachedTemplate = null;
+}

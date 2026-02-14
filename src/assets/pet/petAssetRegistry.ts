@@ -4,6 +4,8 @@ export type PetTemplateId = 'browncat_v1' | 'browncat_v1_run';
 
 export type PetAssetRegistryEntry = {
   version: string;
+  // Runtime validator in petTemplate.ts verifies the loaded JSON shape.
+  // Keep this as unknown at registry boundary to enforce explicit validation downstream.
   template: unknown;
   partAssets: Record<string, ImageSourcePropType>;
 };

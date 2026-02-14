@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Animated, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { getPetPartAsset, getPetTemplate } from '@utils/petAssetLoader';
 import { getTemplateAnchorRenderPx } from '@utils/petAnchorUtils';
@@ -56,9 +56,10 @@ export const PetRenderer = ({
     );
   }, [template.parts, templateId, cacheBustToken]);
 
-  if (missingFiles.length > 0) {
+  useEffect(() => {
+    if (missingFiles.length === 0) return;
     console.warn(`[PetRenderer] missing part files skipped: ${missingFiles.join(', ')}`);
-  }
+  }, [missingFiles]);
 
   return (
     <View testID={testID} style={[styles.container, { width: size, height: size }, style]}>

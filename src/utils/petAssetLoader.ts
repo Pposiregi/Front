@@ -63,7 +63,7 @@ const stats = {
  * 동일 템플릿이라도 버전/버스트가 다르면 별도 엔트리로 분리된다.
  */
 function buildTemplateCacheKey(templateId: string, version: string, cacheBustToken?: string): string {
-  return `${templateId}:${version}:${cacheBustToken ?? ''}`;
+  return JSON.stringify(['tpl', templateId, version, cacheBustToken ?? '']);
 }
 
 /**
@@ -76,7 +76,7 @@ function buildPartCacheKey(
   fileName: string,
   cacheBustToken?: string
 ): string {
-  return `${templateId}:${version}:${cacheBustToken ?? ''}:${fileName}`;
+  return JSON.stringify(['part', templateId, version, cacheBustToken ?? '', fileName]);
 }
 
 /**
@@ -227,13 +227,13 @@ export function invalidatePetAssetCache(options: { templateId?: string } = {}): 
   }
 
   for (const key of Array.from(templateCache.keys())) {
-    if (key.startsWith(`${templateId}:`)) {
+    if (key.includes(`"${templateId}"`)) {
       templateCache.delete(key);
     }
   }
 
   for (const key of Array.from(partAssetCache.keys())) {
-    if (key.startsWith(`${templateId}:`)) {
+    if (key.includes(`"${templateId}"`)) {
       partAssetCache.delete(key);
     }
   }

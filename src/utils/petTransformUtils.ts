@@ -32,6 +32,21 @@ function hasPivotTransform(transform: PartTransformInput): boolean {
   );
 }
 
+function pushScaleAndRotate(
+  result: TransformEntry[],
+  transform: PartTransformInput
+): void {
+  if (transform.scaleX !== undefined) result.push({ scaleX: transform.scaleX });
+  if (transform.scaleY !== undefined) result.push({ scaleY: transform.scaleY });
+  if (transform.rotateDeg !== undefined) {
+    if (typeof transform.rotateDeg === 'number') {
+      result.push({ rotate: `${transform.rotateDeg}deg` });
+    } else {
+      result.push({ rotate: transform.rotateDeg });
+    }
+  }
+}
+
 /**
  * 파츠 변형 배열을 생성한다.
  * 핵심 아이디어:
@@ -59,33 +74,14 @@ export function buildPivotTransform(
 
     result.push({ translateX: -pivotOffsetX });
     result.push({ translateY: -pivotOffsetY });
-
-    if (transform.scaleX !== undefined) result.push({ scaleX: transform.scaleX });
-    if (transform.scaleY !== undefined) result.push({ scaleY: transform.scaleY });
-    if (transform.rotateDeg !== undefined) {
-      if (typeof transform.rotateDeg === 'number') {
-        result.push({ rotate: `${transform.rotateDeg}deg` });
-      } else {
-        result.push({ rotate: transform.rotateDeg });
-      }
-    }
+    pushScaleAndRotate(result, transform);
 
     result.push({ translateX: pivotOffsetX });
     result.push({ translateY: pivotOffsetY });
   }
 
-  if (transform.scaleX !== undefined && !shouldUseAnchorPivot) {
-    result.push({ scaleX: transform.scaleX });
-  }
-  if (transform.scaleY !== undefined && !shouldUseAnchorPivot) {
-    result.push({ scaleY: transform.scaleY });
-  }
-  if (transform.rotateDeg !== undefined && !shouldUseAnchorPivot) {
-    if (typeof transform.rotateDeg === 'number') {
-      result.push({ rotate: `${transform.rotateDeg}deg` });
-    } else {
-      result.push({ rotate: transform.rotateDeg });
-    }
+  if (!shouldUseAnchorPivot && hasPivotTransform(transform)) {
+    pushScaleAndRotate(result, transform);
   }
 
   if (transform.translateX !== undefined) result.push({ translateX: transform.translateX });

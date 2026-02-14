@@ -26,6 +26,7 @@ export function anchorNormToBasePx(anchorNorm: AnchorNorm, baseSize: number): An
  * 이 배율은 모든 앵커 픽셀 좌표에 동일하게 적용된다.
  */
 export function getRenderScale(baseSize: number, renderSizePx: number): number {
+  if (baseSize <= 0) return 1;
   return renderSizePx / baseSize;
 }
 

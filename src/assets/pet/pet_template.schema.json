@@ -41,7 +41,7 @@
         "properties": {
           "key": { "type": "string", "minLength": 1 },
           "file": { "type": "string", "minLength": 1 },
-          "zIndex": { "type": "number" },
+          "zIndex": { "type": "integer" },
           "anchor": { "type": "string", "minLength": 1 },
           "morph": {
             "type": "object",
