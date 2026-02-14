@@ -14,13 +14,6 @@ export type PartTransformInput = {
   rotateDeg?: AnimatableRotate;
   translateX?: AnimatableNumeric;
   translateY?: AnimatableNumeric;
-  stretchCenterX?: AnimatableNumeric;
-  stretchTopLockNorm?: number;
-  stretchBottomLockNorm?: number;
-  stretchTopLeftNormX?: number;
-  stretchTopRightNormX?: number;
-  stretchBottomLeftNormX?: number;
-  stretchBottomRightNormX?: number;
   useAnchorPivot?: boolean;
 };
 

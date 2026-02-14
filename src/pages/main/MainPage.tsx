@@ -17,6 +17,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StepProgress } from '@components/StepProgress';
 import { PetRenderer } from '@components/PetRenderer';
@@ -44,9 +45,11 @@ const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const IDLE_BREATH_LOOP_MS = 3000;
 const RUN_LOOP_MS = 520;
 const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
-const TORSO_TOP_Y = 535;
-const TORSO_BOTTOM_Y = 694;
-const TORSO_LOCK_PADDING_PX = 5;
+const MALE_BASELINE_PBF = 17;
+const FEMALE_BASELINE_PBF = 25;
+const MORPH_FOLLOW_ARM_RATIO = 0.018;
+const MORPH_FOLLOW_LEG_RATIO = 0.022;
+const MORPH_FOLLOW_TAIL_RATIO = 0.012;
 const HEAD_PART_KEYS = [
   'face',
   'ear_left',
@@ -64,10 +67,6 @@ const HEAD_PART_KEYS = [
   'beard_rightUp',
   'neckRuff',
 ] as const;
-const DEFAULT_BELLY_STRETCH_REGION = {
-  topLockNorm: (TORSO_TOP_Y + TORSO_LOCK_PADDING_PX) / 1024,
-  bottomLockNorm: (TORSO_BOTTOM_Y - TORSO_LOCK_PADDING_PX) / 1024,
-};
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -78,6 +77,7 @@ import MissionModal from './missionModal';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
 import { useAppDispatch } from '@store/index';
+import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
@@ -120,7 +120,9 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
-  const [fatVerIndex, setFatVerIndex] = useState(1);
+  const [fatVerIndex, setFatVerIndex] = useState(-1);
+  const [currentPbf, setCurrentPbf] = useState<number | null>(null);
+  const userGender = useSelector((state: RootState) => state.user.gender);
   const dispatch = useAppDispatch();
   /**
    * 사용자 정보 받아오기
@@ -195,6 +197,7 @@ export const MainPage = () => {
     try {
       const existing = await getBodyHistoryByDate(todayKey);
       if (existing) {
+        setCurrentPbf(existing.pbf);
         // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
         await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
         setShowBodyPrompt(false);
@@ -202,6 +205,7 @@ export const MainPage = () => {
       }
     } catch (err: any) {
       if (err?.response?.status === 404) {
+        setCurrentPbf(null);
         return false; // 기록 없음
       }
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
@@ -239,32 +243,21 @@ export const MainPage = () => {
   const { transition: changePetState } = usePetFSM();
   const idleBreathProgress = useRef(new Animated.Value(0)).current;
   const runCycleProgress = useRef(new Animated.Value(0)).current;
-  const selectedPreviewPbf = FAT_VER_PBF_PRESETS[fatVerIndex];
-  const mainPetTemplate = useMemo(
-    () => getPetTemplate({ templateId: 'browncat_v1' }),
+  const baselinePbf =
+    userGender === 'female' ? FEMALE_BASELINE_PBF : MALE_BASELINE_PBF;
+  const selectedPreviewPbf =
+    fatVerIndex >= 0 ? FAT_VER_PBF_PRESETS[fatVerIndex] : null;
+  const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
+  const torsoTemplatePart = useMemo(
+    () =>
+      getPetTemplate({ templateId: 'browncat_v1' }).parts.find(
+        (part) => part.key === 'torso'
+      ),
     []
   );
-  const torsoTemplatePart = useMemo(
-    () => mainPetTemplate.parts.find((part) => part.key === 'torso'),
-    [mainPetTemplate.parts]
-  );
-  const bellyStretchRegion = useMemo(() => {
-    const anchors = mainPetTemplate.anchors;
-    const topLeft = anchors.belly_top_left;
-    const bottomLeft = anchors.belly_bottom_left;
-
-    if (!topLeft || !bottomLeft) {
-      return DEFAULT_BELLY_STRETCH_REGION;
-    }
-
-    return {
-      topLockNorm: topLeft.y + TORSO_LOCK_PADDING_PX / 1024,
-      bottomLockNorm: bottomLeft.y - TORSO_LOCK_PADDING_PX / 1024,
-    };
-  }, [mainPetTemplate.anchors]);
   const torsoMorph = useMemo(
-    () => getTorsoScaleByPbf(torsoTemplatePart, selectedPreviewPbf),
-    [selectedPreviewPbf, torsoTemplatePart]
+    () => getTorsoScaleByPbf(torsoTemplatePart, effectivePbf),
+    [effectivePbf, torsoTemplatePart]
   );
 
   useEffect(() => {
@@ -331,15 +324,21 @@ export const MainPage = () => {
       inputRange: [0, 1],
       outputRange: [0, -2],
     });
+    const armFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_ARM_RATIO * torsoMorph.t;
+    const legFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_LEG_RATIO * torsoMorph.t;
+    const tailFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_TAIL_RATIO * torsoMorph.t;
 
     const transforms: Record<string, PartTransformInput> = {
       torso: {
+        scaleX: torsoMorph.scaleX,
         scaleY: torsoScaleY,
-        stretchCenterX: torsoMorph.scaleX,
-        stretchTopLockNorm: bellyStretchRegion.topLockNorm,
-        stretchBottomLockNorm: bellyStretchRegion.bottomLockNorm,
         useAnchorPivot: true,
       },
+      arm_left: { translateX: -armFollowOffset },
+      arm_right: { translateX: armFollowOffset },
+      leg_left: { translateX: -legFollowOffset },
+      leg_right: { translateX: legFollowOffset },
+      tail: { translateX: tailFollowOffset },
     };
 
     HEAD_PART_KEYS.forEach((partKey) => {
@@ -347,7 +346,7 @@ export const MainPage = () => {
     });
 
     return transforms;
-  }, [bellyStretchRegion, idleBreathProgress, torsoMorph.scaleX]);
+  }, [idleBreathProgress, torsoMorph.scaleX, torsoMorph.t]);
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const limbLeftX = runCycleProgress.interpolate({
@@ -515,8 +514,12 @@ export const MainPage = () => {
   }, [endSession]);
 
   const handleToggleFatVer = useCallback(() => {
-    setFatVerIndex((prev) => (prev + 1) % FAT_VER_PBF_PRESETS.length);
+    setFatVerIndex((prev) => {
+      const nextIndex = prev < 0 ? 0 : (prev + 1) % FAT_VER_PBF_PRESETS.length;
+      return nextIndex;
+    });
   }, []);
+
 
   /**
    * Running 시작/종료 핸들러
@@ -631,6 +634,7 @@ export const MainPage = () => {
           pbf: values.pbf,
           baseDate: values.baseDate,
         });
+        setCurrentPbf(values.pbf);
         await markSkipToday();
         setShowBodyPrompt(false);
         Alert.alert('기록 완료', '오늘의 몸 기록을 저장했어요.');
@@ -976,15 +980,6 @@ export const MainPage = () => {
                 <Text style={styles.devHealthButtonText}>RESET</Text>
               </TouchableOpacity>
             )}
-            {__DEV__ && (
-              <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={handleToggleFatVer}
-                accessibilityLabel={`체형 테스트 pbf ${selectedPreviewPbf}`}
-              >
-                <Text style={styles.devHealthButtonText}>[fat.ver]</Text>
-              </TouchableOpacity>
-            )}
           </View>
         </ImageBackground>
       )}
@@ -997,6 +992,20 @@ export const MainPage = () => {
       >
         <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
       </TouchableOpacity>
+      {__DEV__ && (
+        <TouchableOpacity
+          style={styles.fatButton}
+          onPress={handleToggleFatVer}
+          accessibilityRole='button'
+          accessibilityLabel={`체형 테스트 pbf ${selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]}`}
+        >
+          <Text style={styles.devHealthButtonText}>
+            {selectedPreviewPbf == null
+              ? '[fat:15]'
+              : `[fat:${selectedPreviewPbf}]`}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <BodyRecordPrompt
         visible={showBodyPrompt}

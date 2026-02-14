@@ -129,6 +129,16 @@ export default StyleSheet.create({
     paddingVertical: START_BUTTON_PADDING_V,
     borderRadius: START_BUTTON_RADIUS,
   },
+  fatButton: {
+    position: 'absolute',
+    bottom: BOTTOM_NAV_HEIGHT - 16,
+    left: '50%',
+    marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
+    backgroundColor: '#1f2937',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
   startText: {
     fontFamily: 'JUA',
     fontWeight: 'bold',
