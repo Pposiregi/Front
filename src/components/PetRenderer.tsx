@@ -1,12 +1,15 @@
 import React, { useMemo } from 'react';
 import { Image, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { getPetPartAsset, getPetTemplate } from '@utils/petAssetLoader';
+import { getTemplateAnchorRenderPx } from '@utils/petAnchorUtils';
 import { buildRenderablePetParts, sortPetPartsForRender } from '@utils/petRenderUtils';
+import { buildPivotTransform, type PartTransformInput } from '@utils/petTransformUtils';
 
 type Props = {
   size: number;
   templateId?: string;
   cacheBustToken?: string;
+  partTransforms?: Record<string, PartTransformInput>;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
@@ -15,6 +18,7 @@ export const PetRenderer = ({
   size,
   templateId,
   cacheBustToken,
+  partTransforms,
   style,
   testID = 'pet-renderer',
 }: Props) => {
@@ -44,16 +48,23 @@ export const PetRenderer = ({
 
   return (
     <View testID={testID} style={[styles.container, { width: size, height: size }, style]}>
-      {renderableParts.map(part => (
-        <Image
-          key={`${part.zIndex}:${part.key}:${part.file}:${part._originalIndex}`}
-          source={part.asset}
-          style={[styles.layer, { zIndex: part.zIndex }]}
-          resizeMode='contain'
-          fadeDuration={0}
-          testID={`pet-part-${part.key}`}
-        />
-      ))}
+      {renderableParts.map(part => {
+        const partTransform = partTransforms?.[part.key];
+        const pivot = getTemplateAnchorRenderPx(template, part.anchor, size);
+        const transform =
+          partTransform && pivot ? buildPivotTransform(pivot, partTransform) : undefined;
+
+        return (
+          <Image
+            key={`${part.zIndex}:${part.key}:${part.file}:${part._originalIndex}`}
+            source={part.asset}
+            style={[styles.layer, { zIndex: part.zIndex }, transform ? { transform } : null]}
+            resizeMode='contain'
+            fadeDuration={0}
+            testID={`pet-part-${part.key}`}
+          />
+        );
+      })}
     </View>
   );
 };
