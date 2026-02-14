@@ -20,9 +20,10 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StepProgress } from '@components/StepProgress';
+import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
-import mainBackGround from '@assets/images/mainBackGround.png'; // MAIN 화면 배경
+import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
 import mainBackGround_day from '@assets/images/mainBackground_day.png';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
@@ -37,10 +38,11 @@ import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
  */
 const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
+const PET_RENDER_SIZE = 480;
+const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
-import { petImageByState } from '@utils/petImages';
 import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
@@ -51,7 +53,6 @@ import { mockActiveMissions } from './mockMission';
 import { useAppDispatch } from '@store/index';
 import userSlice from '@slices/user';
 import { getUserResponse } from 'types/main';
-import { useDispatch } from 'react-redux';
 import RunningSummaryModal from './RunningSummaryModal';
 
 /**
@@ -234,7 +235,7 @@ export const MainPage = () => {
   /**
    * 펫 FSM 상태 훅.
    */
-  const { state: petState, transition: changePetState } = usePetFSM();
+  const { transition: changePetState } = usePetFSM();
 
   /**
    * 펫 터치 시 상태 전환.
@@ -714,10 +715,16 @@ export const MainPage = () => {
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>
-            <Image
-              source={petImageByState[petState]}
-              style={styles.petImage}
-              fadeDuration={0}
+            <PetRenderer
+              size={PET_RENDER_SIZE}
+              style={[
+                styles.petImage,
+                {
+                  transform: [
+                    { translateY: PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO },
+                  ],
+                },
+              ]}
             />
           </Pressable>
           <View style={styles.messageRow}>

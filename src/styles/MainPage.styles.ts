@@ -14,6 +14,9 @@ const START_BUTTON_PADDING_V = Math.max(10, Math.round(SCREEN_HEIGHT * 0.015));
 const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
+const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
+const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
+const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
 const PET_WIDTH = SCREEN_WIDTH * 0.45;
 const PET_HEIGHT = PET_WIDTH * 0.6;
@@ -165,13 +168,12 @@ export default StyleSheet.create({
   },
   pet: {
     position: 'absolute',
-    bottom: SCREEN_WIDTH * 0.15,
+    bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
   },
   petImage: {
-    width: PET_WIDTH * 1,
-    height: PET_HEIGHT * 2.5,
+    alignSelf: 'center',
   },
   running_pet: {
     position: 'absolute',
