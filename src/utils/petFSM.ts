@@ -10,6 +10,7 @@ import { PetState, PetStates } from '@utils/petState';
  */
 export const usePetFSM = () => {
   const [state, setState] = useState<PetState>(PetStates.IDLE);
+  const stateRef = useRef<PetState>(PetStates.IDLE);
   const timerRef = useRef<number | null>(null);
 
   type TransitionOptions = {
@@ -25,7 +26,7 @@ export const usePetFSM = () => {
     const { duration } = options;
 
     // 중복 상태로는 전환하지 않음
-    if (state === newState) return;
+    if (stateRef.current === newState) return;
 
     // 기존 타이머 클리어
     if (timerRef.current) {
@@ -33,12 +34,18 @@ export const usePetFSM = () => {
       timerRef.current = null;
     }
 
-    setState(newState);
+    setState(() => {
+      stateRef.current = newState;
+      return newState;
+    });
 
     // duration 후 자동 복귀 (예: HAPPY -> IDLE)
     if (duration) {
       timerRef.current = setTimeout(() => {
-        setState(PetStates.IDLE);
+        setState(() => {
+          stateRef.current = PetStates.IDLE;
+          return PetStates.IDLE;
+        });
       }, duration);
     }
   };

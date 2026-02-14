@@ -615,6 +615,6 @@ hs_err_pid*
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
-
+*/assets/images/pet_AI/*
 ### Codex Config Files ###
 codex/

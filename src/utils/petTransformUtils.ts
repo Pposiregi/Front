@@ -6,7 +6,7 @@ type AnimatableNumeric = number | Animated.Value | Animated.AnimatedInterpolatio
 type AnimatableRotate =
   | number
   | string
-  | Animated.AnimatedInterpolation<number | string>;
+  | Animated.AnimatedInterpolation<string>;
 
 export type PartTransformInput = {
   scaleX?: AnimatableNumeric;
@@ -38,13 +38,14 @@ function pushScaleAndRotate(
 ): void {
   if (transform.scaleX !== undefined) result.push({ scaleX: transform.scaleX });
   if (transform.scaleY !== undefined) result.push({ scaleY: transform.scaleY });
-  if (transform.rotateDeg !== undefined) {
-    if (typeof transform.rotateDeg === 'number') {
-      result.push({ rotate: `${transform.rotateDeg}deg` });
-    } else {
-      result.push({ rotate: transform.rotateDeg });
-    }
+  if (transform.rotateDeg !== undefined) result.push(toRotateTransform(transform.rotateDeg));
+}
+
+function toRotateTransform(rotateDeg: AnimatableRotate): TransformEntry {
+  if (typeof rotateDeg === 'number') {
+    return { rotate: `${rotateDeg}deg` } as TransformEntry;
   }
+  return { rotate: rotateDeg } as TransformEntry;
 }
 
 /**

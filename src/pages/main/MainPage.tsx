@@ -48,10 +48,6 @@ const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
-// Normalized follow-offset ratios (relative to PET_RENDER_SIZE).
-const MORPH_FOLLOW_ARM_RATIO = 0.018;
-const MORPH_FOLLOW_LEG_RATIO = 0.022;
-const MORPH_FOLLOW_TAIL_RATIO = 0.012;
 const HEAD_PART_KEYS = [
   'face',
   'ear_left',
@@ -76,6 +72,11 @@ import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
+import {
+  FAT_MORPH_FOLLOW_RATIOS,
+  MAIN_PET_TEMPLATE_ID,
+  PET_RUN_MOTION,
+} from './petMotionConfig';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
 import { useAppDispatch } from '@store/index';
@@ -253,7 +254,7 @@ export const MainPage = () => {
   const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
   const torsoTemplatePart = useMemo(
     () =>
-      getPetTemplate({ templateId: 'browncat_v1' }).parts.find(
+      getPetTemplate({ templateId: MAIN_PET_TEMPLATE_ID }).parts.find(
         (part) => part.key === 'torso'
       ),
     []
@@ -263,6 +264,7 @@ export const MainPage = () => {
     [effectivePbf, torsoTemplatePart]
   );
 
+  // Animated.Value is created by useRef and remains stable through component lifetime.
   useEffect(() => {
     if (isTracking) {
       idleBreathProgress.stopAnimation();
@@ -290,6 +292,7 @@ export const MainPage = () => {
     };
   }, [idleBreathProgress, isTracking]);
 
+  // Animated.Value is created by useRef and remains stable through component lifetime.
   useEffect(() => {
     if (!isTracking) {
       runCycleProgress.stopAnimation();
@@ -327,9 +330,12 @@ export const MainPage = () => {
       inputRange: [0, 1],
       outputRange: [0, -2],
     });
-    const armFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_ARM_RATIO * torsoMorph.t;
-    const legFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_LEG_RATIO * torsoMorph.t;
-    const tailFollowOffset = PET_RENDER_SIZE * MORPH_FOLLOW_TAIL_RATIO * torsoMorph.t;
+    const armFollowOffset =
+      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.arm * torsoMorph.t;
+    const legFollowOffset =
+      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.leg * torsoMorph.t;
+    const tailFollowOffset =
+      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.tail * torsoMorph.t;
 
     const transforms: Record<string, PartTransformInput> = {
       torso: {
@@ -352,65 +358,66 @@ export const MainPage = () => {
   }, [idleBreathProgress, torsoMorph.scaleX, torsoMorph.t]);
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
+    const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 2;
     const limbLeftX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [-10, 10, -10],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.limbLeftX,
     });
     const limbRightX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [10, -10, 10],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.limbRightX,
     });
     const torsoX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [-2, 2, -2],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.torsoX,
     });
     const torsoY = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0, -1.5, 0],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.torsoY,
     });
     const faceX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [-3, 3, -3],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.faceX,
     });
     const faceY = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0, -1, 0],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.faceY,
     });
     const armLeftRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['-10deg', '10deg', '-10deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.armLeftRotate,
     });
     const armRightRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['10deg', '-10deg', '10deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.armRightRotate,
     });
     const legLeftRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['18deg', '-18deg', '18deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.legLeftRotate,
     });
     const legRightRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['-18deg', '18deg', '-18deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.legRightRotate,
     });
     const tailRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['-14deg', '14deg', '-14deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.tailRotate,
     });
     const tailX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [-1.5, 1.5, -1.5],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.tailX,
     });
     const neckRuffX = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [-2, 2, -2],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.neckRuffX,
     });
     const neckRuffRotate = runCycleProgress.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['-2deg', '2deg', '-2deg'],
+      inputRange: PET_RUN_MOTION.phase,
+      outputRange: PET_RUN_MOTION.neckRuffRotate,
     });
 
     return {
-      torso: { translateX: torsoX, translateY: torsoY },
+      torso: { translateX: torsoX, translateY: torsoY, scaleX: runTorsoScaleX },
       arm_left: {
         translateX: limbLeftX,
         rotateDeg: armLeftRotate,
@@ -440,7 +447,7 @@ export const MainPage = () => {
       eye_right: { translateX: faceX, translateY: faceY },
       mouth: { translateX: faceX, translateY: faceY },
     };
-  }, [runCycleProgress]);
+  }, [runCycleProgress, torsoMorph.scaleX]);
 
   /**
    * 펫 터치 시 상태 전환.
@@ -518,8 +525,9 @@ export const MainPage = () => {
 
   const handleToggleFatVer = useCallback(() => {
     setFatVerIndex((prev) => {
-      const nextIndex = prev < 0 ? 0 : (prev + 1) % FAT_VER_PBF_PRESETS.length;
-      return nextIndex;
+      if (prev < 0) return 0;
+      if (prev >= FAT_VER_PBF_PRESETS.length - 1) return -1;
+      return prev + 1;
     });
   }, []);
 
@@ -946,6 +954,7 @@ export const MainPage = () => {
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <PetRenderer
               size={PET_RENDER_SIZE}
+              templateId={MAIN_PET_TEMPLATE_ID}
               partTransforms={idlePartTransforms}
               style={[
                 styles.petImage,

@@ -53,6 +53,7 @@
                   "range": {
                     "type": "object",
                     "required": ["min", "max"],
+                    "$comment": "Semantic constraint: min must be less than max. Enforced in runtime validator (petTemplate.ts).",
                     "properties": {
                       "min": { "type": "number" },
                       "max": { "type": "number" }

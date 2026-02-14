@@ -1,9 +1,6 @@
-import type { PetTemplate } from '@utils/petTemplate';
+import type { AnchorPoint, PetTemplate } from '@utils/petTemplate';
 
-export type AnchorNorm = {
-  x: number;
-  y: number;
-};
+export type AnchorNorm = AnchorPoint;
 
 export type AnchorPx = {
   x: number;
@@ -26,7 +23,12 @@ export function anchorNormToBasePx(anchorNorm: AnchorNorm, baseSize: number): An
  * 이 배율은 모든 앵커 픽셀 좌표에 동일하게 적용된다.
  */
 export function getRenderScale(baseSize: number, renderSizePx: number): number {
-  if (baseSize <= 0) return 1;
+  if (baseSize <= 0) {
+    console.warn(
+      `[petAnchorUtils] invalid baseSize(${baseSize}). Fallback render scale 1 is applied.`
+    );
+    return 1;
+  }
   return renderSizePx / baseSize;
 }
 

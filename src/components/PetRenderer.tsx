@@ -32,6 +32,7 @@ export const PetRenderer = ({
   style,
   testID = 'pet-renderer',
 }: Props) => {
+  const warnedMissingFilesKeyRef = React.useRef<string>('');
   const template = useMemo(
     () =>
       getPetTemplate({
@@ -55,11 +56,14 @@ export const PetRenderer = ({
       })
     );
   }, [template.parts, templateId, cacheBustToken]);
+  const missingFilesKey = missingFiles.join('|');
 
   useEffect(() => {
     if (missingFiles.length === 0) return;
+    if (warnedMissingFilesKeyRef.current === missingFilesKey) return;
+    warnedMissingFilesKeyRef.current = missingFilesKey;
     console.warn(`[PetRenderer] missing part files skipped: ${missingFiles.join(', ')}`);
-  }, [missingFiles]);
+  }, [missingFiles, missingFilesKey]);
 
   return (
     <View testID={testID} style={[styles.container, { width: size, height: size }, style]}>
@@ -67,8 +71,12 @@ export const PetRenderer = ({
         const partTransform = partTransforms?.[part.key];
         const pivot = getTemplateAnchorRenderPx(template, part.anchor, size);
         const transform =
-          partTransform && pivot
-            ? buildPivotTransform(pivot, size, partTransform)
+          partTransform
+            ? buildPivotTransform(
+                pivot ?? { x: size / 2, y: size / 2 },
+                size,
+                partTransform
+              )
             : undefined;
 
         return (

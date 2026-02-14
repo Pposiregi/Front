@@ -4,7 +4,7 @@
  *
  */
 
-type AnchorPoint = {
+export type AnchorPoint = {
   x: number;
   y: number;
 };
@@ -117,6 +117,10 @@ function validateMorph(
     !isFiniteNumber(range.max)
   ) {
     issues.push(`${path}.pbf.range: expected { min:number, max:number }`);
+    return undefined;
+  }
+  if (range.min >= range.max) {
+    issues.push(`${path}.pbf.range: expected min < max`);
     return undefined;
   }
 
