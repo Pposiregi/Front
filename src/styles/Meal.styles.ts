@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CONTENT_HORIZONTAL_PADDING = 24;
 const CALENDAR_HORIZONTAL_PADDING = 8;
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
@@ -37,6 +37,11 @@ const MODAL_ROW_IMAGE = Math.round(
   Math.min(56, Math.max(44, SCREEN_WIDTH * 0.12))
 );
 const MODAL_ROW_RADIUS = Math.round(MODAL_BUTTON_SIZE * 0.7);
+const MODAL_MAX_HEIGHT = Math.round(SCREEN_HEIGHT * 0.88);
+const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
+  150,
+  Math.min(280, Math.round(SCREEN_HEIGHT * 0.33))
+);
 
 const baseShadow = {
   shadowColor: '#000000',
@@ -407,6 +412,7 @@ export default StyleSheet.create({
     borderRadius: 32,
     paddingVertical: 26,
     paddingHorizontal: 24,
+    maxHeight: MODAL_MAX_HEIGHT,
     ...baseShadow,
   },
   modalHeaderSection: {
@@ -444,6 +450,15 @@ export default StyleSheet.create({
   },
   modalMealList: {
     marginTop: 4,
+    maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
+    flexShrink: 1,
+  },
+  modalMealListScroll: {
+    maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
+    flexGrow: 0,
+  },
+  modalMealListContent: {
+    paddingBottom: 4,
   },
   modalMealLoadingContainer: {
     minHeight: Math.max(80, Math.round(SCREEN_WIDTH * 0.23)),
@@ -502,6 +517,11 @@ export default StyleSheet.create({
     fontSize: Math.max(16, Math.round(SCREEN_WIDTH * 0.042)),
     color: '#8F95AF',
   },
+  modalMealRemoveIcon: {
+    width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
+    height: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
+    resizeMode: 'contain',
+  },
   modalMealRowContent: {
     flex: 1,
   },
@@ -531,6 +551,11 @@ export default StyleSheet.create({
     justifyContent: 'center',
     marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
     backgroundColor: '#FFFFFF',
+  },
+  modalMealEditIcon: {
+    width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
+    height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
+    resizeMode: 'contain',
   },
   modalMealEditLabel: {
     fontFamily: 'JUA',
@@ -568,6 +593,11 @@ export default StyleSheet.create({
     fontFamily: 'JUA',
     fontSize: 18,
     color: '#FF9F43',
+  },
+  modalAddEditIcon: {
+    width: 32,
+    height: 32,
+    resizeMode: 'contain',
   },
   modalAddInput: {
     flex: 1,

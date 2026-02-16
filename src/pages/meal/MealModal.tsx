@@ -5,6 +5,7 @@ import {
   ImageSourcePropType,
   Keyboard,
   Modal,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,6 +14,8 @@ import {
 } from 'react-native';
 import styles from '@styles/Meal.styles';
 import previewMealImage from '@assets/images/preview_meal.png';
+import modifyIcon from '@assets/images/icon/modify_icon.png';
+import deleteIcon from '@assets/images/icon/delete_icon.png';
 import { resolveMealImageSource } from '@utils/imageUtil';
 import type { MealModalProps } from './MealModal.types';
 
@@ -125,72 +128,91 @@ function MealModal({
                   <View style={styles.modalMealLoadingContainer}>
                     <ActivityIndicator color='#5F6BEA' />
                   </View>
-                ) : selectedMeals.length > 0 ? (
-                  selectedMeals.map((meal) => {
-                    const isDeleting = deletingMealId === meal.mealId;
-                    const isEditingTarget = editingMealId === meal.mealId;
-                    const overrideSource =
-                      isEditingTarget && editingMealImageUri
-                        ? { uri: editingMealImageUri }
-                        : null;
-                    const resolvedSource =
-                      overrideSource ?? resolveMealImageSource(meal);
-                    return (
-                      <View
-                        key={`modal-meal-${meal.mealId}`}
-                        style={[
-                          styles.modalMealRowContainer,
-                          isEditingTarget && styles.modalMealRowEditing,
-                        ]}
-                      >
-                        <View style={styles.modalMealControls}>
-                          <TouchableOpacity
-                            style={[
-                              styles.modalMealRemoveButton,
-                              (!onDeleteMeal || isDeleting) &&
-                                styles.modalMealRemoveButtonDisabled,
-                            ]}
-                            activeOpacity={0.8}
-                            disabled={!onDeleteMeal || isDeleting}
-                            onPress={() => onDeleteMeal?.(meal.mealId)}
-                          >
-                            {isDeleting ? (
-                              <ActivityIndicator color='#8F95AF' size='small' />
-                            ) : (
-                              <Text style={styles.modalMealRemoveLabel}>-</Text>
-                            )}
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.modalMealEditButton}
-                            onPress={() => onEditMeal(meal)}
-                            disabled={isUpdatingMeal}
-                            activeOpacity={0.8}
-                          >
-                            <Text style={styles.modalMealEditLabel}>✎</Text>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.modalMealRowContent}>
-                          <Text style={styles.modalMealRowName}>
-                            {meal.title}
-                          </Text>
-                          <Text style={styles.modalMealRowCalories}>
-                            {meal.kcal}kcal
-                          </Text>
-                        </View>
-                        <Image
-                          source={resolvedSource}
-                          style={styles.modalMealRowImage}
-                        />
-                        <View style={styles.modalMealDragHandle}>
-                          <Text style={styles.modalMealDragLabel}>≡</Text>
-                        </View>
-                      </View>
-                    );
-                  })
                 ) : (
-                  <Text style={styles.modalEmptyText}>
-                    등록된 식단이 없어요.
-                  </Text>
+                  <ScrollView
+                    style={styles.modalMealListScroll}
+                    contentContainerStyle={styles.modalMealListContent}
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled
+                    keyboardShouldPersistTaps='handled'
+                  >
+                    {selectedMeals.length > 0 ? (
+                      selectedMeals.map((meal) => {
+                        const isDeleting = deletingMealId === meal.mealId;
+                        const isEditingTarget = editingMealId === meal.mealId;
+                        const overrideSource =
+                          isEditingTarget && editingMealImageUri
+                            ? { uri: editingMealImageUri }
+                            : null;
+                        const resolvedSource =
+                          overrideSource ?? resolveMealImageSource(meal);
+                        return (
+                          <View
+                            key={`modal-meal-${meal.mealId}`}
+                            style={[
+                              styles.modalMealRowContainer,
+                              isEditingTarget && styles.modalMealRowEditing,
+                            ]}
+                          >
+                            <View style={styles.modalMealControls}>
+                              <TouchableOpacity
+                                style={[
+                                  styles.modalMealRemoveButton,
+                                  (!onDeleteMeal || isDeleting) &&
+                                    styles.modalMealRemoveButtonDisabled,
+                                ]}
+                                activeOpacity={0.8}
+                                disabled={!onDeleteMeal || isDeleting}
+                                onPress={() => onDeleteMeal?.(meal.mealId)}
+                              >
+                                {isDeleting ? (
+                                  <ActivityIndicator
+                                    color='#8F95AF'
+                                    size='small'
+                                  />
+                                ) : (
+                                  <Image
+                                    source={deleteIcon}
+                                    style={styles.modalMealRemoveIcon}
+                                  />
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.modalMealEditButton}
+                                onPress={() => onEditMeal(meal)}
+                                disabled={isUpdatingMeal}
+                                activeOpacity={0.8}
+                              >
+                                <Image
+                                  source={modifyIcon}
+                                  style={styles.modalMealEditIcon}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                            <View style={styles.modalMealRowContent}>
+                              <Text style={styles.modalMealRowName}>
+                                {meal.title}
+                              </Text>
+                              <Text style={styles.modalMealRowCalories}>
+                                {meal.kcal}kcal
+                              </Text>
+                            </View>
+                            <Image
+                              source={resolvedSource}
+                              style={styles.modalMealRowImage}
+                            />
+                            <View style={styles.modalMealDragHandle}>
+                              <Text style={styles.modalMealDragLabel}>≡</Text>
+                            </View>
+                          </View>
+                        );
+                      })
+                    ) : (
+                      <Text style={styles.modalEmptyText}>
+                        등록된 식단이 없어요.
+                      </Text>
+                    )}
+                  </ScrollView>
                 )}
                 {errorMessage ? (
                   <Text style={styles.modalErrorText}>{errorMessage}</Text>
@@ -201,7 +223,7 @@ function MealModal({
                 <>
                   <View style={[styles.modalAddRow, styles.modalEditRow]}>
                     <View style={styles.modalAddIcon}>
-                      <Text style={styles.modalAddIconLabel}>✎</Text>
+                      <Image source={modifyIcon} style={styles.modalAddEditIcon} />
                     </View>
                     <TextInput
                       value={editingMealTitle}
