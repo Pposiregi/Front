@@ -31,6 +31,7 @@ export type GpsLogRequest = {
  * /gps/log 응답
  */
 export type GpsLogResponse = {
+  sessionId?: number;
   logId?: number;
   latitude?: number;
   longitude?: number;
@@ -40,13 +41,14 @@ export type GpsLogResponse = {
 
 /**
  * /gps/end 요청 payload
- * - distance 단위는 스펙 기준으로 전달(현재 m 기준)
+ * - fitpet_API.json 기준 필수값: sessionId, endTime, stepCount
+ * - burnCalories는 optional
  */
 export type GpsEndRequest = {
   sessionId: number;
   endTime: string;
   stepCount: number;
-  distance: number;
+  burnCalories?: number;
 };
 
 /**
