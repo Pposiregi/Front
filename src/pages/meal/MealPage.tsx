@@ -388,6 +388,13 @@ function MealPage() {
         }
       });
       setZeroSizedCalendarImageMap(next);
+    }).catch((error) => {
+      if (isCancelled) {
+        return;
+      }
+      console.warn('>>> [MealPage] calendar zero-sized 이미지 확인 실패', error);
+      // 실패 시 안전한 기본값으로 초기화해 stale 상태를 남기지 않는다.
+      setZeroSizedCalendarImageMap({});
     });
 
     return () => {

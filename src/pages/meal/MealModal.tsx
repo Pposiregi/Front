@@ -135,6 +135,13 @@ function MealModal({
         });
         return next;
       });
+    }).catch((error) => {
+      if (isCancelled) {
+        return;
+      }
+      console.warn('>>> [MealModal] zero-sized 이미지 확인 실패', error);
+      // 실패 시 기존 상태를 유지해 불필요한 플리커/재렌더를 방지한다.
+      setZeroSizedImageMap((prev) => prev);
     });
 
     return () => {
