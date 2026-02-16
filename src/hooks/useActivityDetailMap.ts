@@ -250,9 +250,14 @@ export const useActivityDetailMap = (routeLogs: GPS_LOG[]) => {
       if (moved) {
         if (retryCount === 0) {
           retryTimerRef.current = setTimeout(() => {
-          retryCount += 1;
-          tryMove();
-        }, MAP_RETRY_INTERVAL_MS);
+            retryCount += 1;
+            tryMove();
+          }, MAP_RETRY_INTERVAL_MS);
+        }
+        // stop 타이머가 이미 걸려 있다면 먼저 정리해 중복 종료 호출을 막는다.
+        if (stopTimerRef.current) {
+          clearTimeout(stopTimerRef.current);
+          stopTimerRef.current = null;
         }
         // 이동 직후 바로 종료하지 않고 약간의 여유를 둬 UI 깜빡임을 완화한다.
         stopTimerRef.current = setTimeout(
