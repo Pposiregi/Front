@@ -164,8 +164,14 @@ const ActivityDetailPage = () => {
   const [detailData, setDetailData] = useState<SessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const routeLogs = detailData?.routeLogs ?? [];
-  const { mapRef, mapRegion, mapKey, onMapReady, onMapLayout } =
-    useActivityDetailMap(routeLogs, sessionId);
+  const {
+    mapRef,
+    mapRegion,
+    mapKey,
+    isMapRelocating,
+    onMapReady,
+    onMapLayout,
+  } = useActivityDetailMap(routeLogs);
 
   useEffect(() => {
     const loadData = async () => {
@@ -178,33 +184,6 @@ const ActivityDetailPage = () => {
         const data = await getSessionDetail(sessionId);
         const normalizedRouteLogs = normalizeRouteLogs(data.routeLogs);
 
-        if (__DEV__) {
-          console.log(
-            '>>> [ActivityDetail] routeLogs 정규화',
-            JSON.stringify(
-              {
-                sessionId,
-                originalCount: data.routeLogs?.length ?? 0,
-                normalizedCount: normalizedRouteLogs.length,
-                first: normalizedRouteLogs[0],
-                rawFirst: data.routeLogs?.[0],
-              },
-              null,
-              0
-            )
-          );
-        }
-        if (
-          (data.routeLogs?.length ?? 0) > 0 &&
-          normalizedRouteLogs.length === 0
-        ) {
-          if (__DEV__) {
-            console.warn(
-              '>>> [ActivityDetail] routeLogs 정규화 결과가 0개입니다. rawFirst를 확인하세요.'
-            );
-          }
-        }
-
         setDetailData({
           ...data,
           routeLogs: normalizedRouteLogs,
@@ -212,9 +191,6 @@ const ActivityDetailPage = () => {
       } catch (error) {
         console.error('>>> [ActivityDetail] 상세 데이터 로드 실패:', error);
         if (__DEV__) {
-          console.warn(
-            '>>> [ActivityDetail] API 실패로 목업 데이터를 사용합니다.'
-          );
           try {
             const fallbackData = await fetchSessionDetail(sessionId);
             const normalizedRouteLogs = normalizeRouteLogs(
@@ -316,6 +292,14 @@ const ActivityDetailPage = () => {
             height={MAP_HEIGHT}
             width={MAP_WIDTH}
           />
+          {isMapRelocating ? (
+            <View style={styles.mapRelocatingOverlay}>
+              <View style={styles.mapRelocatingCard}>
+                <ActivityIndicator size='small' color='#2563EB' />
+                <Text style={styles.mapRelocatingText}>지도를 불러오는 중...</Text>
+              </View>
+            </View>
+          ) : null}
           <View style={styles.mapOverlay}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
