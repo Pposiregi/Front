@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { LatLng, MapRegion } from '@shared-types/location';
+import type { LatLng, MapRegion } from '@shared/types/location';
 import { useRouteTracking, type RouteTrackPoint } from '@hooks/useRouteTracking';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';

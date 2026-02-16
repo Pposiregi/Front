@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import Svg, { Polyline as SvgPolyline } from 'react-native-svg';
-import type { LatLng } from '@shared-types/location';
-import type { MapRegion } from '@shared-types/location';
+import type { LatLng } from '@shared/types/location';
+import type { MapRegion } from '@shared/types/location';
 
 /**
  * 지도 위에 표시할 폴리라인 컴포넌트 props.
