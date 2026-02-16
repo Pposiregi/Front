@@ -706,7 +706,7 @@ export default StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'visible', // 겹쳐진 이미지가 밖으로 나가도 보이게
+    overflow: 'hidden', // 셀 프레임 바깥으로 이미지가 넘치지 않도록 제한
   },
   stackImage: {
     position: 'absolute',

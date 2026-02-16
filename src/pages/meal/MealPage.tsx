@@ -35,7 +35,8 @@ import {
 import { uploadMealImage } from '@api/uploadMealImage';
 import { isAxiosError } from 'axios';
 
-const MAX_STACK = 3;
+const MAX_STACK = 2;
+const STACK_OFFSET_X = 8;
 
 const getDiaryTitle = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월의 식사`;
@@ -634,7 +635,10 @@ function MealPage() {
                                   source={imgSrc}
                                   style={[
                                     styles.stackImage,
-                                    { left: i * 10, zIndex: MAX_STACK - i }, // 살짝씩 오른쪽으로 가도록
+                                    {
+                                      left: i * STACK_OFFSET_X,
+                                      zIndex: MAX_STACK - i,
+                                    }, // 살짝씩 오른쪽으로 가도록
                                   ]}
                                   resizeMode='cover'
                                 />
