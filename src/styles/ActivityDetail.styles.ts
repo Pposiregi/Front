@@ -125,6 +125,15 @@ export const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: 'JUA',
   },
+  specValueGroup: {
+    alignItems: 'flex-end',
+  },
+  specSubValue: {
+    marginTop: 2,
+    fontSize: 12,
+    color: colors.textMuted,
+    fontFamily: 'Roboto-VariableFont',
+  },
   specRowLast: {
     borderBottomWidth: 0,
   },

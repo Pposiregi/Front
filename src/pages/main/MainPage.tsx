@@ -945,6 +945,7 @@ export const MainPage = () => {
             durationText={
               runSummary ? formatDuration(runSummary.durationMs) : '0분 0초'
             }
+            distanceMeters={runSummary?.distanceMeters ?? 0}
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
             stepCountMissing={runSummary?.stepCountMissing}

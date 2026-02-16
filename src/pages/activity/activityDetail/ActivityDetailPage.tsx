@@ -6,6 +6,7 @@ import MapOverlayPolyline from '@components/MapOverlayPolyline';
 import { ActivityDetailRouteProp, GPS_LOG, SessionDetail } from './types';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
+import { formatDistanceFromMeters } from '@utils/distanceFormat';
 import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
 import useActivityDetailMap from '@hooks/useActivityDetailMap';
@@ -31,6 +32,16 @@ const toFiniteNumber = (value: unknown): number | null => {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+};
+
+const formatPaceFromKmh = (kmh: number) => {
+  // km/h -> sec/km (3600 / speed) 변환 후 mm:ss 포맷으로 표시한다.
+  if (!Number.isFinite(kmh) || kmh <= 0) return '-';
+  const rawSecondsPerKm = 3600 / kmh;
+  const roundedSecondsPerKm = Math.round(rawSecondsPerKm);
+  const minutes = Math.floor(roundedSecondsPerKm / 60);
+  const seconds = roundedSecondsPerKm % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} /km`;
 };
 
 /**
@@ -234,12 +245,14 @@ const ActivityDetailPage = () => {
 
   // 숫자 필드는 null/undefined가 내려올 수 있어 렌더 전에 안전하게 정규화한다.
   const totalDistanceValue = toFiniteNumber(detailData.totalDistance) ?? 0;
-  // backend는 평균 속도를 m/s로 반환한다.
-  // 필드명 전환 구간을 고려해 avgSpeedMps -> avgSpeedKmh 순으로 호환한다.
-  const avgSpeedMpsValue =
-    toFiniteNumber(detailData.avgSpeedMps) ??
+  // 상세 거리도 공통 규칙(1000m 미만 m, 이상 km)으로 포맷한다.
+  const totalDistanceLabel = formatDistanceFromMeters(totalDistanceValue);
+  const avgSpeedMpsFallback = toFiniteNumber(detailData.avgSpeedMps);
+  // backend avgSpeedKmh 값을 그대로 km/h로 사용한다.
+  // 구 응답(avgSpeedMps)만 있는 데이터는 화면 일관성을 위해 km/h로 환산한다.
+  const avgSpeedKmhValue =
     toFiniteNumber(detailData.avgSpeedKmh) ??
-    0;
+    (avgSpeedMpsFallback !== null ? avgSpeedMpsFallback * 3.6 : 0);
   const stepCountValue = Math.max(
     0,
     Math.trunc(toFiniteNumber(detailData.stepCount) ?? 0)
@@ -308,7 +321,7 @@ const ActivityDetailPage = () => {
           <View style={styles.mapOverlay}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
-                {totalDistanceValue.toFixed(2)} km
+                {totalDistanceLabel.value} {totalDistanceLabel.unit}
               </Text>
             </View>
             <View style={styles.chip}>
@@ -330,7 +343,7 @@ const ActivityDetailPage = () => {
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>총 거리</Text>
             <Text style={styles.specValue}>
-              {totalDistanceValue.toFixed(2)} km
+              {totalDistanceLabel.value} {totalDistanceLabel.unit}
             </Text>
           </View>
           <View style={styles.specRow}>
@@ -338,10 +351,17 @@ const ActivityDetailPage = () => {
             <Text style={styles.specValue}>{formattedDuration}</Text>
           </View>
           <View style={styles.specRow}>
-            <Text style={styles.specLabel}>평균 속도</Text>
-            <Text style={styles.specValue}>
-              {avgSpeedMpsValue.toFixed(2)} m/s
-            </Text>
+            <Text style={styles.specLabel}>평균 페이스</Text>
+            <View style={styles.specValueGroup}>
+              <Text style={styles.specValue}>
+                {formatPaceFromKmh(avgSpeedKmhValue)}
+              </Text>
+              <Text style={styles.specSubValue}>
+                {Number.isFinite(avgSpeedKmhValue) && avgSpeedKmhValue > 0
+                  ? `${avgSpeedKmhValue.toFixed(2)} km/h`
+                  : '-'}
+              </Text>
+            </View>
           </View>
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>걸음수</Text>

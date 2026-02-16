@@ -163,6 +163,15 @@ export default StyleSheet.create({
     color: '#333333',
     fontFamily: 'JUA',
   },
+  summaryValueGroup: {
+    alignItems: 'flex-end',
+  },
+  summarySubValue: {
+    marginTop: 2,
+    fontSize: 12,
+    color: '#888888',
+    fontFamily: 'Roboto',
+  },
   summaryDivider: {
     height: 1,
     backgroundColor: '#eeeeee',

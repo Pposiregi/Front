@@ -32,6 +32,12 @@ const wait = (ms: number) =>
 const getRetryDelayMs = (attempt: number) =>
   RETRY_BASE_DELAY_MS * 2 ** attempt;
 
+const toKmh = (speedMps?: number) => {
+  // 위치 SDK speed(m/s)를 /gps/log 전송 규격(km/h)으로 맞춘다.
+  if (!Number.isFinite(speedMps)) return undefined;
+  return Number(speedMps) * 3.6;
+};
+
 const isRetryableNetworkError = (error: unknown): boolean => {
   const maybe = error as {
     code?: string;
@@ -156,7 +162,8 @@ export const useGpsSession = (): UseGpsSessionResult => {
         latitude: point.latitude,
         longitude: point.longitude,
         recordedAt: point.recordedAt,
-        speed: point.speed,
+        // /gps/log 전송 단위는 km/h로 맞춘다.
+        speed: toKmh(point.speed),
         altitude: point.altitude,
       });
     });

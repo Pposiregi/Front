@@ -28,6 +28,7 @@ import {
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
+import { formatDistanceFromKm } from '@utils/distanceFormat';
 import type { getUserResponse } from 'types/main';
 
 /**
@@ -453,6 +454,8 @@ function ActivityPage() {
 
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
+  // 일일 요약은 km 응답을 받아 공통 규칙(1000m 미만 m, 이상 km)으로 표시한다.
+  const distanceLabel = formatDistanceFromKm(distanceValue);
   const burnValue = dailyActivity?.burnCalories ?? 0;
   const targetSteps = userProfile?.targetStepCount ?? 0;
 
@@ -578,7 +581,7 @@ function ActivityPage() {
             <View style={styles.heroMetricRow}>
               <Text style={styles.heroMetricLabel}>거리</Text>
               <Text style={styles.heroMetricValue}>
-                {distanceValue.toFixed(2)} km
+                {distanceLabel.value} {distanceLabel.unit}
               </Text>
             </View>
             <View style={styles.heroMetricDivider} />
@@ -702,25 +705,31 @@ function ActivityPage() {
               </Text>
             </View>
           ) : (
-            normalizedMonthlyDaily.map((item) => (
-              <View key={item.date} style={styles.listCard}>
-                <View style={styles.listMarker} />
-                <View style={styles.listTextColumn}>
-                  <Text style={styles.listTitle}>
-                    {formatDailyLabel(item.date)}
-                  </Text>
-                  <Text style={styles.listSubtitle}>
-                    {(Number(item.distanceKm) || 0).toFixed(2)} km ·{' '}
-                    {(Number(item.burnCalories) || 0).toLocaleString()} kcal
-                  </Text>
+            normalizedMonthlyDaily.map((item) => {
+              // 일별 목록도 동일한 거리 표기 규칙을 사용한다.
+              const itemDistanceLabel = formatDistanceFromKm(
+                Number(item.distanceKm) || 0
+              );
+              return (
+                <View key={item.date} style={styles.listCard}>
+                  <View style={styles.listMarker} />
+                  <View style={styles.listTextColumn}>
+                    <Text style={styles.listTitle}>
+                      {formatDailyLabel(item.date)}
+                    </Text>
+                    <Text style={styles.listSubtitle}>
+                      {itemDistanceLabel.value} {itemDistanceLabel.unit} ·{' '}
+                      {(Number(item.burnCalories) || 0).toLocaleString()} kcal
+                    </Text>
+                  </View>
+                  <View style={styles.listRight}>
+                    <Text style={[styles.listValue, styles.listValueAccent]}>
+                      {(Number(item.steps) || 0).toLocaleString()} 걸음
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.listRight}>
-                  <Text style={[styles.listValue, styles.listValueAccent]}>
-                    {(Number(item.steps) || 0).toLocaleString()} 걸음
-                  </Text>
-                </View>
-              </View>
-            ))
+              );
+            })
           )}
         </View>
       ) : (
