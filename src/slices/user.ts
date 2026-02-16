@@ -53,7 +53,6 @@ const userSlice = createSlice({
       return initialState;
     },
   },
-  extraReducers: () => {},
 });
 
 export default userSlice;

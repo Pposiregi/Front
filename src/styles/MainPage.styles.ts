@@ -130,18 +130,7 @@ export default StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
   },
-  runTimerLabel: {
-    fontFamily: 'Roboto-VariableFont',
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#7A3E00',
-    letterSpacing: 0.8,
-    textShadowColor: 'rgba(255, 255, 255, 0.55)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
   runTimerValue: {
-    marginTop: 3,
     fontFamily: 'JUA',
     fontSize: Math.max(44, Math.round(SCREEN_WIDTH * 0.12)),
     color: '#2E313D',

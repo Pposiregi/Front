@@ -69,6 +69,24 @@ const toMutableRange = <T extends string | number>(
   values: readonly [T, T, T]
 ): T[] => [...values];
 
+const formatDuration = (durationMs: number) => {
+  const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}분 ${seconds}초`;
+};
+
+const formatRunningElapsed = (seconds: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const remainSeconds = safeSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+    2,
+    '0'
+  )}:${String(remainSeconds).padStart(2, '0')}`;
+};
+
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
 import { MissionActiveItem } from 'types/mission';
@@ -203,44 +221,41 @@ export const MainPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isTracking) {
-      // 러닝 시작 시각을 고정하고 1초 간격으로 경과 시간을 갱신한다.
-      if (runningStartMsRef.current === null) {
-        runningStartMsRef.current = Date.now();
+    if (!isTracking) {
+      if (runningTimerRef.current) {
+        clearInterval(runningTimerRef.current);
+        runningTimerRef.current = null;
       }
-
-      const updateElapsed = () => {
-        if (runningStartMsRef.current === null) return;
-        const elapsed = Math.max(
-          0,
-          Math.floor((Date.now() - runningStartMsRef.current) / 1000)
-        );
-        setRunningElapsedSec(elapsed);
-      };
-
-      updateElapsed();
-      if (!runningTimerRef.current) {
-        runningTimerRef.current = setInterval(updateElapsed, 1000);
-      }
+      runningStartMsRef.current = null;
+      setRunningElapsedSec(0);
       return;
     }
 
-    if (runningTimerRef.current) {
-      clearInterval(runningTimerRef.current);
-      runningTimerRef.current = null;
+    // 러닝 시작 시각을 고정하고 1초 간격으로 경과 시간을 갱신한다.
+    if (runningStartMsRef.current === null) {
+      runningStartMsRef.current = Date.now();
     }
-    runningStartMsRef.current = null;
-    setRunningElapsedSec(0);
-  }, [isTracking]);
 
-  useEffect(
-    () => () => {
-      if (!runningTimerRef.current) return;
-      clearInterval(runningTimerRef.current);
-      runningTimerRef.current = null;
-    },
-    []
-  );
+    const updateElapsed = () => {
+      if (runningStartMsRef.current === null) return;
+      const elapsed = Math.max(
+        0,
+        Math.floor((Date.now() - runningStartMsRef.current) / 1000)
+      );
+      setRunningElapsedSec(elapsed);
+    };
+
+    updateElapsed();
+    const intervalId = setInterval(updateElapsed, 1000);
+    runningTimerRef.current = intervalId;
+
+    return () => {
+      clearInterval(intervalId);
+      if (runningTimerRef.current === intervalId) {
+        runningTimerRef.current = null;
+      }
+    };
+  }, [isTracking]);
 
   useEffect(() => {
     /**
@@ -871,24 +886,6 @@ export const MainPage = () => {
     );
   }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
 
-  const formatDuration = (durationMs: number) => {
-    const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}분 ${seconds}초`;
-  };
-
-  const formatRunningElapsed = (seconds: number) => {
-    const safeSeconds = Math.max(0, Math.floor(seconds));
-    const hours = Math.floor(safeSeconds / 3600);
-    const minutes = Math.floor((safeSeconds % 3600) / 60);
-    const remainSeconds = safeSeconds % 60;
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0'
-    )}:${String(remainSeconds).padStart(2, '0')}`;
-  };
-
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
    */
@@ -970,7 +967,6 @@ export const MainPage = () => {
             resizeMode='cover'
           >
             <View style={styles.runHud}>
-              <Text style={styles.runTimerLabel}>RUN TIME</Text>
               <Text style={styles.runTimerValue}>
                 {formatRunningElapsed(runningElapsedSec)}
               </Text>
