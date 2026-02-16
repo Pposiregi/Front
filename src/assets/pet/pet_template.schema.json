@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fitpet.local/schemas/pet_template.schema.json",
+  "title": "FitPet Pet Template",
+  "type": "object",
+  "required": ["id", "canvas", "anchors", "parts"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canvas": {
+      "type": "object",
+      "required": ["baseSize"],
+      "properties": {
+        "baseSize": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "anchors": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["x", "y"],
+        "properties": {
+          "x": { "type": "number", "minimum": 0, "maximum": 1 },
+          "y": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "file", "zIndex", "anchor"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "minLength": 1 },
+          "zIndex": { "type": "integer" },
+          "anchor": { "type": "string", "minLength": 1 },
+          "morph": {
+            "type": "object",
+            "properties": {
+              "pbf": {
+                "type": "object",
+                "required": ["range", "scaleX", "scaleY"],
+                "properties": {
+                  "range": {
+                    "type": "object",
+                    "required": ["min", "max"],
+                    "$comment": "Semantic constraint: min must be less than max. Enforced in runtime validator (petTemplate.ts).",
+                    "properties": {
+                      "min": { "type": "number" },
+                      "max": { "type": "number" }
+                    },
+                    "additionalProperties": false
+                  },
+                  "scaleX": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "scaleY": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

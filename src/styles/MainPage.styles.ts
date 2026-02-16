@@ -14,9 +14,10 @@ const START_BUTTON_PADDING_V = Math.max(10, Math.round(SCREEN_HEIGHT * 0.015));
 const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
-
-const PET_WIDTH = SCREEN_WIDTH * 0.45;
-const PET_HEIGHT = PET_WIDTH * 0.6;
+const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
+// Approximation term for font descender/line-box differences in RN text layout.
+const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
+const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
 export default StyleSheet.create({
   loadingContainer: {
@@ -122,12 +123,22 @@ export default StyleSheet.create({
   },
   startButton: {
     position: 'absolute',
-    bottom: BOTTOM_NAV_HEIGHT - 20,
+    bottom: START_BUTTON_BASE_BOTTOM,
     alignSelf: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: START_BUTTON_PADDING_H,
     paddingVertical: START_BUTTON_PADDING_V,
     borderRadius: START_BUTTON_RADIUS,
+  },
+  fatButton: {
+    position: 'absolute',
+    bottom: BOTTOM_NAV_HEIGHT - 16,
+    left: '50%',
+    marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
+    backgroundColor: '#1f2937',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   startText: {
     fontFamily: 'JUA',
@@ -165,20 +176,17 @@ export default StyleSheet.create({
   },
   pet: {
     position: 'absolute',
-    bottom: SCREEN_WIDTH * 0.15,
+    bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
   },
   petImage: {
-    width: PET_WIDTH * 1,
-    height: PET_HEIGHT * 2.5,
+    alignSelf: 'center',
   },
   running_pet: {
     position: 'absolute',
-    bottom: SCREEN_WIDTH * 0.25,
-    width: PET_WIDTH * 2,
-    height: PET_HEIGHT * 2,
-    left: (SCREEN_WIDTH - PET_WIDTH * 2) / 2,
+    bottom: PET_BOTTOM_FROM_START,
+    alignSelf: 'center',
     resizeMode: 'contain',
   },
   countdownOverlay: {
