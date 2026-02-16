@@ -559,13 +559,15 @@ function MealPage() {
       selectedDate.getMonth() + 1
     }월 ${selectedDate.getDate()}일`;
   }, [selectedDate]);
+  const isFutureDate = selectedDateKey > todayKey;
 
   const disableSaveButton =
     isSavingMeal ||
     isMealDetailLoading ||
+    isFutureDate ||
     mealTitle.trim().length === 0 ||
     mealCalories.trim().length === 0;
-  const disableInputs = isSavingMeal || isMealDetailLoading;
+  const disableInputs = isSavingMeal || isMealDetailLoading || isFutureDate;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -738,6 +740,7 @@ function MealPage() {
         onChangeMealCalories={(value) => setMealCalories(value)}
         isLoadingMeals={isMealDetailLoading}
         isSaving={isSavingMeal}
+        isFutureDate={isFutureDate}
         disableSave={disableSaveButton}
         disableInputs={disableInputs}
         deletingMealId={deletingMealId}

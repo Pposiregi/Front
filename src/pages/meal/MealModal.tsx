@@ -56,6 +56,7 @@ function MealModal({
   onChangeMealCalories,
   isLoadingMeals,
   isSaving,
+  isFutureDate,
   disableSave,
   disableInputs,
   deletingMealId,
@@ -211,9 +212,23 @@ function MealModal({
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderSection}>
               <Text style={styles.modalTitle}>{formattedDate}</Text>
-              <Text style={styles.modalSubtitle}>
-                오늘의 식단을 기록해요!
-              </Text>
+              {isFutureDate ? (
+                <View style={styles.modalFutureNoticeBox}>
+                  <View style={styles.modalFutureNoticeIconWrap}>
+                    <Text style={styles.modalFutureNoticeIcon}>!</Text>
+                  </View>
+                  <View style={styles.modalFutureNoticeBody}>
+                    <Text style={styles.modalFutureNoticeTitle}>기록 불가</Text>
+                    <Text style={styles.modalFutureNoticeText}>
+                      미래에 대한 식단은 등록하지 못해요!
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.modalSubtitle}>
+                  오늘의 식단을 기록해요!
+                </Text>
+              )}
             </View>
 
             {photoRowItems.length > 0 ? (
@@ -277,11 +292,11 @@ function MealModal({
                             <TouchableOpacity
                               style={[
                                 styles.modalMealRemoveButton,
-                                (!onDeleteMeal || isDeleting) &&
+                                (!onDeleteMeal || isDeleting || disableInputs) &&
                                   styles.modalMealRemoveButtonDisabled,
                               ]}
                               activeOpacity={0.8}
-                              disabled={!onDeleteMeal || isDeleting}
+                              disabled={!onDeleteMeal || isDeleting || disableInputs}
                               onPress={() => onDeleteMeal?.(meal.mealId)}
                             >
                               {isDeleting ? (
@@ -299,7 +314,7 @@ function MealModal({
                             <TouchableOpacity
                               style={styles.modalMealEditButton}
                               onPress={() => onEditMeal(meal)}
-                              disabled={isUpdatingMeal}
+                              disabled={isUpdatingMeal || disableInputs}
                               activeOpacity={0.8}
                             >
                               <Image
@@ -334,9 +349,11 @@ function MealModal({
                       );
                     })
                   ) : (
-                    <Text style={styles.modalEmptyText}>
-                      등록된 식단이 없어요.
-                    </Text>
+                    !isFutureDate ? (
+                      <Text style={styles.modalEmptyText}>
+                        등록된 식단이 없어요.
+                      </Text>
+                    ) : null
                   )}
                 </ScrollView>
               )}
@@ -357,7 +374,7 @@ function MealModal({
                     placeholder='메뉴 이름 수정'
                     style={styles.modalAddInput}
                     placeholderTextColor='#B4B8C9'
-                    editable={!isUpdatingMeal}
+                    editable={!isUpdatingMeal && !disableInputs}
                   />
                   <TextInput
                     value={editingMealCalories}
@@ -366,13 +383,13 @@ function MealModal({
                     keyboardType='numeric'
                     style={[styles.modalAddInput, styles.modalAddInputCalorie]}
                     placeholderTextColor='#B4B8C9'
-                    editable={!isUpdatingMeal}
+                    editable={!isUpdatingMeal && !disableInputs}
                   />
                   <TouchableOpacity
                     style={styles.modalCameraButton}
                     activeOpacity={0.8}
                     onPress={onPickEditingImage}
-                    disabled={isUpdatingMeal}
+                    disabled={isUpdatingMeal || disableInputs}
                   >
                     <Text style={styles.modalCameraIcon}>📷</Text>
                   </TouchableOpacity>
@@ -381,7 +398,7 @@ function MealModal({
                   <TouchableOpacity
                     style={[styles.modalEditButton, styles.modalEditCancel]}
                     onPress={onCancelEditMeal}
-                    disabled={isUpdatingMeal}
+                    disabled={isUpdatingMeal || disableInputs}
                   >
                     <Text style={styles.modalEditCancelLabel}>취소</Text>
                   </TouchableOpacity>
@@ -389,10 +406,11 @@ function MealModal({
                     style={[
                       styles.modalEditButton,
                       styles.modalEditSubmit,
-                      isUpdatingMeal && styles.modalEditActionDisabled,
+                      (isUpdatingMeal || disableInputs) &&
+                        styles.modalEditActionDisabled,
                     ]}
                     onPress={onSubmitEditMeal}
-                    disabled={isUpdatingMeal}
+                    disabled={isUpdatingMeal || disableInputs}
                   >
                     {isUpdatingMeal ? (
                       <ActivityIndicator color='#FFFFFF' />
