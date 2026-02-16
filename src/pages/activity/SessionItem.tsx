@@ -57,11 +57,11 @@ function SessionItem({ session }: SessionItemProps) {
     )}:${String(seconds).padStart(2, '0')}`;
   }, [session.endTime, session.startTime]);
 
-  const distanceLabel = useMemo(() => {
+  const distanceValue = useMemo(() => {
     // 서버 응답이 null/undefined일 수 있어 UI 표시 직전에 안전하게 보정한다.
     const numericDistance = Number(session.totalDistance);
     const safeDistance = Number.isFinite(numericDistance) ? numericDistance : 0;
-    return `${safeDistance.toFixed(2)} km`;
+    return safeDistance.toFixed(2);
   }, [session.totalDistance]);
 
   const handlePress = () => {
@@ -79,9 +79,18 @@ function SessionItem({ session }: SessionItemProps) {
         <Text style={styles.listMeta}>{durationLabel}</Text>
       </View>
       <View style={styles.listRight}>
-        <Text style={[styles.listValue, styles.listValueAccent]}>
-          {distanceLabel}
-        </Text>
+        <View style={styles.listDistanceRow}>
+          <Text
+            style={[
+              styles.listValue,
+              styles.listValueAccent,
+              styles.listValueNumber,
+            ]}
+          >
+            {distanceValue}
+          </Text>
+          <Text style={styles.listValueUnit}>km</Text>
+        </View>
         <Text style={styles.detailLink}>&gt;</Text>
       </View>
     </TouchableOpacity>
