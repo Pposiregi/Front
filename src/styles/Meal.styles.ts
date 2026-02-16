@@ -429,10 +429,13 @@ export default StyleSheet.create({
     fontSize: Math.max(12, Math.round(SCREEN_WIDTH * 0.034)),
     color: '#9DA2B5',
   },
+  modalPhotoRowScroll: {
+    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
+  },
   modalPhotoRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
+    alignItems: 'center',
+    paddingHorizontal: Math.max(2, Math.round(SCREEN_WIDTH * 0.01)),
   },
   modalPhotoCard: {
     width: MODAL_CARD_SIZE,

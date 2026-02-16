@@ -2,13 +2,13 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  ImageSourcePropType,
   Linking,
   PermissionsAndroid,
   Platform,
@@ -34,6 +34,8 @@ import {
 } from 'react-native-image-picker';
 import { uploadMealImage } from '@api/uploadMealImage';
 import { isAxiosError } from 'axios';
+import mealPlaceholderImage from '@assets/images/meal.png';
+import { isZeroSizedMealImage } from '@utils/imageUtil';
 
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
@@ -80,8 +82,12 @@ function MealPage() {
     useState<PendingMealImage | null>(null);
   const [isUpdatingMeal, setIsUpdatingMeal] = useState(false);
   const [isPermissionChecked, setPermissionChecked] = useState(false);
-  const mealImageFallbacksRef = useRef<Record<string, string>>({});
-  const previousDateKeyRef = useRef<string>(selectedDateKey);
+  const [failedCalendarImageMap, setFailedCalendarImageMap] = useState<
+    Record<string, true>
+  >({});
+  const [zeroSizedCalendarImageMap, setZeroSizedCalendarImageMap] = useState<
+    Record<string, true>
+  >({});
 
   const {
     previewMap: calendarPreview,
@@ -104,41 +110,27 @@ function MealPage() {
     () => buildMonthMatrix(currentMonth, calendarPreview),
     [currentMonth, calendarPreview]
   );
-  const selectedDatePreviewImageUris = useMemo(
-    () => calendarPreview[selectedDateKey]?.imageUrls ?? [],
-    [calendarPreview, selectedDateKey]
+  const calendarImageUris = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          Object.values(calendarPreview)
+            .flatMap((day) => day.imageUrls ?? [])
+            .map((uri) => uri.trim())
+            .filter((uri) => uri.length > 0)
+        )
+      ),
+    [calendarPreview]
   );
 
   const selectedMeals = useMemo<MealListItem[]>(() => {
-    if (previousDateKeyRef.current !== selectedDateKey) {
-      mealImageFallbacksRef.current = {};
-      previousDateKeyRef.current = selectedDateKey;
-    }
     if (!selectedDayDetail?.mealList) {
       return [];
     }
     return [...selectedDayDetail.mealList]
       .sort((a, b) => a.sequence - b.sequence)
-      .map((meal, index) => {
-        const hasImageUri =
-          typeof meal.imageUri === 'string' && meal.imageUri.trim().length > 0;
-        const fallbackPreview = selectedDatePreviewImageUris[index] ?? null;
-        const storedFallback = mealImageFallbacksRef.current[meal.mealId];
-        const resolvedUri = hasImageUri
-          ? meal.imageUri
-          : storedFallback ?? fallbackPreview ?? null;
-
-        if (resolvedUri) {
-          mealImageFallbacksRef.current[meal.mealId] = resolvedUri;
-        }
-
-        return {
-          ...meal,
-          imageUri: resolvedUri,
-          imageSource: resolvedUri ? { uri: resolvedUri } : undefined,
-        };
-      });
-  }, [selectedDayDetail, selectedDatePreviewImageUris, selectedDateKey]);
+      .map((meal) => ({ ...meal }));
+  }, [selectedDayDetail]);
   const selectedDate = useMemo(
     () => parseDateKey(selectedDateKey),
     [selectedDateKey]
@@ -325,6 +317,49 @@ function MealPage() {
     handleCancelEditMeal();
   }, [selectedDateKey, handleCancelEditMeal]);
 
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (calendarImageUris.length === 0) {
+      setZeroSizedCalendarImageMap({});
+      setFailedCalendarImageMap({});
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    void Promise.all(
+      calendarImageUris.map(async (uri) => ({
+        uri,
+        isZeroSized: await isZeroSizedMealImage(uri),
+      }))
+    ).then((results) => {
+      if (isCancelled) {
+        return;
+      }
+
+      const next: Record<string, true> = {};
+      results.forEach(({ uri, isZeroSized }) => {
+        if (isZeroSized) {
+          next[uri] = true;
+        }
+      });
+      setZeroSizedCalendarImageMap(next);
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [calendarImageUris]);
+
+  const markCalendarImageFailed = useCallback((uri: string | null) => {
+    if (!uri) return;
+    setFailedCalendarImageMap((prev) => {
+      if (prev[uri]) return prev;
+      return { ...prev, [uri]: true };
+    });
+  }, []);
+
   /**
    * 식단 저장 핸들러
    * - Backend API를 통한 최초 식단 생성
@@ -446,8 +481,6 @@ function MealPage() {
       });
 
       if (changeImage && editingMealImage?.uri && updateResult.uploadUrl) {
-        mealImageFallbacksRef.current[editingMealInfo.mealId] =
-          editingMealImage.uri;
         await uploadMealImage(updateResult.uploadUrl, {
           uri: editingMealImage.uri,
           mimeType: editingMealImage.type,
@@ -629,20 +662,39 @@ function MealPage() {
                           cell.previewImage.length > 0 ? (
                             cell.previewImage
                               .slice(0, MAX_STACK)
-                              .map((imgSrc, i) => (
-                                <Image
-                                  key={i}
-                                  source={imgSrc}
-                                  style={[
-                                    styles.stackImage,
-                                    {
-                                      left: i * STACK_OFFSET_X,
-                                      zIndex: MAX_STACK - i,
-                                    }, // 살짝씩 오른쪽으로 가도록
-                                  ]}
-                                  resizeMode='cover'
-                                />
-                              ))
+                              .map((imgSrc, i) => {
+                                const uri =
+                                  typeof imgSrc === 'object' &&
+                                  imgSrc !== null &&
+                                  'uri' in imgSrc &&
+                                  typeof imgSrc.uri === 'string'
+                                    ? imgSrc.uri
+                                    : null;
+                                const source: ImageSourcePropType =
+                                  uri &&
+                                  (zeroSizedCalendarImageMap[uri] ||
+                                    failedCalendarImageMap[uri])
+                                    ? mealPlaceholderImage
+                                    : imgSrc;
+
+                                return (
+                                  <Image
+                                    key={i}
+                                    source={source}
+                                    style={[
+                                      styles.stackImage,
+                                      {
+                                        left: i * STACK_OFFSET_X,
+                                        zIndex: MAX_STACK - i,
+                                      }, // 살짝씩 오른쪽으로 가도록
+                                    ]}
+                                    resizeMode='cover'
+                                    onError={() =>
+                                      markCalendarImageFailed(uri)
+                                    }
+                                  />
+                                );
+                              })
                           ) : (
                             <View style={styles.dayPreviewPlaceholder}>
                               <Text style={styles.dayPreviewPlaceholderText}>
