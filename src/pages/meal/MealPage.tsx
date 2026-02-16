@@ -52,6 +52,23 @@ const getNextSequence = (meals: MealListItem[]) => {
   );
 };
 
+const isUnsupportedImageAsset = (asset: {
+  type?: string;
+  fileName?: string;
+}): boolean => {
+  const mimeType = asset.type?.toLowerCase() ?? '';
+  const fileName = asset.fileName?.toLowerCase() ?? '';
+  const hasFileName = fileName.length > 0;
+  const isJpegByMime = mimeType === 'image/jpeg' || mimeType === 'image/jpg';
+  const isJpegByExt = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+
+  if (hasFileName) {
+    return !isJpegByExt;
+  }
+
+  return !isJpegByMime;
+};
+
 /**
  * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드
  *
@@ -241,7 +258,10 @@ function MealPage() {
    * 공통 이미지 선택 헬퍼
    */
   const pickImageFromLibrary = useCallback(
-    (onSelected: (image: PendingMealImage) => void) => {
+    (
+      onSelected: (image: PendingMealImage) => void,
+      onRejected?: () => void
+    ) => {
       const pick = () =>
         launchImageLibrary(
           {
@@ -264,6 +284,14 @@ function MealPage() {
               Alert.alert(
                 '이미지 선택',
                 '선택한 이미지 정보를 읽을 수 없습니다.'
+              );
+              return;
+            }
+            if (isUnsupportedImageAsset(asset)) {
+              onRejected?.();
+              Alert.alert(
+                '이미지 형식 오류',
+                '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
               );
               return;
             }
@@ -295,12 +323,18 @@ function MealPage() {
   );
 
   const handlePickMealImage = useCallback(() => {
-    pickImageFromLibrary((image) => setMealImage(image));
+    pickImageFromLibrary(
+      (image) => setMealImage(image),
+      () => setMealImage(null)
+    );
   }, [pickImageFromLibrary]);
 
   const handlePickEditingMealImage = useCallback(() => {
     if (!editingMealInfo) return;
-    pickImageFromLibrary((image) => setEditingMealImage(image));
+    pickImageFromLibrary(
+      (image) => setEditingMealImage(image),
+      () => setEditingMealImage(null)
+    );
   }, [editingMealInfo, pickImageFromLibrary]);
 
   /**

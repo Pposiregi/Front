@@ -643,15 +643,16 @@ export default StyleSheet.create({
     resizeMode: 'contain',
   },
   modalAddInput: {
-    flex: 1,
     marginLeft: 12,
     fontSize: 13,
     color: '#2E313D',
     paddingVertical: 0,
   },
+  modalAddInputName: {
+    flex: 2,
+  },
   modalAddInputCalorie: {
-    flex: 0,
-    width: 90,
+    flex: 1,
   },
   modalCameraButton: {
     width: 40,

@@ -15,10 +15,7 @@ import styles from '@styles/Meal.styles';
 import modifyIcon from '@assets/images/icon/modify_icon.png';
 import deleteIcon from '@assets/images/icon/delete_icon.png';
 import mealPlaceholderImage from '@assets/images/meal.png';
-import {
-  isZeroSizedMealImage,
-  resolveMealImageSource,
-} from '@utils/imageUtil';
+import { isZeroSizedMealImage, resolveMealImageSource } from '@utils/imageUtil';
 import type { MealModalProps } from './MealModal.types';
 
 /**
@@ -76,8 +73,12 @@ function MealModal({
   editingMealImageUri,
   isUpdatingMeal,
 }: MealModalProps) {
-  const [zeroSizedImageMap, setZeroSizedImageMap] = useState<Record<string, true>>({});
-  const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>({});
+  const [zeroSizedImageMap, setZeroSizedImageMap] = useState<
+    Record<string, true>
+  >({});
+  const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>(
+    {}
+  );
 
   const mealImageUris = useMemo(
     () =>
@@ -174,18 +175,16 @@ function MealModal({
     key: string;
     source: ImageSourcePropType;
     uriForError: string | null;
-  }[] =
-    selectedMeals.map((meal) => {
-      const isEditingTarget = editingMealId === meal.mealId;
-      const mealImageUri =
-        typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
-      return {
-        key: `photo-${meal.mealId}`,
-        source: resolveModalMealImage(meal, isEditingTarget),
-        uriForError:
-          isEditingTarget && editingMealImageUri ? null : mealImageUri,
-      };
-    });
+  }[] = selectedMeals.map((meal) => {
+    const isEditingTarget = editingMealId === meal.mealId;
+    const mealImageUri =
+      typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
+    return {
+      key: `photo-${meal.mealId}`,
+      source: resolveModalMealImage(meal, isEditingTarget),
+      uriForError: isEditingTarget && editingMealImageUri ? null : mealImageUri,
+    };
+  });
 
   if (pendingImageUri) {
     photoRowItems.push({
@@ -292,11 +291,15 @@ function MealModal({
                             <TouchableOpacity
                               style={[
                                 styles.modalMealRemoveButton,
-                                (!onDeleteMeal || isDeleting || disableInputs) &&
+                                (!onDeleteMeal ||
+                                  isDeleting ||
+                                  disableInputs) &&
                                   styles.modalMealRemoveButtonDisabled,
                               ]}
                               activeOpacity={0.8}
-                              disabled={!onDeleteMeal || isDeleting || disableInputs}
+                              disabled={
+                                !onDeleteMeal || isDeleting || disableInputs
+                              }
                               onPress={() => onDeleteMeal?.(meal.mealId)}
                             >
                               {isDeleting ? (
@@ -348,13 +351,11 @@ function MealModal({
                         </View>
                       );
                     })
-                  ) : (
-                    !isFutureDate ? (
-                      <Text style={styles.modalEmptyText}>
-                        등록된 식단이 없어요.
-                      </Text>
-                    ) : null
-                  )}
+                  ) : !isFutureDate ? (
+                    <Text style={styles.modalEmptyText}>
+                      등록된 식단이 없어요.
+                    </Text>
+                  ) : null}
                 </ScrollView>
               )}
               {errorMessage ? (
@@ -366,13 +367,16 @@ function MealModal({
               <>
                 <View style={[styles.modalAddRow, styles.modalEditRow]}>
                   <View style={styles.modalAddIcon}>
-                    <Image source={modifyIcon} style={styles.modalAddEditIcon} />
+                    <Image
+                      source={modifyIcon}
+                      style={styles.modalAddEditIcon}
+                    />
                   </View>
                   <TextInput
                     value={editingMealTitle}
                     onChangeText={onChangeEditingMealTitle}
                     placeholder='메뉴 이름 수정'
-                    style={styles.modalAddInput}
+                    style={[styles.modalAddInput, styles.modalAddInputName]}
                     placeholderTextColor='#B4B8C9'
                     editable={!isUpdatingMeal && !disableInputs}
                   />
@@ -415,9 +419,7 @@ function MealModal({
                     {isUpdatingMeal ? (
                       <ActivityIndicator color='#FFFFFF' />
                     ) : (
-                      <Text style={styles.modalEditSubmitLabel}>
-                        수정 완료
-                      </Text>
+                      <Text style={styles.modalEditSubmitLabel}>수정 완료</Text>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -430,15 +432,15 @@ function MealModal({
                 <TextInput
                   value={mealTitle}
                   onChangeText={onChangeMealTitle}
-                  placeholder='메뉴 이름 입력'
-                  style={styles.modalAddInput}
+                  placeholder='메뉴 이름'
+                  style={[styles.modalAddInput, styles.modalAddInputName]}
                   placeholderTextColor='#B4B8C9'
                   editable={!disableInputs}
                 />
                 <TextInput
                   value={mealCalories}
                   onChangeText={onChangeMealCalories}
-                  placeholder='칼로리 입력'
+                  placeholder='kcal'
                   keyboardType='numeric'
                   style={[styles.modalAddInput, styles.modalAddInputCalorie]}
                   placeholderTextColor='#B4B8C9'
