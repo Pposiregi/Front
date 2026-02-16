@@ -15,6 +15,7 @@ const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
 const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
+const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 // Approximation term for font descender/line-box differences in RN text layout.
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
 const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
@@ -121,6 +122,34 @@ export default StyleSheet.create({
     fontFamily: 'Roboto-VariableFont',
     fontSize: 14,
   },
+  runHud: {
+    alignSelf: 'center',
+    marginTop: Math.max(10, Math.round(SCREEN_HEIGHT * 0.014)),
+    minWidth: Math.max(240, Math.round(SCREEN_WIDTH * 0.68)),
+    paddingHorizontal: Math.max(20, Math.round(SCREEN_WIDTH * 0.06)),
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  runTimerLabel: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#7A3E00',
+    letterSpacing: 0.8,
+    textShadowColor: 'rgba(255, 255, 255, 0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  runTimerValue: {
+    marginTop: 3,
+    fontFamily: 'JUA',
+    fontSize: Math.max(44, Math.round(SCREEN_WIDTH * 0.12)),
+    color: '#2E313D',
+    letterSpacing: 1.2,
+    textShadowColor: 'rgba(255, 255, 255, 0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
   startButton: {
     position: 'absolute',
     bottom: START_BUTTON_BASE_BOTTOM,
@@ -139,6 +168,24 @@ export default StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
+  },
+  runningLockNotice: {
+    position: 'absolute',
+    right: 12,
+    bottom: RUN_LOCK_NOTICE_BOTTOM,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: 'rgba(254, 194, 136, 0.35)',
+    borderWidth: 1,
+    borderColor: 'rgba(254, 194, 136, 0.62)',
+  },
+  runningLockNoticeText: {
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#7A3E00',
+    letterSpacing: 0.2,
   },
   startText: {
     fontFamily: 'JUA',
