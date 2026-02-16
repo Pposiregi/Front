@@ -3,8 +3,18 @@ import type { ImageSourcePropType } from 'react-native';
 
 import mealPlaceholderImage from '@assets/images/meal.png';
 
+const ZERO_SIZED_CACHE_LIMIT = 300;
 const zeroSizedImageCache = new Map<string, boolean>();
 const zeroSizedImagePending = new Map<string, Promise<boolean>>();
+
+const setZeroSizedCache = (uri: string, isZero: boolean) => {
+  zeroSizedImageCache.set(uri, isZero);
+  if (zeroSizedImageCache.size <= ZERO_SIZED_CACHE_LIMIT) return;
+  const oldestKey = zeroSizedImageCache.keys().next().value;
+  if (oldestKey) {
+    zeroSizedImageCache.delete(oldestKey);
+  }
+};
 
 const parseHeaderNumber = (value: string | null): number | null => {
   if (!value) return null;
@@ -78,17 +88,17 @@ export const isZeroSizedMealImage = async (uri: string): Promise<boolean> => {
     const sizeByHead = await getSizeByHead(normalizedUri);
     if (sizeByHead !== null) {
       const isZero = sizeByHead === 0;
-      zeroSizedImageCache.set(normalizedUri, isZero);
+      setZeroSizedCache(normalizedUri, isZero);
       return isZero;
     }
 
     const sizeByRange = await getSizeByRangeRequest(normalizedUri);
     if (sizeByRange === null) {
-      zeroSizedImageCache.set(normalizedUri, false);
+      setZeroSizedCache(normalizedUri, false);
       return false;
     }
     const isZero = sizeByRange === 0;
-    zeroSizedImageCache.set(normalizedUri, isZero);
+    setZeroSizedCache(normalizedUri, isZero);
     return isZero;
   })().finally(() => {
     zeroSizedImagePending.delete(normalizedUri);

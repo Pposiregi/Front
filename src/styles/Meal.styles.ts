@@ -493,6 +493,8 @@ export default StyleSheet.create({
   },
   modalMealList: {
     marginTop: 4,
+    // 외부 컨테이너와 ScrollView 둘 다 maxHeight를 둬 iOS/Android에서
+    // 스크롤 영역이 의도보다 늘어나는 케이스를 방지한다.
     maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
     flexShrink: 1,
   },
@@ -563,7 +565,6 @@ export default StyleSheet.create({
   modalMealRemoveIcon: {
     width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
     height: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
-    resizeMode: 'contain',
   },
   modalMealRowContent: {
     flex: 1,
@@ -598,7 +599,6 @@ export default StyleSheet.create({
   modalMealEditIcon: {
     width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
     height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
-    resizeMode: 'contain',
   },
   modalMealEditLabel: {
     fontFamily: 'JUA',
@@ -640,7 +640,6 @@ export default StyleSheet.create({
   modalAddEditIcon: {
     width: 32,
     height: 32,
-    resizeMode: 'contain',
   },
   modalAddInput: {
     marginLeft: 12,

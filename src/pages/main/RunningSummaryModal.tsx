@@ -44,6 +44,8 @@ const RunningSummaryModal = ({
       animationType='fade'
       transparent
       visible={visible}
+      statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={onClose}
     >
       <View style={styles.missionView}>

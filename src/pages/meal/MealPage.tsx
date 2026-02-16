@@ -356,11 +356,20 @@ function MealPage() {
 
     if (calendarImageUris.length === 0) {
       setZeroSizedCalendarImageMap({});
-      setFailedCalendarImageMap({});
       return () => {
         isCancelled = true;
       };
     }
+
+    setFailedCalendarImageMap((prev) => {
+      const next: Record<string, true> = {};
+      calendarImageUris.forEach((uri) => {
+        if (prev[uri]) {
+          next[uri] = true;
+        }
+      });
+      return next;
+    });
 
     void Promise.all(
       calendarImageUris.map(async (uri) => ({
@@ -715,7 +724,7 @@ function MealPage() {
 
                                 return (
                                   <Image
-                                    key={i}
+                                    key={uri ?? `placeholder-${i}`}
                                     source={source}
                                     style={[
                                       styles.stackImage,

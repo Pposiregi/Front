@@ -42,7 +42,7 @@ export const mockSessionMetadata: Record<
     totalDistance: 6.5,
     // m/s
     avgSpeedMps: 1.25,
-    avgSpeedKmh: 0.02,
+    avgSpeedKmh: 4.5,
     stepCount: 8900,
     burnCalories: 246,
   },
@@ -52,7 +52,7 @@ export const mockSessionMetadata: Record<
     totalDistance: 4.8,
     // m/s
     avgSpeedMps: 0.89,
-    avgSpeedKmh: 0.08,
+    avgSpeedKmh: 3.2,
     stepCount: 6100,
     burnCalories: 180,
   },

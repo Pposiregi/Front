@@ -65,6 +65,9 @@ const HEAD_PART_KEYS = [
   'beard_rightUp',
   'neckRuff',
 ] as const;
+const toMutableRange = <T extends string | number>(
+  values: readonly [T, T, T]
+): T[] => [...values];
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -359,61 +362,63 @@ export const MainPage = () => {
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 2;
+    // Animated.interpolate 타입은 readonly 튜플 대신 mutable 배열을 요구한다.
+    const phase = toMutableRange(PET_RUN_MOTION.phase);
     const limbLeftX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.limbLeftX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.limbLeftX),
     });
     const limbRightX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.limbRightX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.limbRightX),
     });
     const torsoX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.torsoX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.torsoX),
     });
     const torsoY = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.torsoY,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.torsoY),
     });
     const faceX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.faceX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.faceX),
     });
     const faceY = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.faceY,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.faceY),
     });
     const armLeftRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.armLeftRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.armLeftRotate),
     });
     const armRightRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.armRightRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.armRightRotate),
     });
     const legLeftRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.legLeftRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.legLeftRotate),
     });
     const legRightRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.legRightRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.legRightRotate),
     });
     const tailRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.tailRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.tailRotate),
     });
     const tailX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.tailX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.tailX),
     });
     const neckRuffX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.neckRuffX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffX),
     });
     const neckRuffRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.neckRuffRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffRotate),
     });
 
     return {

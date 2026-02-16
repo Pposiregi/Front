@@ -158,6 +158,9 @@ function MealModal({
     meal: MealModalProps['selectedMeals'][number],
     isEditingTarget: boolean
   ): ImageSourcePropType => {
+    // 모달 전용 래퍼:
+    // 1) 편집 중 임시 이미지 우선, 2) 0byte/로드 실패 이미지는 placeholder 치환,
+    // 3) 그 외 기본 resolveMealImageSource로 위임.
     if (isEditingTarget && editingMealImageUri) {
       return { uri: editingMealImageUri };
     }
@@ -311,6 +314,7 @@ function MealModal({
                                 <Image
                                   source={deleteIcon}
                                   style={styles.modalMealRemoveIcon}
+                                  resizeMode='contain'
                                 />
                               )}
                             </TouchableOpacity>
@@ -323,6 +327,7 @@ function MealModal({
                               <Image
                                 source={modifyIcon}
                                 style={styles.modalMealEditIcon}
+                                resizeMode='contain'
                               />
                             </TouchableOpacity>
                           </View>
@@ -370,6 +375,7 @@ function MealModal({
                     <Image
                       source={modifyIcon}
                       style={styles.modalAddEditIcon}
+                      resizeMode='contain'
                     />
                   </View>
                   <TextInput
