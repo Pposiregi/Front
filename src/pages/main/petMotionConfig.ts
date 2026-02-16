@@ -6,20 +6,38 @@ export const FAT_MORPH_FOLLOW_RATIOS = {
   tail: 0.012,
 } as const;
 
-export const PET_RUN_MOTION = {
-  phase: [0, 0.5, 1] as const,
-  limbLeftX: [-10, 10, -10] as const,
-  limbRightX: [10, -10, 10] as const,
-  torsoX: [-2, 2, -2] as const,
-  torsoY: [0, -1.5, 0] as const,
-  faceX: [-3, 3, -3] as const,
-  faceY: [0, -1, 0] as const,
-  armLeftRotate: ['-10deg', '10deg', '-10deg'] as const,
-  armRightRotate: ['10deg', '-10deg', '10deg'] as const,
-  legLeftRotate: ['18deg', '-18deg', '18deg'] as const,
-  legRightRotate: ['-18deg', '18deg', '-18deg'] as const,
-  tailRotate: ['-14deg', '14deg', '-14deg'] as const,
-  tailX: [-1.5, 1.5, -1.5] as const,
-  neckRuffX: [-2, 2, -2] as const,
-  neckRuffRotate: ['-2deg', '2deg', '-2deg'] as const,
-} as const;
+type PetRunMotionConfig = {
+  phase: number[];
+  limbLeftX: number[];
+  limbRightX: number[];
+  torsoX: number[];
+  torsoY: number[];
+  faceX: number[];
+  faceY: number[];
+  armLeftRotate: string[];
+  armRightRotate: string[];
+  legLeftRotate: string[];
+  legRightRotate: string[];
+  tailRotate: string[];
+  tailX: number[];
+  neckRuffX: number[];
+  neckRuffRotate: string[];
+};
+
+export const PET_RUN_MOTION: PetRunMotionConfig = {
+  phase: [0, 0.5, 1],
+  limbLeftX: [-10, 10, -10],
+  limbRightX: [10, -10, 10],
+  torsoX: [-2, 2, -2],
+  torsoY: [0, -1.5, 0],
+  faceX: [-3, 3, -3],
+  faceY: [0, -1, 0],
+  armLeftRotate: ['-10deg', '10deg', '-10deg'],
+  armRightRotate: ['10deg', '-10deg', '10deg'],
+  legLeftRotate: ['18deg', '-18deg', '18deg'],
+  legRightRotate: ['-18deg', '18deg', '-18deg'],
+  tailRotate: ['-14deg', '14deg', '-14deg'],
+  tailX: [-1.5, 1.5, -1.5],
+  neckRuffX: [-2, 2, -2],
+  neckRuffRotate: ['-2deg', '2deg', '-2deg'],
+};

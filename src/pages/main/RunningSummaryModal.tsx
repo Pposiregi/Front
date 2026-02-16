@@ -7,7 +7,7 @@ type RunningSummaryModalProps = {
   onClose: () => void;
   durationText: string;
   stepCount: number;
-  avgSpeedKmh: number;
+  avgSpeedMps: number;
   stepCountMissing?: boolean;
 };
 
@@ -16,7 +16,7 @@ const RunningSummaryModal = ({
   onClose,
   durationText,
   stepCount,
-  avgSpeedKmh,
+  avgSpeedMps,
   stepCountMissing = false,
 }: RunningSummaryModalProps) => {
   return (
@@ -52,7 +52,7 @@ const RunningSummaryModal = ({
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>평균 속도</Text>
               <Text style={styles.summaryValue}>
-                {avgSpeedKmh.toFixed(1)} km/h
+                {avgSpeedMps.toFixed(2)} m/s
               </Text>
             </View>
           </View>

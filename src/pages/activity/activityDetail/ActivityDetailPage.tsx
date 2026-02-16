@@ -234,7 +234,12 @@ const ActivityDetailPage = () => {
 
   // 숫자 필드는 null/undefined가 내려올 수 있어 렌더 전에 안전하게 정규화한다.
   const totalDistanceValue = toFiniteNumber(detailData.totalDistance) ?? 0;
-  const avgSpeedKmhValue = toFiniteNumber(detailData.avgSpeedKmh) ?? 0;
+  // backend는 평균 속도를 m/s로 반환한다.
+  // 필드명 전환 구간을 고려해 avgSpeedMps -> avgSpeedKmh 순으로 호환한다.
+  const avgSpeedMpsValue =
+    toFiniteNumber(detailData.avgSpeedMps) ??
+    toFiniteNumber(detailData.avgSpeedKmh) ??
+    0;
   const stepCountValue = Math.max(
     0,
     Math.trunc(toFiniteNumber(detailData.stepCount) ?? 0)
@@ -335,7 +340,7 @@ const ActivityDetailPage = () => {
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>평균 속도</Text>
             <Text style={styles.specValue}>
-              {avgSpeedKmhValue.toFixed(2)} km/h
+              {avgSpeedMpsValue.toFixed(2)} m/s
             </Text>
           </View>
           <View style={styles.specRow}>

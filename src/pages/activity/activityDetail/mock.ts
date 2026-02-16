@@ -40,7 +40,9 @@ export const mockSessionMetadata: Record<
     startTime: '2026-01-09T08:30:00.000Z',
     endTime: '2026-01-09T11:00:17.000Z',
     totalDistance: 6.5,
-    avgSpeedKmh: 4.5,
+    // m/s
+    avgSpeedMps: 1.25,
+    avgSpeedKmh: 0.02,
     stepCount: 8900,
     burnCalories: 246,
   },
@@ -48,7 +50,9 @@ export const mockSessionMetadata: Record<
     startTime: '2026-01-09T19:30:00.000Z',
     endTime: '2026-01-09T21:00:00.000Z',
     totalDistance: 4.8,
-    avgSpeedKmh: 3.2,
+    // m/s
+    avgSpeedMps: 0.89,
+    avgSpeedKmh: 0.08,
     stepCount: 6100,
     burnCalories: 180,
   },

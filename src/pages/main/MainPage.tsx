@@ -531,7 +531,6 @@ export const MainPage = () => {
     });
   }, []);
 
-
   /**
    * Running 시작/종료 핸들러
    * - isTracking이 true면 러닝 종료를 시도하되,
@@ -947,7 +946,7 @@ export const MainPage = () => {
               runSummary ? formatDuration(runSummary.durationMs) : '0분 0초'
             }
             stepCount={runSummary?.stepCount ?? 0}
-            avgSpeedKmh={runSummary?.avgSpeedKmh ?? 0}
+            avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
             stepCountMissing={runSummary?.stepCountMissing}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
@@ -1009,7 +1008,9 @@ export const MainPage = () => {
           style={styles.fatButton}
           onPress={handleToggleFatVer}
           accessibilityRole='button'
-          accessibilityLabel={`체형 테스트 pbf ${selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]}`}
+          accessibilityLabel={`체형 테스트 pbf ${
+            selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
+          }`}
         >
           <Text style={styles.devHealthButtonText}>
             {selectedPreviewPbf == null

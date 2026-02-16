@@ -87,7 +87,7 @@ export type GpsSessionSummary = {
   durationMs: number;
   stepCount: number;
   distanceMeters: number;
-  avgSpeedKmh: number;
+  avgSpeedMps: number;
   stepCountMissing?: boolean;
 };
 
@@ -315,8 +315,8 @@ export const useGpsSession = (): UseGpsSessionResult => {
         endTime.getTime() - startTimeValue.getTime()
       );
       const distance = calculateTotalDistanceMeters(path);
-      const avgSpeedKmh =
-        durationMs > 0 ? (distance / durationMs) * 3600 : 0;
+      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
+      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
       let stepCount = 0;
       let stepCountMissing = false;
       if (options?.forceNoSteps) {
@@ -347,7 +347,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
         durationMs,
         stepCount,
         distanceMeters: distance,
-        avgSpeedKmh,
+        avgSpeedMps,
         stepCountMissing,
       };
 
