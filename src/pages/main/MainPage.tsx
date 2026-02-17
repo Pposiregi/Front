@@ -71,8 +71,12 @@ const toMutableRange = <T extends string | number>(
 
 const formatDuration = (durationMs: number) => {
   const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
+  if (hours > 0) {
+    return `${hours}시간 ${minutes}분 ${seconds}초`;
+  }
   return `${minutes}분 ${seconds}초`;
 };
 
@@ -200,7 +204,6 @@ export const MainPage = () => {
 
   const mapRef = useRef<MapView | null>(null);
   const runningStartMsRef = useRef<number | null>(null);
-  const runningTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
@@ -209,12 +212,16 @@ export const MainPage = () => {
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
   useEffect(() => {
-    // 러닝 중 여부를 전역 상태로 동기화하고, unmount 시 안전하게 해제한다.
+    // 러닝 중 여부를 전역 상태로 동기화한다.
     dispatch(userSlice.actions.setRunningActive(isTracking));
+  }, [dispatch, isTracking]);
+
+  useEffect(() => {
+    // MainPage를 벗어날 때 전역 러닝 플래그를 안전하게 해제한다.
     return () => {
       dispatch(userSlice.actions.setRunningActive(false));
     };
-  }, [dispatch, isTracking]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isTracking) {
@@ -239,13 +246,9 @@ export const MainPage = () => {
 
     updateElapsed();
     const intervalId = setInterval(updateElapsed, 1000);
-    runningTimerRef.current = intervalId;
 
     return () => {
       clearInterval(intervalId);
-      if (runningTimerRef.current === intervalId) {
-        runningTimerRef.current = null;
-      }
     };
   }, [isTracking]);
 

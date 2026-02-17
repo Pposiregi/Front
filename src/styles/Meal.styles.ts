@@ -664,6 +664,9 @@ export default StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 12,
   },
+  modalCameraButtonDisabled: {
+    opacity: 0.5,
+  },
   modalCameraIcon: {
     fontSize: 18,
     color: '#9DA3BB',
@@ -729,6 +732,9 @@ export default StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     ...baseShadow,
+  },
+  modalPrimaryButtonDisabled: {
+    opacity: 0.6,
   },
   modalPrimaryButtonLabel: {
     fontFamily: 'JUA',

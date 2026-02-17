@@ -149,8 +149,8 @@ function MealModal({
         return;
       }
       console.warn('>>> [MealModal] zero-sized 이미지 확인 실패', error);
-      // 실패 시 안전한 기본값으로 초기화해 stale 상태를 남기지 않는다.
-      setZeroSizedImageMap({});
+      // 실패 시 기존 캐시를 유지해 불필요한 이미지 재시도를 줄인다.
+      setZeroSizedImageMap((prev) => prev);
     });
 
     return () => {
@@ -170,48 +170,64 @@ function MealModal({
     });
   }, []);
 
-  const resolveModalMealImage = (
-    meal: MealModalProps['selectedMeals'][number],
-    isEditingTarget: boolean
-  ): ImageSourcePropType => {
-    // 모달 전용 래퍼:
-    // 1) 편집 중 임시 이미지 우선, 2) 0byte/로드 실패 이미지는 placeholder 치환,
-    // 3) 그 외 기본 resolveMealImageSource로 위임.
-    if (isEditingTarget && editingMealImageUri) {
-      return { uri: editingMealImageUri };
-    }
+  const resolveModalMealImage = useCallback(
+    (
+      meal: MealModalProps['selectedMeals'][number],
+      isEditingTarget: boolean
+    ): ImageSourcePropType => {
+      // 모달 전용 래퍼:
+      // 1) 편집 중 임시 이미지 우선, 2) 0byte/로드 실패 이미지는 placeholder 치환,
+      // 3) 그 외 기본 resolveMealImageSource로 위임.
+      if (isEditingTarget && editingMealImageUri) {
+        return { uri: editingMealImageUri };
+      }
 
-    const imageUri =
-      typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
-    if (imageUri && (zeroSizedImageMap[imageUri] || failedImageMap[imageUri])) {
-      return mealPlaceholderImage;
-    }
+      const imageUri =
+        typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
+      if (
+        imageUri &&
+        (zeroSizedImageMap[imageUri] || failedImageMap[imageUri])
+      ) {
+        return mealPlaceholderImage;
+      }
 
-    return resolveMealImageSource(meal);
-  };
+      return resolveMealImageSource(meal);
+    },
+    [editingMealImageUri, failedImageMap, zeroSizedImageMap]
+  );
 
   const photoRowItems: {
     key: string;
     source: ImageSourcePropType;
     uriForError: string | null;
-  }[] = selectedMeals.map((meal) => {
-    const isEditingTarget = editingMealId === meal.mealId;
-    const mealImageUri =
-      typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
-    return {
-      key: `photo-${meal.mealId}`,
-      source: resolveModalMealImage(meal, isEditingTarget),
-      uriForError: isEditingTarget && editingMealImageUri ? null : mealImageUri,
-    };
-  });
-
-  if (pendingImageUri) {
-    photoRowItems.push({
-      key: 'pending',
-      source: { uri: pendingImageUri },
-      uriForError: null,
+  }[] = useMemo(() => {
+    const items = selectedMeals.map((meal) => {
+      const isEditingTarget = editingMealId === meal.mealId;
+      const mealImageUri =
+        typeof meal.imageUri === 'string' ? meal.imageUri.trim() : null;
+      return {
+        key: `photo-${meal.mealId}`,
+        source: resolveModalMealImage(meal, isEditingTarget),
+        uriForError: isEditingTarget && editingMealImageUri ? null : mealImageUri,
+      };
     });
-  }
+
+    if (pendingImageUri) {
+      items.push({
+        key: 'pending',
+        source: { uri: pendingImageUri },
+        uriForError: null,
+      });
+    }
+
+    return items;
+  }, [
+    editingMealId,
+    editingMealImageUri,
+    pendingImageUri,
+    resolveModalMealImage,
+    selectedMeals,
+  ]);
 
   return (
     <Modal
@@ -471,7 +487,7 @@ function MealModal({
                 <TouchableOpacity
                   style={[
                     styles.modalCameraButton,
-                    disableInputs ? { opacity: 0.5 } : null,
+                    disableInputs ? styles.modalCameraButtonDisabled : null,
                   ]}
                   activeOpacity={0.8}
                   onPress={onPickImage}
@@ -492,7 +508,7 @@ function MealModal({
             <TouchableOpacity
               style={[
                 styles.modalPrimaryButton,
-                (disableSave || isSaving) && { opacity: 0.6 },
+                (disableSave || isSaving) && styles.modalPrimaryButtonDisabled,
               ]}
               activeOpacity={0.85}
               onPress={onSave}
