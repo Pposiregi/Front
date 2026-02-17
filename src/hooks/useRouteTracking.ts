@@ -6,7 +6,7 @@ import {
   type Permission,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import type { LatLng, MapRegion } from '@shared-types/location';
+import type { LatLng, MapRegion } from '@shared/types/location';
 import { getDistanceMeters } from '@utils/distance';
 
 // 초기 지도 위치 (서울 시청 근방) — 실제 위치를 받으면 곧바로 덮어쓴다.

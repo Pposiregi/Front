@@ -4,6 +4,27 @@ export const FAT_MORPH_FOLLOW_RATIOS = {
   tail: 0.012,
 } as const;
 
+type NumberPhase = readonly [number, number, number];
+type DegreePhase = readonly [string, string, string];
+
+type PetRunMotionConfig = {
+  phase: NumberPhase;
+  limbLeftX: NumberPhase;
+  limbRightX: NumberPhase;
+  torsoX: NumberPhase;
+  torsoY: NumberPhase;
+  faceX: NumberPhase;
+  faceY: NumberPhase;
+  armLeftRotate: DegreePhase;
+  armRightRotate: DegreePhase;
+  legLeftRotate: DegreePhase;
+  legRightRotate: DegreePhase;
+  tailRotate: DegreePhase;
+  tailX: NumberPhase;
+  neckRuffX: NumberPhase;
+  neckRuffRotate: DegreePhase;
+};
+
 export const PET_RUN_MOTION = {
   phase: [0, 0.5, 1] as const,
   limbLeftX: [-5, 5, -5] as const,
@@ -20,4 +41,4 @@ export const PET_RUN_MOTION = {
   tailX: [-1, 1, -1] as const,
   neckRuffX: [-1, 1, -1] as const,
   neckRuffRotate: ['-1.5deg', '1.5deg', '-1.5deg'] as const,
-} as const;
+} as const satisfies PetRunMotionConfig;

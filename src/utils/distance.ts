@@ -1,4 +1,4 @@
-import type { LatLng } from '@shared-types/location';
+import type { LatLng } from '@shared/types/location';
 
 /**
  * 두 좌표 간 거리를 하버사인 공식으로 계산 (미터)

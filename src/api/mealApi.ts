@@ -91,6 +91,7 @@ type LegacyMealCalendarDayDetail = {
   meal_id?: string | number;
   image_uri?: string | null;
   image_url?: string | null;
+  imageUrl?: string | null;
   image_updated_at?: number;
 };
 
@@ -105,7 +106,7 @@ const normalizeMealDetailItem = (
   item: MealCalendarDayDetail & LegacyMealCalendarDayDetail
 ): MealDetailItem => {
   const rawUri =
-    [item.imageUri, item.image_uri, item.image_url].find(
+    [item.imageUri, item.imageUrl, item.image_uri, item.image_url].find(
       (uri) => typeof uri === 'string' && uri.trim().length > 0
     ) ?? null;
 

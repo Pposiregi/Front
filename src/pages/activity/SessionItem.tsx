@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useMemo } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '@styles/Activity.styles';
+import { formatDistanceFromMeters } from '@utils/distanceFormat';
 import type {
   ActivityDetailNavigationProp,
   GPS_SESSION,
@@ -59,9 +60,10 @@ function SessionItem({ session }: SessionItemProps) {
 
   const distanceLabel = useMemo(() => {
     // 서버 응답이 null/undefined일 수 있어 UI 표시 직전에 안전하게 보정한다.
+    // 러닝별 세션 totalDistance는 meter 기준 응답을 가정한다.
     const numericDistance = Number(session.totalDistance);
     const safeDistance = Number.isFinite(numericDistance) ? numericDistance : 0;
-    return `${safeDistance.toFixed(2)} km`;
+    return formatDistanceFromMeters(safeDistance);
   }, [session.totalDistance]);
 
   const handlePress = () => {
@@ -79,9 +81,18 @@ function SessionItem({ session }: SessionItemProps) {
         <Text style={styles.listMeta}>{durationLabel}</Text>
       </View>
       <View style={styles.listRight}>
-        <Text style={[styles.listValue, styles.listValueAccent]}>
-          {distanceLabel}
-        </Text>
+        <View style={styles.listDistanceRow}>
+          <Text
+            style={[
+              styles.listValue,
+              styles.listValueAccent,
+              styles.listValueNumber,
+            ]}
+          >
+            {distanceLabel.value}
+          </Text>
+          <Text style={styles.listValueUnit}>{distanceLabel.unit}</Text>
+        </View>
         <Text style={styles.detailLink}>&gt;</Text>
       </View>
     </TouchableOpacity>
