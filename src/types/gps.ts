@@ -17,6 +17,7 @@ export type GpsSessionStartResponse = {
 /**
  * /gps/log 요청 payload
  * - speed/altitude는 현재 확보 가능할 때만 optional로 전달
+ * - speed 단위: km/h
  */
 export type GpsLogRequest = {
   sessionId: number;

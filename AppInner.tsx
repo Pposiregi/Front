@@ -14,7 +14,7 @@ import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
@@ -86,7 +86,6 @@ const createTabBarIcon =
  */
 const getTabScreenOptions = (routeName: TabIconKey) => ({
   headerShown: false,
-  tabBarStyle: styles.tabBar,
   tabBarItemStyle: styles.tabBarItem,
   tabBarIcon: createTabBarIcon(routeName),
   tabBarShowLabel: false,
@@ -158,6 +157,9 @@ function AppInner() {
   );
   const isSignUpInProgress = useSelector(
     (state: RootState) => state.user.isSignUpInProgress
+  );
+  const isRunningActive = useSelector(
+    (state: RootState) => state.user.isRunningActive
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
@@ -370,9 +372,25 @@ function AppInner() {
           // 회원가입이 완료되었을 때 -> 메인 화면으로 이동
           <Tab.Navigator
             initialRouteName='Main'
-            screenOptions={({ route }) =>
-              getTabScreenOptions(route.name as TabIconKey)
-            }
+            screenOptions={({ route }) => ({
+              ...getTabScreenOptions(route.name as TabIconKey),
+              tabBarStyle: [
+                styles.tabBar,
+                isRunningActive ? styles.tabBarLocked : null,
+              ],
+            })}
+            screenListeners={({ route }) => ({
+              tabPress: (event) => {
+                // 러닝 중에는 메인 탭 이외의 하단 탭 전환을 막는다.
+                if (isRunningActive && route.name !== 'Main') {
+                  event.preventDefault();
+                  Alert.alert(
+                    '러닝 진행 중',
+                    '러닝이 끝날 때까지 다른 화면으로 이동할 수 없어요.'
+                  );
+                }
+              },
+            })}
           >
             <Tab.Screen name='Activity' component={ActivityStack} />
             <Tab.Screen name='Meal' component={Meal} />
@@ -414,6 +432,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 0.5,
     borderTopColor: '#e5e7eb',
+  },
+  tabBarLocked: {
+    backgroundColor: '#D1D5DB',
+    borderTopColor: '#9CA3AF',
   },
   tabBarItem: {
     justifyContent: 'center',

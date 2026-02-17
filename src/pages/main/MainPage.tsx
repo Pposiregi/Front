@@ -65,6 +65,31 @@ const HEAD_PART_KEYS = [
   'beard_rightUp',
   'neckRuff',
 ] as const;
+const toMutableRange = <T extends string | number>(
+  values: readonly [T, T, T]
+): T[] => [...values];
+
+const formatDuration = (durationMs: number) => {
+  const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) {
+    return `${hours}시간 ${minutes}분 ${seconds}초`;
+  }
+  return `${minutes}분 ${seconds}초`;
+};
+
+const formatRunningElapsed = (seconds: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const remainSeconds = safeSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+    2,
+    '0'
+  )}:${String(remainSeconds).padStart(2, '0')}`;
+};
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
@@ -163,6 +188,7 @@ export const MainPage = () => {
   const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
+  const [runningElapsedSec, setRunningElapsedSec] = useState(0);
   const isAndroid13OrLower =
     Platform.OS === 'android' &&
     Number(Platform.Version) > 0 &&
@@ -177,12 +203,54 @@ export const MainPage = () => {
   }, []);
 
   const mapRef = useRef<MapView | null>(null);
+  const runningStartMsRef = useRef<number | null>(null);
   const [showBodyPrompt, setShowBodyPrompt] = useState(false);
   const [savingBodyHistory, setSavingBodyHistory] = useState(false);
   const [bodyGoals, setBodyGoals] = useState<BodyGoals>({});
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+
+  useEffect(() => {
+    // 러닝 중 여부를 전역 상태로 동기화한다.
+    dispatch(userSlice.actions.setRunningActive(isTracking));
+  }, [dispatch, isTracking]);
+
+  useEffect(() => {
+    // MainPage를 벗어날 때 전역 러닝 플래그를 안전하게 해제한다.
+    return () => {
+      dispatch(userSlice.actions.setRunningActive(false));
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!isTracking) {
+      runningStartMsRef.current = null;
+      setRunningElapsedSec(0);
+      return;
+    }
+
+    // 러닝 시작 시각을 고정하고 1초 간격으로 경과 시간을 갱신한다.
+    if (runningStartMsRef.current === null) {
+      runningStartMsRef.current = Date.now();
+    }
+
+    const updateElapsed = () => {
+      if (runningStartMsRef.current === null) return;
+      const elapsed = Math.max(
+        0,
+        Math.floor((Date.now() - runningStartMsRef.current) / 1000)
+      );
+      setRunningElapsedSec(elapsed);
+    };
+
+    updateElapsed();
+    const intervalId = setInterval(updateElapsed, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isTracking]);
 
   useEffect(() => {
     /**
@@ -359,61 +427,63 @@ export const MainPage = () => {
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 2;
+    // Animated.interpolate 타입은 readonly 튜플 대신 mutable 배열을 요구한다.
+    const phase = toMutableRange(PET_RUN_MOTION.phase);
     const limbLeftX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.limbLeftX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.limbLeftX),
     });
     const limbRightX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.limbRightX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.limbRightX),
     });
     const torsoX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.torsoX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.torsoX),
     });
     const torsoY = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.torsoY,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.torsoY),
     });
     const faceX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.faceX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.faceX),
     });
     const faceY = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.faceY,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.faceY),
     });
     const armLeftRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.armLeftRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.armLeftRotate),
     });
     const armRightRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.armRightRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.armRightRotate),
     });
     const legLeftRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.legLeftRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.legLeftRotate),
     });
     const legRightRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.legRightRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.legRightRotate),
     });
     const tailRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.tailRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.tailRotate),
     });
     const tailX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.tailX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.tailX),
     });
     const neckRuffX = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.neckRuffX,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffX),
     });
     const neckRuffRotate = runCycleProgress.interpolate({
-      inputRange: PET_RUN_MOTION.phase,
-      outputRange: PET_RUN_MOTION.neckRuffRotate,
+      inputRange: phase,
+      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffRotate),
     });
 
     return {
@@ -530,7 +600,6 @@ export const MainPage = () => {
       return prev + 1;
     });
   }, []);
-
 
   /**
    * Running 시작/종료 핸들러
@@ -812,13 +881,6 @@ export const MainPage = () => {
     );
   }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
 
-  const formatDuration = (durationMs: number) => {
-    const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}분 ${seconds}초`;
-  };
-
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
    */
@@ -899,6 +961,11 @@ export const MainPage = () => {
             style={styles.mainBackground}
             resizeMode='cover'
           >
+            <View style={styles.runHud}>
+              <Text style={styles.runTimerValue}>
+                {formatRunningElapsed(runningElapsedSec)}
+              </Text>
+            </View>
             <PetRenderer
               size={PET_RENDER_SIZE}
               templateId='browncat_v1_run'
@@ -946,8 +1013,9 @@ export const MainPage = () => {
             durationText={
               runSummary ? formatDuration(runSummary.durationMs) : '0분 0초'
             }
+            distanceMeters={runSummary?.distanceMeters ?? 0}
             stepCount={runSummary?.stepCount ?? 0}
-            avgSpeedKmh={runSummary?.avgSpeedKmh ?? 0}
+            avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
             stepCountMissing={runSummary?.stepCountMissing}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
@@ -1009,7 +1077,9 @@ export const MainPage = () => {
           style={styles.fatButton}
           onPress={handleToggleFatVer}
           accessibilityRole='button'
-          accessibilityLabel={`체형 테스트 pbf ${selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]}`}
+          accessibilityLabel={`체형 테스트 pbf ${
+            selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
+          }`}
         >
           <Text style={styles.devHealthButtonText}>
             {selectedPreviewPbf == null
@@ -1018,7 +1088,6 @@ export const MainPage = () => {
           </Text>
         </TouchableOpacity>
       )}
-
       <BodyRecordPrompt
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}

@@ -47,9 +47,12 @@ export const buildMonthMatrix = (
     // 해당 날짜에 사진이 있는 경우, 겹쳐진 사진 미리보기를 출력한다
     const curDate = new Date(year, month, dayNumber);
     const dateKey = formatDateKey(curDate);
+    const imageUrls = previewMap[dateKey]?.imageUrls ?? [];
     const previewImage =
-      previewMap[dateKey]?.imageUrls.length
-        ? previewMap[dateKey]?.imageUrls.map((uri: string) => ({ uri }))
+      imageUrls.length > 0
+        ? imageUrls
+            .slice(0, 3)
+            .map((uri: string) => ({ uri }))
         : null;
 
     week.push({

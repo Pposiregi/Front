@@ -331,9 +331,17 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xxs,
   },
   listRight: {
-    alignItems: 'flex-end',
+    minWidth: Math.max(92, Math.round(deviceWidth * 0.24)),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
     marginLeft: spacing.lg,
-    marginRight: spacing.sm,
+    marginRight: spacing.xs,
+  },
+  listDistanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   listValue: {
     fontFamily: 'JUA',
@@ -342,6 +350,17 @@ export const styles = StyleSheet.create({
   },
   listValueAccent: {
     color: colors.accent,
+  },
+  listValueNumber: {
+    fontSize: 15,
+    letterSpacing: 0.2,
+    fontVariant: ['tabular-nums'],
+  },
+  listValueUnit: {
+    marginLeft: spacing.xxs,
+    fontFamily: 'Roboto-VariableFont',
+    fontSize: 11,
+    color: colors.textSecondary,
   },
   sessionTextColumn: {
     flexDirection: 'column',
@@ -368,7 +387,8 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textMuted,
     fontFamily: 'JUA',
-    marginTop: spacing.xxs,
+    marginLeft: spacing.sm,
+    lineHeight: 16,
   },
   indexText: {
     fontSize: 18,

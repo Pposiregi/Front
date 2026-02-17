@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CONTENT_HORIZONTAL_PADDING = 24;
 const CALENDAR_HORIZONTAL_PADDING = 8;
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
@@ -37,6 +37,11 @@ const MODAL_ROW_IMAGE = Math.round(
   Math.min(56, Math.max(44, SCREEN_WIDTH * 0.12))
 );
 const MODAL_ROW_RADIUS = Math.round(MODAL_BUTTON_SIZE * 0.7);
+const MODAL_MAX_HEIGHT = Math.round(SCREEN_HEIGHT * 0.88);
+const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
+  150,
+  Math.min(280, Math.round(SCREEN_HEIGHT * 0.33))
+);
 
 const baseShadow = {
   shadowColor: '#000000',
@@ -407,6 +412,7 @@ export default StyleSheet.create({
     borderRadius: 32,
     paddingVertical: 26,
     paddingHorizontal: 24,
+    maxHeight: MODAL_MAX_HEIGHT,
     ...baseShadow,
   },
   modalHeaderSection: {
@@ -423,10 +429,53 @@ export default StyleSheet.create({
     fontSize: Math.max(12, Math.round(SCREEN_WIDTH * 0.034)),
     color: '#9DA2B5',
   },
+  modalFutureNoticeBox: {
+    marginTop: 8,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#FFD59A',
+    backgroundColor: '#FFF7EA',
+  },
+  modalFutureNoticeIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFB84D',
+    marginRight: 10,
+  },
+  modalFutureNoticeIcon: {
+    fontFamily: 'JUA',
+    color: '#FFFFFF',
+    fontSize: 13,
+    lineHeight: 16,
+  },
+  modalFutureNoticeBody: {
+    flex: 1,
+  },
+  modalFutureNoticeTitle: {
+    fontFamily: 'JUA',
+    fontSize: 13,
+    color: '#B55B00',
+  },
+  modalFutureNoticeText: {
+    marginTop: 1,
+    fontSize: 11,
+    color: '#A15A00',
+  },
+  modalPhotoRowScroll: {
+    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
+  },
   modalPhotoRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
+    alignItems: 'center',
+    paddingHorizontal: Math.max(2, Math.round(SCREEN_WIDTH * 0.01)),
   },
   modalPhotoCard: {
     width: MODAL_CARD_SIZE,
@@ -444,6 +493,17 @@ export default StyleSheet.create({
   },
   modalMealList: {
     marginTop: 4,
+    // 외부 컨테이너와 ScrollView 둘 다 maxHeight를 둬 iOS/Android에서
+    // 스크롤 영역이 의도보다 늘어나는 케이스를 방지한다.
+    maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
+    flexShrink: 1,
+  },
+  modalMealListScroll: {
+    maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
+    flexGrow: 0,
+  },
+  modalMealListContent: {
+    paddingBottom: 4,
   },
   modalMealLoadingContainer: {
     minHeight: Math.max(80, Math.round(SCREEN_WIDTH * 0.23)),
@@ -502,6 +562,10 @@ export default StyleSheet.create({
     fontSize: Math.max(16, Math.round(SCREEN_WIDTH * 0.042)),
     color: '#8F95AF',
   },
+  modalMealRemoveIcon: {
+    width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
+    height: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
+  },
   modalMealRowContent: {
     flex: 1,
   },
@@ -531,6 +595,10 @@ export default StyleSheet.create({
     justifyContent: 'center',
     marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
     backgroundColor: '#FFFFFF',
+  },
+  modalMealEditIcon: {
+    width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
+    height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
   },
   modalMealEditLabel: {
     fontFamily: 'JUA',
@@ -569,16 +637,21 @@ export default StyleSheet.create({
     fontSize: 18,
     color: '#FF9F43',
   },
+  modalAddEditIcon: {
+    width: 32,
+    height: 32,
+  },
   modalAddInput: {
-    flex: 1,
     marginLeft: 12,
     fontSize: 13,
     color: '#2E313D',
     paddingVertical: 0,
   },
+  modalAddInputName: {
+    flex: 2,
+  },
   modalAddInputCalorie: {
-    flex: 0,
-    width: 90,
+    flex: 1,
   },
   modalCameraButton: {
     width: 40,
@@ -590,6 +663,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
+  },
+  modalCameraButtonDisabled: {
+    opacity: 0.5,
   },
   modalCameraIcon: {
     fontSize: 18,
@@ -657,6 +733,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     ...baseShadow,
   },
+  modalPrimaryButtonDisabled: {
+    opacity: 0.6,
+  },
   modalPrimaryButtonLabel: {
     fontFamily: 'JUA',
     fontSize: 16,
@@ -676,7 +755,7 @@ export default StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'visible', // 겹쳐진 이미지가 밖으로 나가도 보이게
+    overflow: 'hidden', // 셀 프레임 바깥으로 이미지가 넘치지 않도록 제한
   },
   stackImage: {
     position: 'absolute',

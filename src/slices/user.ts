@@ -4,6 +4,7 @@ const initialState = {
   email: '',
   accessToken: '',
   isSignUpInProgress: false,
+  isRunningActive: false,
   userId: null as number | null,
   nickname: '',
   profileImageId: 1,
@@ -38,6 +39,9 @@ const userSlice = createSlice({
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
       state.isSignUpInProgress = action.payload;
     },
+    setRunningActive(state, action: PayloadAction<boolean>) {
+      state.isRunningActive = action.payload;
+    },
     updateNickname(state, action: PayloadAction<string>) {
       state.nickname = action.payload;
     },
@@ -49,7 +53,6 @@ const userSlice = createSlice({
       return initialState;
     },
   },
-  extraReducers: (builder) => {},
 });
 
 export default userSlice;

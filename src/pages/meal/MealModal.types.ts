@@ -16,6 +16,7 @@ export type MealModalProps = {
   onChangeMealCalories: (value: string) => void;
   isLoadingMeals: boolean;
   isSaving: boolean;
+  isFutureDate: boolean;
   disableSave: boolean;
   disableInputs: boolean;
   deletingMealId: string | null;

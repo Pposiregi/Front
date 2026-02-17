@@ -6,6 +6,7 @@ import MapOverlayPolyline from '@components/MapOverlayPolyline';
 import { ActivityDetailRouteProp, GPS_LOG, SessionDetail } from './types';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
+import { formatDistanceFromMeters } from '@utils/distanceFormat';
 import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
 import useActivityDetailMap from '@hooks/useActivityDetailMap';
@@ -31,6 +32,16 @@ const toFiniteNumber = (value: unknown): number | null => {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+};
+
+const formatPaceFromKmh = (kmh: number) => {
+  // km/h -> sec/km (3600 / speed) 변환 후 mm:ss 포맷으로 표시한다.
+  if (!Number.isFinite(kmh) || kmh <= 0) return '-';
+  const rawSecondsPerKm = 3600 / kmh;
+  const roundedSecondsPerKm = Math.round(rawSecondsPerKm);
+  const minutes = Math.floor(roundedSecondsPerKm / 60);
+  const seconds = roundedSecondsPerKm % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} /km`;
 };
 
 /**
@@ -164,8 +175,14 @@ const ActivityDetailPage = () => {
   const [detailData, setDetailData] = useState<SessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const routeLogs = detailData?.routeLogs ?? [];
-  const { mapRef, mapRegion, mapKey, onMapReady, onMapLayout } =
-    useActivityDetailMap(routeLogs, sessionId);
+  const {
+    mapRef,
+    mapRegion,
+    mapKey,
+    isMapRelocating,
+    onMapReady,
+    onMapLayout,
+  } = useActivityDetailMap(routeLogs);
 
   useEffect(() => {
     const loadData = async () => {
@@ -178,33 +195,6 @@ const ActivityDetailPage = () => {
         const data = await getSessionDetail(sessionId);
         const normalizedRouteLogs = normalizeRouteLogs(data.routeLogs);
 
-        if (__DEV__) {
-          console.log(
-            '>>> [ActivityDetail] routeLogs 정규화',
-            JSON.stringify(
-              {
-                sessionId,
-                originalCount: data.routeLogs?.length ?? 0,
-                normalizedCount: normalizedRouteLogs.length,
-                first: normalizedRouteLogs[0],
-                rawFirst: data.routeLogs?.[0],
-              },
-              null,
-              0
-            )
-          );
-        }
-        if (
-          (data.routeLogs?.length ?? 0) > 0 &&
-          normalizedRouteLogs.length === 0
-        ) {
-          if (__DEV__) {
-            console.warn(
-              '>>> [ActivityDetail] routeLogs 정규화 결과가 0개입니다. rawFirst를 확인하세요.'
-            );
-          }
-        }
-
         setDetailData({
           ...data,
           routeLogs: normalizedRouteLogs,
@@ -212,9 +202,6 @@ const ActivityDetailPage = () => {
       } catch (error) {
         console.error('>>> [ActivityDetail] 상세 데이터 로드 실패:', error);
         if (__DEV__) {
-          console.warn(
-            '>>> [ActivityDetail] API 실패로 목업 데이터를 사용합니다.'
-          );
           try {
             const fallbackData = await fetchSessionDetail(sessionId);
             const normalizedRouteLogs = normalizeRouteLogs(
@@ -258,7 +245,14 @@ const ActivityDetailPage = () => {
 
   // 숫자 필드는 null/undefined가 내려올 수 있어 렌더 전에 안전하게 정규화한다.
   const totalDistanceValue = toFiniteNumber(detailData.totalDistance) ?? 0;
-  const avgSpeedKmhValue = toFiniteNumber(detailData.avgSpeedKmh) ?? 0;
+  // 상세 거리도 공통 규칙(1000m 미만 m, 이상 km)으로 포맷한다.
+  const totalDistanceLabel = formatDistanceFromMeters(totalDistanceValue);
+  const avgSpeedMpsFallback = toFiniteNumber(detailData.avgSpeedMps);
+  // backend avgSpeedKmh 값을 그대로 km/h로 사용한다.
+  // 구 응답(avgSpeedMps)만 있는 데이터는 화면 일관성을 위해 km/h로 환산한다.
+  const avgSpeedKmhValue =
+    toFiniteNumber(detailData.avgSpeedKmh) ??
+    (avgSpeedMpsFallback !== null ? avgSpeedMpsFallback * 3.6 : 0);
   const stepCountValue = Math.max(
     0,
     Math.trunc(toFiniteNumber(detailData.stepCount) ?? 0)
@@ -316,10 +310,18 @@ const ActivityDetailPage = () => {
             height={MAP_HEIGHT}
             width={MAP_WIDTH}
           />
+          {isMapRelocating ? (
+            <View style={styles.mapRelocatingOverlay}>
+              <View style={styles.mapRelocatingCard}>
+                <ActivityIndicator size='small' color='#2563EB' />
+                <Text style={styles.mapRelocatingText}>지도를 불러오는 중...</Text>
+              </View>
+            </View>
+          ) : null}
           <View style={styles.mapOverlay}>
             <View style={styles.chip}>
               <Text style={styles.chipText}>
-                {totalDistanceValue.toFixed(2)} km
+                {totalDistanceLabel.value} {totalDistanceLabel.unit}
               </Text>
             </View>
             <View style={styles.chip}>
@@ -341,7 +343,7 @@ const ActivityDetailPage = () => {
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>총 거리</Text>
             <Text style={styles.specValue}>
-              {totalDistanceValue.toFixed(2)} km
+              {totalDistanceLabel.value} {totalDistanceLabel.unit}
             </Text>
           </View>
           <View style={styles.specRow}>
@@ -349,10 +351,17 @@ const ActivityDetailPage = () => {
             <Text style={styles.specValue}>{formattedDuration}</Text>
           </View>
           <View style={styles.specRow}>
-            <Text style={styles.specLabel}>평균 속도</Text>
-            <Text style={styles.specValue}>
-              {avgSpeedKmhValue.toFixed(2)} km/h
-            </Text>
+            <Text style={styles.specLabel}>평균 페이스</Text>
+            <View style={styles.specValueGroup}>
+              <Text style={styles.specValue}>
+                {formatPaceFromKmh(avgSpeedKmhValue)}
+              </Text>
+              <Text style={styles.specSubValue}>
+                {Number.isFinite(avgSpeedKmhValue) && avgSpeedKmhValue > 0
+                  ? `${avgSpeedKmhValue.toFixed(2)} km/h`
+                  : '-'}
+              </Text>
+            </View>
           </View>
           <View style={styles.specRow}>
             <Text style={styles.specLabel}>걸음수</Text>
