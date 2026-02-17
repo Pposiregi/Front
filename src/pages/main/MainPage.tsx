@@ -209,23 +209,15 @@ export const MainPage = () => {
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
 
   useEffect(() => {
-    // 러닝 중 여부를 전역 상태로 동기화해 하단 탭 이동 제어에 사용한다.
+    // 러닝 중 여부를 전역 상태로 동기화하고, unmount 시 안전하게 해제한다.
     dispatch(userSlice.actions.setRunningActive(isTracking));
-  }, [dispatch, isTracking]);
-
-  useEffect(() => {
-    // MainPage를 벗어날 때 전역 러닝 플래그를 안전하게 해제한다.
     return () => {
       dispatch(userSlice.actions.setRunningActive(false));
     };
-  }, [dispatch]);
+  }, [dispatch, isTracking]);
 
   useEffect(() => {
     if (!isTracking) {
-      if (runningTimerRef.current) {
-        clearInterval(runningTimerRef.current);
-        runningTimerRef.current = null;
-      }
       runningStartMsRef.current = null;
       setRunningElapsedSec(0);
       return;

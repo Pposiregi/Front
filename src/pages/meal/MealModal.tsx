@@ -114,6 +114,15 @@ function MealModal({
       });
       return next;
     });
+    setFailedImageMap((prev) => {
+      const next: Record<string, true> = {};
+      mealImageUris.forEach((uri) => {
+        if (prev[uri]) {
+          next[uri] = true;
+        }
+      });
+      return next;
+    });
 
     void Promise.all(
       mealImageUris.map(async (uri) => ({
@@ -140,8 +149,8 @@ function MealModal({
         return;
       }
       console.warn('>>> [MealModal] zero-sized 이미지 확인 실패', error);
-      // 실패 시 기존 상태를 유지해 불필요한 플리커/재렌더를 방지한다.
-      setZeroSizedImageMap((prev) => prev);
+      // 실패 시 안전한 기본값으로 초기화해 stale 상태를 남기지 않는다.
+      setZeroSizedImageMap({});
     });
 
     return () => {
