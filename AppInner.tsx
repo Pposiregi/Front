@@ -33,6 +33,7 @@ import {
   getLastSentPushToken,
   setLastSentPushToken,
 } from '@utils/pushTokenStorage';
+import useAppStateLogger from '@hooks/useAppStateLogger';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -150,6 +151,9 @@ const runWithRetry = async <T,>(
  * - 로그인/회원가입 상태에 따라 스택을 분기한다.
  */
 function AppInner() {
+  // 앱 전환 상태 확인용 로거
+  useAppStateLogger();
+
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
 

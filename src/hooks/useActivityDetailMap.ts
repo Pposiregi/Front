@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MapView from 'react-native-maps';
 import type { GPS_LOG } from '@pages/activity/activityDetail/types';
-import type { MapRegion } from '@shared-types/location';
+import type { MapRegion } from '@shared/types/location';
 import { SCREEN_WIDTH } from '@styles/dimensions';
 
 /**
