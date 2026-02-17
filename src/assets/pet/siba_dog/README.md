@@ -5,8 +5,8 @@ This folder is the working area for `sibadog` composable pet assets.
 ## Folder layout
 - `main/`: layered parts for default scene.
 - `run/`: layered parts for running scene.
-- `template_main.example.json`: example template for `main/` parts.
-- `template_run.example.json`: example template for `run/` parts.
+- `template_main.json`: runtime template for `main/` parts.
+- `template_run.json`: runtime template for `run/` parts.
 
 ## Naming rules
 Use this pattern for runtime part files:

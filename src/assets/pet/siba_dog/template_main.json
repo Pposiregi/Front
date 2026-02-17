@@ -27,13 +27,13 @@
     {
       "key": "leg_left",
       "file": "sibadog_v1_01_leg_left.png",
-      "zIndex": 1,
+      "zIndex": 5,
       "anchor": "hip_left"
     },
     {
       "key": "leg_right",
       "file": "sibadog_v1_01_right_left.png",
-      "zIndex": 1,
+      "zIndex": 5,
       "anchor": "hip_right"
     },
     {

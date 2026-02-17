@@ -1,6 +1,10 @@
 import type { ImageSourcePropType } from 'react-native';
 
-export type PetTemplateId = 'browncat_v1' | 'browncat_v1_run';
+export type PetTemplateId =
+  | 'browncat_v1'
+  | 'browncat_v1_run'
+  | 'sibadog_v1'
+  | 'sibadog_v1_run';
 
 export type PetAssetRegistryEntry = {
   version: string;
@@ -48,16 +52,56 @@ const browncatV1RunPartAssets: Record<string, ImageSourcePropType> = {
   'browncat_v1_09_mouth_none.png': require('./brown_cat/run/browncat_v1_09_mouth_none.png'),
 };
 
+const sibadogV1MainPartAssets: Record<string, ImageSourcePropType> = {
+  'sibadog_v1_00_tail_none.png': require('./siba_dog/main/sibadog_v1_00_tail_none.png'),
+  'sibadog_v1_01_leg_left.png': require('./siba_dog/main/sibadog_v1_01_leg_left.png'),
+  'sibadog_v1_01_right_left.png': require('./siba_dog/main/sibadog_v1_01_right_left.png'),
+  'sibadog_v1_02_torso_none.png': require('./siba_dog/main/sibadog_v1_02_torso_none.png'),
+  'sibadog_v1_03_arm_left.png': require('./siba_dog/main/sibadog_v1_03_arm_left.png'),
+  'sibadog_v1_03_arm_right.png': require('./siba_dog/main/sibadog_v1_03_arm_right.png'),
+  'sibadog_v1_04_ear_left.png': require('./siba_dog/main/sibadog_v1_04_ear_left.png'),
+  'sibadog_v1_04_ear_right.png': require('./siba_dog/main/sibadog_v1_04_ear_right.png'),
+  'sibadog_v1_05_face.png': require('./siba_dog/main/sibadog_v1_05_face.png'),
+  'sibadog_v1_06_flushing_left.png': require('./siba_dog/main/sibadog_v1_06_flushing_left.png'),
+  'sibadog_v1_06_flushing_right.png': require('./siba_dog/main/sibadog_v1_06_flushing_right.png'),
+  'sibadog_v1_07_mouth_none.png': require('./siba_dog/main/sibadog_v1_07_mouth_none.png'),
+  'sibadog_v1_08_eye_left.png': require('./siba_dog/main/sibadog_v1_08_eye_left.png'),
+  'sibadog_v1_08_eye_right.png': require('./siba_dog/main/sibadog_v1_08_eye_right.png'),
+};
+
+const sibadogV1RunPartAssets: Record<string, ImageSourcePropType> = {
+  'sibadog_v1_00_tail_none.png': require('./siba_dog/run/sibadog_v1_00_tail_none.png'),
+  'sibadog_v1_02_arm_left.png': require('./siba_dog/run/sibadog_v1_02_arm_left.png'),
+  'sibadog_v1_05_arm_right.png': require('./siba_dog/run/sibadog_v1_05_arm_right.png'),
+  'sibadog_v1_02_leg_left.png': require('./siba_dog/run/sibadog_v1_02_leg_left.png'),
+  'sibadog_v1_05_leg_right.png': require('./siba_dog/run/sibadog_v1_05_leg_right.png'),
+  'sibadog_v1_03_torso_none.png': require('./siba_dog/run/sibadog_v1_03_torso_none.png'),
+  'sibadog_v1_04_face.png': require('./siba_dog/run/sibadog_v1_04_face.png'),
+  'sibadog_v1_06_flushing_right.png': require('./siba_dog/run/sibadog_v1_06_flushing_right.png'),
+  'sibadog_v1_07_mouth_none.png': require('./siba_dog/run/sibadog_v1_07_mouth_none.png'),
+  'sibadog_v1_08_eye_right.png': require('./siba_dog/run/sibadog_v1_08_eye_right.png'),
+};
+
 const petAssetRegistry: Record<PetTemplateId, PetAssetRegistryEntry> = {
   browncat_v1: {
     version: 'v1',
-    template: require('./template.json'),
+    template: require('./brown_cat/template_main.json'),
     partAssets: browncatV1MainPartAssets,
   },
   browncat_v1_run: {
     version: 'v1_run',
-    template: require('./template_run.json'),
+    template: require('./brown_cat/template_run.json'),
     partAssets: browncatV1RunPartAssets,
+  },
+  sibadog_v1: {
+    version: 'v1',
+    template: require('./siba_dog/template_main.json'),
+    partAssets: sibadogV1MainPartAssets,
+  },
+  sibadog_v1_run: {
+    version: 'v1_run',
+    template: require('./siba_dog/template_run.json'),
+    partAssets: sibadogV1RunPartAssets,
   },
 };
 
