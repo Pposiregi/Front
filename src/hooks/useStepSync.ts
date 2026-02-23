@@ -2,7 +2,6 @@ import { postDailyWalks } from '@api/mainApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback } from 'react';
 
-const STEP_UNIT = 1000;
 const STORAGE_KEY = 'LAST_SYNCED_STEPS';
 const STORAGE_DATE_KEY = 'LAST_SYNCED_DATE';
 
@@ -24,25 +23,36 @@ export const useStepSync = () => {
         await AsyncStorage.setItem(STORAGE_KEY, '0');
         await AsyncStorage.setItem(STORAGE_DATE_KEY, todayKey);
       }
-
       const diff = currentSteps - lastSyncedSteps;
-      if (diff < STEP_UNIT) return;
 
-      const sendCount = Math.floor(diff / STEP_UNIT);
-      const stepsToSend = sendCount * STEP_UNIT;
+      if (__DEV__) {
+        console.log('---------------- STEP SYNC DEBUG ----------------');
+        console.log('currentSteps:', currentSteps);
+        console.log('lastSyncedSteps:', lastSyncedSteps);
+        console.log('calculated diff:', diff);
+        console.log('--------------------------------------------------');
+      }
 
-      // distanceKm, burnCaloreis는 현재 계산하는 로직이 없어 0으로 전송,
-      // 프론트에서 계산해서 보내줘야할지??
+      if (diff <= 0) {
+        if (__DEV__) {
+          console.log('⏸ diff <= 0 → 서버 전송 안 함');
+        }
+        return;
+      }
+
+      if (__DEV__) {
+        console.log('서버 전송 step(diff):', diff);
+      }
+      // 증가분만 전송
       await postDailyWalks({
-        step: stepsToSend,
+        step: diff,
         distanceKm: 0,
         burnCalories: 0,
       });
-
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        String(lastSyncedSteps + stepsToSend)
-      );
+      if (__DEV__) {
+        console.log('✅ 서버 전송 성공');
+      }
+      await AsyncStorage.setItem(STORAGE_KEY, String(currentSteps));
     } catch (error) {
       console.error('>>> [useStepSync] step sync failed', error);
     }

@@ -559,6 +559,25 @@ export const MainPage = () => {
     writing: healthWriting,
     loading: healthLoading,
   } = useHealthSteps();
+
+  /**
+   * 2초마다 걸음수 서버 동기화 (값이 바뀐 경우에만)
+   */
+  const prevSyncedStepsRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (healthSteps == null) return;
+
+    const interval = setInterval(() => {
+      if (prevSyncedStepsRef.current !== healthSteps) {
+        syncSteps(healthSteps);
+        prevSyncedStepsRef.current = healthSteps;
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [healthSteps, syncSteps]);
+
   const healthErrorShownRef = useRef(false);
   /**
    * 개발용 걸음수 +1000 버튼.
@@ -791,30 +810,17 @@ export const MainPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startSession]);
 
-  const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
-   * Health Steps 서버 전송 + 미션 최신화.
+   * 미션 새로고침.
    */
   const refreshMissions = useCallback(async () => {
     try {
-      if (healthSteps != null) {
-        const diff = healthSteps - lastSyncedSteps;
-        if (diff >= 1000) {
-          await syncSteps(healthSteps);
-          setLastSyncedSteps(healthSteps);
-        }
-      }
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
-      // if (__DEV__) {
-      //   const activeMission = mockActiveMissions;
-      //   setMissionApiItems(activeMission.missions);
-      // }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
-  }, [healthSteps, lastSyncedSteps, syncSteps]);
-
+  }, []);
   /**
    * Health Steps 변화 시 호출 (1000보 단위로 제한).
    */
