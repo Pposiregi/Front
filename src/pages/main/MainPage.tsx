@@ -568,14 +568,17 @@ export const MainPage = () => {
   useEffect(() => {
     if (healthSteps == null) return;
 
-    const interval = setInterval(() => {
-      if (prevSyncedStepsRef.current !== healthSteps) {
-        syncSteps(healthSteps);
-        prevSyncedStepsRef.current = healthSteps;
+    if (prevSyncedStepsRef.current !== healthSteps) {
+      if (__DEV__) {
+        console.log('syncSteps 호출', {
+          healthSteps,
+          prev: prevSyncedStepsRef.current,
+        });
       }
-    }, 2000);
 
-    return () => clearInterval(interval);
+      syncSteps(healthSteps);
+      prevSyncedStepsRef.current = healthSteps;
+    }
   }, [healthSteps, syncSteps]);
 
   const healthErrorShownRef = useRef(false);

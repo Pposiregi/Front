@@ -33,12 +33,7 @@ export const useStepSync = () => {
         console.log('--------------------------------------------------');
       }
 
-      if (diff <= 0) {
-        if (__DEV__) {
-          console.log('⏸ diff <= 0 → 서버 전송 안 함');
-        }
-        return;
-      }
+      if (diff <= 0) return;
 
       if (__DEV__) {
         console.log('서버 전송 step(diff):', diff);

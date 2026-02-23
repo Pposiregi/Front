@@ -74,8 +74,9 @@ const useHealthSteps = (): HealthStepsState => {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
     await ensureBackgroundRationaleAcknowledged();
-    const granted: GrantedHealthPermission[] =
-      await requestPermission(HEALTH_PERMISSIONS);
+    const granted: GrantedHealthPermission[] = await requestPermission(
+      HEALTH_PERMISSIONS
+    );
     if (!hasAllPermissions(granted)) {
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
@@ -121,7 +122,13 @@ const useHealthSteps = (): HealthStepsState => {
         (sum: number, record: any) => sum + (record.count || 0),
         0
       );
-      setSteps(total);
+
+      if (__DEV__) {
+        console.log('[HC] 읽어온 걸음 수:', total);
+      }
+      // 이전과 값이 다를 때만 set
+      setSteps((prev) => (prev === total ? prev : total));
+      //setSteps(total);
       try {
         // 최신 결과를 캐시에 저장해 다음 진입/백그라운드 핸들러와 공유
         await AsyncStorage.setItem(
@@ -178,9 +185,14 @@ const useHealthSteps = (): HealthStepsState => {
 
   useEffect(() => {
     loadCachedSteps();
-
     fetchSteps();
-
+    // healthConnect 값을 2초마다 들고오기 위해 interval 설정
+    const interval = setInterval(() => {
+      if (__DEV__) {
+        console.log('[HC] fetchSteps interval tick', new Date().toISOString());
+      }
+      fetchSteps();
+    }, 2000);
     const handleAppStateChange = (state: AppStateStatus) => {
       if (state === 'active') {
         fetchSteps();
@@ -191,7 +203,10 @@ const useHealthSteps = (): HealthStepsState => {
       'change',
       handleAppStateChange
     );
-    return () => subscription.remove();
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
