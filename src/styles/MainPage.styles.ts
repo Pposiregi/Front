@@ -1,5 +1,6 @@
 import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Colors, Fonts, Typography } from './theme';
 
 // 화면 크기 기반 반응형 사이즈 계산
 const BOTTOM_NAV_HEIGHT = 60;
@@ -17,19 +18,21 @@ const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 // Approximation term for font descender/line-box differences in RN text layout.
-const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
-const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
+const START_BUTTON_ESTIMATED_HEIGHT =
+  START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
+const PET_BOTTOM_FROM_START =
+  START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
 export default StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F8',
+    backgroundColor: Colors.background,
     paddingTop: Platform.select({ ios: 40, android: 24 }),
   },
   progressContainer: {
@@ -45,10 +48,10 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     textAlign: 'center',
-    color: '#000000ff',
-    fontSize: 24,
+    color: Colors.textPrimary,
+    fontSize: Typography.h1,
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
   messageRow: {
@@ -69,58 +72,7 @@ export default StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#fff',
-  },
-  map: {
-    flex: 1,
-  },
-  locateButton: {
-    position: 'absolute',
-    right: 18,
-    bottom: 18,
-    backgroundColor: '#FFFFFFEE',
-    borderRadius: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 4,
-  },
-  locateText: {
-    fontFamily: 'Roboto-VariableFont',
-    fontWeight: '600',
-    fontSize: 12,
-    color: '#1F1F1F',
-  },
-  currentPin: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(116, 80, 255, 0.25)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  currentPinInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#7450FF',
-  },
-  mapOverlay: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  overlayText: {
-    color: '#fff',
-    fontFamily: 'Roboto-VariableFont',
-    fontSize: 14,
+    backgroundColor: Colors.surface,
   },
   runHud: {
     alignSelf: 'center',
@@ -131,9 +83,9 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   runTimerValue: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(44, Math.round(SCREEN_WIDTH * 0.12)),
-    color: '#2E313D',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.12)),
+    color: Colors.textPrimary,
     letterSpacing: 1.2,
     textShadowColor: 'rgba(255, 255, 255, 0.6)',
     textShadowOffset: { width: 0, height: 1 },
@@ -143,7 +95,7 @@ export default StyleSheet.create({
     position: 'absolute',
     bottom: START_BUTTON_BASE_BOTTOM,
     alignSelf: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     paddingHorizontal: START_BUTTON_PADDING_H,
     paddingVertical: START_BUTTON_PADDING_V,
     borderRadius: START_BUTTON_RADIUS,
@@ -153,7 +105,7 @@ export default StyleSheet.create({
     bottom: BOTTOM_NAV_HEIGHT - 16,
     left: '50%',
     marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
-    backgroundColor: '#1f2937',
+    backgroundColor: Colors.devButton,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
@@ -169,46 +121,22 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(254, 194, 136, 0.62)',
   },
-  runningLockNoticeText: {
-    fontFamily: 'Roboto-VariableFont',
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#7A3E00',
-    letterSpacing: 0.2,
-  },
   startText: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontWeight: 'bold',
-    fontSize: START_BUTTON_FONT,
+    color: Colors.textSecondary,
+    fontSize: Typography.body,
   },
   devHealthButton: {
-    backgroundColor: '#1f2937',
+    backgroundColor: Colors.devButton,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
   },
   devHealthButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: Colors.surface,
+    fontSize: Typography.caption,
     fontWeight: '700',
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-  },
-  navIcon: {
-    fontSize: 24,
-  },
-  removeText: {
-    marginTop: 4,
-    color: '#fff',
-    fontSize: 12,
   },
   pet: {
     position: 'absolute',
@@ -237,8 +165,8 @@ export default StyleSheet.create({
     zIndex: 999,
   },
   countdownText: {
-    fontSize: 90,
-    color: 'white',
+    fontSize: Typography.display,
+    color: Colors.surface,
     fontWeight: 'bold',
   },
   emptyMissionContainer: {
@@ -247,9 +175,9 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   emptyMissionText: {
-    fontSize: 18,
-    color: '#888',
-    fontWeight: '500',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textPrimary,
+    fontWeight: '600',
     textAlign: 'center',
   },
   missionButton: {
@@ -259,14 +187,14 @@ export default StyleSheet.create({
     width: 50,
     height: 50,
     padding: 10,
-    backgroundColor: '#ca4949',
+    backgroundColor: Colors.accentStrong,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   missionButtonText: {
-    color: '#fff',
+    color: Colors.surface,
     fontWeight: 'bold',
   },
 });

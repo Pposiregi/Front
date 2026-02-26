@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -18,10 +19,10 @@ export const styles = StyleSheet.create({
   },
   rankingNumberImage: { width: 50, height: 50, resizeMode: 'contain' },
   rankingNumberText: {
-    fontSize: 22, // 가독성을 위해 살짝 조절
-    fontFamily: 'JUA',
+    fontSize: Typography.h1, // 가독성을 위해 살짝 조절
+    fontFamily: Fonts.JUA,
     textAlign: 'center',
-    color: '#333',
+    color: Colors.textPrimary,
   },
   rankingNameScoreContainer: {
     flex: 1,
@@ -31,7 +32,7 @@ export const styles = StyleSheet.create({
     marginLeft: 5,
   },
   listItemBox: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     paddingRight: 16,
     paddingLeft: 4,
@@ -43,9 +44,10 @@ export const styles = StyleSheet.create({
     minHeight: 70,
   },
   listItemText: {
-    fontSize: 16,
-    fontFamily: 'Roboto-VariableFont',
-    color: '#444',
+    fontSize: Typography.bodyLarge,
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontWeight: '600',
+    color: Colors.textPrimary,
   },
   filterButton: {
     flexDirection: 'row',
@@ -57,19 +59,20 @@ export const styles = StyleSheet.create({
     paddingVertical: 6,
     marginHorizontal: 4,
     borderRadius: 8,
-    backgroundColor: '#EEE', // 기본 배경색
+    backgroundColor: Colors.background,
     alignItems: 'center',
   },
   rankingFilterButtonText: {
-    fontSize: 14,
-    color: '#000', // 기본 글자색
+    fontSize: Typography.bodySmall,
+    color: Colors.textPrimary,
+    fontFamily: Fonts.Roboto_VariableFont,
     fontWeight: 'bold',
   },
   rankingFilterButtonActive: {
-    backgroundColor: '#007AFF', // 활성화 배경색
+    backgroundColor: Colors.info,
   },
   rankingFilterButtonTextActive: {
-    color: '#FFF', // 활성화 글자색
+    color: Colors.surface,
   },
   noRankingContainer: {
     justifyContent: 'center',
@@ -77,26 +80,26 @@ export const styles = StyleSheet.create({
     padding: 40,
   },
   noRankingText: {
-    fontSize: 25,
-    color: '#333',
-    fontFamily: 'Roboto-VariableFont',
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   myRankingHighlight: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: Colors.accentSoft,
   },
   myRankingBox: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#FFF',
+    backgroundColor: Colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   myRankingText: {
-    fontSize: 16,
-    fontFamily: 'JUA',
+    fontSize: Typography.body,
+    fontFamily: Fonts.JUA,
     textAlign: 'center',
-    color: '#fff', // 흰색 글자
+    color: Colors.surface,
   },
 });

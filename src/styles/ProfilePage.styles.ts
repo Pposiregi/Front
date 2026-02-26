@@ -1,5 +1,6 @@
 import { Platform, StyleSheet, Dimensions } from 'react-native';
 import { SCREEN_WIDTH } from './dimensions';
+import { Colors, Fonts, Typography } from './theme';
 
 const { width: deviceWidth } = Dimensions.get('window');
 const baseUnit = deviceWidth / 24; // 반응형 기준 단위
@@ -7,11 +8,20 @@ const avatarSize = Math.max(80, Math.round(deviceWidth * 0.24));
 const gearSize = Math.max(28, Math.round(deviceWidth * 0.09));
 const cardRadius = Math.max(12, Math.round(deviceWidth * 0.04));
 const cardPadding = Math.max(12, Math.round(deviceWidth * 0.04));
-const headerFont = Math.max(18, Math.round(deviceWidth * 0.05));
-const bodyFont = Math.max(12, Math.round(deviceWidth * 0.034));
-const smallFont = Math.max(11, Math.round(deviceWidth * 0.03));
-const titleFont = Math.max(20, Math.round(deviceWidth * 0.053));
-const metricNumberFont = Math.max(16, Math.round(deviceWidth * 0.05));
+const headerFont = Math.max(
+  Typography.bodyLarge,
+  Math.round(deviceWidth * 0.05)
+);
+const bodyFont = Math.max(Typography.caption, Math.round(deviceWidth * 0.034));
+const smallFont = Math.max(
+  Typography.caption - 1,
+  Math.round(deviceWidth * 0.03)
+);
+const titleFont = Math.max(Typography.h2, Math.round(deviceWidth * 0.053));
+const metricNumberFont = Math.max(
+  Typography.body,
+  Math.round(deviceWidth * 0.05)
+);
 const chartRadius = Math.max(10, Math.round(deviceWidth * 0.03));
 const chartPadding = Math.max(10, Math.round(deviceWidth * 0.035));
 const contentPadding = Math.max(16, Math.round(deviceWidth * 0.048));
@@ -20,7 +30,7 @@ const progressRadius = Math.round(progressHeight * 1.2);
 const bottomPadding = Math.max(100, Math.round(deviceWidth * 0.28));
 
 const cardShadow = {
-  shadowColor: '#000',
+  shadowColor: Colors.shadow,
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.07,
   shadowRadius: 12,
@@ -30,7 +40,7 @@ const cardShadow = {
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.background,
   },
   contentContainer: {
     paddingHorizontal: contentPadding,
@@ -48,7 +58,7 @@ export default StyleSheet.create({
     width: avatarSize,
     height: avatarSize,
     borderRadius: Math.round(avatarSize / 2),
-    backgroundColor: '#FFE1B8',
+    backgroundColor: Colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
     ...cardShadow,
@@ -63,7 +73,7 @@ export default StyleSheet.create({
     width: gearSize,
     height: gearSize,
     borderRadius: Math.round(gearSize / 2),
-    backgroundColor: '#FFB454',
+    backgroundColor: Colors.accentStrong,
     alignItems: 'center',
     justifyContent: 'center',
     ...cardShadow,
@@ -73,13 +83,13 @@ export default StyleSheet.create({
   },
   name: {
     marginTop: Math.max(8, Math.round(baseUnit * 1.2)),
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: titleFont,
     color: '#1F2937',
   },
   caption: {
     marginTop: Math.max(4, Math.round(baseUnit * 0.8)),
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: bodyFont,
     color: '#6B7280',
   },
@@ -91,9 +101,9 @@ export default StyleSheet.create({
     marginBottom: Math.max(6, Math.round(baseUnit * 1)),
   },
   sectionTitle: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: headerFont,
-    color: '#1F2937',
+    color: Colors.textPrimary,
   },
   recordButton: {
     flexDirection: 'row',
@@ -107,13 +117,13 @@ export default StyleSheet.create({
     marginRight: Math.max(4, Math.round(baseUnit * 0.8)),
   },
   recordText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: bodyFont,
     fontWeight: '600',
-    color: '#4B5563',
+    color: Colors.textSecondary,
   },
   metricCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     paddingVertical: Math.max(10, Math.round(cardPadding * 0.8)),
     paddingHorizontal: cardPadding,
@@ -124,7 +134,7 @@ export default StyleSheet.create({
     ...cardShadow,
   },
   metricCardSingle: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     paddingVertical: Math.max(10, Math.round(cardPadding * 0.8)),
     paddingHorizontal: cardPadding,
@@ -135,34 +145,34 @@ export default StyleSheet.create({
     ...cardShadow,
   },
   metricLabel: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
     lineHeight: Math.max(12, Math.round(baseUnit * 1.4)),
-    color: '#111827',
+    color: Colors.textPrimary,
   },
   metricAim: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: smallFont,
-    color: '#9CA3AF',
+    color: Colors.textSecondary,
     marginTop: Math.max(2, Math.round(baseUnit * 0.5)),
   },
   metricRight: {
     alignItems: 'flex-end',
   },
   metricValue: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
     lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#4B5563',
   },
   metricNumber: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: metricNumberFont,
     lineHeight: Math.max(metricNumberFont, Math.round(metricNumberFont * 1.05)),
-    color: '#111827',
+    color: Colors.textPrimary,
   },
   metricUnit: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: Math.max(10, Math.round(baseUnit * 1.1)),
     lineHeight: Math.max(13, Math.round(baseUnit * 1.5)),
     color: '#6B7280',
@@ -171,7 +181,7 @@ export default StyleSheet.create({
     width: Math.max(140, SCREEN_WIDTH * 0.35),
     height: progressHeight,
     borderRadius: progressRadius,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.divider,
     marginTop: Math.max(6, Math.round(baseUnit * 1)),
   },
   progressBar: {
@@ -183,7 +193,7 @@ export default StyleSheet.create({
     marginTop: Math.max(8, Math.round(baseUnit * 1.2)),
   },
   chartCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     paddingVertical: chartPadding,
     paddingHorizontal: chartPadding,
@@ -196,6 +206,6 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.background,
   },
 });

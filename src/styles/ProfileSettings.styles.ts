@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
   },
   scroll: {
     flex: 1,
@@ -26,12 +27,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backText: {
-    fontSize: 22,
-    color: '#111827',
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
   },
   headerTitle: {
-    fontFamily: 'JUA',
-    fontSize: 22,
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h1,
     color: '#111827',
     paddingHorizontal: 8,
   },
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
     borderColor: '#F3F4F6',
   },
   rowLabel: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 16,
     color: '#111827',
   },
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logoutText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 15,
     color: '#111827',
   },
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
   },
   withdrawText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 15,
     color: '#991B1B',
   },
@@ -114,13 +115,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalTitle: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 18,
     color: '#111827',
   },
   modalBody: {
     marginTop: 10,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: '#4B5563',
     lineHeight: 20,
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   modalCancelText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: '#111827',
   },
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F59E0B',
   },
   modalConfirmText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: '#FFFFFF',
   },
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF7ED',
   },
   chipText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: '#4B5563',
   },

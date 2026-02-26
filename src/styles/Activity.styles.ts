@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
+import { Colors, Fonts } from './theme';
 
 const { width: deviceWidth } = Dimensions.get('window');
 const spacing = {
@@ -51,7 +52,7 @@ export const activityTheme = {
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
   contentContainer: {
     padding: contentPadding,
@@ -71,13 +72,13 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 24,
     color: colors.textTitle,
     textAlign: 'center',
   },
   headerSub: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textMuted,
     marginTop: spacing.xxs,
@@ -92,13 +93,13 @@ export const styles = StyleSheet.create({
   arrowText: {
     fontSize: 20,
     color: colors.textSecondary,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
   },
   arrowTextDisabled: {
     color: colors.textMuted,
   },
   subHeaderText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: spacing.xs,
@@ -114,12 +115,12 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   summaryDateText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textMuted,
   },
   summaryNotice: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textSecondary,
     textAlign: 'center',
@@ -138,12 +139,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   progressValue: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 20,
     color: colors.textPrimary,
   },
   progressTarget: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textMuted,
     marginTop: spacing.xxs,
@@ -159,12 +160,12 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   heroMetricLabel: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textSecondary,
   },
   heroMetricValue: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 16,
     color: colors.textPrimary,
   },
@@ -174,7 +175,7 @@ export const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   heroComment: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: spacing.md,
@@ -194,7 +195,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   badgeText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textPrimary,
   },
@@ -207,18 +208,18 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryLabel: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
   },
   summaryValue: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 20,
     color: colors.textPrimary,
     marginTop: spacing.sm,
   },
   summaryUnit: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textMuted,
     marginTop: spacing.xxs,
@@ -240,7 +241,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionTitle: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 18,
     color: colors.textTitle,
     marginRight: spacing.md,
@@ -269,12 +270,12 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   segmentedText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
   },
   segmentedTextActive: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     color: colors.accent,
   },
   itemContainer: {
@@ -312,20 +313,20 @@ export const styles = StyleSheet.create({
     paddingRight: spacing.md,
   },
   listTitle: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 14,
     color: colors.textPrimary,
     lineHeight: 18,
   },
   listSubtitle: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: spacing.xxs,
     lineHeight: 16,
   },
   listMeta: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textMuted,
     marginTop: spacing.xxs,
@@ -344,7 +345,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   listValue: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 14,
     color: colors.textPrimary,
   },
@@ -358,7 +359,7 @@ export const styles = StyleSheet.create({
   },
   listValueUnit: {
     marginLeft: spacing.xxs,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textSecondary,
   },
@@ -366,19 +367,19 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   dateText: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 14,
     color: colors.textPrimary,
     marginBottom: spacing.xxs,
   },
   timeText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
     marginRight: spacing.xxl,
   },
   distanceText: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 16,
     color: colors.accent,
     marginLeft: 'auto',
@@ -386,7 +387,7 @@ export const styles = StyleSheet.create({
   detailLink: {
     fontSize: 16,
     color: colors.textMuted,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     marginLeft: spacing.sm,
     lineHeight: 16,
   },
@@ -394,7 +395,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: spacing.xl,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
   },
   chartCard: {
     backgroundColor: colors.surface,
@@ -419,18 +420,18 @@ export const styles = StyleSheet.create({
     marginHorizontal: spacing.lg,
   },
   chartMetaLabel: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 11,
     color: colors.textMuted,
     marginBottom: spacing.xxs,
   },
   chartMetaValue: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 15,
     color: colors.textPrimary,
   },
   chartMetaUnit: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 10,
     color: colors.textMuted,
   },
@@ -451,13 +452,13 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   emptyCardTitle: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: 16,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
   emptyCardText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textSecondary,
   },
@@ -467,7 +468,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xxl,
   },
   chartEmptyText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.textMuted,
   },
