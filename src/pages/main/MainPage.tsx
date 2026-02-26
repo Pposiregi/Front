@@ -109,6 +109,7 @@ import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
+import { useRunningService } from '@hooks/useRunningService';
 
 /**
  * 메인 화면 컴포넌트
@@ -210,7 +211,7 @@ export const MainPage = () => {
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
-
+  useRunningService(isTracking, runningElapsedSec);
   useEffect(() => {
     // 러닝 중 여부를 전역 상태로 동기화한다.
     dispatch(userSlice.actions.setRunningActive(isTracking));
