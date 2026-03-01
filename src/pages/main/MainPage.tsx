@@ -109,7 +109,11 @@ import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
-import { useRunningService } from '@hooks/useRunningService';
+import {
+  startRunningNotification,
+  stopRunningNotification,
+  updateRunningNotification,
+} from '@hooks/useRunningService';
 
 /**
  * 메인 화면 컴포넌트
@@ -211,7 +215,7 @@ export const MainPage = () => {
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
-  useRunningService(isTracking, runningElapsedSec);
+
   useEffect(() => {
     // 러닝 중 여부를 전역 상태로 동기화한다.
     dispatch(userSlice.actions.setRunningActive(isTracking));
@@ -576,11 +580,17 @@ export const MainPage = () => {
           prev: prevSyncedStepsRef.current,
         });
       }
-
       syncSteps(healthSteps);
       prevSyncedStepsRef.current = healthSteps;
     }
   }, [healthSteps, syncSteps]);
+
+  useEffect(() => {
+    if (!isTracking) return;
+    if (healthSteps == null) return;
+
+    updateRunningNotification(runningElapsedSec, healthSteps);
+  }, [runningElapsedSec, healthSteps, isTracking]);
 
   const healthErrorShownRef = useRef(false);
   /**
@@ -666,6 +676,7 @@ export const MainPage = () => {
       }
       try {
         const result = await endSession();
+        await stopRunningNotification();
         if (result?.summary) {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
@@ -699,6 +710,7 @@ export const MainPage = () => {
       }
       return;
     }
+
     setCountdown(3);
   }, [
     endSession,
@@ -779,8 +791,10 @@ export const MainPage = () => {
           const started = await startSession();
           if (!started) {
             // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
+            await stopRunningNotification();
             return;
           }
+          await startRunningNotification();
           setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(

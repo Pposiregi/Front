@@ -1,56 +1,56 @@
-import { useEffect, useCallback } from 'react';
-import { AppState, Platform } from 'react-native';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import { Platform } from 'react-native';
 
-export const useRunningService = (isTracking: boolean, elapsedSec: number) => {
-  const updateService = useCallback(async (seconds: number) => {
-    if (Platform.OS !== 'android') return;
+const CHANNEL_ID = 'running-tracker';
+const NOTI_ID = 'running-notif';
 
-    try {
-      const channelId = await notifee.createChannel({
-        id: 'running-tracker',
-        name: '러닝 트래킹',
-        importance: AndroidImportance.HIGH,
-      });
+export async function startRunningNotification() {
+  if (Platform.OS !== 'android') return;
 
-      await notifee.displayNotification({
-        id: 'running-notif',
-        title: '🏃 열심히 달리는 중!',
-        body: `현재 기록: ${formatRunningElapsed(seconds)}`,
-        android: {
-          channelId,
-          asForegroundService: true, // 서비스 등록과 쌍을 이룹니다.
-          ongoing: true,
-          pressAction: { id: 'default' },
-          // 아이콘이 없으면 알림이 안 뜰 수 있으니 기본 아이콘 설정
-          smallIcon: 'ic_launcher',
-        },
-      });
-    } catch (err) {
-      console.error('Notification Update Error:', err);
-    }
-  }, []);
+  await notifee.createChannel({
+    id: CHANNEL_ID,
+    name: '러닝 트래킹',
+    importance: AndroidImportance.HIGH,
+  });
 
-  useEffect(() => {
-    if (!isTracking) {
-      if (Platform.OS === 'android') {
-        notifee.stopForegroundService();
-        notifee.cancelNotification('running-notif');
-      }
-      return;
-    }
+  await notifee.displayNotification({
+    id: NOTI_ID,
+    title: '🏃 러닝 기록 중',
+    body: '운동 시간을 측정하고 있습니다.',
+    android: {
+      channelId: 'running-tracker',
+      asForegroundService: true,
+      ongoing: true,
+      smallIcon: 'ic_launcher',
+      pressAction: { id: 'default' },
+      showChronometer: true,
+      timestamp: Date.now(),
+    },
+  });
+}
 
-    // 1초마다 변하는 elapsedSec에 맞춰 알림 갱신
-    updateService(elapsedSec);
-  }, [isTracking, elapsedSec, updateService]);
-};
+export async function updateRunningNotification(
+  elapsedSec: number,
+  steps: number
+) {
+  if (Platform.OS !== 'android') return;
 
-// 시간 포맷 함수 (훅 내부에서 쓰기 위해 복사하거나 import)
-const formatRunningElapsed = (seconds: number) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(
-    s
-  ).padStart(2, '0')}`;
-};
+  await notifee.displayNotification({
+    id: NOTI_ID, // 🔥 같은 id
+    title: '🏃 러닝 기록 중',
+    body: `${elapsedSec}초 · ${steps.toLocaleString()}보`,
+    android: {
+      channelId: CHANNEL_ID,
+      asForegroundService: true,
+      ongoing: true,
+      smallIcon: 'ic_launcher',
+      onlyAlertOnce: true, // 🔥 진동 반복 방지 (중요)
+      pressAction: { id: 'default' },
+    },
+  });
+}
+
+export async function stopRunningNotification() {
+  if (Platform.OS !== 'android') return;
+  await notifee.stopForegroundService();
+}
