@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -6,33 +7,31 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // Section Header
   sectionHeader: {
     paddingHorizontal: 22,
     paddingVertical: 20,
-    backgroundColor: '#F4F4F4',
+    backgroundColor: Colors.background,
     borderRadius: 8,
+    marginHorizontal: 10,
     marginVertical: 4,
   },
   sectionHeaderText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: Typography.bodyLarge,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
 
-  // Mission Item
   listItemBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     marginHorizontal: 16,
     marginVertical: 6,
     padding: 16,
     borderRadius: 16,
     borderLeftWidth: 6,
-    borderLeftColor: '#4CAF50', // STEP이면 초록, MEAL이면 주황으로 런타임에 바꿔서 적용 가능
-    shadowColor: '#000',
+    borderLeftColor: Colors.success, // STEP이면 초록, MEAL이면 주황으로 런타임에 바꿔서 적용 가능
+    shadowColor: Colors.shadow,
     shadowOpacity: 0.05,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
@@ -47,34 +46,33 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
   iconText: {
-    fontSize: 18,
+    fontSize: Typography.bodyLarge,
   },
   listItemTitle: {
-    fontSize: 15,
+    fontSize: Typography.body,
     fontWeight: '600',
-    color: '#222',
+    color: Colors.textPrimary,
   },
   listItemSub: {
     marginTop: 4,
-    fontSize: 12,
-    color: '#888',
+    fontSize: Typography.caption,
+    fontWeight: '600',
+    color: Colors.textSecondary,
   },
-
   rightBox: {
     alignItems: 'flex-end',
   },
   completedText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4CAF50',
+    fontSize: Typography.bodySmall,
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontWeight: '700',
+    color: Colors.success,
   },
   timeText: {
     marginTop: 2,
-    fontSize: 12,
-    color: '#999',
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
   },
-
-  // List Header
   listHeaderContainer: {
     padding: 16,
     flexDirection: 'row',
@@ -82,18 +80,16 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listHeaderTitle: {
-    fontSize: 18,
-    fontFamily: 'Roboto-VariableFont',
-    color: '#333',
+    fontSize: Typography.bodyLarge,
+    fontFamily: Fonts.Roboto_VariableFont,
+    color: Colors.textPrimary,
   },
   listHeaderSubtitle: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     marginTop: 4,
-    fontFamily: 'Roboto-VariableFont',
-    color: '#333',
+    fontFamily: Fonts.Roboto_VariableFont,
+    color: Colors.textPrimary,
   },
-
-  // 기간 선택 버튼
   dateRangeButton: {
     padding: 8,
   },
@@ -102,8 +98,6 @@ export const styles = StyleSheet.create({
     height: 24,
     resizeMode: 'contain',
   },
-
-  // 모달
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -116,8 +110,8 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
   modalTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: Typography.body,
+    fontWeight: '700',
     marginBottom: 12,
   },
   modalButton: {
@@ -128,7 +122,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalButtonText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Typography.bodySmall,
+    color: Colors.textPrimary,
   },
 });

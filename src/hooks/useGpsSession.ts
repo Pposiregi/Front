@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { LatLng, MapRegion } from '@shared/types/location';
-import { useRouteTracking, type RouteTrackPoint } from '@hooks/useRouteTracking';
+import {
+  useRouteTracking,
+  type RouteTrackPoint,
+} from '@hooks/useRouteTracking';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';
 import { getHealthConnectStepCount } from '@utils/healthConnectSteps';
@@ -29,8 +32,7 @@ const wait = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const getRetryDelayMs = (attempt: number) =>
-  RETRY_BASE_DELAY_MS * 2 ** attempt;
+const getRetryDelayMs = (attempt: number) => RETRY_BASE_DELAY_MS * 2 ** attempt;
 
 const toKmh = (speedMps?: number) => {
   // 위치 SDK speed(m/s)를 /gps/log 전송 규격(km/h)으로 맞춘다.
@@ -129,18 +131,21 @@ export const useGpsSession = (): UseGpsSessionResult => {
     logTimerRef.current = null;
   }, []);
 
-  const persistSession = useCallback(async (session: GpsSessionStartResponse) => {
-    try {
-      await AsyncStorage.setItem(SESSION_ID_KEY, String(session.sessionId));
-      if (startTimeRef.current) {
-        await AsyncStorage.setItem(SESSION_START_KEY, startTimeRef.current);
+  const persistSession = useCallback(
+    async (session: GpsSessionStartResponse) => {
+      try {
+        await AsyncStorage.setItem(SESSION_ID_KEY, String(session.sessionId));
+        if (startTimeRef.current) {
+          await AsyncStorage.setItem(SESSION_START_KEY, startTimeRef.current);
+        }
+      } catch (err) {
+        if (__DEV__) {
+          console.warn('>>>[RUNNING][RUN] 세션 저장 실패', err);
+        }
       }
-    } catch (err) {
-      if (__DEV__) {
-        console.warn('>>>[RUNNING][RUN] 세션 저장 실패', err);
-      }
-    }
-  }, []);
+    },
+    []
+  );
 
   const clearPersistedSession = useCallback(async () => {
     try {
@@ -302,95 +307,98 @@ export const useGpsSession = (): UseGpsSessionResult => {
     stopTracking,
   ]);
 
-  const endSession = useCallback(async (options?: EndSessionOptions) => {
-    if (!sessionIdRef.current || !startTimeRef.current) return null;
+  const endSession = useCallback(
+    async (options?: EndSessionOptions) => {
+      if (!sessionIdRef.current || !startTimeRef.current) return null;
 
-    try {
-      isEndingRef.current = true;
-      clearLogTimer();
-      const allLogsFlushed = await flushAllPendingLogs();
-      if (!allLogsFlushed) {
-        throw new Error(
-          'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
-        );
-      }
-
-      const endTime = new Date();
-      const startTimeValue = new Date(startTimeRef.current);
-      const durationMs = Math.max(
-        0,
-        endTime.getTime() - startTimeValue.getTime()
-      );
-      const distance = calculateTotalDistanceMeters(path);
-      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
-      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
-      let stepCount = 0;
-      let stepCountMissing = false;
-      if (options?.forceNoSteps) {
-        stepCountMissing = true;
-        if (__DEV__) {
-          console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
+      try {
+        isEndingRef.current = true;
+        clearLogTimer();
+        const allLogsFlushed = await flushAllPendingLogs();
+        if (!allLogsFlushed) {
+          throw new Error(
+            'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
+          );
         }
-      } else {
-        stepCount = await getHealthConnectStepCount(
-          startTimeRef.current,
-          endTime
+
+        const endTime = new Date();
+        const startTimeValue = new Date(startTimeRef.current);
+        const durationMs = Math.max(
+          0,
+          endTime.getTime() - startTimeValue.getTime()
         );
-        if (__DEV__) {
-          console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
-            startTime: startTimeRef.current,
-            endTime: endTime.toISOString(),
-            stepCount,
-          });
+        const distance = calculateTotalDistanceMeters(path);
+        // backend 기준 단위(m/s)로 요약 속도를 관리한다.
+        const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
+        let stepCount = 0;
+        let stepCountMissing = false;
+        if (options?.forceNoSteps) {
+          stepCountMissing = true;
+          if (__DEV__) {
+            console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
+          }
+        } else {
+          stepCount = await getHealthConnectStepCount(
+            startTimeRef.current,
+            endTime
+          );
+          if (__DEV__) {
+            console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
+              startTime: startTimeRef.current,
+              endTime: endTime.toISOString(),
+              stepCount,
+            });
+          }
         }
+
+        const response = await endGpsSessionWithRetry({
+          sessionId: sessionIdRef.current,
+          endTime: endTime.toISOString(),
+          stepCount,
+        });
+        const summary: GpsSessionSummary = {
+          durationMs,
+          stepCount,
+          distanceMeters: distance,
+          avgSpeedMps,
+          stepCountMissing,
+        };
+
+        clearLogTimer();
+        pendingLogsRef.current = [];
+        lastTrackPointIndexRef.current = 0;
+        sessionIdRef.current = null;
+        startTimeRef.current = null;
+        setSessionId(null);
+        setIsSessionActive(false);
+        await clearPersistedSession();
+        stopTracking();
+        isEndingRef.current = false;
+
+        if (__DEV__) {
+          console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
+        }
+
+        return { response, summary };
+      } catch (err) {
+        // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
+        isEndingRef.current = false;
+        appendNewTrackPointsToPending();
+        startLogTimer();
+        throw err;
       }
-
-      const response = await endGpsSessionWithRetry({
-        sessionId: sessionIdRef.current,
-        endTime: endTime.toISOString(),
-        stepCount,
-      });
-      const summary: GpsSessionSummary = {
-        durationMs,
-        stepCount,
-        distanceMeters: distance,
-        avgSpeedMps,
-        stepCountMissing,
-      };
-
-      clearLogTimer();
-      pendingLogsRef.current = [];
-      lastTrackPointIndexRef.current = 0;
-      sessionIdRef.current = null;
-      startTimeRef.current = null;
-      setSessionId(null);
-      setIsSessionActive(false);
-      await clearPersistedSession();
-      stopTracking();
-      isEndingRef.current = false;
-
-      if (__DEV__) {
-        console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
-      }
-
-      return { response, summary };
-    } catch (err) {
-      // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
-      isEndingRef.current = false;
-      appendNewTrackPointsToPending();
-      startLogTimer();
-      throw err;
-    }
-  }, [
-    appendNewTrackPointsToPending,
-    clearLogTimer,
-    clearPersistedSession,
-    endGpsSessionWithRetry,
-    flushAllPendingLogs,
-    path,
-    startLogTimer,
-    stopTracking,
-  ]);
+    },
+    [
+      appendNewTrackPointsToPending,
+      clearLogTimer,
+      clearPersistedSession,
+      endGpsSessionWithRetry,
+      flushAllPendingLogs,
+      path,
+      startLogTimer,
+      stopTracking,
+    ]
+  );
 
   useEffect(() => {
     if (!isTracking) return;

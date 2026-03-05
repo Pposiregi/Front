@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CONTENT_HORIZONTAL_PADDING = 24;
@@ -13,9 +14,7 @@ const CALENDAR_CONTAINER_EXPAND = Math.max(
   CONTENT_HORIZONTAL_PADDING - CALENDAR_OUTER_GUTTER
 );
 const CALENDAR_AVAILABLE_WIDTH =
-  SCREEN_WIDTH -
-  CALENDAR_OUTER_GUTTER * 2 -
-  CALENDAR_HORIZONTAL_PADDING * 2;
+  SCREEN_WIDTH - CALENDAR_OUTER_GUTTER * 2 - CALENDAR_HORIZONTAL_PADDING * 2;
 const DAY_CELL_GAP_RATIO = 0.045;
 const GRID_SIZE = Math.min(
   52,
@@ -44,7 +43,7 @@ const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
 );
 
 const baseShadow = {
-  shadowColor: '#000000',
+  shadowColor: Colors.shadow,
   shadowOpacity: 0.08,
   shadowOffset: { width: 0, height: 6 },
   shadowRadius: 12,
@@ -59,7 +58,7 @@ const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.3);
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F8',
+    backgroundColor: Colors.background,
   },
   content: {
     flexGrow: 1,
@@ -80,23 +79,23 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   headerButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 20,
-    color: '#14151A',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   headerTitle: {
-    fontFamily: 'JUA',
-    fontSize: 27,
-    color: '#2B2B2B',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
   },
   headerSpacing: {
     marginBottom: 24,
   },
   calendarContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: 28,
     paddingVertical: 12,
     paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
@@ -110,9 +109,9 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   calendarMonthLabel: {
-    fontFamily: 'JUA',
-    fontSize: 18,
-    color: '#2B2B2B',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodyLarge,
+    color: Colors.textPrimary,
   },
   calendarLoadingIndicator: {
     marginLeft: 8,
@@ -125,9 +124,9 @@ export default StyleSheet.create({
   weekDayLabel: {
     flex: 1,
     textAlign: 'center',
-    fontSize: Math.max(12, Math.round(GRID_SIZE * 0.25)),
-    color: '#9597A3',
-    fontFamily: 'JUA',
+    fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.25)),
+    color: Colors.textMuted,
+    fontFamily: Fonts.JUA,
   },
   weekRow: {
     flexDirection: 'row',
@@ -151,245 +150,64 @@ export default StyleSheet.create({
     paddingVertical: GRID_PADDING_V,
     paddingHorizontal: GRID_PADDING_H,
     borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#FFFFFF',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
     marginHorizontal: DAY_CELL_GAP,
     marginVertical: DAY_CELL_GAP,
   },
   dayNumber: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(13, Math.round(GRID_SIZE * 0.3)),
-    color: '#383A45',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.3)),
+    color: Colors.textPrimary,
   },
   dayNumberMuted: {
-    color: '#C8CAD4',
+    color: Colors.textMuted,
   },
   selectedDayBackground: {
-    borderColor: '#1D7ED8',
+    borderColor: Colors.info,
     borderWidth: 2,
-    backgroundColor: '#EAF3FF',
+    backgroundColor: Colors.infoSoft,
   },
   todayDayOutline: {
-    borderColor: '#FF9F43',
+    borderColor: Colors.accentStrong,
     borderWidth: 2,
-    backgroundColor: '#FFF7EB',
+    backgroundColor: Colors.accentSoft,
   },
   selectedDayNumber: {
-    color: '#1D7ED8',
+    color: Colors.info,
   },
   todayDayNumber: {
-    color: '#FF9F43',
-  },
-  dayPreviewThumbnail: {
-    width: STACK_ITEM_SIZE,
-    height: STACK_ITEM_SIZE,
-    borderRadius: STACK_ITEM_RADIUS,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#F4F6FB',
+    color: Colors.accentStrong,
   },
   dayPreviewPlaceholder: {
     width: STACK_ITEM_SIZE,
     height: STACK_ITEM_SIZE,
     borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#F4F6FB',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   dayPreviewPlaceholderText: {
-    fontSize: 14,
-    color: '#C2C7D8',
-  },
-  catContainer: {
-    alignItems: 'center',
-  },
-  catImage: {
-    width: 240,
-    height: 180,
-    resizeMode: 'contain',
-  },
-  detailContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 30,
-    padding: 24,
-    ...baseShadow,
+    fontSize: Typography.bodySmall,
+    color: Colors.divider,
   },
   sectionSpacing: {
     marginBottom: 24,
   },
-  detailHeader: {},
-  detailDate: {
-    fontFamily: 'JUA',
-    fontSize: 20,
-    color: '#292C36',
-  },
-  detailSubtitle: {
-    fontSize: 13,
-    color: '#9CA0AE',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  badge: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#FFD970',
-  },
-  badgeSpacing: {
-    marginRight: 8,
-  },
-  badgeLabel: {
-    fontFamily: 'JUA',
-    color: '#714A00',
-    fontSize: 13,
-  },
-  mealsSection: {
-    marginTop: 12,
-  },
-  mealRowSpacing: {
-    marginTop: 12,
-  },
-  mealRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 18,
-    backgroundColor: '#F5F6FB',
-  },
-  mealImagePlaceholder: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: '#FFE1A8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  mealPlaceholderText: {
-    fontFamily: 'JUA',
-    color: '#C97E09',
-    fontSize: 16,
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealInfoSpacing: {
-    marginBottom: 4,
-  },
-  mealName: {
-    fontFamily: 'JUA',
-    fontSize: 15,
-    color: '#2E313D',
-  },
-  mealCalories: {
-    fontSize: 12,
-    color: '#888DA0',
-  },
-  mealActions: {
-    alignItems: 'flex-end',
-  },
-  mealActionSpacing: {
-    marginBottom: 8,
-  },
-  iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E2EC',
-  },
-  iconButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 14,
-    color: '#7781A9',
-  },
-  emptyState: {
-    padding: 20,
-    borderRadius: 18,
-    backgroundColor: '#F6F7FC',
-    alignItems: 'center',
-  },
-  emptyStateSpacing: {
-    marginBottom: 6,
-  },
-  emptyStateTitle: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#5F6485',
-  },
-  emptyStateText: {
-    fontSize: 12,
-    color: '#949AB6',
-    textAlign: 'center',
-  },
-  addRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 16,
-    backgroundColor: '#EFF1F9',
-    paddingHorizontal: 14,
-  },
-  addRowSpacing: {
-    marginTop: 20,
-  },
-  addRowLabelPrimary: {
-    flex: 1,
-    color: '#9AA0BB',
-    fontSize: 13,
-  },
-  addRowLabelSecondary: {
-    color: '#C1C5DA',
-    fontSize: 13,
-    marginLeft: 8,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#4A4E66',
-  },
-  summaryValue: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FF9157',
-  },
-  saveButton: {
-    marginTop: 8,
-    backgroundColor: '#FF9F43',
-    borderRadius: 20,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
   calendarHelperText: {
     marginTop: 24,
     textAlign: 'center',
-    color: '#7C8098',
-    fontSize: 14,
+    color: Colors.textSecondary,
+    fontSize: Typography.bodySmall,
   },
   calendarErrorText: {
     marginTop: 16,
     textAlign: 'center',
-    color: '#D9534F',
-    fontSize: 13,
+    color: Colors.error,
+    fontSize: Typography.bodySmall,
   },
   modalContainer: {
     flex: 1,
@@ -420,14 +238,14 @@ export default StyleSheet.create({
     marginBottom: 18,
   },
   modalTitle: {
-    fontFamily: 'JUA',
-    fontSize: 22,
-    color: '#222430',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
   },
   modalSubtitle: {
     marginTop: Math.max(4, Math.round(SCREEN_WIDTH * 0.012)),
-    fontSize: Math.max(12, Math.round(SCREEN_WIDTH * 0.034)),
-    color: '#9DA2B5',
+    fontSize: Math.max(Typography.caption, Math.round(SCREEN_WIDTH * 0.034)),
+    color: Colors.textMuted,
   },
   modalFutureNoticeBox: {
     marginTop: 8,
@@ -438,8 +256,8 @@ export default StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#FFD59A',
-    backgroundColor: '#FFF7EA',
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accentSoft,
   },
   modalFutureNoticeIconWrap: {
     width: 24,
@@ -447,26 +265,26 @@ export default StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFB84D',
+    backgroundColor: Colors.accentStrong,
     marginRight: 10,
   },
   modalFutureNoticeIcon: {
-    fontFamily: 'JUA',
-    color: '#FFFFFF',
-    fontSize: 13,
+    fontFamily: Fonts.JUA,
+    color: Colors.surface,
+    fontSize: Typography.caption,
     lineHeight: 16,
   },
   modalFutureNoticeBody: {
     flex: 1,
   },
   modalFutureNoticeTitle: {
-    fontFamily: 'JUA',
-    fontSize: 13,
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodySmall,
     color: '#B55B00',
   },
   modalFutureNoticeText: {
     marginTop: 1,
-    fontSize: 11,
+    fontSize: Typography.caption,
     color: '#A15A00',
   },
   modalPhotoRowScroll: {
@@ -482,7 +300,7 @@ export default StyleSheet.create({
     height: MODAL_CARD_SIZE,
     borderRadius: MODAL_CARD_RADIUS,
     overflow: 'hidden',
-    backgroundColor: '#F4F6FB',
+    backgroundColor: Colors.infoSoft,
     marginHorizontal: Math.max(6, Math.round(SCREEN_WIDTH * 0.018)),
     position: 'relative',
   },
@@ -512,32 +330,32 @@ export default StyleSheet.create({
   },
   modalEmptyText: {
     textAlign: 'center',
-    color: '#9DA2B5',
-    fontSize: 13,
-    marginTop: 8,
+    color: Colors.textMuted,
+    fontSize: Typography.bodySmall,
+    marginTop: 6,
   },
   modalErrorText: {
     marginTop: 8,
     textAlign: 'center',
-    color: '#D9534F',
-    fontSize: 12,
+    color: Colors.error,
+    fontSize: Typography.caption,
   },
   modalMealRowContainer: {
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: MODAL_ROW_RADIUS,
     paddingVertical: Math.max(12, Math.round(SCREEN_WIDTH * 0.03)),
     paddingHorizontal: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
     marginBottom: Math.max(10, Math.round(SCREEN_WIDTH * 0.025)),
     borderWidth: 1,
-    borderColor: '#E4E6F1',
+    borderColor: Colors.divider,
     ...baseShadow,
   },
   modalMealRowEditing: {
-    borderColor: '#5F6BEA',
-    backgroundColor: '#EDF1FF',
+    borderColor: Colors.infoStrong,
+    backgroundColor: Colors.infoSoft,
   },
   modalMealControls: {
     flexDirection: 'row',
@@ -558,9 +376,9 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalMealRemoveLabel: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(16, Math.round(SCREEN_WIDTH * 0.042)),
-    color: '#8F95AF',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.body, Math.round(SCREEN_WIDTH * 0.042)),
+    color: Colors.textMuted,
   },
   modalMealRemoveIcon: {
     width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
@@ -570,8 +388,8 @@ export default StyleSheet.create({
     flex: 1,
   },
   modalMealRowName: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.bodySmall, Math.round(SCREEN_WIDTH * 0.036)),
     color: '#2E313D',
   },
   modalMealRowCalories: {
@@ -594,14 +412,14 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
   },
   modalMealEditIcon: {
     width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
     height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
   },
   modalMealEditLabel: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
     color: '#4C5AC7',
   },
@@ -610,8 +428,8 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   modalMealDragLabel: {
-    fontSize: 18,
-    color: '#B6BBCE',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textMuted,
   },
   modalAddRow: {
     flexDirection: 'row',
@@ -620,7 +438,7 @@ export default StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 18,
-    backgroundColor: '#F6F7FC',
+    backgroundColor: Colors.infoSoft,
   },
   modalAddIcon: {
     width: 36,
@@ -628,14 +446,14 @@ export default StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E0E3F1',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalAddIconLabel: {
-    fontFamily: 'JUA',
-    fontSize: 18,
-    color: '#FF9F43',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodyLarge,
+    color: Colors.accentStrong,
   },
   modalAddEditIcon: {
     width: 32,
@@ -659,7 +477,7 @@ export default StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E0E3F1',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
@@ -668,7 +486,7 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalCameraIcon: {
-    fontSize: 18,
+    fontSize: Typography.bodyLarge,
     color: '#9DA3BB',
   },
   modalEditRow: {
@@ -690,24 +508,24 @@ export default StyleSheet.create({
     marginRight: 8,
     borderWidth: 1,
     borderColor: '#C8CCE0',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
   },
   modalEditSubmit: {
     marginLeft: 8,
-    backgroundColor: '#FF9F43',
+    backgroundColor: Colors.accentStrong,
   },
   modalEditActionDisabled: {
     opacity: 0.5,
   },
   modalEditCancelLabel: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     color: '#8F95AF',
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
   },
   modalEditSubmitLabel: {
-    fontFamily: 'JUA',
-    color: '#FFFFFF',
-    fontSize: 14,
+    fontFamily: Fonts.JUA,
+    color: Colors.surface,
+    fontSize: Typography.bodySmall,
   },
   modalTotalRow: {
     flexDirection: 'row',
@@ -715,19 +533,19 @@ export default StyleSheet.create({
     marginTop: 22,
   },
   modalTotalLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
     color: '#4A4E66',
   },
   modalTotalValue: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FF9157',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.accentStrong,
     marginLeft: 6,
   },
   modalPrimaryButton: {
     marginTop: 20,
-    backgroundColor: '#FF9F43',
+    backgroundColor: Colors.accentStrong,
     borderRadius: 22,
     paddingVertical: 14,
     alignItems: 'center',
@@ -737,16 +555,16 @@ export default StyleSheet.create({
     opacity: 0.6,
   },
   modalPrimaryButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.surface,
   },
   modalSecondaryButton: {
     marginTop: 10,
     alignItems: 'center',
   },
   modalSecondaryButtonLabel: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: '#8F94AB',
   },
   stackThumb: {

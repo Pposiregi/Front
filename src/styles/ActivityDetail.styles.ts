@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Fonts } from './theme';
 
 const colors = {
   background: '#F3F4F6',
@@ -36,7 +37,7 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: colors.textSecondary,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   mapFrame: {
     height: SCREEN_HEIGHT * 0.36,
@@ -81,7 +82,7 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 12,
     color: colors.textPrimary,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   chip: {
     backgroundColor: colors.chipBackground,
@@ -90,14 +91,14 @@ export const styles = StyleSheet.create({
     borderRadius: 999,
   },
   chipText: {
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
     color: colors.chipText,
   },
   sectionTitle: {
     fontSize: 18,
     marginBottom: 12,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     color: colors.textPrimary,
   },
   specCard: {
@@ -118,12 +119,12 @@ export const styles = StyleSheet.create({
   specLabel: {
     fontSize: 14,
     color: colors.textSecondary,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   specValue: {
     fontSize: 14,
     color: colors.textPrimary,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
   },
   specValueGroup: {
     alignItems: 'flex-end',
@@ -132,7 +133,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 12,
     color: colors.textMuted,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   specRowLast: {
     borderBottomWidth: 0,
@@ -144,6 +145,6 @@ export const styles = StyleSheet.create({
   emptyText: {
     fontSize: 15,
     color: colors.textSecondary,
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
 });

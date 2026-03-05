@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 /**
  * 미션 UI
@@ -6,181 +7,216 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   missionView: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   modalBox: {
     width: '95%',
     height: '83%',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
   },
+
   missionTitle: {
-    fontSize: 28,
+    fontSize: Typography.h1,
     marginBottom: 12,
-    fontFamily: 'JUA',
-    color: '#333333',
+    fontFamily: Fonts.JUA,
+    color: Colors.textPrimary,
   },
+
   tabRow: {
     flexDirection: 'row',
     marginBottom: 12,
   },
+
   tabButton: {
     flex: 1,
     paddingVertical: 8,
     marginHorizontal: 4,
     alignItems: 'center',
   },
+
   tabButtonActive: {
-    backgroundColor: '#FEC288',
+    backgroundColor: Colors.accentStrong,
   },
+
   tabText: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#333333',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.textPrimary,
   },
+
   tabTextActive: {
-    color: '#fff',
+    color: Colors.surface,
   },
+
   emptyMissionText: {
-    fontSize: 18,
-    color: '#888',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textMuted,
     fontWeight: '500',
     textAlign: 'center',
   },
+
   missionUICard: {
     padding: 12,
     marginVertical: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: Colors.divider,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: Colors.surface,
     borderRadius: 12,
   },
+
   missionUICardReadbyBorder: {
-    backgroundColor: '#ffefe0',
+    backgroundColor: Colors.accentSoft,
     borderWidth: 2,
-    borderColor: '#FEC288',
+    borderColor: Colors.accent,
     borderRadius: 12,
   },
+
   missionUICardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
+
   missionIcon: {
-    fontSize: 20,
+    fontSize: Typography.h2,
     marginRight: 8,
   },
+
   missionUITextTitle: {
-    fontSize: 20,
-    fontFamily: 'JUA',
-    color: '#333333',
+    fontSize: Typography.h2,
+    fontFamily: Fonts.JUA,
+    color: Colors.textPrimary,
   },
+
   flexEndContainer: {
     flex: 1,
     alignItems: 'flex-end',
   },
+
   completeButton: {
+    backgroundColor: Colors.accent,
     paddingVertical: 8,
     minWidth: 60,
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  completeButtonDisabled: {
+    backgroundColor: Colors.disabled,
+  },
+
   completeButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    fontFamily: 'Roboto',
+    fontSize: Typography.body,
+    color: Colors.surface,
+    fontFamily: Fonts.Roboto_VariableFont,
   },
+
   completeButtonTextDisabled: {
-    fontSize: 16,
-    color: '#888',
-    fontFamily: 'Roboto',
+    color: Colors.textSecondary,
   },
+
   missionUIText: {
-    fontSize: 16,
-    color: '#333333',
-    fontFamily: 'Roboto',
+    fontSize: Typography.body,
+    color: Colors.textPrimary,
+    fontFamily: Fonts.Roboto_VariableFont,
     fontWeight: 'bold',
   },
+
   progressBarBackground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surface,
     marginVertical: 8,
     overflow: 'hidden',
   },
+
   progressBarForeground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FEC288',
+    backgroundColor: Colors.accent,
   },
+
   missionUIExitButton: {
     marginTop: 12,
     alignSelf: 'flex-end',
     padding: 8,
-    backgroundColor: '#FEC288',
+    backgroundColor: Colors.accent,
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   missionUIExitText: {
-    color: '#fff',
-    fontSize: 20,
-    fontFamily: 'JUA',
+    color: Colors.surface,
+    fontSize: Typography.h2,
+    fontFamily: Fonts.JUA,
   },
+
   summaryBox: {
     width: '85%',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 20,
   },
+
   summaryTitle: {
-    fontSize: 24,
+    fontSize: Typography.h1,
     marginBottom: 12,
-    fontFamily: 'JUA',
-    color: '#333333',
+    fontFamily: Fonts.JUA,
+    color: Colors.textPrimary,
     textAlign: 'center',
   },
+
   summaryList: {
     marginBottom: 12,
   },
+
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 6,
   },
+
   summaryLabel: {
-    fontSize: 16,
-    color: '#666666',
-    fontFamily: 'JUA',
+    fontSize: Typography.body,
+    color: Colors.textSecondary,
+    fontFamily: Fonts.JUA,
   },
+
   summaryValue: {
-    fontSize: 18,
-    color: '#333333',
-    fontFamily: 'JUA',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textPrimary,
+    fontFamily: Fonts.JUA,
   },
+
   summaryValueGroup: {
     alignItems: 'flex-end',
   },
+
   summarySubValue: {
     marginTop: 2,
-    fontSize: 12,
-    color: '#888888',
-    fontFamily: 'Roboto',
+    fontSize: Typography.caption,
+    color: Colors.textMuted,
+    fontFamily: Fonts.Roboto_VariableFont,
   },
+
   summaryDivider: {
     height: 1,
-    backgroundColor: '#eeeeee',
+    backgroundColor: Colors.divider,
   },
+
   summaryCaption: {
     marginTop: 4,
-    fontSize: 12,
-    color: '#999999',
-    fontFamily: 'JUA',
+    fontSize: Typography.caption,
+    color: Colors.textMuted,
+    fontFamily: Fonts.JUA,
     textAlign: 'right',
   },
 });

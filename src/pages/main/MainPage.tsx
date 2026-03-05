@@ -109,6 +109,11 @@ import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
+import {
+  startRunningNotification,
+  stopRunningNotification,
+  updateRunningNotification,
+} from '@hooks/useRunningService';
 
 /**
  * 메인 화면 컴포넌트
@@ -559,6 +564,34 @@ export const MainPage = () => {
     writing: healthWriting,
     loading: healthLoading,
   } = useHealthSteps();
+
+  /**
+   * 2초마다 걸음수 서버 동기화 (값이 바뀐 경우에만)
+   */
+  const prevSyncedStepsRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (healthSteps == null) return;
+
+    if (prevSyncedStepsRef.current !== healthSteps) {
+      if (__DEV__) {
+        console.log('syncSteps 호출', {
+          healthSteps,
+          prev: prevSyncedStepsRef.current,
+        });
+      }
+      syncSteps(healthSteps);
+      prevSyncedStepsRef.current = healthSteps;
+    }
+  }, [healthSteps, syncSteps]);
+
+  useEffect(() => {
+    if (!isTracking) return;
+    if (healthSteps == null) return;
+
+    updateRunningNotification(runningElapsedSec, healthSteps);
+  }, [runningElapsedSec, healthSteps, isTracking]);
+
   const healthErrorShownRef = useRef(false);
   /**
    * 개발용 걸음수 +1000 버튼.
@@ -643,6 +676,7 @@ export const MainPage = () => {
       }
       try {
         const result = await endSession();
+        await stopRunningNotification();
         if (result?.summary) {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
@@ -676,6 +710,7 @@ export const MainPage = () => {
       }
       return;
     }
+
     setCountdown(3);
   }, [
     endSession,
@@ -756,8 +791,10 @@ export const MainPage = () => {
           const started = await startSession();
           if (!started) {
             // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
+            await stopRunningNotification();
             return;
           }
+          await startRunningNotification();
           setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(
@@ -791,30 +828,17 @@ export const MainPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startSession]);
 
-  const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
-   * Health Steps 서버 전송 + 미션 최신화.
+   * 미션 새로고침.
    */
   const refreshMissions = useCallback(async () => {
     try {
-      if (healthSteps != null) {
-        const diff = healthSteps - lastSyncedSteps;
-        if (diff >= 1000) {
-          await syncSteps(healthSteps);
-          setLastSyncedSteps(healthSteps);
-        }
-      }
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
-      // if (__DEV__) {
-      //   const activeMission = mockActiveMissions;
-      //   setMissionApiItems(activeMission.missions);
-      // }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
-  }, [healthSteps, lastSyncedSteps, syncSteps]);
-
+  }, []);
   /**
    * Health Steps 변화 시 호출 (1000보 단위로 제한).
    */
