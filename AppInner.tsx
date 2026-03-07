@@ -28,6 +28,12 @@ import {
   postPushToken,
   type PushTokenPayload,
 } from '@api/pushTokenApi';
+import {
+  clearSessionExpiredHandler,
+  notifySessionExpired,
+  resetSessionExpiredState,
+  setSessionExpiredHandler,
+} from '@api/authSession';
 import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
   getLastSentPushToken,
@@ -163,6 +169,26 @@ function AppInner() {
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
+  useEffect(() => {
+    setSessionExpiredHandler(async () => {
+      await EncryptedStorage.removeItem('refreshToken');
+      await EncryptedStorage.removeItem('serverAccessToken');
+      await AsyncStorage.removeItem('isSignUpInProgress');
+      dispatch(userSlice.actions.resetUser());
+      Alert.alert('로그인 만료', '로그인이 만료되었어요. 다시 로그인해 주세요.');
+    });
+
+    return () => {
+      clearSessionExpiredHandler();
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (accessToken) {
+      resetSessionExpiredState();
+    }
+  }, [accessToken]);
+
   /**
    * 앱 진입 시 자동 로그인 처리.
    * - refreshToken 갱신 및 유저 상태 초기화
@@ -190,6 +216,10 @@ function AppInner() {
           try {
             const result = await refreshAccessToken();
             if (result?.serverAccessToken) {
+              await EncryptedStorage.setItem(
+                'serverAccessToken',
+                result.serverAccessToken
+              );
               dispatch(
                 userSlice.actions.setAuth({
                   accessToken: result.serverAccessToken,
@@ -204,10 +234,7 @@ function AppInner() {
           } catch (err: any) {
             const status = err?.response?.status;
             if (status === 401) {
-              await EncryptedStorage.removeItem('refreshToken');
-              await EncryptedStorage.removeItem('serverAccessToken');
-              await AsyncStorage.removeItem('isSignUpInProgress');
-              dispatch(userSlice.actions.resetUser());
+              await notifySessionExpired('REFRESH_TOKEN_INVALID');
             }
             console.error('[AuthError] 자동로그인 실패', err);
           }
