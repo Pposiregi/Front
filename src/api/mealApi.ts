@@ -16,9 +16,9 @@ import type {
   UpdateMealResponse,
 } from 'types/meal';
 
-const MEAL_BASE_PATH = '/meal'; // POST, PUT, DELETE
-const GET_MEAL_DAY_PATH = '/report/meal/day';
-const GET_MEAL_MONTH_PATH = '/report/meal/calendar';
+const MEAL_BASE_PATH = '/meals'; // POST, PATCH, DELETE
+const GET_MEAL_DAY_PATH = '/reports/meals/daily';
+const GET_MEAL_MONTH_PATH = '/reports/meals/calendar';
 
 /**
  * Meal 식단 생성
@@ -68,7 +68,7 @@ export const getMealDayDetail = async (
 ): Promise<MealCalendarDayApiResponse> => {
   const { data } = await apiClient.get<MealCalendarDayApiResponse>(
     GET_MEAL_DAY_PATH,
-    { params }
+    { params: { date: params.day } }
   );
   return data;
 };

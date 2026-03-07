@@ -7,19 +7,14 @@ import type {
 export const getDailyStepRanking = async ({
   gender = 'ALL',
 }: GetDailyStepRankingRequest): Promise<DailyStepRankingResponse> => {
-  let url = '/ranking/summary';
-  const params: any = {};
-
-  // 남/여 필터 API 새로 수정되면 그거 가져다가 쓸 것
-  if (gender === 'MALE') {
-    url = '/users/rankings/daily-step/gender';
-    params.gender = 'male';
-  } else if (gender === 'FEMALE') {
-    url = '/users/rankings/daily-step/gender';
-    params.gender = 'female';
+  const params: { filter?: 'ALL' | 'MALE' | 'FEMALE' } = {};
+  if (gender !== 'ALL') {
+    params.filter = gender;
   }
 
-  const { data } = await apiClient.get<DailyStepRankingResponse>(url, {
+  const { data } = await apiClient.get<DailyStepRankingResponse>(
+    '/ranking/summary',
+    {
     params,
   });
 

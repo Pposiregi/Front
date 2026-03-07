@@ -17,7 +17,7 @@ export const getDailyActivity = async (
   date: string
 ): Promise<DailyActivity> => {
   const { data } = await apiClient.get<DailyActivity>(
-    '/report/activity/daily',
+    '/reports/activity/today',
     {
       params: { date },
     }
@@ -34,7 +34,7 @@ export const getActivityRange = async (
   to: string
 ): Promise<DailyActivity[]> => {
   const { data } = await apiClient.get<DailyActivity[]>(
-    '/report/activity/range',
+    '/reports/activity/range',
     {
       params: { from, to },
     }
