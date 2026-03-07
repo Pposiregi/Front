@@ -14,6 +14,10 @@ import {
   HEALTH_STEPS_CACHE_KEY,
   type GrantedHealthPermission,
 } from '@utils/healthConnect';
+import {
+  isStepSyncUnsupportedByPolicy,
+  STEP_SYNC_MESSAGES,
+} from '@utils/stepSyncPolicy';
 
 type HealthStepsState = {
   steps: number | null;
@@ -101,6 +105,11 @@ const useHealthSteps = (): HealthStepsState => {
 
   const fetchSteps = async () => {
     if (Platform.OS !== 'android') return;
+    if (isStepSyncUnsupportedByPolicy()) {
+      setError(STEP_SYNC_MESSAGES.unsupported);
+      setSteps(null);
+      return;
+    }
     if (checkingRef.current) return;
     checkingRef.current = true;
     setLoading(true);

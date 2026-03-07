@@ -1,6 +1,8 @@
 import { postDailyWalks } from '@api/mainApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback } from 'react';
+import { formatDateKeyKST } from '@utils/dateUtil';
+import { STEP_SYNC_UPLOAD_POLICY } from '@utils/stepSyncPolicy';
 
 const STORAGE_KEY = 'LAST_SYNCED_STEPS';
 const STORAGE_DATE_KEY = 'LAST_SYNCED_DATE';
@@ -9,7 +11,7 @@ export const useStepSync = () => {
   const syncSteps = useCallback(async (currentSteps: number) => {
     try {
       // 오늘 날짜 key
-      const todayKey = new Date().toISOString().slice(0, 10);
+      const todayKey = formatDateKeyKST(new Date());
 
       // 마지막 동기화 날짜 확인
       const storedDate = await AsyncStorage.getItem(STORAGE_DATE_KEY);
@@ -33,7 +35,7 @@ export const useStepSync = () => {
         console.log('--------------------------------------------------');
       }
 
-      if (diff <= 0) return;
+      if (diff < STEP_SYNC_UPLOAD_POLICY.minStepDelta) return;
 
       if (__DEV__) {
         console.log('서버 전송 step(diff):', diff);

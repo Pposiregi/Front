@@ -15,6 +15,10 @@ import {
   type GrantedHealthPermission,
   isAndroid,
 } from '@utils/healthConnect';
+import {
+  isStepSyncUnsupportedByPolicy,
+  STEP_SYNC_MESSAGES,
+} from '@utils/stepSyncPolicy';
 
 const logPrefix = '[FCM][background]';
 
@@ -22,6 +26,10 @@ const syncStepsForToday = async () => {
   // Health Connect 권한을 확인하고 오늘 걸음 수를 읽어 로컬 캐시에 저장
   if (!isAndroid()) {
     console.log(`${logPrefix} skip sync: 안드로이드가 아닙니다. `);
+    return;
+  }
+  if (isStepSyncUnsupportedByPolicy()) {
+    console.log(`${logPrefix} skip sync: ${STEP_SYNC_MESSAGES.unsupported}`);
     return;
   }
 

@@ -35,9 +35,24 @@ export const hasAllPermissions = (
 
 // 금일 0시~현재 시각 구간 계산
 export const getStartOfToday = () => {
+  // KST(UTC+9) 기준으로 오늘 00:00 ~ 현재 시각 구간을 만든다.
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
   const now = new Date();
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
+  const shifted = new Date(now.getTime() + KST_OFFSET_MS);
+
+  const startShifted = new Date(
+    Date.UTC(
+      shifted.getUTCFullYear(),
+      shifted.getUTCMonth(),
+      shifted.getUTCDate(),
+      0,
+      0,
+      0,
+      0
+    )
+  );
+
+  const start = new Date(startShifted.getTime() - KST_OFFSET_MS);
   return { start, end: now };
 };
 
