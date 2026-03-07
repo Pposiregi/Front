@@ -9,16 +9,18 @@ const PROGRESS_CONTAINER_HEIGHT = Math.max(
 );
 const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
 const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));
-const START_BUTTON_PADDING_H = Math.max(28, Math.round(SCREEN_WIDTH * 0.1));
-const START_BUTTON_PADDING_V = Math.max(10, Math.round(SCREEN_HEIGHT * 0.015));
-const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
-const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
+const START_BUTTON_SIZE = Math.max(
+  66,
+  Math.min(82, Math.round(SCREEN_WIDTH * 0.205))
+);
+const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
+const START_BUTTON_FONT = Math.max(16, Math.round(SCREEN_WIDTH * 0.045));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
-// Approximation term for font descender/line-box differences in RN text layout.
-const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
-const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
+const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
+const PET_BOTTOM_FROM_START =
+  START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
 export default StyleSheet.create({
   loadingContainer: {
@@ -52,9 +54,14 @@ export default StyleSheet.create({
     marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
   },
   messageRow: {
+    position: 'absolute',
+    top: Math.max(148, Math.round(SCREEN_HEIGHT * 0.2)),
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
+    zIndex: 6,
   },
   mainBackground: {
     flex: 1,
@@ -123,40 +130,88 @@ export default StyleSheet.create({
     fontSize: 14,
   },
   runHud: {
-    alignSelf: 'center',
-    marginTop: Math.max(10, Math.round(SCREEN_HEIGHT * 0.014)),
-    minWidth: Math.max(240, Math.round(SCREEN_WIDTH * 0.68)),
-    paddingHorizontal: Math.max(20, Math.round(SCREEN_WIDTH * 0.06)),
-    paddingVertical: 8,
+    zIndex: 2,
+    position: 'absolute',
+    top: Math.round(SCREEN_HEIGHT * 0.05),
+    left: -TOKKI_PADDING_H,
+    right: -TOKKI_PADDING_H,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  runHudInner: {
+    width: '100%',
+    minHeight: Math.max(58, Math.round(SCREEN_HEIGHT * 0.07)),
+    paddingHorizontal: Math.max(16, Math.round(SCREEN_WIDTH * 0.045)),
+    paddingVertical: 6,
+    borderRadius: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+    justifyContent: 'center',
     alignItems: 'center',
   },
   runTimerValue: {
     fontFamily: 'JUA',
-    fontSize: Math.max(44, Math.round(SCREEN_WIDTH * 0.12)),
-    color: '#2E313D',
-    letterSpacing: 1.2,
-    textShadowColor: 'rgba(255, 255, 255, 0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    fontSize: Math.max(40, Math.round(SCREEN_WIDTH * 0.108)),
+    color: '#1E3A5F',
+    letterSpacing: 1,
+    lineHeight: Math.max(42, Math.round(SCREEN_WIDTH * 0.112)),
+    textAlign: 'center',
+  },
+  runBgScroller: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    zIndex: 0,
+  },
+  runBgTile: {
+    height: '100%',
+    marginTop: '0%',
   },
   startButton: {
     position: 'absolute',
     bottom: START_BUTTON_BASE_BOTTOM,
     alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: START_BUTTON_PADDING_H,
-    paddingVertical: START_BUTTON_PADDING_V,
+    width: START_BUTTON_SIZE,
+    height: START_BUTTON_SIZE,
     borderRadius: START_BUTTON_RADIUS,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.22,
+        shadowRadius: 7,
+      },
+      android: {
+        elevation: 0,
+      },
+    }),
   },
-  fatButton: {
-    position: 'absolute',
-    bottom: BOTTOM_NAV_HEIGHT - 16,
-    left: '50%',
-    marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
-    backgroundColor: '#1f2937',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+  startButtonInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: START_BUTTON_RADIUS,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.86)',
+    overflow: 'hidden',
+    ...Platform.select({
+      android: {
+        elevation: 7,
+      },
+    }),
   },
   runningLockNotice: {
     position: 'absolute',
@@ -180,6 +235,11 @@ export default StyleSheet.create({
     fontFamily: 'JUA',
     fontWeight: 'bold',
     fontSize: START_BUTTON_FONT,
+    color: '#5B2D00',
+  },
+  startIcon: {
+    width: Math.max(50, Math.round(SCREEN_WIDTH * 0.14)),
+    height: Math.max(50, Math.round(SCREEN_WIDTH * 0.14)),
   },
   devHealthButton: {
     backgroundColor: '#1f2937',
@@ -224,6 +284,7 @@ export default StyleSheet.create({
     bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
+    zIndex: 2,
   },
   countdownOverlay: {
     position: 'absolute',
@@ -254,19 +315,24 @@ export default StyleSheet.create({
   },
   missionButton: {
     position: 'absolute',
-    top: 15, // 상단 여백
+    top: Math.max(108, Math.round(SCREEN_HEIGHT * 0.145)),
     right: 15, // 오른쪽 여백
     width: 50,
     height: 50,
     padding: 10,
-    backgroundColor: '#ca4949',
+    backgroundColor: 'rgba(235, 158, 158, 0.88)',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#7A2E2E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
     zIndex: 10,
   },
-  missionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  missionIcon: {
+    width: 34,
+    height: 34,
   },
 });

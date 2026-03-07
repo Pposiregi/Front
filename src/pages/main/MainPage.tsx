@@ -8,6 +8,7 @@ import React, {
 import {
   View,
   Text,
+  Image,
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
@@ -16,6 +17,7 @@ import {
   Animated,
   Alert,
   Platform,
+  Easing,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,7 +26,8 @@ import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
-import mainBackGround_day from '@assets/images/mainBackground_track.png';
+import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
+import { SCREEN_WIDTH } from '@styles/dimensions';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
@@ -40,7 +43,12 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
+const RUN_PET_SCALE = 0.7;
 const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
+const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
+const KCAL_PER_STEP = 0.04;
+const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
+const RUN_BG_LOOP_MS = 8000;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
@@ -73,6 +81,7 @@ import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
+import MainStatCards from './MainStatCards';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
 import { useAppDispatch } from '@store/index';
@@ -187,6 +196,8 @@ export const MainPage = () => {
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
+  const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
+  const runBgProgress = useRef(new Animated.Value(0)).current;
   const isAndroid13OrLower =
     Platform.OS === 'android' &&
     Number(Platform.Version) > 0 &&
@@ -208,6 +219,27 @@ export const MainPage = () => {
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+  const getTodayRunSecondsKey = useCallback(
+    () => `${DAILY_RUN_SECONDS_KEY_PREFIX}${formatDateKey(new Date())}`,
+    []
+  );
+
+  const appendTodayRunSeconds = useCallback(
+    async (addSeconds: number) => {
+      if (addSeconds <= 0) return;
+      try {
+        const key = getTodayRunSecondsKey();
+        const raw = await AsyncStorage.getItem(key);
+        const prev = Number(raw ?? '0');
+        const next = Math.max(0, prev) + Math.floor(addSeconds);
+        await AsyncStorage.setItem(key, String(next));
+        setTodayRunAccumulatedSec(next);
+      } catch (error) {
+        console.warn('[MainPage] 러닝 시간 누적 저장 실패', error);
+      }
+    },
+    [getTodayRunSecondsKey]
+  );
 
   useEffect(() => {
     // 러닝 중 여부를 전역 상태로 동기화한다.
@@ -251,11 +283,48 @@ export const MainPage = () => {
   }, [isTracking]);
 
   useEffect(() => {
+    if (!isTracking) {
+      runBgProgress.stopAnimation();
+      runBgProgress.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.timing(runBgProgress, {
+        toValue: 1,
+        duration: RUN_BG_LOOP_MS,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+      runBgProgress.stopAnimation();
+    };
+  }, [isTracking, runBgProgress]);
+
+  useEffect(() => {
     /**
      * 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
      */
     loadBodyGoals().then(setBodyGoals);
   }, []);
+
+  useEffect(() => {
+    const loadTodayRunAccumulatedSec = async () => {
+      try {
+        const key = getTodayRunSecondsKey();
+        const raw = await AsyncStorage.getItem(key);
+        setTodayRunAccumulatedSec(Math.max(0, Number(raw ?? '0')));
+      } catch (error) {
+        console.warn('[MainPage] 누적 러닝 시간 로드 실패', error);
+        setTodayRunAccumulatedSec(0);
+      }
+    };
+    loadTodayRunAccumulatedSec();
+  }, [getTodayRunSecondsKey]);
 
   /**
    * 오늘 몸 기록이 있는지 확인
@@ -387,6 +456,7 @@ export const MainPage = () => {
       if (result?.summary) {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
+        await appendTodayRunSeconds(result.summary.durationMs / 1000);
       }
       setEndFailureCount(0);
     } catch (err: any) {
@@ -396,7 +466,7 @@ export const MainPage = () => {
         err?.message ?? '러닝 종료 중 문제가 발생했어요.'
       );
     }
-  }, [endSession]);
+  }, [appendTodayRunSeconds, endSession]);
 
   const handleToggleFatVer = useCallback(() => {
     setFatVerIndex((prev) => {
@@ -451,6 +521,7 @@ export const MainPage = () => {
         if (result?.summary) {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
+          await appendTodayRunSeconds(result.summary.durationMs / 1000);
         }
         setEndFailureCount(0);
       } catch (err: any) {
@@ -483,6 +554,7 @@ export const MainPage = () => {
     }
     setCountdown(3);
   }, [
+    appendTodayRunSeconds,
     endSession,
     getSamsungHealthGuide,
     healthError,
@@ -702,6 +774,14 @@ export const MainPage = () => {
    * - 권한 거부/불러오기 실패 시 기본값으로 대체
    */
   const displayedSteps = healthSteps ?? 8954;
+  const todayTotalRunSec =
+    todayRunAccumulatedSec + (isTracking ? runningElapsedSec : 0);
+  const estimatedKcal = Math.round(displayedSteps * KCAL_PER_STEP);
+  const runPetRenderSize = Math.round(PET_RENDER_SIZE * RUN_PET_SCALE);
+  const runBgTranslateX = runBgProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, RUN_BG_TILE_WIDTH],
+  });
   return (
     <View style={styles.container}>
       {/*
@@ -760,19 +840,42 @@ export const MainPage = () => {
       </View>
       {isTracking ? (
         <View style={styles.mapContainer}>
-          {/* 지도 대신 PNG 배경 */}
-          <ImageBackground
-            source={mainBackGround_day}
-            style={styles.mainBackground}
-            resizeMode='cover'
-          >
+          <View style={styles.mainBackground}>
+            <Animated.View
+              style={[
+                styles.runBgScroller,
+                {
+                  left: -RUN_BG_TILE_WIDTH,
+                  width: RUN_BG_TILE_WIDTH * 3,
+                  transform: [{ translateX: runBgTranslateX }],
+                },
+              ]}
+            >
+              <Image
+                source={mainBackGroundWide}
+                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
+                resizeMode='stretch'
+              />
+              <Image
+                source={mainBackGroundWide}
+                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
+                resizeMode='stretch'
+              />
+              <Image
+                source={mainBackGroundWide}
+                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
+                resizeMode='stretch'
+              />
+            </Animated.View>
             <View style={styles.runHud}>
-              <Text style={styles.runTimerValue}>
-                {formatRunningElapsed(runningElapsedSec)}
-              </Text>
+              <View style={styles.runHudInner}>
+                <Text style={styles.runTimerValue}>
+                  {formatRunningElapsed(runningElapsedSec)}
+                </Text>
+              </View>
             </View>
             <PetRenderer
-              size={PET_RENDER_SIZE}
+              size={runPetRenderSize}
               templateId={runPetTemplateId}
               partTransforms={runPartTransforms}
               style={[
@@ -781,13 +884,13 @@ export const MainPage = () => {
                   transform: [
                     {
                       translateY:
-                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                        runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
                     },
                   ],
                 },
               ]}
             />
-          </ImageBackground>
+          </View>
         </View>
       ) : (
         // 배경 이미지 & 펫 이미지와 함께 메시지 표시
@@ -801,7 +904,11 @@ export const MainPage = () => {
             onPress={handleOpenMission}
             style={styles.missionButton}
           >
-            <Text style={styles.missionButtonText}>미션</Text>
+            <Image
+              source={require('@assets/images/Icon_colored/fb_mission.png')}
+              style={styles.missionIcon}
+              resizeMode='contain'
+            />
           </TouchableOpacity>
           <MissionModal
             visible={showMissionModal}
@@ -842,10 +949,12 @@ export const MainPage = () => {
               ]}
             />
           </Pressable>
+          <MainStatCards
+            stepCount={displayedSteps}
+            totalRunSec={todayTotalRunSec}
+            estimatedKcal={estimatedKcal}
+          />
           <View style={styles.messageRow}>
-            <Text style={styles.message}>
-              {`${displayedSteps.toLocaleString()}보 걸었어요!`}
-            </Text>
             {__DEV__ && (
               <TouchableOpacity
                 style={styles.devHealthButton}
@@ -865,6 +974,22 @@ export const MainPage = () => {
                 <Text style={styles.devHealthButtonText}>RESET</Text>
               </TouchableOpacity>
             )}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devHealthButton}
+                onPress={handleToggleFatVer}
+                accessibilityRole='button'
+                accessibilityLabel={`체형 테스트 pbf ${
+                  selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
+                }`}
+              >
+                <Text style={styles.devHealthButtonText}>
+                  {selectedPreviewPbf == null
+                    ? 'FAT:15'
+                    : `FAT:${selectedPreviewPbf}`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ImageBackground>
       )}
@@ -875,24 +1000,18 @@ export const MainPage = () => {
         accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
         onPress={handleToggleTracking}
       >
-        <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
+        <View style={styles.startButtonInner}>
+          {isTracking ? (
+            <Text style={styles.startText}>END</Text>
+          ) : (
+            <Image
+              source={require('@assets/images/Icon_colored/fb_run.png')}
+              style={styles.startIcon}
+              resizeMode='contain'
+            />
+          )}
+        </View>
       </TouchableOpacity>
-      {__DEV__ && (
-        <TouchableOpacity
-          style={styles.fatButton}
-          onPress={handleToggleFatVer}
-          accessibilityRole='button'
-          accessibilityLabel={`체형 테스트 pbf ${
-            selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
-          }`}
-        >
-          <Text style={styles.devHealthButtonText}>
-            {selectedPreviewPbf == null
-              ? '[fat:15]'
-              : `[fat:${selectedPreviewPbf}]`}
-          </Text>
-        </TouchableOpacity>
-      )}
       <BodyRecordPrompt
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}
