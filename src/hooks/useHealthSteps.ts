@@ -15,9 +15,9 @@ import {
   type GrantedHealthPermission,
 } from '@utils/healthConnect';
 import {
-  isStepSyncUnsupportedByPolicy,
-  STEP_SYNC_MESSAGES,
-} from '@utils/stepSyncPolicy';
+  getPreferredStepSyncProvider,
+  getStepSyncUnsupportedReason,
+} from '@utils/stepSyncProvider';
 
 type HealthStepsState = {
   steps: number | null;
@@ -105,10 +105,18 @@ const useHealthSteps = (): HealthStepsState => {
 
   const fetchSteps = async () => {
     if (Platform.OS !== 'android') return;
-    if (isStepSyncUnsupportedByPolicy()) {
-      setError(STEP_SYNC_MESSAGES.unsupported);
+    const provider = getPreferredStepSyncProvider();
+    const unsupportedReason = getStepSyncUnsupportedReason(provider);
+    if (unsupportedReason) {
+      setError(unsupportedReason);
       setSteps(null);
       return;
+    }
+    if (provider === 'samsung_health_sdk' && __DEV__) {
+      // Samsung Health SDK provider 구현 전까지는 기존 HC 경로를 임시 사용한다.
+      console.log(
+        '[STEP_SYNC] samsung_health_sdk 정책 구간, 임시로 Health Connect 경로 사용'
+      );
     }
     if (checkingRef.current) return;
     checkingRef.current = true;

@@ -16,9 +16,9 @@ import {
   isAndroid,
 } from '@utils/healthConnect';
 import {
-  isStepSyncUnsupportedByPolicy,
-  STEP_SYNC_MESSAGES,
-} from '@utils/stepSyncPolicy';
+  getPreferredStepSyncProvider,
+  getStepSyncUnsupportedReason,
+} from '@utils/stepSyncProvider';
 
 const logPrefix = '[FCM][background]';
 
@@ -28,9 +28,17 @@ const syncStepsForToday = async () => {
     console.log(`${logPrefix} skip sync: 안드로이드가 아닙니다. `);
     return;
   }
-  if (isStepSyncUnsupportedByPolicy()) {
-    console.log(`${logPrefix} skip sync: ${STEP_SYNC_MESSAGES.unsupported}`);
+  const provider = getPreferredStepSyncProvider();
+  const unsupportedReason = getStepSyncUnsupportedReason(provider);
+  if (unsupportedReason) {
+    console.log(`${logPrefix} skip sync: ${unsupportedReason}`);
     return;
+  }
+  if (provider === 'samsung_health_sdk') {
+    // Samsung Health SDK provider 구현 전까지는 기존 HC 경로를 임시 사용한다.
+    console.log(
+      `${logPrefix} samsung_health_sdk 정책 구간, 임시로 Health Connect 경로 사용`
+    );
   }
 
   const isInitialized = await initialize();
