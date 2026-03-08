@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, AppStateStatus, Platform } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initialize,
@@ -10,9 +10,10 @@ import {
 import {
   getStartOfToday,
   hasAllPermissions,
-  HEALTH_PERMISSIONS,
+  HEALTH_STEP_PERMISSIONS,
   HEALTH_STEPS_CACHE_KEY,
   ensureHealthConnectInstalledOrPrompt,
+  getCurrentGrantedPermissions,
   type GrantedHealthPermission,
 } from '@utils/healthConnect';
 import {
@@ -33,14 +34,12 @@ type HealthStepsState = {
 };
 
 const useHealthSteps = (): HealthStepsState => {
-  const BG_RATIONALE_SHOWN_KEY = 'fitpet:health:bgPermissionRationale';
   const [steps, setSteps] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [writing, setWriting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const checkingRef = useRef(false);
   const lastWriteEndRef = useRef<Date | null>(null);
-  const rationalePromiseRef = useRef<Promise<void> | null>(null);
   const permissionDeniedRef = useRef(false);
   const setupPendingRef = useRef(false);
   const lastErrorRef = useRef<string | null>(null);
@@ -93,40 +92,6 @@ const useHealthSteps = (): HealthStepsState => {
     }, 2000);
   };
 
-  const ensureBackgroundRationaleAcknowledged = async () => {
-    if (rationalePromiseRef.current) {
-      return rationalePromiseRef.current;
-    }
-
-    // BackgroundAccessPermission은 민감하므로 한 번은 목적을 안내한다.
-    const runner = (async () => {
-      const shown = await AsyncStorage.getItem(BG_RATIONALE_SHOWN_KEY);
-      if (shown) return;
-
-      const acknowledged = await new Promise<boolean>((resolve) => {
-        Alert.alert(
-          'Health Connect 백그라운드 권한 안내',
-          '백그라운드에서도 걸음 수를 동기화하기 위해 Health Connect 백그라운드 접근 권한이 필요합니다.',
-          [
-            { text: '취소', style: 'cancel', onPress: () => resolve(false) },
-            { text: '계속', onPress: () => resolve(true) },
-          ]
-        );
-      });
-      if (!acknowledged) {
-        throw new Error('백그라운드 권한 안내에 동의하지 않았습니다.');
-      }
-      await AsyncStorage.setItem(BG_RATIONALE_SHOWN_KEY, '1');
-    })();
-
-    rationalePromiseRef.current = runner;
-    try {
-      await runner;
-    } finally {
-      rationalePromiseRef.current = null;
-    }
-  };
-
   const ensureInitializedAndPermitted = async (showPrompt = false) => {
     const apiLevel = getAndroidApiLevel();
 
@@ -139,17 +104,24 @@ const useHealthSteps = (): HealthStepsState => {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
 
-    if (permissionDeniedRef.current && !showPrompt) {
+    const grantedBeforeRequest = await getCurrentGrantedPermissions();
+    if (hasAllPermissions(grantedBeforeRequest, HEALTH_STEP_PERMISSIONS)) {
+      permissionDeniedRef.current = false;
+      return;
+    }
+
+    if (!showPrompt) {
+      permissionDeniedRef.current = true;
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
       );
     }
 
-    const granted: GrantedHealthPermission[] = await requestPermission(
-      HEALTH_PERMISSIONS
+    const grantedAfterRequest: GrantedHealthPermission[] = await requestPermission(
+      HEALTH_STEP_PERMISSIONS
     );
 
-    if (!hasAllPermissions(granted)) {
+    if (!hasAllPermissions(grantedAfterRequest, HEALTH_STEP_PERMISSIONS)) {
       permissionDeniedRef.current = true;
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
@@ -157,7 +129,6 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     permissionDeniedRef.current = false;
-    await ensureBackgroundRationaleAcknowledged();
   };
 
   const loadCachedSteps = async () => {

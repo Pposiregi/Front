@@ -1,5 +1,6 @@
 import { Alert, Linking, Platform } from 'react-native';
 import {
+  getGrantedPermissions,
   getSdkStatus,
   type BackgroundAccessPermission,
   type Permission,
@@ -9,12 +10,17 @@ import {
   openHealthConnectSettings,
 } from 'react-native-health-connect';
 
-// 앱에서 사용하는 Health Connect 권한 세트
-export const HEALTH_PERMISSIONS: (Permission | BackgroundAccessPermission)[] = [
+// 포그라운드 걸음 수 조회/기록에 필요한 최소 권한 세트
+export const HEALTH_STEP_PERMISSIONS: Permission[] = [
   { accessType: 'read', recordType: 'Steps' },
   { accessType: 'write', recordType: 'Steps' },
-  { accessType: 'read', recordType: 'BackgroundAccessPermission' },
 ];
+
+// 백그라운드 동기화에 필요한 특수 권한은 별도로 관리한다.
+export const HEALTH_BACKGROUND_PERMISSION: BackgroundAccessPermission = {
+  accessType: 'read',
+  recordType: 'BackgroundAccessPermission',
+};
 
 export const HEALTH_CONNECT_PROVIDER_PACKAGE = 'com.google.android.apps.healthdata';
 export const HEALTH_CONNECT_INSTALL_URL = `https://play.google.com/store/apps/details?id=${HEALTH_CONNECT_PROVIDER_PACKAGE}`;
@@ -107,15 +113,20 @@ export type GrantedHealthPermission =
 
 // 요청한 권한이 모두 허용됐는지 검사
 export const hasAllPermissions = (
-  granted: GrantedHealthPermission[]
+  granted: GrantedHealthPermission[],
+  requiredPermissions: GrantedHealthPermission[]
 ): boolean => {
-  return HEALTH_PERMISSIONS.every((required) =>
+  return requiredPermissions.every((required) =>
     granted.some(
       (permission) =>
         permission.recordType === required.recordType &&
         permission.accessType === required.accessType
     )
   );
+};
+
+export const getCurrentGrantedPermissions = async () => {
+  return (await getGrantedPermissions()) as GrantedHealthPermission[];
 };
 
 // 금일 0시~현재 시각 구간 계산
