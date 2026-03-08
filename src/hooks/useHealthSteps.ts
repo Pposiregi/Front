@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, Platform } from 'react-native';
+import { Alert, AppState, AppStateStatus, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initialize,
@@ -14,6 +14,8 @@ import {
   HEALTH_STEPS_CACHE_KEY,
   ensureHealthConnectInstalledOrPrompt,
   getCurrentGrantedPermissions,
+  hasBackgroundPermission,
+  HEALTH_BACKGROUND_PERMISSION,
   type GrantedHealthPermission,
 } from '@utils/healthConnect';
 import {
@@ -34,6 +36,7 @@ type HealthStepsState = {
 };
 
 const useHealthSteps = (): HealthStepsState => {
+  const BG_RATIONALE_SHOWN_KEY = 'fitpet:health:bgPermissionRationale';
   const [steps, setSteps] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [writing, setWriting] = useState(false);
@@ -41,6 +44,7 @@ const useHealthSteps = (): HealthStepsState => {
   const checkingRef = useRef(false);
   const lastWriteEndRef = useRef<Date | null>(null);
   const permissionDeniedRef = useRef(false);
+  const backgroundPermissionPromptedRef = useRef(false);
   const setupPendingRef = useRef(false);
   const lastErrorRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -92,6 +96,89 @@ const useHealthSteps = (): HealthStepsState => {
     }, 2000);
   };
 
+  const maybeRequestBackgroundPermission = async (showPrompt = false) => {
+    if (!showPrompt || backgroundPermissionPromptedRef.current) {
+      return;
+    }
+
+    const granted = await getCurrentGrantedPermissions();
+    if (!hasAllPermissions(granted, HEALTH_STEP_PERMISSIONS)) {
+      return;
+    }
+    if (hasBackgroundPermission(granted)) {
+      return;
+    }
+
+    backgroundPermissionPromptedRef.current = true;
+
+    const shown = await AsyncStorage.getItem(BG_RATIONALE_SHOWN_KEY);
+    if (!shown) {
+      const acknowledged = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          '백그라운드 걸음 수 동기화',
+          '앱이 꺼져 있거나 화면이 꺼진 상태에서도 걸음 수를 동기화하려면 Health Connect 백그라운드 권한이 필요합니다.',
+          [
+            { text: '나중에', style: 'cancel', onPress: () => resolve(false) },
+            { text: '권한 설정', onPress: () => resolve(true) },
+          ]
+        );
+      });
+
+      await AsyncStorage.setItem(BG_RATIONALE_SHOWN_KEY, '1');
+      if (!acknowledged) {
+        return;
+      }
+    }
+
+    try {
+      await requestPermission([HEALTH_BACKGROUND_PERMISSION]);
+    } catch (err) {
+      if (__DEV__) {
+        console.log('[HC] background permission request skipped/failed', err);
+      }
+    }
+  };
+
+  const syncGrantedPermissionState = async () => {
+    const apiLevel = getAndroidApiLevel();
+    if (apiLevel == null) return false;
+
+    await ensureHealthConnectInstalledOrPrompt(apiLevel, {
+      showPrompt: false,
+    });
+
+    const isInitialized = await initialize();
+    if (!isInitialized) {
+      throw new Error('Health Connect를 사용할 수 없습니다.');
+    }
+
+    const granted = await getCurrentGrantedPermissions();
+    const hasStepPermissions = hasAllPermissions(
+      granted,
+      HEALTH_STEP_PERMISSIONS
+    );
+
+    permissionDeniedRef.current = !hasStepPermissions;
+    setupPendingRef.current =
+      shouldPausePollingForSetup() && !hasStepPermissions;
+
+    if (hasStepPermissions) {
+      setStableError(null);
+      if (shouldPausePollingForSetup()) {
+        resumePolling();
+      }
+      return true;
+    }
+
+    if (shouldPausePollingForSetup()) {
+      pausePollingForSetup();
+    }
+    setStableError(
+      'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
+    );
+    return false;
+  };
+
   const ensureInitializedAndPermitted = async (showPrompt = false) => {
     const apiLevel = getAndroidApiLevel();
 
@@ -107,6 +194,7 @@ const useHealthSteps = (): HealthStepsState => {
     const grantedBeforeRequest = await getCurrentGrantedPermissions();
     if (hasAllPermissions(grantedBeforeRequest, HEALTH_STEP_PERMISSIONS)) {
       permissionDeniedRef.current = false;
+      await maybeRequestBackgroundPermission(showPrompt);
       return;
     }
 
@@ -129,6 +217,7 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     permissionDeniedRef.current = false;
+    await maybeRequestBackgroundPermission(showPrompt);
   };
 
   const loadCachedSteps = async () => {
@@ -272,12 +361,15 @@ const useHealthSteps = (): HealthStepsState => {
 
     const handleAppStateChange = (state: AppStateStatus) => {
       if (state === 'active') {
-        // 앱 복귀 시 권한 재확인 경로를 열어두기 위해 실패 플래그 리셋
-        permissionDeniedRef.current = false;
+        backgroundPermissionPromptedRef.current = false;
         (async () => {
-          await fetchSteps(true);
-          if (!pollingStoppedRef.current && !setupPendingRef.current) {
-            resumePolling();
+          try {
+            const hasGrantedPermissions = await syncGrantedPermissionState();
+            await fetchSteps(hasGrantedPermissions ? false : true);
+          } catch (err) {
+            if (__DEV__) {
+              console.log('[HC] active permission sync failed', err);
+            }
           }
         })();
       } else if (state === 'background' || state === 'inactive') {

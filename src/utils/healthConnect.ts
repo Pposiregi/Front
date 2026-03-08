@@ -129,6 +129,11 @@ export const getCurrentGrantedPermissions = async () => {
   return (await getGrantedPermissions()) as GrantedHealthPermission[];
 };
 
+export const hasBackgroundPermission = (
+  granted: GrantedHealthPermission[]
+): boolean =>
+  hasAllPermissions(granted, [HEALTH_BACKGROUND_PERMISSION]);
+
 // 금일 0시~현재 시각 구간 계산
 export const getStartOfToday = () => {
   // KST(UTC+9) 기준으로 오늘 00:00 ~ 현재 시각 구간을 만든다.

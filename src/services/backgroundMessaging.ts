@@ -10,6 +10,8 @@ import {
   getStartOfToday,
   HEALTH_STEPS_CACHE_KEY,
   ensureHealthConnectInstalledOrPrompt,
+  getCurrentGrantedPermissions,
+  hasBackgroundPermission,
   isAndroid,
 } from '@utils/healthConnect';
 import {
@@ -49,7 +51,12 @@ const syncStepsForToday = async () => {
   }
 
   // 백그라운드에서는 사용자 인터랙션 없이 읽기만 수행.
-  // 권한은 포그라운드 `useHealthSteps`에서만 요청하고, 여기서는 미설치/가용성 실패만 선차단한다.
+  // background 특수 권한이 없으면 foreground 동작을 깨지 않도록 조용히 skip 한다.
+  const granted = await getCurrentGrantedPermissions();
+  if (!hasBackgroundPermission(granted)) {
+    console.log(`${logPrefix} skip sync: background permission not granted`);
+    return;
+  }
 
   const { start, end } = getStartOfToday();
   const result = await readRecords('Steps', {
