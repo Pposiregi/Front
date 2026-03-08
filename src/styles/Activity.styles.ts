@@ -1,38 +1,27 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const { width: deviceWidth } = Dimensions.get('window');
 const spacing = {
-  xxs: Math.max(2, Math.round(deviceWidth * 0.005)),
-  xs: Math.max(4, Math.round(deviceWidth * 0.01)),
-  sm: Math.max(6, Math.round(deviceWidth * 0.015)),
-  md: Math.max(8, Math.round(deviceWidth * 0.02)),
-  lg: Math.max(12, Math.round(deviceWidth * 0.03)),
-  xl: Math.max(16, Math.round(deviceWidth * 0.04)),
-  xxl: Math.max(20, Math.round(deviceWidth * 0.05)),
+  xxs: Math.max(Spacing.xxs, Math.round(deviceWidth * 0.005)),
+  xs: Math.max(Spacing.xs, Math.round(deviceWidth * 0.01)),
+  sm: Math.max(Spacing.sm - 2, Math.round(deviceWidth * 0.015)),
+  md: Math.max(Spacing.sm, Math.round(deviceWidth * 0.02)),
+  lg: Math.max(Spacing.md, Math.round(deviceWidth * 0.03)),
+  xl: Math.max(Spacing.lg, Math.round(deviceWidth * 0.04)),
+  xxl: Math.max(Spacing.xl, Math.round(deviceWidth * 0.05)),
 };
 const contentPadding = spacing.xl;
 const chartPadding = spacing.lg;
-const cardRadius = Math.max(14, Math.round(deviceWidth * 0.04));
-const chartRadius = Math.max(10, Math.round(deviceWidth * 0.03));
-
-const colors = {
-  background: '#F3F4F6',
-  surface: '#FFFFFF',
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  textTitle: '#1F2937',
-  divider: '#E5E7EB',
-  accent: '#F97316',
-  accentSoft: '#FDE68A',
-  badgeSuccess: '#DCFCE7',
-  badgeProgress: '#E0E7FF',
-  shadow: '#000',
-};
+const cardRadius = Math.max(Radius.md + 2, Math.round(deviceWidth * 0.04));
+const chartRadius = Math.max(Radius.sm + 2, Math.round(deviceWidth * 0.03));
+const headerFont = Math.max(Typography.h1, Math.round(deviceWidth * 0.06));
+const subHeaderFont = Math.max(Typography.bodySmall, Math.round(deviceWidth * 0.035));
+const metaFont = Math.max(Typography.caption - 1, Math.round(deviceWidth * 0.028));
+const metricFont = Math.max(Typography.body, Math.round(deviceWidth * 0.042));
 
 const cardShadow = {
-  shadowColor: colors.shadow,
+  ...Shadows.soft,
   shadowOpacity: 0.07,
   shadowRadius: 12,
   shadowOffset: { width: 0, height: 6 },
@@ -40,12 +29,12 @@ const cardShadow = {
 };
 
 export const activityTheme = {
-  colors,
+  colors: Colors,
   spacing,
   radius: {
     card: cardRadius,
     chart: chartRadius,
-    pill: 999,
+    pill: Radius.pill,
   },
 };
 
@@ -73,14 +62,14 @@ export const styles = StyleSheet.create({
   },
   header: {
     fontFamily: Fonts.JUA,
-    fontSize: 24,
-    color: colors.textTitle,
+    fontSize: headerFont,
+    color: Colors.textPrimary,
     textAlign: 'center',
   },
   headerSub: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 12,
-    color: colors.textMuted,
+    fontSize: Typography.caption,
+    color: Colors.textMuted,
     marginTop: spacing.xxs,
   },
   arrowButton: {
@@ -91,21 +80,21 @@ export const styles = StyleSheet.create({
     opacity: 0.4,
   },
   arrowText: {
-    fontSize: 20,
-    color: colors.textSecondary,
+    fontSize: Typography.h2,
+    color: Colors.textSecondary,
     fontFamily: Fonts.JUA,
   },
   arrowTextDisabled: {
-    color: colors.textMuted,
+    color: Colors.textMuted,
   },
   subHeaderText: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 14,
-    color: colors.textSecondary,
+    fontSize: subHeaderFont,
+    color: Colors.textSecondary,
     marginTop: spacing.xs,
   },
   summaryCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
     ...cardShadow,
@@ -116,13 +105,13 @@ export const styles = StyleSheet.create({
   },
   summaryDateText: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: metaFont,
+    color: Colors.textMuted,
   },
   summaryNotice: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textSecondary,
+    fontSize: metaFont,
+    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.md,
   },
@@ -140,13 +129,13 @@ export const styles = StyleSheet.create({
   },
   progressValue: {
     fontFamily: Fonts.JUA,
-    fontSize: 20,
-    color: colors.textPrimary,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
   },
   progressTarget: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: metaFont,
+    color: Colors.textMuted,
     marginTop: spacing.xxs,
   },
   heroMetrics: {
@@ -161,43 +150,43 @@ export const styles = StyleSheet.create({
   },
   heroMetricLabel: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textSecondary,
+    fontSize: metaFont,
+    color: Colors.textSecondary,
   },
   heroMetricValue: {
     fontFamily: Fonts.JUA,
-    fontSize: 16,
-    color: colors.textPrimary,
+    fontSize: metricFont,
+    color: Colors.textPrimary,
   },
   heroMetricDivider: {
     height: 1,
-    backgroundColor: colors.divider,
+    backgroundColor: Colors.divider,
     alignSelf: 'stretch',
   },
   heroComment: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
     marginTop: spacing.md,
   },
   badge: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xs,
-    borderRadius: 999,
+    borderRadius: Radius.pill,
   },
   badgeSuccess: {
-    backgroundColor: colors.badgeSuccess,
+    backgroundColor: Colors.badgeSuccess,
   },
   badgeProgress: {
-    backgroundColor: colors.badgeProgress,
+    backgroundColor: Colors.badgeProgress,
   },
   badgeMuted: {
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
   badgeText: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textPrimary,
+    fontSize: metaFont,
+    color: Colors.textPrimary,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -209,25 +198,25 @@ export const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
   },
   summaryValue: {
     fontFamily: Fonts.JUA,
-    fontSize: 20,
-    color: colors.textPrimary,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
     marginTop: spacing.sm,
   },
   summaryUnit: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: metaFont,
+    color: Colors.textMuted,
     marginTop: spacing.xxs,
   },
   summaryDivider: {
     width: 1,
     height: 46,
-    backgroundColor: colors.divider,
+    backgroundColor: Colors.divider,
   },
   sectionHeader: {
     marginTop: spacing.xl,
@@ -243,21 +232,21 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.JUA,
     fontSize: 18,
-    color: colors.textTitle,
+    color: Colors.textPrimary,
     marginRight: spacing.md,
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 999,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.pill,
     padding: spacing.xxs,
     borderWidth: 1,
-    borderColor: colors.divider,
+    borderColor: Colors.divider,
   },
   segmentedButton: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.lg,
-    borderRadius: 999,
+    borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: 'transparent',
     alignItems: 'center',
@@ -265,23 +254,23 @@ export const styles = StyleSheet.create({
     minWidth: Math.max(64, Math.round(deviceWidth * 0.18)),
   },
   segmentedButtonActive: {
-    backgroundColor: colors.surface,
-    borderColor: colors.accent,
+    backgroundColor: Colors.surface,
+    borderColor: Colors.accentStrong,
     ...cardShadow,
   },
   segmentedText: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
   },
   segmentedTextActive: {
     fontFamily: Fonts.JUA,
-    color: colors.accent,
+    color: Colors.accentStrong,
   },
   itemContainer: {
     padding: spacing.lg,
     marginVertical: spacing.xs,
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -292,20 +281,20 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     marginVertical: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: colors.divider,
+    borderColor: Colors.divider,
     ...cardShadow,
   },
   listMarker: {
     width: Math.max(10, Math.round(deviceWidth * 0.03)),
     height: Math.max(10, Math.round(deviceWidth * 0.03)),
-    borderRadius: 999,
-    backgroundColor: colors.accent,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.accentStrong,
     marginRight: spacing.md,
   },
   listTextColumn: {
@@ -315,20 +304,20 @@ export const styles = StyleSheet.create({
   listTitle: {
     fontFamily: Fonts.JUA,
     fontSize: 14,
-    color: colors.textPrimary,
+    color: Colors.textPrimary,
     lineHeight: 18,
   },
   listSubtitle: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     marginTop: spacing.xxs,
     lineHeight: 16,
   },
   listMeta: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: metaFont,
+    color: Colors.textMuted,
     marginTop: spacing.xxs,
   },
   listRight: {
@@ -347,10 +336,10 @@ export const styles = StyleSheet.create({
   listValue: {
     fontFamily: Fonts.JUA,
     fontSize: 14,
-    color: colors.textPrimary,
+    color: Colors.textPrimary,
   },
   listValueAccent: {
-    color: colors.accent,
+    color: Colors.accentStrong,
   },
   listValueNumber: {
     fontSize: 15,
@@ -360,8 +349,8 @@ export const styles = StyleSheet.create({
   listValueUnit: {
     marginLeft: spacing.xxs,
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textSecondary,
+    fontSize: metaFont,
+    color: Colors.textSecondary,
   },
   sessionTextColumn: {
     flexDirection: 'column',
@@ -369,24 +358,24 @@ export const styles = StyleSheet.create({
   dateText: {
     fontFamily: Fonts.JUA,
     fontSize: 14,
-    color: colors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: spacing.xxs,
   },
   timeText: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     marginRight: spacing.xxl,
   },
   distanceText: {
     fontFamily: Fonts.JUA,
     fontSize: 16,
-    color: colors.accent,
+    color: Colors.accentStrong,
     marginLeft: 'auto',
   },
   detailLink: {
     fontSize: 16,
-    color: colors.textMuted,
+    color: Colors.textMuted,
     fontFamily: Fonts.JUA,
     marginLeft: spacing.sm,
     lineHeight: 16,
@@ -398,7 +387,7 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.JUA,
   },
   chartCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     paddingVertical: chartPadding,
     paddingHorizontal: chartPadding,
@@ -416,51 +405,51 @@ export const styles = StyleSheet.create({
   chartMetaDivider: {
     width: 1,
     height: 24,
-    backgroundColor: colors.divider,
+    backgroundColor: Colors.divider,
     marginHorizontal: spacing.lg,
   },
   chartMetaLabel: {
     fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: metaFont,
+    color: Colors.textMuted,
     marginBottom: spacing.xxs,
   },
   chartMetaValue: {
     fontFamily: Fonts.JUA,
     fontSize: 15,
-    color: colors.textPrimary,
+    color: Colors.textPrimary,
   },
   chartMetaUnit: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 10,
-    color: colors.textMuted,
+    color: Colors.textMuted,
   },
   lineChartStyle: {
     borderRadius: chartRadius,
     alignSelf: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
   },
   loadingIndicator: {
     marginTop: spacing.xxl,
   },
   emptyCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
     borderWidth: 1,
-    borderColor: colors.divider,
+    borderColor: Colors.divider,
     ...cardShadow,
   },
   emptyCardTitle: {
     fontFamily: Fonts.JUA,
     fontSize: 16,
-    color: colors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: spacing.sm,
   },
   emptyCardText: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
   },
   chartEmpty: {
     alignItems: 'center',
@@ -470,6 +459,6 @@ export const styles = StyleSheet.create({
   chartEmptyText: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 12,
-    color: colors.textMuted,
+    color: Colors.textMuted,
   },
 });

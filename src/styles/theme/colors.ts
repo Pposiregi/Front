@@ -15,8 +15,7 @@ export const Colors = {
   accent: '#FEC288',
   accentSoft: '#FFEFE0',
   accentStrong: '#FF9F43',
-  accentTint: 'rgba(254, 194, 136, 0.35)',
-  accentTintStrong: 'rgba(254, 194, 136, 0.62)',
+  accentDeep: '#C2410C',
 
   disabled: '#ccc',
 
@@ -27,11 +26,15 @@ export const Colors = {
   success: '#4CAF50',
 
   error: '#D9534F',
+  errorSoft: '#FEE2E2',
+  errorText: '#991B1B',
 
   badgeSuccess: '#DCFCE7',
   badgeProgress: '#E0E7FF',
 
   overlayDark: 'rgba(0,0,0,0.6)',
+  overlaySoft: 'rgba(0,0,0,0.3)',
+  shadowSoft: 'rgba(0, 0, 0, 0.2)',
   shadow: '#000',
 
   devButton: '#1F2937',

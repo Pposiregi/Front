@@ -12,11 +12,15 @@ import {
   View,
 } from 'react-native';
 import styles from '@styles/Meal.styles';
+import { Colors } from '@styles/theme';
 import modifyIcon from '@assets/images/icon/modify_icon.png';
 import deleteIcon from '@assets/images/icon/delete_icon.png';
 import mealPlaceholderImage from '@assets/images/meal.png';
 import { isZeroSizedMealImage, resolveMealImageSource } from '@utils/imageUtil';
 import type { MealModalProps } from './MealModal.types';
+
+const MODAL_LOADING_COLOR = Colors.infoStrong;
+const MODAL_MUTED_LOADING_COLOR = Colors.textMuted;
 
 /**
  * 지정된 날짜의 식단을 조회하고 수정할 수 있는 모달을 렌더링한다.
@@ -292,7 +296,7 @@ function MealModal({
             <View style={styles.modalMealList}>
               {isLoadingMeals ? (
                 <View style={styles.modalMealLoadingContainer}>
-                  <ActivityIndicator color='#5F6BEA' />
+                  <ActivityIndicator color={MODAL_LOADING_COLOR} />
                 </View>
               ) : (
                 <ScrollView
@@ -339,7 +343,7 @@ function MealModal({
                             >
                               {isDeleting ? (
                                 <ActivityIndicator
-                                  color='#8F95AF'
+                                  color={MODAL_MUTED_LOADING_COLOR}
                                   size='small'
                                 />
                               ) : (
@@ -415,7 +419,7 @@ function MealModal({
                     onChangeText={onChangeEditingMealTitle}
                     placeholder='메뉴 이름 수정'
                     style={[styles.modalAddInput, styles.modalAddInputName]}
-                    placeholderTextColor='#B4B8C9'
+                    placeholderTextColor={Colors.textMuted}
                     editable={!isUpdatingMeal && !disableInputs}
                   />
                   <TextInput
@@ -424,7 +428,7 @@ function MealModal({
                     placeholder='칼로리 수정'
                     keyboardType='numeric'
                     style={[styles.modalAddInput, styles.modalAddInputCalorie]}
-                    placeholderTextColor='#B4B8C9'
+                    placeholderTextColor={Colors.textMuted}
                     editable={!isUpdatingMeal && !disableInputs}
                   />
                   <TouchableOpacity
@@ -455,7 +459,7 @@ function MealModal({
                     disabled={isUpdatingMeal || disableInputs}
                   >
                     {isUpdatingMeal ? (
-                      <ActivityIndicator color='#FFFFFF' />
+                      <ActivityIndicator color={Colors.surface} />
                     ) : (
                       <Text style={styles.modalEditSubmitLabel}>수정 완료</Text>
                     )}
@@ -472,7 +476,7 @@ function MealModal({
                   onChangeText={onChangeMealTitle}
                   placeholder='메뉴 이름'
                   style={[styles.modalAddInput, styles.modalAddInputName]}
-                  placeholderTextColor='#B4B8C9'
+                  placeholderTextColor={Colors.textMuted}
                   editable={!disableInputs}
                 />
                 <TextInput
@@ -481,7 +485,7 @@ function MealModal({
                   placeholder='kcal'
                   keyboardType='numeric'
                   style={[styles.modalAddInput, styles.modalAddInputCalorie]}
-                  placeholderTextColor='#B4B8C9'
+                  placeholderTextColor={Colors.textMuted}
                   editable={!disableInputs}
                 />
                 <TouchableOpacity
@@ -515,7 +519,7 @@ function MealModal({
               disabled={disableSave || isSaving}
             >
               {isSaving ? (
-                <ActivityIndicator color='#FFFFFF' />
+                <ActivityIndicator color={Colors.surface} />
               ) : (
                 <Text style={styles.modalPrimaryButtonLabel}>저장하기</Text>
               )}

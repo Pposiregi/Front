@@ -204,9 +204,9 @@ export default StyleSheet.create({
     paddingHorizontal: RUN_LOCK_NOTICE_HORIZONTAL_PADDING,
     paddingVertical: RUN_LOCK_NOTICE_VERTICAL_PADDING,
     borderRadius: Radius.pill,
-    backgroundColor: Colors.accentTint,
+    backgroundColor: Colors.accentSoft,
     borderWidth: 1,
-    borderColor: Colors.accentTintStrong,
+    borderColor: Colors.accent,
   },
   startText: {
     fontFamily: Fonts.JUA,

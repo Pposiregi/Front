@@ -11,6 +11,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import styles from '@styles/ProfilePage.styles';
+import { Colors } from '@styles/theme';
 import { ProfileStackNavigationProp } from '@navigation/profileStack';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import {
@@ -31,10 +32,36 @@ import ProfileImageModal from './ProfileImageModal';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const CONTENT_PADDING = Math.max(16, Math.round(DEVICE_WIDTH * 0.048));
+const CHART_WIDTH = DEVICE_WIDTH - Math.max(12, CONTENT_PADDING * 1.5) * 2;
+const CHART_HEIGHT = Math.max(188, Math.round(DEVICE_WIDTH * 0.52));
+const CHART_STROKE_WIDTH = Math.max(2, Math.round(DEVICE_WIDTH * 0.008));
+const CHART_DOT_RADIUS = Math.max(3, Math.round(DEVICE_WIDTH * 0.01));
+const CHART_DOT_STROKE_WIDTH = Math.max(2, Math.round(DEVICE_WIDTH * 0.005));
+const HEADER_HIT_SLOP = Math.max(8, Math.round(DEVICE_WIDTH * 0.025));
 
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
 const FALLBACK_BODY_FAT = 0;
+const DEFAULT_PROGRESS_BAR_COLOR = Colors.infoStrong;
+const BODY_FAT_PROGRESS_BAR_COLOR = Colors.accentStrong;
+
+const hexToRgba = (hex: string, opacity = 1) => {
+  const normalized = hex.replace('#', '');
+  const safeHex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : normalized;
+
+  const value = parseInt(safeHex, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 type MetricCardProps = {
   label: string;
@@ -51,7 +78,7 @@ const MetricCard = ({
   unit,
   aim,
   progress,
-  barColor = '#9AAAFE',
+  barColor = DEFAULT_PROGRESS_BAR_COLOR,
 }: MetricCardProps) => {
   const progressPercent = Math.min(Math.max(progress ?? 0, 0), 1) * 100;
 
@@ -85,7 +112,6 @@ const MetricCard = ({
 
 function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
-  const chartWidth = DEVICE_WIDTH - Math.max(12, CONTENT_PADDING * 1.5) * 2;
 
   const [histories, setHistories] = useState<BodyHistoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,13 +191,13 @@ function ProfilePage() {
       datasets: [
         {
           data: [0, 0, 0, 0, 0, 0, 0],
-          color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
-          strokeWidth: 3,
+          color: (opacity = 1) => hexToRgba(Colors.accentStrong, opacity),
+          strokeWidth: CHART_STROKE_WIDTH,
         },
         {
           data: [1, 0, 1, 0, 1, 0, 1],
-          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-          strokeWidth: 3,
+          color: (opacity = 1) => hexToRgba(Colors.info, opacity),
+          strokeWidth: CHART_STROKE_WIDTH,
         },
       ],
       legend: ['체중(kg)', '체지방률(%)'],
@@ -200,13 +226,13 @@ function ProfilePage() {
       datasets: [
         {
           data: recent.map((history) => history.weightKg),
-          color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
-          strokeWidth: 3,
+          color: (opacity = 1) => hexToRgba(Colors.accentStrong, opacity),
+          strokeWidth: CHART_STROKE_WIDTH,
         },
         {
           data: recent.map((history) => history.pbf),
-          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-          strokeWidth: 3,
+          color: (opacity = 1) => hexToRgba(Colors.info, opacity),
+          strokeWidth: CHART_STROKE_WIDTH,
         },
       ],
       legend: ['체중(kg)', '체지방률(%)'],
@@ -251,19 +277,19 @@ function ProfilePage() {
   );
 
   const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
+    backgroundGradientFrom: Colors.surface,
+    backgroundGradientTo: Colors.surface,
     decimalPlaces: 1,
-    color: (opacity = 1) => `rgba(245, 134, 52, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
+    color: (opacity = 1) => hexToRgba(Colors.accentStrong, opacity),
+    labelColor: (opacity = 1) => hexToRgba(Colors.textSecondary, opacity),
     propsForBackgroundLines: {
-      stroke: '#F3F4F6',
+      stroke: Colors.divider,
       strokeDasharray: '0',
     },
     propsForDots: {
-      r: '4',
-      strokeWidth: '2',
-      stroke: '#fff',
+      r: `${CHART_DOT_RADIUS}`,
+      strokeWidth: `${CHART_DOT_STROKE_WIDTH}`,
+      stroke: Colors.surface,
     },
     useShadowColorFromDataset: false,
   };
@@ -278,7 +304,7 @@ function ProfilePage() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#111827' />
+        <ActivityIndicator size='large' color={Colors.textPrimary} />
       </View>
     );
   }
@@ -300,7 +326,7 @@ function ProfilePage() {
             <Pressable
               style={styles.gearButton}
               onPress={() => navigation.navigate('ProfileSettings')}
-              hitSlop={10}
+              hitSlop={HEADER_HIT_SLOP}
             >
               <Text style={styles.gearText}>⚙️</Text>
             </Pressable>
@@ -314,7 +340,7 @@ function ProfilePage() {
           <Pressable
             style={styles.recordButton}
             onPress={() => setRecordModalVisible(true)}
-            hitSlop={6}
+            hitSlop={HEADER_HIT_SLOP}
           >
             <Text style={styles.recordIcon}>✏️</Text>
             <Text style={styles.recordText}>기록하기</Text>
@@ -342,7 +368,7 @@ function ProfilePage() {
           unit='%'
           aim={bodyFatAim}
           progress={bodyFatProgress}
-          barColor='#F58634'
+          barColor={BODY_FAT_PROGRESS_BAR_COLOR}
         />
 
         <View style={[styles.sectionHeader, styles.chartHeader]}>
@@ -352,8 +378,8 @@ function ProfilePage() {
         <View style={styles.chartCard}>
           <LineChart
             data={chartData}
-            width={chartWidth}
-            height={200}
+            width={CHART_WIDTH}
+            height={CHART_HEIGHT}
             chartConfig={chartConfig}
             bezier
             fromZero
