@@ -1,6 +1,10 @@
 export const Colors = {
   background: '#F3F4F6',
   surface: '#FFFFFF',
+  surfaceOverlay: 'rgba(255, 255, 255, 0.72)',
+  surfaceOverlayStrong: 'rgba(255, 255, 255, 0.78)',
+  surfaceOverlaySolid: 'rgba(255, 255, 255, 0.86)',
+  surfaceBorderOverlay: 'rgba(255, 255, 255, 0.6)',
 
   textPrimary: '#2B2B2B',
   textSecondary: '#6B7280',
@@ -11,6 +15,8 @@ export const Colors = {
   accent: '#FEC288',
   accentSoft: '#FFEFE0',
   accentStrong: '#FF9F43',
+  accentTint: 'rgba(254, 194, 136, 0.35)',
+  accentTintStrong: 'rgba(254, 194, 136, 0.62)',
 
   disabled: '#ccc',
 
