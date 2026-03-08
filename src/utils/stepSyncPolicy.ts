@@ -1,10 +1,8 @@
 import { Platform } from 'react-native';
 
 export const STEP_SYNC_OS_POLICY = {
-  unsupportedMaxApi: 28, // Android 8 이하 + Android 9(정책상 미지원)
-  samsungMinApi: 29,
-  samsungMaxApi: 33,
-  healthConnectMinApi: 34,
+  unsupportedMaxApi: 27, // Android 8 이하 미지원
+  healthConnectMinApi: 28, // Android 9+는 Health Connect 단일 경로
 } as const;
 
 export const STEP_SYNC_UPLOAD_POLICY = {
@@ -31,4 +29,3 @@ export const isStepSyncUnsupportedByPolicy = (): boolean => {
   if (api == null) return false;
   return api <= STEP_SYNC_OS_POLICY.unsupportedMaxApi;
 };
-

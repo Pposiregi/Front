@@ -6,7 +6,6 @@ import {
 
 export type StepSyncProviderKind =
   | 'unsupported'
-  | 'samsung_health_sdk'
   | 'health_connect';
 
 export const getPreferredStepSyncProvider = (): StepSyncProviderKind => {
@@ -15,12 +14,6 @@ export const getPreferredStepSyncProvider = (): StepSyncProviderKind => {
 
   if (apiLevel <= STEP_SYNC_OS_POLICY.unsupportedMaxApi) {
     return 'unsupported';
-  }
-  if (
-    apiLevel >= STEP_SYNC_OS_POLICY.samsungMinApi &&
-    apiLevel <= STEP_SYNC_OS_POLICY.samsungMaxApi
-  ) {
-    return 'samsung_health_sdk';
   }
   if (apiLevel >= STEP_SYNC_OS_POLICY.healthConnectMinApi) {
     return 'health_connect';
@@ -38,4 +31,3 @@ export const getStepSyncUnsupportedReason = (
   }
   return null;
 };
-

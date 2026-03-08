@@ -15,7 +15,6 @@ import {
   Pressable,
   Animated,
   Alert,
-  Platform,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -194,18 +193,6 @@ export const MainPage = () => {
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
-  const isAndroid13OrLower =
-    Platform.OS === 'android' &&
-    Number(Platform.Version) > 0 &&
-    Number(Platform.Version) <= 33;
-  const getSamsungHealthGuide = useCallback(() => {
-    return (
-      'Android 13 이하에서는 삼성 헬스 연동이 필요합니다.\n' +
-      '1) 삼성 헬스 → 더 보기(⋮) → 설정 → 헬스 커넥트 → 앱 권한 → 삼성 헬스 → 모두 허용\n' +
-      '2) 삼성 헬스 → 설정 → 개인정보 → 민감정보 동의\n' +
-      '3) 삼성 헬스 → 설정 → 삼성 클라우드 동기화 → 지금 동기화'
-    );
-  }, []);
 
   const mapRef = useRef<MapView | null>(null);
   const runningStartMsRef = useRef<number | null>(null);
@@ -562,7 +549,6 @@ export const MainPage = () => {
     addSteps,
     error: healthError,
     writing: healthWriting,
-    loading: healthLoading,
   } = useHealthSteps();
 
   /**
@@ -611,7 +597,7 @@ export const MainPage = () => {
 
   const handleForceEnd = useCallback(async () => {
     try {
-      const result = await endSession({ forceNoSteps: true });
+      const result = await endSession();
       if (result?.summary) {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
@@ -636,44 +622,12 @@ export const MainPage = () => {
 
   /**
    * Running 시작/종료 핸들러
-   * - isTracking이 true면 러닝 종료를 시도하되,
-   *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
-   * - isTracking이 false면 러닝 전이므로 카운트다운 후 시작
+   * - isTracking이 true면 러닝 종료
+   * - isTracking이 false면 카운트다운 후 시작
    */
   const handleToggleTracking = useCallback(async () => {
-    // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
+    // 추적 중이면 종료를 시도한다.
     if (isTracking) {
-      if (Platform.OS === 'android') {
-        if (healthLoading) {
-          Alert.alert(
-            '걸음 수 확인 중',
-            'Health Connect 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.'
-          );
-          return;
-        }
-        if (healthError || healthSteps == null) {
-          const baseMessage =
-            healthError ??
-            'Health Connect 권한/데이터가 없습니다. 권한을 허용하고 다시 시도해 주세요.';
-          Alert.alert(
-            '걸음 수 권한 필요',
-            isAndroid13OrLower
-              ? `${baseMessage}\n\n${getSamsungHealthGuide()}`
-              : baseMessage,
-            [
-              {
-                text: '강제 종료',
-                style: 'destructive',
-                onPress: () => {
-                  handleForceEnd();
-                },
-              },
-              { text: '취소', style: 'cancel' },
-            ]
-          );
-          return;
-        }
-      }
       try {
         const result = await endSession();
         await stopRunningNotification();
@@ -714,12 +668,7 @@ export const MainPage = () => {
     setCountdown(3);
   }, [
     endSession,
-    getSamsungHealthGuide,
-    healthError,
-    healthLoading,
-    healthSteps,
     handleForceEnd,
-    isAndroid13OrLower,
     endFailureCount,
     isTracking,
   ]);
@@ -897,13 +846,8 @@ export const MainPage = () => {
     }
     if (healthErrorShownRef.current) return;
     healthErrorShownRef.current = true;
-    Alert.alert(
-      '걸음 수 연동 실패',
-      isAndroid13OrLower
-        ? `${healthError}\n\n${getSamsungHealthGuide()}`
-        : healthError
-    );
-  }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
+    Alert.alert('걸음 수 연동 실패', healthError);
+  }, [healthError]);
 
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.

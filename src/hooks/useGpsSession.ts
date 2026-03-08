@@ -7,7 +7,6 @@ import {
 } from '@hooks/useRouteTracking';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';
-import { getHealthConnectStepCount } from '@utils/healthConnectSteps';
 import type {
   GpsEndRequest,
   GpsEndResponse,
@@ -20,6 +19,7 @@ const SESSION_START_KEY = 'fitpet:gps:startTime';
 const LOG_FLUSH_MAX_ATTEMPTS = 3;
 const END_API_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
+const DEFAULT_STEP_LENGTH_METERS = 0.75;
 
 type PendingLog = Omit<GpsLogRequest, 'sessionId'>;
 type FlushLogsResult = {
@@ -71,14 +71,6 @@ const calculateTotalDistanceMeters = (path: LatLng[]): number => {
   return total;
 };
 
-export type EndSessionOptions = {
-  /**
-   * Health Connect를 건너뛰고 강제 종료한다.
-   * stepCount는 0으로 처리되고 요약에 미집계 표시가 포함된다.
-   */
-  forceNoSteps?: boolean;
-};
-
 export type UseGpsSessionResult = {
   isTracking: boolean;
   isSessionActive: boolean;
@@ -86,9 +78,7 @@ export type UseGpsSessionResult = {
   path: LatLng[];
   region: MapRegion;
   startSession: () => Promise<boolean>;
-  endSession: (
-    options?: EndSessionOptions
-  ) => Promise<GpsSessionEndResult | null>;
+  endSession: () => Promise<GpsSessionEndResult | null>;
 };
 
 export type GpsSessionSummary = {
@@ -308,7 +298,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
   ]);
 
   const endSession = useCallback(
-    async (options?: EndSessionOptions) => {
+    async () => {
       if (!sessionIdRef.current || !startTimeRef.current) return null;
 
       try {
@@ -330,25 +320,17 @@ export const useGpsSession = (): UseGpsSessionResult => {
         const distance = calculateTotalDistanceMeters(path);
         // backend 기준 단위(m/s)로 요약 속도를 관리한다.
         const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
-        let stepCount = 0;
-        let stepCountMissing = false;
-        if (options?.forceNoSteps) {
-          stepCountMissing = true;
-          if (__DEV__) {
-            console.warn('>>>[RUNNING][RUN] 강제 종료: 걸음 수 미집계');
-          }
-        } else {
-          stepCount = await getHealthConnectStepCount(
-            startTimeRef.current,
-            endTime
-          );
-          if (__DEV__) {
-            console.log('>>>[RUNNING][HC] 세션 구간 걸음 수', {
-              startTime: startTimeRef.current,
-              endTime: endTime.toISOString(),
-              stepCount,
-            });
-          }
+        // 러닝 세션은 Health Connect 대신 이동거리 기반으로 자체 걸음 수를 계산한다.
+        const stepCount = Math.max(
+          0,
+          Math.round(distance / DEFAULT_STEP_LENGTH_METERS)
+        );
+        if (__DEV__) {
+          console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
+            distanceMeters: distance,
+            stepLengthMeters: DEFAULT_STEP_LENGTH_METERS,
+            stepCount,
+          });
         }
 
         const response = await endGpsSessionWithRetry({
@@ -361,7 +343,6 @@ export const useGpsSession = (): UseGpsSessionResult => {
           stepCount,
           distanceMeters: distance,
           avgSpeedMps,
-          stepCountMissing,
         };
 
         clearLogTimer();
