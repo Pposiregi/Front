@@ -23,6 +23,9 @@ private const val FCM_TAG = "FitpetFCM"
 private const val FCM_CHANNEL_ID = "fitpet_fcm_default"
 private const val FCM_CHANNEL_NAME = "Fitpet Notifications"
 private const val FCM_CHANNEL_DESC = "Default channel for Fitpet FCM"
+private const val RUNNING_CHANNEL_ID = "running-tracker"
+private const val RUNNING_CHANNEL_NAME = "러닝 트래킹"
+private const val RUNNING_CHANNEL_DESC = "러닝 진행 중 포그라운드 서비스 알림"
 
 class MainApplication : Application(), ReactApplication {
 
@@ -49,7 +52,7 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
-    createNotificationChannel()
+    createNotificationChannels()
     requestNotificationPermission()
     FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
       if (!task.isSuccessful) {
@@ -61,18 +64,28 @@ class MainApplication : Application(), ReactApplication {
     }
   }
 
-  private fun createNotificationChannel() {
+  private fun createNotificationChannels() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val channel = NotificationChannel(
+      val fcmChannel = NotificationChannel(
         FCM_CHANNEL_ID,
         FCM_CHANNEL_NAME,
         NotificationManager.IMPORTANCE_HIGH
       ).apply {
         description = FCM_CHANNEL_DESC
       }
+      val runningChannel = NotificationChannel(
+        RUNNING_CHANNEL_ID,
+        RUNNING_CHANNEL_NAME,
+        NotificationManager.IMPORTANCE_DEFAULT
+      ).apply {
+        description = RUNNING_CHANNEL_DESC
+        setSound(null, null)
+        enableVibration(false)
+      }
       val notificationManager =
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-      notificationManager.createNotificationChannel(channel)
+      notificationManager.createNotificationChannel(fcmChannel)
+      notificationManager.createNotificationChannel(runningChannel)
     }
   }
 
