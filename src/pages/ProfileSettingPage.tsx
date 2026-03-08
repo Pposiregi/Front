@@ -27,6 +27,7 @@ import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
 import { isValidNickname } from '@utils/validation';
+import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 
 const PET_ID_FALLBACK = 1;
 
@@ -71,6 +72,7 @@ const ProfileSettingPage = () => {
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
   const [petId, setPetId] = useState(PET_ID_FALLBACK);
+  const currentPetType = useSelector((state: RootState) => state.user.petType);
 
   useEffect(() => {
     let mounted = true;
@@ -85,6 +87,23 @@ const ProfileSettingPage = () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    setPetType(currentPetType);
+  }, [currentPetType]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PET_TYPE_STORAGE_KEY)
+      .then((stored) => {
+        if (stored === 'DOG' || stored === 'CAT') {
+          setPetType(stored);
+          dispatch(userSlice.actions.updatePetType(stored));
+        }
+      })
+      .catch((error) => {
+        console.warn('>>> [ProfileSettings] petType 로드 실패', error);
+      });
+  }, [dispatch]);
 
   /**
    * 임시로 구현한 로그아웃 핸들러
@@ -488,6 +507,8 @@ const ProfileSettingPage = () => {
                       name: petNameInput.trim(),
                       petType,
                     });
+                    dispatch(userSlice.actions.updatePetType(petType));
+                    await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
                     Alert.alert('완료', '펫 정보가 변경되었습니다.');
                     setPetModalVisible(false);
                   } catch (err) {
