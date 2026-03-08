@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 export const STEP_SYNC_OS_POLICY = {
   unsupportedMaxApi: 27, // Android 8 이하 미지원
-  healthConnectMinApi: 28, // Android 9+는 Health Connect 단일 경로
+  healthConnectMinApi: 28, // Android 28~33은 설치 권장, 34+는 내장 Health Connect 경유
 } as const;
 
 export const STEP_SYNC_UPLOAD_POLICY = {
@@ -12,7 +12,7 @@ export const STEP_SYNC_UPLOAD_POLICY = {
 
 export const STEP_SYNC_MESSAGES = {
   unsupported:
-    '현재 Android 버전에서는 걸음수 자동 동기화를 지원하지 않아요.',
+    '현재 Android 8 이하에서는 걸음수 자동 동기화를 지원하지 않습니다.',
   permissionRequired:
     '걸음수 동기화를 위해 건강 데이터 접근 권한이 필요해요.',
 } as const;

@@ -12,12 +12,17 @@ import {
   hasAllPermissions,
   HEALTH_PERMISSIONS,
   HEALTH_STEPS_CACHE_KEY,
+  ensureHealthConnectInstalledOrPrompt,
   type GrantedHealthPermission,
 } from '@utils/healthConnect';
 import {
   getPreferredStepSyncProvider,
   getStepSyncUnsupportedReason,
 } from '@utils/stepSyncProvider';
+import {
+  getAndroidApiLevel,
+  STEP_SYNC_OS_POLICY,
+} from '@utils/stepSyncPolicy';
 
 type HealthStepsState = {
   steps: number | null;
@@ -36,6 +41,57 @@ const useHealthSteps = (): HealthStepsState => {
   const checkingRef = useRef(false);
   const lastWriteEndRef = useRef<Date | null>(null);
   const rationalePromiseRef = useRef<Promise<void> | null>(null);
+  const permissionDeniedRef = useRef(false);
+  const setupPendingRef = useRef(false);
+  const lastErrorRef = useRef<string | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingStoppedRef = useRef(false);
+
+  const setStableError = (message: string | null) => {
+    if (lastErrorRef.current === message) return;
+    lastErrorRef.current = message;
+    setError(message);
+  };
+
+  const stopPolling = () => {
+    if (!intervalRef.current) return;
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  };
+
+  const shouldPausePollingForSetup = () => {
+    const apiLevel = getAndroidApiLevel();
+    return (
+      apiLevel !== null &&
+      apiLevel >= STEP_SYNC_OS_POLICY.healthConnectMinApi &&
+      apiLevel < 34
+    );
+  };
+
+  const disablePollingOnUnsupported = () => {
+    pollingStoppedRef.current = true;
+    stopPolling();
+  };
+
+  const pausePollingForSetup = () => {
+    stopPolling();
+  };
+
+  const resumePolling = () => {
+    if (pollingStoppedRef.current || setupPendingRef.current) {
+      return;
+    }
+    stopPolling();
+    intervalRef.current = setInterval(() => {
+      if (pollingStoppedRef.current || setupPendingRef.current) {
+        return;
+      }
+      if (__DEV__) {
+        console.log('[HC] fetchSteps interval tick', new Date().toISOString());
+      }
+      fetchSteps(false);
+    }, 2000);
+  };
 
   const ensureBackgroundRationaleAcknowledged = async () => {
     if (rationalePromiseRef.current) {
@@ -71,21 +127,37 @@ const useHealthSteps = (): HealthStepsState => {
     }
   };
 
-  const ensureInitializedAndPermitted = async () => {
-    // HC SDK 초기화 + 필수 권한 확인
+  const ensureInitializedAndPermitted = async (showPrompt = false) => {
+    const apiLevel = getAndroidApiLevel();
+
+    await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
+      showPrompt,
+    });
+
     const isInitialized = await initialize();
     if (!isInitialized) {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
-    await ensureBackgroundRationaleAcknowledged();
-    const granted: GrantedHealthPermission[] = await requestPermission(
-      HEALTH_PERMISSIONS
-    );
-    if (!hasAllPermissions(granted)) {
+
+    if (permissionDeniedRef.current && !showPrompt) {
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
       );
     }
+
+    const granted: GrantedHealthPermission[] = await requestPermission(
+      HEALTH_PERMISSIONS
+    );
+
+    if (!hasAllPermissions(granted)) {
+      permissionDeniedRef.current = true;
+      throw new Error(
+        'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
+      );
+    }
+
+    permissionDeniedRef.current = false;
+    await ensureBackgroundRationaleAcknowledged();
   };
 
   const loadCachedSteps = async () => {
@@ -103,22 +175,29 @@ const useHealthSteps = (): HealthStepsState => {
     }
   };
 
-  const fetchSteps = async () => {
+  const fetchSteps = async (showPrompt = false) => {
     if (Platform.OS !== 'android') return;
+    if (pollingStoppedRef.current && !showPrompt) return;
+    if (setupPendingRef.current && !showPrompt) return;
     const provider = getPreferredStepSyncProvider();
     const unsupportedReason = getStepSyncUnsupportedReason(provider);
     if (unsupportedReason) {
-      setError(unsupportedReason);
+      setStableError(unsupportedReason);
       setSteps(null);
+      disablePollingOnUnsupported();
       return;
     }
     if (checkingRef.current) return;
     checkingRef.current = true;
     setLoading(true);
-    setError(null);
+    setStableError(null);
 
     try {
-      await ensureInitializedAndPermitted();
+      await ensureInitializedAndPermitted(showPrompt);
+      setupPendingRef.current = false;
+      if (shouldPausePollingForSetup()) {
+        resumePolling();
+      }
 
       const { start, end } = getStartOfToday();
       const result = await readRecords('Steps', {
@@ -151,8 +230,25 @@ const useHealthSteps = (): HealthStepsState => {
       }
     } catch (err: any) {
       console.error('>>>[RUNNING][HC] 걸음 수 읽기 실패', err);
-      setError(err?.message ?? '걸음 수를 불러오지 못했습니다.');
+      setStableError(err?.message ?? '걸음 수를 불러오지 못했습니다.');
       setSteps(null);
+
+      if (shouldPausePollingForSetup()) {
+        const isSetupPending =
+          err?.message === 'Health Connect가 설치되어 있지 않습니다.' ||
+          err?.message === 'Health Connect 업데이트가 필요합니다.' ||
+          err?.message ===
+            'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.';
+        if (isSetupPending) {
+          setupPendingRef.current = true;
+          pausePollingForSetup();
+        } else if (permissionDeniedRef.current && showPrompt) {
+          setupPendingRef.current = true;
+          pausePollingForSetup();
+        } else if (!showPrompt) {
+          setupPendingRef.current = false;
+        }
+      }
     } finally {
       setLoading(false);
       checkingRef.current = false;
@@ -162,13 +258,13 @@ const useHealthSteps = (): HealthStepsState => {
   const addSteps = async (delta: number) => {
     if (Platform.OS !== 'android') return;
     if (delta <= 0) {
-      setError('걸음 수 증분은 1 이상이어야 합니다.');
+      setStableError('걸음 수 증분은 1 이상이어야 합니다.');
       return;
     }
     setWriting(true);
-    setError(null);
+    setStableError(null);
     try {
-      await ensureInitializedAndPermitted();
+      await ensureInitializedAndPermitted(true);
       const now = new Date();
       // 마지막 기록 종료 시각 이후로부터 현재까지를 구간으로 설정해 중복/겹침 최소화
       const startTime =
@@ -184,10 +280,10 @@ const useHealthSteps = (): HealthStepsState => {
         },
       ]);
       lastWriteEndRef.current = now;
-      await fetchSteps();
+      await fetchSteps(true);
     } catch (err: any) {
       console.error('>>>[RUNNING][HC] 걸음 수 쓰기 실패', err);
-      setError(err?.message ?? '걸음 수를 기록하지 못했습니다.');
+      setStableError(err?.message ?? '걸음 수를 기록하지 못했습니다.');
       throw err;
     } finally {
       setWriting(false);
@@ -196,17 +292,25 @@ const useHealthSteps = (): HealthStepsState => {
 
   useEffect(() => {
     loadCachedSteps();
-    fetchSteps();
-    // healthConnect 값을 2초마다 들고오기 위해 interval 설정
-    const interval = setInterval(() => {
-      if (__DEV__) {
-        console.log('[HC] fetchSteps interval tick', new Date().toISOString());
+    (async () => {
+      await fetchSteps(true);
+      if (!pollingStoppedRef.current && !setupPendingRef.current) {
+        resumePolling();
       }
-      fetchSteps();
-    }, 2000);
+    })();
+
     const handleAppStateChange = (state: AppStateStatus) => {
       if (state === 'active') {
-        fetchSteps();
+        // 앱 복귀 시 권한 재확인 경로를 열어두기 위해 실패 플래그 리셋
+        permissionDeniedRef.current = false;
+        (async () => {
+          await fetchSteps(true);
+          if (!pollingStoppedRef.current && !setupPendingRef.current) {
+            resumePolling();
+          }
+        })();
+      } else if (state === 'background' || state === 'inactive') {
+        stopPolling();
       }
     };
 
@@ -215,7 +319,7 @@ const useHealthSteps = (): HealthStepsState => {
       handleAppStateChange
     );
     return () => {
-      clearInterval(interval);
+      stopPolling();
       subscription.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

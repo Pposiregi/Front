@@ -15,6 +15,8 @@ import {
   Pressable,
   Animated,
   Alert,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -113,6 +115,7 @@ import {
   stopRunningNotification,
   updateRunningNotification,
 } from '@hooks/useRunningService';
+import { getAndroidApiLevel, STEP_SYNC_MESSAGES, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
 
 /**
  * 메인 화면 컴포넌트
@@ -846,6 +849,20 @@ export const MainPage = () => {
     }
     if (healthErrorShownRef.current) return;
     healthErrorShownRef.current = true;
+    const apiLevel = getAndroidApiLevel();
+    const isUnsupportedDevice =
+      Platform.OS === 'android' &&
+      apiLevel != null &&
+      apiLevel <= STEP_SYNC_OS_POLICY.unsupportedMaxApi &&
+      healthError === STEP_SYNC_MESSAGES.unsupported;
+    if (isUnsupportedDevice) {
+      Alert.alert(
+        '걸음 수 연동 불가',
+        `${healthError}\n\n현재 단말에서는 걸음수 자동 동기화를 지원하지 않습니다.`,
+        [{ text: '확인', style: 'default', onPress: () => BackHandler.exitApp() }]
+      );
+      return;
+    }
     Alert.alert('걸음 수 연동 실패', healthError);
   }, [healthError]);
 

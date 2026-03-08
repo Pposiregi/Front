@@ -5,20 +5,18 @@ import messaging, {
 import {
   initialize,
   readRecords,
-  requestPermission,
 } from 'react-native-health-connect';
 import {
   getStartOfToday,
-  hasAllPermissions,
-  HEALTH_PERMISSIONS,
   HEALTH_STEPS_CACHE_KEY,
-  type GrantedHealthPermission,
+  ensureHealthConnectInstalledOrPrompt,
   isAndroid,
 } from '@utils/healthConnect';
 import {
   getPreferredStepSyncProvider,
   getStepSyncUnsupportedReason,
 } from '@utils/stepSyncProvider';
+import { getAndroidApiLevel } from '@utils/stepSyncPolicy';
 
 const logPrefix = '[FCM][background]';
 
@@ -35,18 +33,23 @@ const syncStepsForToday = async () => {
     return;
   }
 
+  const apiLevel = getAndroidApiLevel();
+  try {
+    await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
+      showPrompt: false,
+    });
+  } catch (err) {
+    console.log(`${logPrefix} skip sync: ${err}`);
+    return;
+  }
+
   const isInitialized = await initialize();
   if (!isInitialized) {
     throw new Error('Health Connect 초기화 실패');
   }
 
-  // 필수 권한 승인 여부 확인
-  const granted: GrantedHealthPermission[] = await requestPermission(
-    HEALTH_PERMISSIONS
-  );
-  if (!hasAllPermissions(granted)) {
-    throw new Error('필수 권한 미승인');
-  }
+  // 백그라운드에서는 사용자 인터랙션 없이 읽기만 수행.
+  // 권한은 포그라운드 `useHealthSteps`에서만 요청하고, 여기서는 미설치/가용성 실패만 선차단한다.
 
   const { start, end } = getStartOfToday();
   const result = await readRecords('Steps', {
