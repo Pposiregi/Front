@@ -1,6 +1,6 @@
 import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 // 화면 크기 기반 반응형 사이즈 계산
 const BOTTOM_NAV_HEIGHT = 60;
@@ -22,6 +22,11 @@ const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
 const PET_BOTTOM_FROM_START =
   START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
+const MISSION_BUTTON_TOP = Math.max(96, Math.round(SCREEN_HEIGHT * 0.125));
+const HUD_SURFACE = 'rgba(255, 255, 255, 0.72)';
+const START_BUTTON_SURFACE = 'rgba(255, 255, 255, 0.86)';
+const RUNNING_NOTICE_BG = 'rgba(254, 194, 136, 0.35)';
+const RUNNING_NOTICE_BORDER = 'rgba(254, 194, 136, 0.62)';
 
 export default StyleSheet.create({
   loadingContainer: {
@@ -40,10 +45,10 @@ export default StyleSheet.create({
     marginBottom: CONTENT_MARGIN_BOTTOM,
   },
   progressRow: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
   },
   missionCard: {
-    marginRight: 12,
+    marginRight: Spacing.md,
     alignItems: 'center',
   },
   message: {
@@ -61,8 +66,17 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: Spacing.sm,
     zIndex: 6,
+  },
+  devButtonGroup: {
+    position: 'absolute',
+    left: Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.035)),
+    bottom: BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006)),
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    zIndex: 12,
   },
   mainBackground: {
     flex: 1,
@@ -75,7 +89,7 @@ export default StyleSheet.create({
   mapContainer: {
     flex: 1,
     width: '100%',
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
   },
@@ -94,24 +108,14 @@ export default StyleSheet.create({
     paddingHorizontal: Math.max(16, Math.round(SCREEN_WIDTH * 0.045)),
     paddingVertical: 6,
     borderRadius: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    backgroundColor: HUD_SURFACE,
+    ...Shadows.soft,
     justifyContent: 'center',
     alignItems: 'center',
   },
   runTimerValue: {
     fontFamily: Fonts.JUA,
-    fontSize: Math.max(40, Math.round(SCREEN_WIDTH * 0.108)),
+    fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.108)),
     color: Colors.textPrimary,
     letterSpacing: 1,
     lineHeight: Math.max(42, Math.round(SCREEN_WIDTH * 0.112)),
@@ -138,15 +142,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.22,
-        shadowRadius: 7,
-      },
-      android: {
-        elevation: 0,
-      },
+      ios: Shadows.medium,
+      android: { elevation: 0 },
     }),
   },
   fatButton: {
@@ -155,9 +152,9 @@ export default StyleSheet.create({
     left: '50%',
     marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
     backgroundColor: Colors.devButton,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: Spacing.md - 2,
+    paddingVertical: Spacing.sm - 2,
+    borderRadius: Radius.md,
   },
   startButtonInner: {
     width: '100%',
@@ -165,24 +162,22 @@ export default StyleSheet.create({
     borderRadius: START_BUTTON_RADIUS,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.86)',
+    backgroundColor: START_BUTTON_SURFACE,
     overflow: 'hidden',
     ...Platform.select({
-      android: {
-        elevation: 7,
-      },
+      android: Shadows.medium,
     }),
   },
   runningLockNotice: {
     position: 'absolute',
-    right: 12,
+    right: Spacing.md,
     bottom: RUN_LOCK_NOTICE_BOTTOM,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: 'rgba(254, 194, 136, 0.35)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm - 1,
+    borderRadius: Radius.pill,
+    backgroundColor: RUNNING_NOTICE_BG,
     borderWidth: 1,
-    borderColor: 'rgba(254, 194, 136, 0.62)',
+    borderColor: RUNNING_NOTICE_BORDER,
   },
   startText: {
     fontFamily: Fonts.JUA,
@@ -196,9 +191,9 @@ export default StyleSheet.create({
   },
   devHealthButton: {
     backgroundColor: Colors.devButton,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: Spacing.md - 2,
+    paddingVertical: Spacing.sm - 2,
+    borderRadius: Radius.md,
   },
   devHealthButtonText: {
     color: Colors.surface,
@@ -227,7 +222,7 @@ export default StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
@@ -250,24 +245,20 @@ export default StyleSheet.create({
   },
   missionButton: {
     position: 'absolute',
-    top: Math.max(108, Math.round(SCREEN_HEIGHT * 0.145)),
-    right: 15, // 오른쪽 여백
-    width: 50,
-    height: 50,
-    padding: 10,
+    top: MISSION_BUTTON_TOP,
+    right: Math.max(Spacing.md + 2, Math.round(SCREEN_WIDTH * 0.04)),
+    width: 46,
+    height: 46,
+    padding: Spacing.sm,
     backgroundColor: Colors.accentStrong,
-    borderRadius: 8,
+    borderRadius: Radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#7A2E2E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    ...Shadows.accent,
     zIndex: 10,
   },
   missionIcon: {
-    width: 34,
-    height: 34,
+    width: 30,
+    height: 30,
   },
 });

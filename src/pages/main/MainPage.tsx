@@ -939,7 +939,7 @@ export const MainPage = () => {
             totalRunSec={todayTotalRunSec}
             estimatedKcal={estimatedKcal}
           />
-          <View style={styles.messageRow}>
+          <View style={styles.devButtonGroup}>
             {__DEV__ && (
               <TouchableOpacity
                 style={styles.devHealthButton}
