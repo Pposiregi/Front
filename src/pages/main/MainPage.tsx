@@ -109,6 +109,7 @@ import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
+import PetOnboardingOverlay from '@components/PetOnbordingOverlay';
 
 /**
  * 메인 화면 컴포넌트
@@ -151,6 +152,7 @@ export const MainPage = () => {
   const [fatVerIndex, setFatVerIndex] = useState(-1);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
+  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
   const dispatch = useAppDispatch();
   /**
    * 사용자 정보 받아오기
@@ -163,12 +165,16 @@ export const MainPage = () => {
         if (data.userId == null || data.nickname == null) {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
+        if (!data.pet) {
+          setShowPetOnboarding(true);
+          return;
+        }
         dispatch(
           userSlice.actions.setUser({
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageId ?? 2,
+            profileImageId: data.profileImageUrl,
           })
         );
       } catch (e) {
@@ -1089,7 +1095,7 @@ export const MainPage = () => {
         </TouchableOpacity>
       )}
       <BodyRecordPrompt
-        visible={showBodyPrompt}
+        visible={!showBodyPrompt && showBodyPrompt}
         dateLabel={bodyPromptDateLabel}
         baseDate={bodyPromptBaseDate}
         // 목표값에 대한 진행률/aim 라벨을 실제 데이터로 표시
@@ -1099,6 +1105,10 @@ export const MainPage = () => {
         onLater={handleLaterBodyPrompt}
         onSkipToday={handleSkipBodyPromptToday}
         saving={savingBodyHistory}
+      />
+      <PetOnboardingOverlay
+        visible={showPetOnboarding}
+        onClose={() => setShowPetOnboarding(false)}
       />
     </View>
   );

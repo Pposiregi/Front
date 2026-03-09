@@ -1,3 +1,5 @@
+import { Pet } from './pet';
+
 /**
  * 일정 걸음 마다 수집해서 보내는 요청 타입
  * 현재는 increment만 보내주는 중, distanceKm랑 burnCalories는 계산식이 필요함!
@@ -34,5 +36,6 @@ export type getUserResponse = {
   targetPbf: number | null;
   targetStepCount: number | null;
   dailyStepCount: number;
-  profileImageId: number;
+  profileImageUrl: number;
+  pet: Pet | null;
 };

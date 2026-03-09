@@ -130,8 +130,10 @@ const SocialLoginPage = () => {
       // 신규/기존 회원 분기
       if (result.registrationStatus === 'INCOMPLETE') {
         dispatch(userSlice.actions.setSignUpInProgress(true));
+        console.log('회원가입이 완료 되지 않은 사용자');
       } else {
         dispatch(userSlice.actions.setSignUpInProgress(false));
+        console.log('회원가입이 완료된 사용자');
       }
     } catch (err: any) {
       console.error('>>> firstLoginCheck error', {

@@ -17,8 +17,10 @@ const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
 const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 // Approximation term for font descender/line-box differences in RN text layout.
-const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
-const PET_BOTTOM_FROM_START = START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
+const START_BUTTON_ESTIMATED_HEIGHT =
+  START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
+const PET_BOTTOM_FROM_START =
+  START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
 
 export default StyleSheet.create({
   loadingContainer: {
@@ -268,5 +270,53 @@ export default StyleSheet.create({
   missionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  /**
+   * 펫 관련
+   */
+  petOnboardingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+
+  petOnboardingCard: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+  },
+
+  petOnboardingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 20,
+  },
+
+  petTypeRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+
+  petTypeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 10,
+  },
+
+  petOnboardingStart: {
+    backgroundColor: '#111827',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
   },
 });
