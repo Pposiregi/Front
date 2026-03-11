@@ -178,11 +178,10 @@ export const useGpsSession = (): UseGpsSessionResult => {
     }
   }, []);
 
-  const appendNewTrackPointsToPending = useCallback(() => {
-    const latestTrackPoints = trackPointsRef.current;
-    if (latestTrackPoints.length <= lastTrackPointIndexRef.current) return;
+  const appendTrackPointsToPending = useCallback((points: RouteTrackPoint[]) => {
+    if (points.length <= lastTrackPointIndexRef.current) return;
 
-    const newPoints = latestTrackPoints.slice(lastTrackPointIndexRef.current);
+    const newPoints = points.slice(lastTrackPointIndexRef.current);
     newPoints.forEach((point: RouteTrackPoint) => {
       pendingLogsRef.current.push({
         latitude: point.latitude,
@@ -193,8 +192,12 @@ export const useGpsSession = (): UseGpsSessionResult => {
         altitude: point.altitude,
       });
     });
-    lastTrackPointIndexRef.current = latestTrackPoints.length;
+    lastTrackPointIndexRef.current = points.length;
   }, []);
+
+  const appendNewTrackPointsToPending = useCallback(() => {
+    appendTrackPointsToPending(trackPointsRef.current);
+  }, [appendTrackPointsToPending]);
 
   const flushLogs = useCallback(async (): Promise<FlushLogsResult> => {
     const currentSessionId = sessionIdRef.current;
@@ -333,8 +336,13 @@ export const useGpsSession = (): UseGpsSessionResult => {
       if (!sessionIdRef.current || !startTimeRef.current) return null;
 
       try {
+        const endTime = new Date();
+        const pathSnapshot = [...path];
+        const trackPointsSnapshot = [...trackPoints];
+
         isEndingRef.current = true;
         clearLogTimer();
+        appendTrackPointsToPending(trackPointsSnapshot);
         const allLogsFlushed = await flushAllPendingLogs();
         if (!allLogsFlushed) {
           throw new Error(
@@ -342,13 +350,12 @@ export const useGpsSession = (): UseGpsSessionResult => {
           );
         }
 
-        const endTime = new Date();
         const startTimeValue = new Date(startTimeRef.current);
         const durationMs = Math.max(
           0,
           endTime.getTime() - startTimeValue.getTime()
         );
-        const distance = calculateTotalDistanceMeters(path);
+        const distance = calculateTotalDistanceMeters(pathSnapshot);
         // backend 기준 단위(m/s)로 요약 속도를 관리한다.
         const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
         // 실제 step source가 없으므로, 평균 속도 기반 추정 보폭으로 걸음 수를 계산한다.
@@ -405,11 +412,13 @@ export const useGpsSession = (): UseGpsSessionResult => {
     },
     [
       appendNewTrackPointsToPending,
+      appendTrackPointsToPending,
       clearLogTimer,
       clearPersistedSession,
       endGpsSessionWithRetry,
       flushAllPendingLogs,
       path,
+      trackPoints,
       startLogTimer,
       stopTracking,
     ]

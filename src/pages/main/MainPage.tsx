@@ -488,6 +488,7 @@ export const MainPage = () => {
   const handleForceEnd = useCallback(async () => {
     try {
       const result = await endSession();
+      await stopRunningNotification();
       if (result?.summary) {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
