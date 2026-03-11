@@ -30,6 +30,7 @@ type HealthConnectSdkState =
   | 'unavailable'
   | 'provider_update_required';
 
+/** Health Connect SDK 상태 코드를 내부 상태 문자열로 변환한다. */
 const statusToState = (status: number): HealthConnectSdkState => {
   if (status === SdkAvailabilityStatus.SDK_AVAILABLE) {
     return 'available';
@@ -40,6 +41,7 @@ const statusToState = (status: number): HealthConnectSdkState => {
   return 'unavailable';
 };
 
+/** Health Connect 설치/업데이트 페이지를 연다. */
 const openPlayStore = async () => {
   const marketUrl = `market://details?id=${HEALTH_CONNECT_PROVIDER_PACKAGE}`;
   const canOpenMarket = await Linking.canOpenURL(marketUrl);
@@ -50,6 +52,7 @@ const openPlayStore = async () => {
   await Linking.openURL(HEALTH_CONNECT_INSTALL_URL);
 };
 
+/** Health Connect 설치 및 업데이트 필요 여부를 확인하고 필요 시 안내한다. */
 export const ensureHealthConnectInstalledOrPrompt = async (
   apiLevel: number,
   options?: { showPrompt?: boolean }
@@ -113,7 +116,7 @@ export type GrantedHealthPermission =
   | WriteExerciseRoutePermission
   | ReadHealthDataHistoryPermission;
 
-// 요청한 권한이 모두 허용됐는지 검사
+/** 현재 허용된 권한 집합이 필요한 권한 집합을 모두 포함하는지 검사한다. */
 export const hasAllPermissions = (
   granted: GrantedHealthPermission[],
   requiredPermissions: GrantedHealthPermission[]
@@ -127,16 +130,18 @@ export const hasAllPermissions = (
   );
 };
 
+/** 현재 허용된 Health Connect 권한 목록을 가져온다. */
 export const getCurrentGrantedPermissions = async () => {
   return (await getGrantedPermissions()) as GrantedHealthPermission[];
 };
 
+/** 백그라운드 접근 특수 권한 보유 여부를 반환한다. */
 export const hasBackgroundPermission = (
   granted: GrantedHealthPermission[]
 ): boolean =>
   hasAllPermissions(granted, [HEALTH_BACKGROUND_PERMISSION]);
 
-// 금일 0시~현재 시각 구간 계산
+/** KST 기준 오늘 00:00부터 현재 시각까지의 구간을 계산한다. */
 export const getStartOfToday = () => {
   // KST(UTC+9) 기준으로 오늘 00:00 ~ 현재 시각 구간을 만든다.
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -159,6 +164,7 @@ export const getStartOfToday = () => {
   return { start, end: now };
 };
 
+/** 현재 플랫폼이 Android인지 반환한다. */
 export const isAndroid = () => Platform.OS === 'android';
 
 // 오늘 걸음 수 캐시 저장/조회 시 사용하는 키

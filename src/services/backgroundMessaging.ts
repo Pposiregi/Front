@@ -24,6 +24,7 @@ import { getAndroidApiLevel } from '@utils/stepSyncPolicy';
 
 const logPrefix = '[FCM][background]';
 
+/** 백그라운드 메시지 기반으로 금일 걸음 수 캐시를 동기화한다. */
 const syncStepsForToday = async () => {
   // Health Connect 권한을 확인하고 오늘 걸음 수를 읽어 로컬 캐시에 저장
   if (!isAndroid()) {
@@ -84,6 +85,7 @@ const syncStepsForToday = async () => {
   console.log(`${logPrefix} steps synced`, total);
 };
 
+/** 수신한 데이터 메시지의 action/type에 따라 백그라운드 작업을 실행한다. */
 const handleDataMessage = async (
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ) => {
@@ -105,6 +107,7 @@ const handleDataMessage = async (
   }
 };
 
+/** FCM 백그라운드 메시지 핸들러를 앱 전역에 등록한다. */
 export const registerBackgroundMessageHandler = () => {
   // 백그라운드에서 도착하는 데이터 메시지를 공용 핸들러에 위임
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {

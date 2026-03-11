@@ -35,6 +35,7 @@ type HealthStepsState = {
   addSteps: (delta: number) => Promise<void>;
 };
 
+/** Health Connect 기반 걸음 수 조회/기록과 polling을 관리하는 훅이다. */
 const useHealthSteps = (): HealthStepsState => {
   const BG_RATIONALE_SHOWN_KEY = 'fitpet:health:bgPermissionRationale';
   const [steps, setSteps] = useState<number | null>(null);
@@ -50,18 +51,21 @@ const useHealthSteps = (): HealthStepsState => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollingStoppedRef = useRef(false);
 
+  /** 같은 에러 메시지의 중복 state 업데이트를 방지한다. */
   const setStableError = (message: string | null) => {
     if (lastErrorRef.current === message) return;
     lastErrorRef.current = message;
     setError(message);
   };
 
+  /** 현재 등록된 걸음 수 polling interval을 해제한다. */
   const stopPolling = () => {
     if (!intervalRef.current) return;
     clearInterval(intervalRef.current);
     intervalRef.current = null;
   };
 
+  /** 설치/권한 설정이 필요한 기기에서는 polling을 일시 중단해야 하는지 계산한다. */
   const shouldPausePollingForSetup = () => {
     const apiLevel = getAndroidApiLevel();
     return (
@@ -72,15 +76,18 @@ const useHealthSteps = (): HealthStepsState => {
     );
   };
 
+  /** 현재 환경이 지원 불가일 때 polling을 영구 중단한다. */
   const disablePollingOnUnsupported = () => {
     pollingStoppedRef.current = true;
     stopPolling();
   };
 
+  /** 설정 대기 상태에서 polling을 잠시 멈춘다. */
   const pausePollingForSetup = () => {
     stopPolling();
   };
 
+  /** 설정 대기 상태가 아닐 때 2초 주기의 polling을 재개한다. */
   const resumePolling = () => {
     if (pollingStoppedRef.current || setupPendingRef.current) {
       return;
@@ -97,6 +104,7 @@ const useHealthSteps = (): HealthStepsState => {
     }, 2000);
   };
 
+  /** foreground 권한이 확보된 뒤 background 권한 요청을 안내한다. */
   const maybeRequestBackgroundPermission = async (showPrompt = false) => {
     if (!showPrompt || backgroundPermissionPromptedRef.current) {
       return;
@@ -140,6 +148,7 @@ const useHealthSteps = (): HealthStepsState => {
     }
   };
 
+  /** 현재 설치/권한 상태를 내부 플래그와 에러 state에 반영한다. */
   const syncGrantedPermissionState = async () => {
     const apiLevel = getAndroidApiLevel();
     if (apiLevel == null) return false;
@@ -180,6 +189,7 @@ const useHealthSteps = (): HealthStepsState => {
     return false;
   };
 
+  /** Health Connect 초기화와 필수 권한 보장을 한 번에 수행한다. */
   const ensureInitializedAndPermitted = async (showPrompt = false) => {
     const apiLevel = getAndroidApiLevel();
 
@@ -221,6 +231,7 @@ const useHealthSteps = (): HealthStepsState => {
     await maybeRequestBackgroundPermission(showPrompt);
   };
 
+  /** 백그라운드가 저장한 오늘 걸음 수 캐시를 먼저 읽어 UI에 반영한다. */
   const loadCachedSteps = async () => {
     // 백그라운드 동기화가 저장한 금일 걸음 수 캐시가 있으면 UI에 선반영
     try {
@@ -236,6 +247,7 @@ const useHealthSteps = (): HealthStepsState => {
     }
   };
 
+  /** 현재 걸음 수를 읽어 state와 캐시에 반영한다. */
   const fetchSteps = async (showPrompt = false) => {
     if (Platform.OS !== 'android') return;
     if (pollingStoppedRef.current && !showPrompt) return;
@@ -316,6 +328,7 @@ const useHealthSteps = (): HealthStepsState => {
     }
   };
 
+  /** Health Connect에 걸음 수를 기록한 뒤 현재 값을 다시 동기화한다. */
   const addSteps = async (delta: number) => {
     if (Platform.OS !== 'android') return;
     if (delta <= 0) {

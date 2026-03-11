@@ -55,6 +55,7 @@ const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
 
+/** 밀리초 단위 러닝 시간을 한국어 문자열로 변환한다. */
 const formatDuration = (durationMs: number) => {
   const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
   const hours = Math.floor(totalSeconds / 3600);
@@ -66,6 +67,7 @@ const formatDuration = (durationMs: number) => {
   return `${minutes}분 ${seconds}초`;
 };
 
+/** 초 단위 경과 시간을 HH:MM:SS 형식으로 변환한다. */
 const formatRunningElapsed = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(safeSeconds / 3600);
@@ -124,7 +126,9 @@ export const MainPage = () => {
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [trans, setTrans] = useState(false); // 미션 완료 트리거
+  /** 미션 목록 모달을 연다. */
   const handleOpenMission = () => setShowMissionModal(true);
+  /** 미션 모달을 닫고 필요하면 펫 완료 연출을 재생한다. */
   const handleCloseMission = () => {
     // 모달 닫힐 때 강아지 웃음 트리거
     if (trans) {
@@ -148,10 +152,8 @@ export const MainPage = () => {
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
   const dispatch = useAppDispatch();
-  /**
-   * 사용자 정보 받아오기
-   */
   useEffect(() => {
+    /** 사용자 기본 정보와 petType 캐시를 메인 진입 시 동기화한다. */
     const fetchUser = async () => {
       try {
         const data = await getUser();
@@ -225,11 +227,13 @@ export const MainPage = () => {
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+  /** 오늘 날짜 기준 누적 러닝 시간 저장 키를 계산한다. */
   const getTodayRunSecondsKey = useCallback(
     () => `${DAILY_RUN_SECONDS_KEY_PREFIX}${formatDateKey(new Date())}`,
     []
   );
 
+  /** 오늘 누적 러닝 시간을 storage와 state에 함께 반영한다. */
   const appendTodayRunSeconds = useCallback(
     async (addSeconds: number) => {
       if (addSeconds <= 0) return;
@@ -399,9 +403,7 @@ export const MainPage = () => {
     petRenderSize: PET_RENDER_SIZE,
   });
 
-  /**
-   * 펫 터치 시 상태 전환.
-   */
+  /** 펫을 터치했을 때 HAPPY 상태 전환을 트리거한다. */
   const onPetTouch = () => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });

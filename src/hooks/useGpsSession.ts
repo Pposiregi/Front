@@ -28,19 +28,23 @@ type FlushLogsResult = {
   retryable: boolean;
 };
 
+/** 지정한 시간만큼 대기하는 Promise 유틸이다. */
 const wait = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
 
+/** 재시도 횟수에 따른 exponential backoff 지연 시간을 계산한다. */
 const getRetryDelayMs = (attempt: number) => RETRY_BASE_DELAY_MS * 2 ** attempt;
 
+/** 위치 SDK의 m/s 속도를 서버 전송용 km/h 값으로 변환한다. */
 const toKmh = (speedMps?: number) => {
   // 위치 SDK speed(m/s)를 /gps/log 전송 규격(km/h)으로 맞춘다.
   if (!Number.isFinite(speedMps)) return undefined;
   return Number(speedMps) * 3.6;
 };
 
+/** 실패가 재시도 가능한 네트워크 계열인지 판단한다. */
 const isRetryableNetworkError = (error: unknown): boolean => {
   const maybe = error as {
     code?: string;
@@ -63,6 +67,7 @@ const isRetryableNetworkError = (error: unknown): boolean => {
   return maybe?.request != null && maybe?.response == null;
 };
 
+/** 좌표 경로 전체 길이를 미터 단위로 계산한다. */
 const calculateTotalDistanceMeters = (path: LatLng[]): number => {
   if (path.length < 2) return 0;
   let total = 0;

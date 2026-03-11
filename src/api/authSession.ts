@@ -7,18 +7,22 @@ type SessionExpiredHandler = (reason: SessionExpiredReason) => Promise<void> | v
 let sessionExpiredHandler: SessionExpiredHandler | null = null;
 let isSessionExpireHandling = false;
 
+/** 앱 전역 세션 만료 핸들러를 등록한다. */
 export const setSessionExpiredHandler = (handler: SessionExpiredHandler) => {
   sessionExpiredHandler = handler;
 };
 
+/** 등록된 세션 만료 핸들러를 제거한다. */
 export const clearSessionExpiredHandler = () => {
   sessionExpiredHandler = null;
 };
 
+/** 세션 만료 중복 처리 방지 latch를 초기화한다. */
 export const resetSessionExpiredState = () => {
   isSessionExpireHandling = false;
 };
 
+/** 세션 만료 사유를 현재 등록된 핸들러로 전달한다. */
 export const notifySessionExpired = async (
   reason: SessionExpiredReason
 ) => {

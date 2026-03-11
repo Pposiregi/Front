@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { Colors } from './colors';
 
+/** 플랫폼별 공용 shadow preset 모음이다. */
 export const Shadows = {
   soft: Platform.select({
     ios: {

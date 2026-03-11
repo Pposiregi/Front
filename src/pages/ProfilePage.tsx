@@ -36,6 +36,7 @@ const FALLBACK_BODY_FAT = 0;
 const WEIGHT_COLOR = Colors.infoStrong;
 const BODY_FAT_COLOR = Colors.accentStrong;
 
+/** hex 색상을 chart-kit 호환 rgba 문자열로 변환한다. */
 const hexToRgba = (hex: string, opacity = 1) => {
   const normalized = hex.replace('#', '');
   const safeHex =
@@ -63,6 +64,7 @@ type MetricCardProps = {
   barColor?: string;
 };
 
+/** 목표 진행률을 포함한 프로필 지표 카드를 렌더한다. */
 const MetricCard = ({
   label,
   value,
@@ -101,6 +103,7 @@ const MetricCard = ({
   );
 };
 
+/** 최신 몸 기록, 차트, 기록 저장 진입점을 제공하는 프로필 메인 화면이다. */
 function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
   const { width: windowWidth } = useWindowDimensions();

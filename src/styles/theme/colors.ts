@@ -1,3 +1,4 @@
+/** 앱 전반에서 재사용하는 색상 토큰 모음이다. */
 export const Colors = {
   background: '#F3F4F6',
   surface: '#FFFFFF',

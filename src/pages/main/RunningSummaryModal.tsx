@@ -11,8 +11,10 @@ type RunningSummaryModalProps = {
   avgSpeedMps: number;
 };
 
+/** 평균 속도를 km/h로 변환한다. */
 const toKmh = (mps: number) => mps * 3.6;
 
+/** 평균 속도를 분/km 페이스 문자열로 변환한다. */
 const formatPacePerKm = (mps: number) => {
   // m/s -> sec/km (1000m / speed) 변환 후 mm:ss 포맷으로 표시한다.
   if (!Number.isFinite(mps) || mps <= 0) return '-';
@@ -23,12 +25,14 @@ const formatPacePerKm = (mps: number) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} /km`;
 };
 
+/** 미터 단위 거리를 요약 모달용 문자열로 포맷한다. */
 const formatDistanceMeters = (meters: number) => {
   // 요약 모달은 러닝 종료 직후 원본 거리(m)를 그대로 노출한다.
   if (!Number.isFinite(meters) || meters < 0) return '-';
   return `${meters.toFixed(2)} m`;
 };
 
+/** 러닝 종료 직후 핵심 요약 수치를 보여주는 모달이다. */
 const RunningSummaryModal = ({
   visible,
   onClose,

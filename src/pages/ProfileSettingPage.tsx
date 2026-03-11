@@ -37,11 +37,7 @@ type SettingRowProps = {
   muted?: boolean;
 };
 
-/**
- *  설정 항목 행 컴포넌트
- * @param param0
- * @returns
- */
+/** 설정 화면에서 공통으로 사용하는 한 줄짜리 메뉴 행 UI다. */
 const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   <Pressable style={styles.row} onPress={onPress}>
     <Text style={[styles.rowLabel, muted && styles.rowMuted]}>{label}</Text>
@@ -49,10 +45,7 @@ const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   </Pressable>
 );
 
-/**
- *  프로필 설정 페이지
- * @returns
- */
+/** 프로필 설정, 펫 설정, 로그아웃 진입점을 제공하는 화면이다. */
 const ProfileSettingPage = () => {
   const navigation =
     useNavigation<ProfileStackNavigationProp<'ProfileSettings'>>();
@@ -106,11 +99,7 @@ const ProfileSettingPage = () => {
       });
   }, []);
 
-  /**
-   * 임시로 구현한 로그아웃 핸들러
-   *  - 로그아웃 시, Device Token 삭제(푸쉬알람 전송방지)
-   * @returns
-   */
+  /** 플랫폼 로그아웃과 푸시 토큰 정리를 포함한 전체 로그아웃 플로우를 수행한다. */
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
@@ -159,10 +148,12 @@ const ProfileSettingPage = () => {
     }
   };
 
+  /** 탈퇴 대체 안내 모달을 연다. */
   const handleWithdraw = () => {
     setWithdrawModalVisible(true);
   };
 
+  /** 현재는 탈퇴 대신 로그아웃으로 대체되는 안내 플로우를 실행한다. */
   const confirmWithdraw = async () => {
     setWithdrawModalVisible(false);
     Alert.alert(
