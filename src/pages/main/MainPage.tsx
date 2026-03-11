@@ -50,6 +50,7 @@ const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
+const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
@@ -842,21 +843,14 @@ export const MainPage = () => {
                 },
               ]}
             >
-              <Image
-                source={mainBackGroundWide}
-                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
-                resizeMode='stretch'
-              />
-              <Image
-                source={mainBackGroundWide}
-                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
-                resizeMode='stretch'
-              />
-              <Image
-                source={mainBackGroundWide}
-                style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
-                resizeMode='stretch'
-              />
+              {RUN_BG_TILE_OFFSETS.map((offset) => (
+                <Image
+                  key={offset}
+                  source={mainBackGroundWide}
+                  style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
+                  resizeMode='stretch'
+                />
+              ))}
             </Animated.View>
             <View style={styles.runHud}>
               <View style={styles.runHudInner}>

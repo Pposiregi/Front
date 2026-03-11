@@ -4,15 +4,23 @@ import { Platform } from 'react-native';
 const CHANNEL_ID = 'running-tracker';
 const NOTI_ID = 'running-notif';
 const SMALL_ICON = 'ic_notification';
+let runningChannelPromise: Promise<string> | null = null;
+
+const ensureRunningChannel = () => {
+  if (!runningChannelPromise) {
+    runningChannelPromise = notifee.createChannel({
+      id: CHANNEL_ID,
+      name: '러닝 트래킹',
+      importance: AndroidImportance.DEFAULT,
+    });
+  }
+  return runningChannelPromise;
+};
 
 export async function startRunningNotification() {
   if (Platform.OS !== 'android') return;
 
-  const createdChannelId = await notifee.createChannel({
-    id: CHANNEL_ID,
-    name: '러닝 트래킹',
-    importance: AndroidImportance.DEFAULT,
-  });
+  const createdChannelId = await ensureRunningChannel();
 
   await notifee.displayNotification({
     id: NOTI_ID,
@@ -36,11 +44,7 @@ export async function updateRunningNotification(
 ) {
   if (Platform.OS !== 'android') return;
 
-  const createdChannelId = await notifee.createChannel({
-    id: CHANNEL_ID,
-    name: '러닝 트래킹',
-    importance: AndroidImportance.DEFAULT,
-  });
+  const createdChannelId = await ensureRunningChannel();
 
   await notifee.displayNotification({
     id: NOTI_ID, // 🔥 같은 id

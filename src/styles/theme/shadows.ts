@@ -28,7 +28,7 @@ export const Shadows = {
   }),
   accent: Platform.select({
     ios: {
-      shadowColor: '#7A2E2E',
+      shadowColor: Colors.shadowAccent,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.2,
       shadowRadius: 6,

@@ -55,7 +55,7 @@ const browncatV1RunPartAssets: Record<string, ImageSourcePropType> = {
 const sibadogV1MainPartAssets: Record<string, ImageSourcePropType> = {
   'sibadog_v1_00_tail_none.png': require('./siba_dog/main/sibadog_v1_00_tail_none.png'),
   'sibadog_v1_01_leg_left.png': require('./siba_dog/main/sibadog_v1_01_leg_left.png'),
-  'sibadog_v1_01_right_left.png': require('./siba_dog/main/sibadog_v1_01_right_left.png'),
+  'sibadog_v1_01_leg_right.png': require('./siba_dog/main/sibadog_v1_01_leg_right.png'),
   'sibadog_v1_02_torso_none.png': require('./siba_dog/main/sibadog_v1_02_torso_none.png'),
   'sibadog_v1_03_arm_left.png': require('./siba_dog/main/sibadog_v1_03_arm_left.png'),
   'sibadog_v1_03_arm_right.png': require('./siba_dog/main/sibadog_v1_03_arm_right.png'),

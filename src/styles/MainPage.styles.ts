@@ -159,7 +159,7 @@ export default StyleSheet.create({
   },
   runBgTile: {
     height: '100%',
-    marginTop: '0%',
+    marginTop: 0,
   },
   startButton: {
     position: 'absolute',

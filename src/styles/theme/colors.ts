@@ -36,6 +36,7 @@ export const Colors = {
   overlaySoft: 'rgba(0,0,0,0.3)',
   shadowSoft: 'rgba(0, 0, 0, 0.2)',
   shadow: '#000',
+  shadowAccent: '#7A2E2E',
 
   devButton: '#1F2937',
 };

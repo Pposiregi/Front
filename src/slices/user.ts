@@ -60,7 +60,6 @@ const userSlice = createSlice({
       return initialState;
     },
   },
-  extraReducers: (_builder) => {},
 });
 
 export default userSlice;

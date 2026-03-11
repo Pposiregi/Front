@@ -32,7 +32,7 @@
     },
     {
       "key": "leg_right",
-      "file": "sibadog_v1_01_right_left.png",
+      "file": "sibadog_v1_01_leg_right.png",
       "zIndex": 5,
       "anchor": "hip_right"
     },

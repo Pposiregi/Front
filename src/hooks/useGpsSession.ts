@@ -19,6 +19,7 @@ const SESSION_START_KEY = 'fitpet:gps:startTime';
 const LOG_FLUSH_MAX_ATTEMPTS = 3;
 const END_API_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
+// Distance-based fallback to keep running summaries independent from Health Connect.
 const DEFAULT_STEP_LENGTH_METERS = 0.75;
 
 type PendingLog = Omit<GpsLogRequest, 'sessionId'>;
