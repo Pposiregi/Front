@@ -919,7 +919,6 @@ export const MainPage = () => {
             distanceMeters={runSummary?.distanceMeters ?? 0}
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
-            stepCountMissing={runSummary?.stepCountMissing}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>

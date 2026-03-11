@@ -86,7 +86,6 @@ export type GpsSessionSummary = {
   stepCount: number;
   distanceMeters: number;
   avgSpeedMps: number;
-  stepCountMissing?: boolean;
 };
 
 export type GpsSessionEndResult = {

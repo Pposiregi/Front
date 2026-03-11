@@ -9,7 +9,6 @@ type RunningSummaryModalProps = {
   distanceMeters: number;
   stepCount: number;
   avgSpeedMps: number;
-  stepCountMissing?: boolean;
 };
 
 const toKmh = (mps: number) => mps * 3.6;
@@ -37,7 +36,6 @@ const RunningSummaryModal = ({
   distanceMeters,
   stepCount,
   avgSpeedMps,
-  stepCountMissing = false,
 }: RunningSummaryModalProps) => {
   return (
     <Modal
@@ -66,17 +64,8 @@ const RunningSummaryModal = ({
             <View style={styles.summaryDivider} />
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>총 걸음 수</Text>
-              <Text style={styles.summaryValue}>
-                {stepCountMissing
-                  ? '미집계'
-                  : `${stepCount.toLocaleString()} 보`}
-              </Text>
+              <Text style={styles.summaryValue}>{`${stepCount.toLocaleString()} 보`}</Text>
             </View>
-            {stepCountMissing && (
-              <Text style={styles.summaryCaption}>
-                Health Connect 권한을 확인해 주세요.
-              </Text>
-            )}
             <View style={styles.summaryDivider} />
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>평균 페이스</Text>
