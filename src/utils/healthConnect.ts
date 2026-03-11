@@ -55,6 +55,8 @@ export const ensureHealthConnectInstalledOrPrompt = async (
   options?: { showPrompt?: boolean }
 ) => {
   const shouldPrompt = options?.showPrompt ?? true;
+  // exported helper 자체에서 플랫폼을 확실히 좁혀 두어
+  // 호출부가 실수하더라도 iOS/unsupported 기기에서 조용히 빠진다.
   if (Platform.OS !== 'android' || apiLevel < 28) return;
 
   let state: HealthConnectSdkState = 'unavailable';

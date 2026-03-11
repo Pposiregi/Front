@@ -172,11 +172,14 @@ function AppInner() {
 
   useEffect(() => {
     setSessionExpiredHandler(async (reason) => {
+      // refresh 재시도 중의 일시 실패(네트워크/5xx)는 세션 파기 사유가 아니므로
+      // latch만 풀고 사용자 상태는 유지한다.
       if (reason !== 'REFRESH_TOKEN_INVALID') {
         resetSessionExpiredState();
         return;
       }
 
+      // 실제 refresh token 만료일 때만 로컬 인증 정보와 사용자별 캐시를 함께 정리한다.
       await EncryptedStorage.removeItem('refreshToken');
       await EncryptedStorage.removeItem('serverAccessToken');
       await AsyncStorage.multiRemove([
@@ -194,6 +197,7 @@ function AppInner() {
 
   useEffect(() => {
     if (accessToken) {
+      // 새 access token을 확보한 시점에는 이전 만료 처리 latch를 반드시 초기화한다.
       resetSessionExpiredState();
     }
   }, [accessToken]);

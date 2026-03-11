@@ -66,6 +66,8 @@ const useHealthSteps = (): HealthStepsState => {
     const apiLevel = getAndroidApiLevel();
     return (
       apiLevel !== null &&
+      // Android 14+도 동일하게 Health Connect 설치/권한 플로우를 타므로
+      // minApi 이상 전체를 setup pause 대상으로 본다.
       apiLevel >= STEP_SYNC_OS_POLICY.healthConnectMinApi
     );
   };

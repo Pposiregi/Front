@@ -96,6 +96,8 @@ const ProfileSettingPage = () => {
     AsyncStorage.getItem(PET_TYPE_STORAGE_KEY)
       .then((stored) => {
         if (stored === 'DOG' || stored === 'CAT') {
+          // 로컬 캐시는 모달 초기값 hydrate 용도만 맡긴다.
+          // Redux 전역 상태는 서버 응답을 source of truth로 유지한다.
           setPetType(stored);
         }
       })
@@ -512,6 +514,8 @@ const ProfileSettingPage = () => {
                     });
                     dispatch(userSlice.actions.updatePetType(petType));
                     try {
+                      // 서버 상태 반영 이후의 캐시 저장 실패는 보조 저장소 문제이므로
+                      // 사용자에게 전체 실패로 보이지 않게 분리한다.
                       await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
                     } catch (storageError) {
                       console.warn(

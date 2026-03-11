@@ -165,6 +165,8 @@ export const MainPage = () => {
             ? data.petType
             : null;
 
+        // 전역 상태는 서버 응답을 우선 반영한다.
+        // 이전 세션의 로컬 petType이 최신 서버값을 덮어쓰지 않도록 여기서 우선순위를 고정한다.
         dispatch(
           userSlice.actions.setUser({
             userId: data.userId,
@@ -177,6 +179,7 @@ export const MainPage = () => {
 
         if (resolvedPetType) {
           try {
+            // 서버가 준 최신 petType으로 로컬 캐시를 재정렬해 다음 진입 시 stale 값을 줄인다.
             await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, resolvedPetType);
           } catch (storageError) {
             console.warn('[MainPage] petType 캐시 저장 실패', storageError);
@@ -185,6 +188,7 @@ export const MainPage = () => {
         }
 
         try {
+          // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
           const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
           if (storedPetType === 'DOG' || storedPetType === 'CAT') {
             dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
@@ -843,6 +847,7 @@ export const MainPage = () => {
                 },
               ]}
             >
+              {/* 동일한 배경 타일을 반복 배치해 무한 스크롤 배경을 단순하게 구성한다. */}
               {RUN_BG_TILE_OFFSETS.map((offset) => (
                 <Image
                   key={offset}

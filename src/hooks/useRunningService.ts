@@ -8,6 +8,8 @@ let runningChannelPromise: Promise<string> | null = null;
 
 const ensureRunningChannel = () => {
   if (!runningChannelPromise) {
+    // update hot path에서 JS->native createChannel 호출을 반복하지 않도록
+    // 앱 수명 동안 1회만 channel 생성 Promise를 재사용한다.
     runningChannelPromise = notifee.createChannel({
       id: CHANNEL_ID,
       name: '러닝 트래킹',

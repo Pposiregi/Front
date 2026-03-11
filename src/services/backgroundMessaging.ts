@@ -53,7 +53,8 @@ const syncStepsForToday = async () => {
   }
 
   // 백그라운드에서는 사용자 인터랙션 없이 읽기만 수행.
-  // 읽기 권한 또는 background 특수 권한이 없으면 조용히 skip 한다.
+  // foreground read 권한과 background 특수 권한이 모두 있어야 한다.
+  // 둘 중 하나라도 빠지면 handler 전체를 실패시키지 않고 조용히 skip 한다.
   const granted = await getCurrentGrantedPermissions();
   if (!hasAllPermissions(granted, HEALTH_STEP_PERMISSIONS)) {
     console.log(`${logPrefix} skip sync: step read permission not granted`);
