@@ -7,7 +7,6 @@ import {
   type ReadHealthDataHistoryPermission,
   type WriteExerciseRoutePermission,
   SdkAvailabilityStatus,
-  openHealthConnectSettings,
 } from 'react-native-health-connect';
 
 // 포그라운드 걸음 수 조회/기록에 필요한 최소 권한 세트
@@ -89,8 +88,7 @@ export const ensureHealthConnectInstalledOrPrompt = async (
     throw new Error('Health Connect 업데이트가 필요합니다.');
   }
 
-  const canOpenSettings = Platform.OS === 'android';
-  if (canOpenSettings && shouldPrompt) {
+  if (shouldPrompt) {
     Alert.alert(
       'Health Connect 연동',
       'Health Connect가 설치되어 있지 않습니다. 설치 후 걸음수 연동을 진행할 수 있습니다.',
@@ -98,10 +96,6 @@ export const ensureHealthConnectInstalledOrPrompt = async (
         {
           text: 'Health Connect 설치',
           onPress: openPlayStore,
-        },
-        {
-          text: 'Health Connect 설정 열기',
-          onPress: openHealthConnectSettings,
         },
       ]
     );

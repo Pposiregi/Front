@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 const CHANNEL_ID = 'running-tracker';
 const NOTI_ID = 'running-notif';
 const SMALL_ICON = 'ic_notification';
+const CHANNEL_NAME = '러닝 트래킹';
 let runningChannelPromise: Promise<string> | null = null;
 
 /** 러닝 알림 채널을 1회만 생성하고 재사용한다. */
@@ -11,11 +12,19 @@ const ensureRunningChannel = () => {
   if (!runningChannelPromise) {
     // update hot path에서 JS->native createChannel 호출을 반복하지 않도록
     // 앱 수명 동안 1회만 channel 생성 Promise를 재사용한다.
-    runningChannelPromise = notifee.createChannel({
-      id: CHANNEL_ID,
-      name: '러닝 트래킹',
-      importance: AndroidImportance.DEFAULT,
-    });
+    runningChannelPromise = notifee
+      .createChannel({
+        id: CHANNEL_ID,
+        name: CHANNEL_NAME,
+        importance: AndroidImportance.DEFAULT,
+        vibration: false,
+      })
+      .catch((error) => {
+        // rejected promise를 계속 들고 있으면 앱 재시작 전까지 모든 알림 갱신이 막히므로
+        // 실패 시 캐시를 비워 다음 호출에서 다시 채널 생성을 시도한다.
+        runningChannelPromise = null;
+        throw error;
+      });
   }
   return runningChannelPromise;
 };

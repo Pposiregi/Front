@@ -133,6 +133,7 @@ const ProfileSettingPage = () => {
       }
 
       await EncryptedStorage.removeItem('refreshToken');
+      await EncryptedStorage.removeItem('serverAccessToken');
       await AsyncStorage.multiRemove([
         'platform',
         'isSignUpInProgress',
