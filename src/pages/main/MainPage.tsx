@@ -147,25 +147,6 @@ export const MainPage = () => {
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
   const dispatch = useAppDispatch();
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      AsyncStorage.getItem(PET_TYPE_STORAGE_KEY)
-        .then((stored) => {
-          if (!active) return;
-          if (stored === 'DOG' || stored === 'CAT') {
-            dispatch(userSlice.actions.updatePetType(stored as PetType));
-          }
-        })
-        .catch((error) => {
-          console.warn('[MainPage] petType 로드 실패', error);
-        });
-      return () => {
-        active = false;
-      };
-    }, [dispatch])
-  );
   /**
    * 사용자 정보 받아오기
    */
@@ -177,14 +158,39 @@ export const MainPage = () => {
         if (data.userId == null || data.nickname == null) {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
+
+        const resolvedPetType =
+          data.petType === 'DOG' || data.petType === 'CAT'
+            ? data.petType
+            : null;
+
         dispatch(
           userSlice.actions.setUser({
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
             profileImageId: data.profileImageId ?? 2,
+            petType: resolvedPetType ?? undefined,
           })
         );
+
+        if (resolvedPetType) {
+          try {
+            await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, resolvedPetType);
+          } catch (storageError) {
+            console.warn('[MainPage] petType 캐시 저장 실패', storageError);
+          }
+          return;
+        }
+
+        try {
+          const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
+          if (storedPetType === 'DOG' || storedPetType === 'CAT') {
+            dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
+          }
+        } catch (storageError) {
+          console.warn('[MainPage] petType 로드 실패', storageError);
+        }
       } catch (e) {
         console.log('유저 정보 로드 실패', e);
       } finally {
