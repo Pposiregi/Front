@@ -97,13 +97,12 @@ const ProfileSettingPage = () => {
       .then((stored) => {
         if (stored === 'DOG' || stored === 'CAT') {
           setPetType(stored);
-          dispatch(userSlice.actions.updatePetType(stored));
         }
       })
       .catch((error) => {
         console.warn('>>> [ProfileSettings] petType 로드 실패', error);
       });
-  }, [dispatch]);
+  }, []);
 
   /**
    * 임시로 구현한 로그아웃 핸들러
@@ -143,7 +142,11 @@ const ProfileSettingPage = () => {
       }
 
       await EncryptedStorage.removeItem('refreshToken');
-      await AsyncStorage.multiRemove(['platform', 'isSignUpInProgress']);
+      await AsyncStorage.multiRemove([
+        'platform',
+        'isSignUpInProgress',
+        PET_TYPE_STORAGE_KEY,
+      ]);
       dispatch(userSlice.actions.resetUser());
       Alert.alert('로그아웃 완료', '다음에 다시 만나요!');
     } catch (err) {
@@ -508,7 +511,14 @@ const ProfileSettingPage = () => {
                       petType,
                     });
                     dispatch(userSlice.actions.updatePetType(petType));
-                    await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
+                    try {
+                      await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
+                    } catch (storageError) {
+                      console.warn(
+                        '>>> [ProfileSettings] petType 캐시 저장 실패',
+                        storageError
+                      );
+                    }
                     Alert.alert('완료', '펫 정보가 변경되었습니다.');
                     setPetModalVisible(false);
                   } catch (err) {

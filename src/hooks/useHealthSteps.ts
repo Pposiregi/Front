@@ -66,8 +66,7 @@ const useHealthSteps = (): HealthStepsState => {
     const apiLevel = getAndroidApiLevel();
     return (
       apiLevel !== null &&
-      apiLevel >= STEP_SYNC_OS_POLICY.healthConnectMinApi &&
-      apiLevel < 34
+      apiLevel >= STEP_SYNC_OS_POLICY.healthConnectMinApi
     );
   };
 

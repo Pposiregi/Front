@@ -22,17 +22,15 @@ export const resetSessionExpiredState = () => {
 export const notifySessionExpired = async (
   reason: SessionExpiredReason
 ) => {
-  if (isSessionExpireHandling) {
+  if (isSessionExpireHandling || !sessionExpiredHandler) {
     return;
   }
 
   isSessionExpireHandling = true;
   try {
-    if (sessionExpiredHandler) {
-      await sessionExpiredHandler(reason);
-    }
+    await sessionExpiredHandler(reason);
   } catch (error) {
+    isSessionExpireHandling = false;
     console.error('[AuthSession] 세션 만료 처리 실패', error);
   }
 };
-

@@ -55,7 +55,7 @@ export const ensureHealthConnectInstalledOrPrompt = async (
   options?: { showPrompt?: boolean }
 ) => {
   const shouldPrompt = options?.showPrompt ?? true;
-  if (!Platform.OS || apiLevel < 28) return;
+  if (Platform.OS !== 'android' || apiLevel < 28) return;
 
   let state: HealthConnectSdkState = 'unavailable';
   try {

@@ -34,6 +34,7 @@ import {
   resetSessionExpiredState,
   setSessionExpiredHandler,
 } from '@api/authSession';
+import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
   getLastSentPushToken,
@@ -170,10 +171,18 @@ function AppInner() {
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
   useEffect(() => {
-    setSessionExpiredHandler(async () => {
+    setSessionExpiredHandler(async (reason) => {
+      if (reason !== 'REFRESH_TOKEN_INVALID') {
+        resetSessionExpiredState();
+        return;
+      }
+
       await EncryptedStorage.removeItem('refreshToken');
       await EncryptedStorage.removeItem('serverAccessToken');
-      await AsyncStorage.removeItem('isSignUpInProgress');
+      await AsyncStorage.multiRemove([
+        'isSignUpInProgress',
+        PET_TYPE_STORAGE_KEY,
+      ]);
       dispatch(userSlice.actions.resetUser());
       Alert.alert('로그인 만료', '로그인이 만료되었어요. 다시 로그인해 주세요.');
     });
