@@ -17,8 +17,8 @@ import type {
 } from 'types/meal';
 
 const MEAL_BASE_PATH = '/meals'; // POST, PATCH, DELETE
-const GET_MEAL_DAY_PATH = '/reports/meals/daily';
-const GET_MEAL_MONTH_PATH = '/reports/meals/calendar';
+const GET_MEAL_DAY_PATH = '/report/meals/daily';
+const GET_MEAL_MONTH_PATH = '/report/meals/calendar';
 
 /**
  * Meal 식단 생성
@@ -110,17 +110,14 @@ const normalizeMealDetailItem = (
       (uri) => typeof uri === 'string' && uri.trim().length > 0
     ) ?? null;
 
-  const cacheKey =
-    item.imageUpdatedAt ??
-    item.image_updated_at ??
-    null;
+  const cacheKey = item.imageUpdatedAt ?? item.image_updated_at ?? null;
 
   const imageUri =
     rawUri === null
       ? null
       : cacheKey === null
-          ? rawUri
-          : `${rawUri}${rawUri.includes('?') ? '&' : '?'}v=${cacheKey}`;
+      ? rawUri
+      : `${rawUri}${rawUri.includes('?') ? '&' : '?'}v=${cacheKey}`;
 
   return {
     mealId: String(item.mealId ?? item.meal_id ?? ''),
