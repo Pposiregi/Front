@@ -19,8 +19,11 @@ const SESSION_START_KEY = 'fitpet:gps:startTime';
 const LOG_FLUSH_MAX_ATTEMPTS = 3;
 const END_API_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
-// Distance-based fallback to keep running summaries independent from Health Connect.
-const DEFAULT_STEP_LENGTH_METERS = 0.75;
+const MIN_RUNNING_STEP_LENGTH_METERS = 0.78;
+const EASY_RUNNING_STEP_LENGTH_METERS = 0.85;
+const STEADY_RUNNING_STEP_LENGTH_METERS = 0.92;
+const FAST_RUNNING_STEP_LENGTH_METERS = 1.0;
+const VERY_FAST_RUNNING_STEP_LENGTH_METERS = 1.08;
 
 type PendingLog = Omit<GpsLogRequest, 'sessionId'>;
 type FlushLogsResult = {
@@ -75,6 +78,29 @@ const calculateTotalDistanceMeters = (path: LatLng[]): number => {
     total += getDistanceMeters(path[i - 1], path[i]);
   }
   return total;
+};
+
+/**
+ * 평균 속도를 바탕으로 러닝 보폭을 추정한다.
+ * 실제 step source가 없기 때문에, 고정 걷기 보폭 대신 속도 구간별 stride를 사용한다.
+ */
+const getEstimatedRunningStepLengthMeters = (avgSpeedMps: number) => {
+  if (!Number.isFinite(avgSpeedMps) || avgSpeedMps <= 0) {
+    return EASY_RUNNING_STEP_LENGTH_METERS;
+  }
+  if (avgSpeedMps < 2.0) {
+    return MIN_RUNNING_STEP_LENGTH_METERS;
+  }
+  if (avgSpeedMps < 2.5) {
+    return EASY_RUNNING_STEP_LENGTH_METERS;
+  }
+  if (avgSpeedMps < 3.0) {
+    return STEADY_RUNNING_STEP_LENGTH_METERS;
+  }
+  if (avgSpeedMps < 3.5) {
+    return FAST_RUNNING_STEP_LENGTH_METERS;
+  }
+  return VERY_FAST_RUNNING_STEP_LENGTH_METERS;
 };
 
 export type UseGpsSessionResult = {
@@ -325,15 +351,18 @@ export const useGpsSession = (): UseGpsSessionResult => {
         const distance = calculateTotalDistanceMeters(path);
         // backend 기준 단위(m/s)로 요약 속도를 관리한다.
         const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
-        // 러닝 세션은 Health Connect 대신 이동거리 기반으로 자체 걸음 수를 계산한다.
+        // 실제 step source가 없으므로, 평균 속도 기반 추정 보폭으로 걸음 수를 계산한다.
+        const estimatedStepLengthMeters =
+          getEstimatedRunningStepLengthMeters(avgSpeedMps);
         const stepCount = Math.max(
           0,
-          Math.round(distance / DEFAULT_STEP_LENGTH_METERS)
+          Math.round(distance / estimatedStepLengthMeters)
         );
         if (__DEV__) {
           console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
             distanceMeters: distance,
-            stepLengthMeters: DEFAULT_STEP_LENGTH_METERS,
+            avgSpeedMps,
+            stepLengthMeters: estimatedStepLengthMeters,
             stepCount,
           });
         }
