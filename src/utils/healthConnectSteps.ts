@@ -5,7 +5,7 @@ import {
 } from 'react-native-health-connect';
 import {
   getCurrentGrantedPermissions,
-  HEALTH_STEP_PERMISSIONS,
+  HEALTH_STEP_READ_PERMISSIONS,
   hasAllPermissions,
   isAndroid,
   type GrantedHealthPermission,
@@ -32,10 +32,12 @@ export const getHealthConnectStepCount = async (
     }
 
     const grantedBeforeRequest = await getCurrentGrantedPermissions();
-    if (!hasAllPermissions(grantedBeforeRequest, HEALTH_STEP_PERMISSIONS)) {
+    if (!hasAllPermissions(grantedBeforeRequest, HEALTH_STEP_READ_PERMISSIONS)) {
       const grantedAfterRequest: GrantedHealthPermission[] =
-        await requestPermission(HEALTH_STEP_PERMISSIONS);
-      if (!hasAllPermissions(grantedAfterRequest, HEALTH_STEP_PERMISSIONS)) {
+        await requestPermission(HEALTH_STEP_READ_PERMISSIONS);
+      if (
+        !hasAllPermissions(grantedAfterRequest, HEALTH_STEP_READ_PERMISSIONS)
+      ) {
         throw new Error(
           'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
         );
@@ -43,7 +45,7 @@ export const getHealthConnectStepCount = async (
     }
 
     const granted = await getCurrentGrantedPermissions();
-    if (!hasAllPermissions(granted, HEALTH_STEP_PERMISSIONS)) {
+    if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
       );

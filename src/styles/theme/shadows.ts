@@ -35,6 +35,7 @@ export const Shadows = {
       shadowRadius: 6,
     },
     android: {
+      shadowColor: Colors.shadowAccent,
       elevation: 5,
     },
     default: {},

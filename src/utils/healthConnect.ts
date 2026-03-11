@@ -9,9 +9,13 @@ import {
   SdkAvailabilityStatus,
 } from 'react-native-health-connect';
 
-// 포그라운드 걸음 수 조회/기록에 필요한 최소 권한 세트
-export const HEALTH_STEP_PERMISSIONS: Permission[] = [
+// 걸음 수 조회에 필요한 최소 권한 세트
+export const HEALTH_STEP_READ_PERMISSIONS: Permission[] = [
   { accessType: 'read', recordType: 'Steps' },
+];
+
+// 걸음 수 기록에 필요한 최소 권한 세트
+export const HEALTH_STEP_WRITE_PERMISSIONS: Permission[] = [
   { accessType: 'write', recordType: 'Steps' },
 ];
 

@@ -10,7 +10,8 @@ import {
 import {
   getStartOfToday,
   hasAllPermissions,
-  HEALTH_STEP_PERMISSIONS,
+  HEALTH_STEP_READ_PERMISSIONS,
+  HEALTH_STEP_WRITE_PERMISSIONS,
   HEALTH_STEPS_CACHE_KEY,
   ensureHealthConnectInstalledOrPrompt,
   getCurrentGrantedPermissions,
@@ -111,7 +112,7 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     const granted = await getCurrentGrantedPermissions();
-    if (!hasAllPermissions(granted, HEALTH_STEP_PERMISSIONS)) {
+    if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
       return;
     }
     if (hasBackgroundPermission(granted)) {
@@ -165,7 +166,7 @@ const useHealthSteps = (): HealthStepsState => {
     const granted = await getCurrentGrantedPermissions();
     const hasStepPermissions = hasAllPermissions(
       granted,
-      HEALTH_STEP_PERMISSIONS
+      HEALTH_STEP_READ_PERMISSIONS
     );
 
     permissionDeniedRef.current = !hasStepPermissions;
@@ -189,8 +190,14 @@ const useHealthSteps = (): HealthStepsState => {
     return false;
   };
 
-  /** Health Connect 초기화와 필수 권한 보장을 한 번에 수행한다. */
-  const ensureInitializedAndPermitted = async (showPrompt = false) => {
+  /** Health Connect 초기화와 필요한 권한 보장을 한 번에 수행한다. */
+  const ensureInitializedAndPermitted = async (
+    requiredPermissions: GrantedHealthPermission[],
+    options?: { showPrompt?: boolean; requestBackgroundAfterGrant?: boolean }
+  ) => {
+    const showPrompt = options?.showPrompt ?? false;
+    const requestBackgroundAfterGrant =
+      options?.requestBackgroundAfterGrant ?? false;
     const apiLevel = getAndroidApiLevel();
 
     await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
@@ -203,9 +210,11 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     const grantedBeforeRequest = await getCurrentGrantedPermissions();
-    if (hasAllPermissions(grantedBeforeRequest, HEALTH_STEP_PERMISSIONS)) {
+    if (hasAllPermissions(grantedBeforeRequest, requiredPermissions)) {
       permissionDeniedRef.current = false;
-      await maybeRequestBackgroundPermission(showPrompt);
+      if (requestBackgroundAfterGrant) {
+        await maybeRequestBackgroundPermission(showPrompt);
+      }
       return;
     }
 
@@ -217,10 +226,10 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     const grantedAfterRequest: GrantedHealthPermission[] = await requestPermission(
-      HEALTH_STEP_PERMISSIONS
+      requiredPermissions
     );
 
-    if (!hasAllPermissions(grantedAfterRequest, HEALTH_STEP_PERMISSIONS)) {
+    if (!hasAllPermissions(grantedAfterRequest, requiredPermissions)) {
       permissionDeniedRef.current = true;
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
@@ -228,7 +237,9 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     permissionDeniedRef.current = false;
-    await maybeRequestBackgroundPermission(showPrompt);
+    if (requestBackgroundAfterGrant) {
+      await maybeRequestBackgroundPermission(showPrompt);
+    }
   };
 
   /** 백그라운드가 저장한 오늘 걸음 수 캐시를 먼저 읽어 UI에 반영한다. */
@@ -266,7 +277,10 @@ const useHealthSteps = (): HealthStepsState => {
     setStableError(null);
 
     try {
-      await ensureInitializedAndPermitted(showPrompt);
+      await ensureInitializedAndPermitted(HEALTH_STEP_READ_PERMISSIONS, {
+        showPrompt,
+        requestBackgroundAfterGrant: true,
+      });
       setupPendingRef.current = false;
       if (shouldPausePollingForSetup()) {
         resumePolling();
@@ -338,7 +352,10 @@ const useHealthSteps = (): HealthStepsState => {
     setWriting(true);
     setStableError(null);
     try {
-      await ensureInitializedAndPermitted(true);
+      await ensureInitializedAndPermitted(
+        [...HEALTH_STEP_READ_PERMISSIONS, ...HEALTH_STEP_WRITE_PERMISSIONS],
+        { showPrompt: true }
+      );
       const now = new Date();
       // 마지막 기록 종료 시각 이후로부터 현재까지를 구간으로 설정해 중복/겹침 최소화
       const startTime =

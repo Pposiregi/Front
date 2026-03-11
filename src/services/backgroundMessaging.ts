@@ -9,7 +9,7 @@ import {
 import {
   getStartOfToday,
   HEALTH_STEPS_CACHE_KEY,
-  HEALTH_STEP_PERMISSIONS,
+  HEALTH_STEP_READ_PERMISSIONS,
   ensureHealthConnectInstalledOrPrompt,
   getCurrentGrantedPermissions,
   hasAllPermissions,
@@ -57,7 +57,7 @@ const syncStepsForToday = async () => {
   // foreground read 권한과 background 특수 권한이 모두 있어야 한다.
   // 둘 중 하나라도 빠지면 handler 전체를 실패시키지 않고 조용히 skip 한다.
   const granted = await getCurrentGrantedPermissions();
-  if (!hasAllPermissions(granted, HEALTH_STEP_PERMISSIONS)) {
+  if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
     console.log(`${logPrefix} skip sync: step read permission not granted`);
     return;
   }
