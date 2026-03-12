@@ -9,6 +9,7 @@ import PermissionPage from './PermissionPage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
 import { authRequest } from '../../types/auth';
+import PetCreatePage from './PetCreatePage';
 
 const IntroPage = () => {
   //현재 페이지 주소 나타냄
@@ -66,7 +67,7 @@ const IntroPage = () => {
 
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
-    const totalPages = 3;
+    const totalPages = 4;
     if (pagerRef.current && currentPage < totalPages - 1) {
       pagerRef.current.setPage(currentPage + 1);
       setCurrentPage(currentPage + 1);
@@ -105,8 +106,9 @@ const IntroPage = () => {
     };
     try {
       await signUp(requestBody);
-      await AsyncStorage.setItem('isSignUpInProgress', 'false');
-      dispatch(userSlice.actions.setSignUpInProgress(false));
+      goToNextPage();
+      // await AsyncStorage.setItem('isSignUpInProgress', 'false');
+      // dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
       console.error('회원가입 상태 업데이트 실패', err);
     }

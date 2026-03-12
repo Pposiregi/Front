@@ -3,24 +3,23 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 
 type Props = {
-  visible: boolean;
-  onClose: () => void;
+  onFinish: () => void;
 };
 
-export default function PetOnboardingOverlay({ visible, onClose }: Props) {
+export default function PetCreatePage({ onFinish }: Props) {
   const [petType, setPetType] = useState<'DOG' | 'CAT' | null>(null);
   const [name, setName] = useState('');
 
-  if (!visible) return null;
-
   const handleCreate = async () => {
     if (!petType || !name) return;
+
     try {
       await postPets({
         name,
         petType,
       });
-      onClose();
+
+      onFinish();
     } catch (e) {
       console.error(e);
     }
@@ -28,9 +27,14 @@ export default function PetOnboardingOverlay({ visible, onClose }: Props) {
 
   return (
     <View
-      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+      }}
     >
-      <View>
+      <View style={{ width: '100%' }}>
         <Text>함께 달릴 친구를 만들어볼까요?</Text>
 
         <TouchableOpacity onPress={() => setPetType('DOG')}>

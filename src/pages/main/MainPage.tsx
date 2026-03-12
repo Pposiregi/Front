@@ -109,7 +109,6 @@ import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
 import type { PartTransformInput } from '@utils/petTransformUtils';
-import PetOnboardingOverlay from '@components/PetOnbordingOverlay';
 
 /**
  * 메인 화면 컴포넌트
@@ -1095,7 +1094,7 @@ export const MainPage = () => {
         </TouchableOpacity>
       )}
       <BodyRecordPrompt
-        visible={!showBodyPrompt && showBodyPrompt}
+        visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}
         baseDate={bodyPromptBaseDate}
         // 목표값에 대한 진행률/aim 라벨을 실제 데이터로 표시
@@ -1105,10 +1104,6 @@ export const MainPage = () => {
         onLater={handleLaterBodyPrompt}
         onSkipToday={handleSkipBodyPromptToday}
         saving={savingBodyHistory}
-      />
-      <PetOnboardingOverlay
-        visible={showPetOnboarding}
-        onClose={() => setShowPetOnboarding(false)}
       />
     </View>
   );
