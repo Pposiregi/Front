@@ -18,36 +18,36 @@ import {
 
 type OptionalInfoProps = {
   onFinish: (data: {
-    targetWeight: string;
-    currentPbf: string;
+    targetWeightKg: string;
+    pbf: string;
     targetPbf: string;
-    targetStep: string;
+    targetStepCount: string;
   }) => void;
 };
 const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
-  const [targetWeight, setTargetWeight] = useState('');
-  const [currentPbf, setcurrentPbf] = useState('');
+  const [targetWeightKg, setTargetWeight] = useState('');
+  const [pbf, setcurrentPbf] = useState('');
   const [targetPbf, setTargetPbf] = useState('');
-  const [targetStep, setTargetStep] = useState('');
+  const [targetStepCount, setTargetStep] = useState('');
   const targetWeightRef = useRef<TextInput | null>(null);
-  const currentPbfRef = useRef<TextInput | null>(null);
+  const pbfRef = useRef<TextInput | null>(null);
   const targetPbfRef = useRef<TextInput | null>(null);
   const targetWalkRef = useRef<TextInput | null>(null);
-  const allEmpty = !targetWeight && !currentPbf && !targetPbf && !targetStep;
+  const allEmpty = !targetWeightKg && !pbf && !targetPbf && !targetStepCount;
   // 제출 버튼을 눌렀을 때 실행될 함수
   const onSubmit = useCallback(() => {
     // 모든 값이 비어있을 때 (건너뛰기)
     if (allEmpty) {
-      onFinish({ targetWeight, currentPbf, targetPbf, targetStep });
+      onFinish({ targetWeightKg, pbf, targetPbf, targetStepCount });
       return;
     }
 
     // 입력된 값이 하나라도 있을 때, 유효성 검사 실행
-    if (targetWeight && !isValidWeight(targetWeight)) {
+    if (targetWeightKg && !isValidWeight(targetWeightKg)) {
       Alert.alert('알림', '목표 체중을 올바르게 입력해주세요.');
       return;
     }
-    if (currentPbf && !isValidPbf(currentPbf)) {
+    if (pbf && !isValidPbf(pbf)) {
       Alert.alert('알림', '현재 체지방률을 올바르게 입력해주세요.');
       return;
     }
@@ -55,14 +55,14 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
       Alert.alert('알림', '목표 체지방률을 올바르게 입력해주세요.');
       return;
     }
-    if (targetStep && !isValidTargetStep(targetStep)) {
+    if (targetStepCount && !isValidTargetStep(targetStepCount)) {
       Alert.alert('알림', '목표 걸음을 올바르게 입력해주세요.');
       return;
     }
 
     // 모든 유효성 검사 통과
-    onFinish({ targetWeight, currentPbf, targetPbf, targetStep });
-  }, [targetWeight, currentPbf, targetPbf, targetStep, allEmpty, onFinish]);
+    onFinish({ targetWeightKg, pbf, targetPbf, targetStepCount });
+  }, [targetWeightKg, pbf, targetPbf, targetStepCount, allEmpty, onFinish]);
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
@@ -86,8 +86,8 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setTargetWeight}
-              ref={targetWalkRef}
-              onSubmitEditing={() => currentPbfRef.current?.focus()}
+              ref={targetWeightRef}
+              onSubmitEditing={() => targetWalkRef.current?.focus()}
             />
             <Text style={styles.unit}>kg</Text>
           </View>
@@ -99,8 +99,8 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setTargetStep}
-              ref={targetWeightRef}
-              onSubmitEditing={() => currentPbfRef.current?.focus()}
+              ref={targetWalkRef}
+              onSubmitEditing={() => pbfRef.current?.focus()}
             />
             <Text style={styles.unit}>step</Text>
           </View>
@@ -112,7 +112,7 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
               placeholderTextColor='#666'
               keyboardType='numeric'
               onChangeText={setcurrentPbf}
-              ref={currentPbfRef}
+              ref={pbfRef}
               onSubmitEditing={() => targetPbfRef.current?.focus()}
             />
             <Text style={styles.unit}>%</Text>

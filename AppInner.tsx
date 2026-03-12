@@ -14,7 +14,13 @@ import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
-import { ActivityIndicator, Alert, Image, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  View,
+} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
@@ -33,6 +39,7 @@ import {
   getLastSentPushToken,
   setLastSentPushToken,
 } from '@utils/pushTokenStorage';
+import PetCreatePage from '@pages/SignUpFlow/PetCreatePage';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -45,6 +52,7 @@ export type LoggedInParamList = {
 export type RootStackParamList = {
   SocialLogin: undefined;
   Intro: undefined;
+  PetCreate: undefined;
 };
 
 /**
@@ -163,6 +171,10 @@ function AppInner() {
   );
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
 
+  const petId = useSelector((state: RootState) => state.user.petId);
+
+  const hasPet = !!petId;
+
   /**
    * 앱 진입 시 자동 로그인 처리.
    * - refreshToken 갱신 및 유저 상태 초기화
@@ -211,6 +223,14 @@ function AppInner() {
             }
             console.error('[AuthError] 자동로그인 실패', err);
           }
+        }
+        try {
+          const petId = await AsyncStorage.getItem('petId');
+          if (petId) {
+            dispatch(userSlice.actions.setPet(Number(petId)));
+          }
+        } catch (err) {
+          console.warn('petId 확인 실패', err);
         }
       } catch (err) {
         console.error('[AuthError] 자동로그인 실패', err);
@@ -366,6 +386,14 @@ function AppInner() {
               name='Intro'
               component={Index}
               options={{ headerShown: false, animation: 'slide_from_right' }}
+            />
+          </Stack.Navigator>
+        ) : !hasPet ? (
+          <Stack.Navigator>
+            <Stack.Screen
+              name='PetCreate'
+              component={PetCreatePage}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         ) : (

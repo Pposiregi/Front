@@ -9,6 +9,7 @@ const initialState = {
   nickname: '',
   profileImageId: 1,
   gender: null as 'female' | 'male' | null,
+  petId: null as number | null,
 };
 
 const userSlice = createSlice({
@@ -20,6 +21,9 @@ const userSlice = createSlice({
       action: PayloadAction<{ accessToken: string; platform?: string }>
     ) {
       state.accessToken = action.payload.accessToken;
+    },
+    setNickName(state, action: PayloadAction<{ nickname: string }>) {
+      state.nickname = action.payload.nickname;
     },
     setUser(
       state,
@@ -41,6 +45,9 @@ const userSlice = createSlice({
     },
     setRunningActive(state, action: PayloadAction<boolean>) {
       state.isRunningActive = action.payload;
+    },
+    setPet(state, action: PayloadAction<number>) {
+      state.petId = action.payload;
     },
     updateNickname(state, action: PayloadAction<string>) {
       state.nickname = action.payload;

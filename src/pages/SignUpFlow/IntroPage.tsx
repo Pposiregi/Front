@@ -106,9 +106,13 @@ const IntroPage = () => {
     };
     try {
       await signUp(requestBody);
-      goToNextPage();
-      // await AsyncStorage.setItem('isSignUpInProgress', 'false');
-      // dispatch(userSlice.actions.setSignUpInProgress(false));
+      dispatch(
+        userSlice.actions.setNickName({
+          nickname: requestBody.nickname,
+        })
+      );
+      await AsyncStorage.setItem('isSignUpInProgress', 'false');
+      dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
       console.error('회원가입 상태 업데이트 실패', err);
     }
