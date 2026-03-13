@@ -1,9 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CONTENT_HORIZONTAL_PADDING = 24;
-const CALENDAR_HORIZONTAL_PADDING = 8;
+const CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const CALENDAR_HORIZONTAL_PADDING = Math.max(Spacing.sm, Math.round(SCREEN_WIDTH * 0.02));
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
 const CALENDAR_OUTER_GUTTER = Math.max(
   4,
@@ -25,6 +25,14 @@ const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
 const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
+const CONTENT_TOP_PADDING = Math.max(Spacing.md, Math.round(SCREEN_HEIGHT * 0.015));
+const CONTENT_BOTTOM_PADDING = Math.max(40, Math.round(SCREEN_HEIGHT * 0.05));
+const HEADER_BUTTON_SIZE = Math.max(36, Math.round(SCREEN_WIDTH * 0.09));
+const HEADER_BUTTON_RADIUS = Math.round(HEADER_BUTTON_SIZE / 2);
+const HEADER_SECTION_SPACING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const CALENDAR_RADIUS = Math.max(28, Math.round(SCREEN_WIDTH * 0.07));
+const CALENDAR_VERTICAL_PADDING = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
+const MONTH_ROW_MARGIN_BOTTOM = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
 const MODAL_CARD_SIZE = Math.round(
   Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
 );
@@ -42,8 +50,19 @@ const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
   Math.min(280, Math.round(SCREEN_HEIGHT * 0.33))
 );
 
+const MODAL_CONTENT_RADIUS = Math.max(32, Math.round(SCREEN_WIDTH * 0.08));
+const MODAL_CONTENT_VERTICAL_PADDING = Math.max(26, Math.round(SCREEN_HEIGHT * 0.032));
+const MODAL_CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const MODAL_HEADER_MARGIN_BOTTOM = Math.max(18, Math.round(SCREEN_HEIGHT * 0.022));
+const MODAL_NOTICE_RADIUS = Math.max(14, Math.round(SCREEN_WIDTH * 0.035));
+const MODAL_NOTICE_ICON_SIZE = Math.max(24, Math.round(SCREEN_WIDTH * 0.06));
+const MODAL_NOTICE_ICON_RADIUS = Math.round(MODAL_NOTICE_ICON_SIZE / 2);
+const MODAL_LIST_TOP_MARGIN = Math.max(Spacing.xs, Math.round(SCREEN_WIDTH * 0.01));
+const STACK_IMAGE_BORDER = Colors.surface;
+const STACK_IMAGE_SHADOW = Colors.shadow;
+
 const baseShadow = {
-  shadowColor: Colors.shadow,
+  ...Shadows.soft,
   shadowOpacity: 0.08,
   shadowOffset: { width: 0, height: 6 },
   shadowRadius: 12,
@@ -63,8 +82,8 @@ export default StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: CONTENT_HORIZONTAL_PADDING,
-    paddingTop: 12,
-    paddingBottom: 40,
+    paddingTop: CONTENT_TOP_PADDING,
+    paddingBottom: CONTENT_BOTTOM_PADDING,
   },
   header: {
     flexDirection: 'row',
@@ -72,9 +91,9 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: HEADER_BUTTON_SIZE,
+    height: HEADER_BUTTON_SIZE,
+    borderRadius: HEADER_BUTTON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -82,7 +101,7 @@ export default StyleSheet.create({
     fontFamily: Fonts.JUA,
     fontSize: Typography.h2,
     color: Colors.textPrimary,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowColor: Colors.shadowSoft,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -92,12 +111,12 @@ export default StyleSheet.create({
     color: Colors.textPrimary,
   },
   headerSpacing: {
-    marginBottom: 24,
+    marginBottom: HEADER_SECTION_SPACING,
   },
   calendarContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 28,
-    paddingVertical: 12,
+    borderRadius: CALENDAR_RADIUS,
+    paddingVertical: CALENDAR_VERTICAL_PADDING,
     paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
     marginHorizontal: -CALENDAR_CONTAINER_EXPAND,
     ...baseShadow,
@@ -106,7 +125,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: MONTH_ROW_MARGIN_BOTTOM,
   },
   calendarMonthLabel: {
     fontFamily: Fonts.JUA,
@@ -195,16 +214,16 @@ export default StyleSheet.create({
     color: Colors.divider,
   },
   sectionSpacing: {
-    marginBottom: 24,
+    marginBottom: HEADER_SECTION_SPACING,
   },
   calendarHelperText: {
-    marginTop: 24,
+    marginTop: HEADER_SECTION_SPACING,
     textAlign: 'center',
     color: Colors.textSecondary,
     fontSize: Typography.bodySmall,
   },
   calendarErrorText: {
-    marginTop: 16,
+    marginTop: Math.max(Spacing.lg, Math.round(SCREEN_HEIGHT * 0.02)),
     textAlign: 'center',
     color: Colors.error,
     fontSize: Typography.bodySmall,
@@ -220,22 +239,22 @@ export default StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.overlaySoft,
   },
   modalContentWrapper: {
     width: '88%',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 32,
-    paddingVertical: 26,
-    paddingHorizontal: 24,
+    backgroundColor: Colors.surface,
+    borderRadius: MODAL_CONTENT_RADIUS,
+    paddingVertical: MODAL_CONTENT_VERTICAL_PADDING,
+    paddingHorizontal: MODAL_CONTENT_HORIZONTAL_PADDING,
     maxHeight: MODAL_MAX_HEIGHT,
     ...baseShadow,
   },
   modalHeaderSection: {
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: MODAL_HEADER_MARGIN_BOTTOM,
   },
   modalTitle: {
     fontFamily: Fonts.JUA,
@@ -248,25 +267,25 @@ export default StyleSheet.create({
     color: Colors.textMuted,
   },
   modalFutureNoticeBox: {
-    marginTop: 8,
+    marginTop: Spacing.sm,
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    paddingVertical: Math.max(10, Math.round(SCREEN_HEIGHT * 0.012)),
+    paddingHorizontal: Spacing.md,
+    borderRadius: MODAL_NOTICE_RADIUS,
     borderWidth: 1,
-    borderColor: Colors.accent,
+    borderColor: Colors.accentStrong,
     backgroundColor: Colors.accentSoft,
   },
   modalFutureNoticeIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: MODAL_NOTICE_ICON_SIZE,
+    height: MODAL_NOTICE_ICON_SIZE,
+    borderRadius: MODAL_NOTICE_ICON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.accentStrong,
-    marginRight: 10,
+    marginRight: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.025)),
   },
   modalFutureNoticeIcon: {
     fontFamily: Fonts.JUA,
@@ -280,12 +299,12 @@ export default StyleSheet.create({
   modalFutureNoticeTitle: {
     fontFamily: Fonts.JUA,
     fontSize: Typography.bodySmall,
-    color: '#B55B00',
+    color: Colors.accentStrong,
   },
   modalFutureNoticeText: {
     marginTop: 1,
     fontSize: Typography.caption,
-    color: '#A15A00',
+    color: Colors.textSecondary,
   },
   modalPhotoRowScroll: {
     marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
@@ -310,7 +329,7 @@ export default StyleSheet.create({
     resizeMode: 'cover',
   },
   modalMealList: {
-    marginTop: 4,
+    marginTop: MODAL_LIST_TOP_MARGIN,
     // 외부 컨테이너와 ScrollView 둘 다 maxHeight를 둬 iOS/Android에서
     // 스크롤 영역이 의도보다 늘어나는 케이스를 방지한다.
     maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
@@ -367,7 +386,7 @@ export default StyleSheet.create({
     height: MODAL_BUTTON_SIZE,
     borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
-    borderColor: '#D8DBE8',
+    borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
@@ -390,12 +409,12 @@ export default StyleSheet.create({
   modalMealRowName: {
     fontFamily: Fonts.JUA,
     fontSize: Math.max(Typography.bodySmall, Math.round(SCREEN_WIDTH * 0.036)),
-    color: '#2E313D',
+    color: Colors.textPrimary,
   },
   modalMealRowCalories: {
     marginTop: 4,
     fontSize: Math.max(11, Math.round(SCREEN_WIDTH * 0.028)),
-    color: '#9398B3',
+    color: Colors.textMuted,
   },
   modalMealRowImage: {
     width: MODAL_ROW_IMAGE,
@@ -408,7 +427,7 @@ export default StyleSheet.create({
     height: MODAL_BUTTON_SIZE,
     borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
-    borderColor: '#D8DBE8',
+    borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
@@ -421,7 +440,7 @@ export default StyleSheet.create({
   modalMealEditLabel: {
     fontFamily: Fonts.JUA,
     fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
-    color: '#4C5AC7',
+    color: Colors.infoStrong,
   },
   modalMealDragHandle: {
     width: 22,
@@ -445,7 +464,7 @@ export default StyleSheet.create({
     height: 36,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E0E3F1',
+    borderColor: Colors.divider,
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
@@ -462,7 +481,7 @@ export default StyleSheet.create({
   modalAddInput: {
     marginLeft: 12,
     fontSize: 13,
-    color: '#2E313D',
+    color: Colors.textPrimary,
     paddingVertical: 0,
   },
   modalAddInputName: {
@@ -476,7 +495,7 @@ export default StyleSheet.create({
     height: 40,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E0E3F1',
+    borderColor: Colors.divider,
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
@@ -487,11 +506,11 @@ export default StyleSheet.create({
   },
   modalCameraIcon: {
     fontSize: Typography.bodyLarge,
-    color: '#9DA3BB',
+    color: Colors.textMuted,
   },
   modalEditRow: {
     marginTop: 18,
-    backgroundColor: '#F5F7FF',
+    backgroundColor: Colors.infoSoft,
   },
   modalEditActions: {
     flexDirection: 'row',
@@ -507,7 +526,7 @@ export default StyleSheet.create({
   modalEditCancel: {
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#C8CCE0',
+    borderColor: Colors.divider,
     backgroundColor: Colors.surface,
   },
   modalEditSubmit: {
@@ -519,7 +538,7 @@ export default StyleSheet.create({
   },
   modalEditCancelLabel: {
     fontFamily: Fonts.JUA,
-    color: '#8F95AF',
+    color: Colors.textMuted,
     fontSize: Typography.bodySmall,
   },
   modalEditSubmitLabel: {
@@ -535,7 +554,7 @@ export default StyleSheet.create({
   modalTotalLabel: {
     fontFamily: Fonts.JUA,
     fontSize: Typography.body,
-    color: '#4A4E66',
+    color: Colors.textSecondary,
   },
   modalTotalValue: {
     fontFamily: Fonts.JUA,
@@ -565,7 +584,7 @@ export default StyleSheet.create({
   },
   modalSecondaryButtonLabel: {
     fontSize: Typography.bodySmall,
-    color: '#8F94AB',
+    color: Colors.textMuted,
   },
   stackThumb: {
     width: '100%',
@@ -581,8 +600,8 @@ export default StyleSheet.create({
     height: STACK_ITEM_SIZE,
     borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 2, // 겹침 경계 또렷하게
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: STACK_IMAGE_BORDER,
+    shadowColor: STACK_IMAGE_SHADOW,
     shadowOpacity: 0.15,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },

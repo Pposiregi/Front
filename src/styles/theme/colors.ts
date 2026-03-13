@@ -1,6 +1,11 @@
+/** 앱 전반에서 재사용하는 색상 토큰 모음이다. */
 export const Colors = {
   background: '#F3F4F6',
   surface: '#FFFFFF',
+  surfaceOverlay: 'rgba(255, 255, 255, 0.72)',
+  surfaceOverlayStrong: 'rgba(255, 255, 255, 0.78)',
+  surfaceOverlaySolid: 'rgba(255, 255, 255, 0.86)',
+  surfaceBorderOverlay: 'rgba(255, 255, 255, 0.6)',
 
   textPrimary: '#2B2B2B',
   textSecondary: '#6B7280',
@@ -11,6 +16,7 @@ export const Colors = {
   accent: '#FEC288',
   accentSoft: '#FFEFE0',
   accentStrong: '#FF9F43',
+  accentDeep: '#C2410C',
 
   disabled: '#ccc',
 
@@ -21,12 +27,17 @@ export const Colors = {
   success: '#4CAF50',
 
   error: '#D9534F',
+  errorSoft: '#FEE2E2',
+  errorText: '#991B1B',
 
   badgeSuccess: '#DCFCE7',
   badgeProgress: '#E0E7FF',
 
   overlayDark: 'rgba(0,0,0,0.6)',
+  overlaySoft: 'rgba(0,0,0,0.3)',
+  shadowSoft: 'rgba(0, 0, 0, 0.2)',
   shadow: '#000',
+  shadowAccent: '#7A2E2E',
 
   devButton: '#1F2937',
 };

@@ -17,7 +17,7 @@ export const getDailyActivity = async (
   date: string
 ): Promise<DailyActivity> => {
   const { data } = await apiClient.get<DailyActivity>(
-    '/report/activity/daily',
+    '/report/activity/today',
     {
       params: { date },
     }

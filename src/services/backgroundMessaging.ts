@@ -5,23 +5,46 @@ import messaging, {
 import {
   initialize,
   readRecords,
-  requestPermission,
 } from 'react-native-health-connect';
 import {
   getStartOfToday,
-  hasAllPermissions,
-  HEALTH_PERMISSIONS,
   HEALTH_STEPS_CACHE_KEY,
-  type GrantedHealthPermission,
+  HEALTH_STEP_READ_PERMISSIONS,
+  ensureHealthConnectInstalledOrPrompt,
+  getCurrentGrantedPermissions,
+  hasAllPermissions,
+  hasBackgroundPermission,
   isAndroid,
 } from '@utils/healthConnect';
+import {
+  getPreferredStepSyncProvider,
+  getStepSyncUnsupportedReason,
+} from '@utils/stepSyncProvider';
+import { getAndroidApiLevel } from '@utils/stepSyncPolicy';
 
 const logPrefix = '[FCM][background]';
 
+/** 백그라운드 메시지 기반으로 금일 걸음 수 캐시를 동기화한다. */
 const syncStepsForToday = async () => {
   // Health Connect 권한을 확인하고 오늘 걸음 수를 읽어 로컬 캐시에 저장
   if (!isAndroid()) {
     console.log(`${logPrefix} skip sync: 안드로이드가 아닙니다. `);
+    return;
+  }
+  const provider = getPreferredStepSyncProvider();
+  const unsupportedReason = getStepSyncUnsupportedReason(provider);
+  if (unsupportedReason) {
+    console.log(`${logPrefix} skip sync: ${unsupportedReason}`);
+    return;
+  }
+
+  const apiLevel = getAndroidApiLevel();
+  try {
+    await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
+      showPrompt: false,
+    });
+  } catch (err) {
+    console.log(`${logPrefix} skip sync: ${err}`);
     return;
   }
 
@@ -30,12 +53,17 @@ const syncStepsForToday = async () => {
     throw new Error('Health Connect 초기화 실패');
   }
 
-  // 필수 권한 승인 여부 확인
-  const granted: GrantedHealthPermission[] = await requestPermission(
-    HEALTH_PERMISSIONS
-  );
-  if (!hasAllPermissions(granted)) {
-    throw new Error('필수 권한 미승인');
+  // 백그라운드에서는 사용자 인터랙션 없이 읽기만 수행.
+  // foreground read 권한과 background 특수 권한이 모두 있어야 한다.
+  // 둘 중 하나라도 빠지면 handler 전체를 실패시키지 않고 조용히 skip 한다.
+  const granted = await getCurrentGrantedPermissions();
+  if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
+    console.log(`${logPrefix} skip sync: step read permission not granted`);
+    return;
+  }
+  if (!hasBackgroundPermission(granted)) {
+    console.log(`${logPrefix} skip sync: background permission not granted`);
+    return;
   }
 
   const { start, end } = getStartOfToday();
@@ -57,6 +85,7 @@ const syncStepsForToday = async () => {
   console.log(`${logPrefix} steps synced`, total);
 };
 
+/** 수신한 데이터 메시지의 action/type에 따라 백그라운드 작업을 실행한다. */
 const handleDataMessage = async (
   remoteMessage: FirebaseMessagingTypes.RemoteMessage
 ) => {
@@ -78,6 +107,7 @@ const handleDataMessage = async (
   }
 };
 
+/** FCM 백그라운드 메시지 핸들러를 앱 전역에 등록한다. */
 export const registerBackgroundMessageHandler = () => {
   // 백그라운드에서 도착하는 데이터 메시지를 공용 핸들러에 위임
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
