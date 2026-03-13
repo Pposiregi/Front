@@ -46,6 +46,7 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.16.0",
     "react-native-splash-screen": "^3.3.0",
+    "react-native-sse": "^1.2.1",
     "react-native-svg": "^15.13.0",
     "react-redux": "^9.2.0"
   },
