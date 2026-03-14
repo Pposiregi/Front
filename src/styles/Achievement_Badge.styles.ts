@@ -4,6 +4,12 @@ export const styles = StyleSheet.create({
   /**
    * 뱃지
    */
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
   badgeCard: {
     marginTop: 10,
     backgroundColor: '#fff',
@@ -25,8 +31,8 @@ export const styles = StyleSheet.create({
     marginRight: -3,
   },
   badgeIcon: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     marginBottom: 4,
   },
   tabHeaderContainer: {
