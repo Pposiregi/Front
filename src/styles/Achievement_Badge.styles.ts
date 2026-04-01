@@ -1,70 +1,70 @@
 import { Dimensions, StyleSheet } from 'react-native';
+import { Colors, Fonts } from './theme';
+
+const { width } = Dimensions.get('window');
+const COLUMN_COUNT = 5;
+const CARD_MARGIN = 20;
+const CARD_PADDING = 14;
+const ITEM_WIDTH = (width - CARD_MARGIN * 2 - CARD_PADDING * 2) / COLUMN_COUNT;
 
 export const styles = StyleSheet.create({
-  /**
-   * 뱃지
-   */
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.background,
   },
   badgeCard: {
-    marginTop: 10,
-    backgroundColor: '#fff',
-    padding: 14,
+    marginTop: 15,
+    backgroundColor: Colors.surface,
+    padding: CARD_PADDING,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginBottom: 16,
+    marginBottom: 5,
     elevation: 3,
-    marginHorizontal: 20,
+    marginHorizontal: CARD_MARGIN,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 4,
   },
   badgeTitle: {
-    fontSize: 24,
-    fontFamily: 'JUA',
-    textAlign: 'center',
-    marginBottom: 8,
+    fontSize: 20,
+    fontFamily: Fonts.JUA,
+    color: '#333',
+  },
+  badgeCount: {
+    fontSize: 14,
+    fontFamily: Fonts.JUA,
+    color: '#888',
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  columnWrapper: {
+    justifyContent: 'flex-start',
   },
   badgeItem: {
-    marginRight: -3,
-  },
-  badgeIcon: {
-    width: 70,
-    height: 70,
-    marginBottom: 4,
-  },
-  tabHeaderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  tabInner: {
+    width: ITEM_WIDTH,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
   },
-  tabUnderline: {
-    width: 100, // 밑줄 길이 조절
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: '#333', // 밑줄 색
+  badgeIcon: {
+    width: ITEM_WIDTH,
+    height: ITEM_WIDTH,
+    resizeMode: 'contain',
   },
-  tabText: {
-    fontFamily: 'JUA',
-    fontSize: 24,
-    color: '#888',
-  },
-  activeTabText: {
-    color: '#333',
-    marginBottom: 3,
+  lockedIcon: {
+    opacity: 0.4,
   },
 });
