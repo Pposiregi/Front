@@ -12,7 +12,7 @@ if (!API_BASE_URL) {
  * - baseURL, 인증 헤더, 응답 로깅 등을 일괄 관리
  */
 const apiClient = axios.create({
-  baseURL: 'https://fitpet-dev-315426352835.asia-northeast3.run.app',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 

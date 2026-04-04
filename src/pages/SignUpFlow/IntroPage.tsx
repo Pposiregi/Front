@@ -67,7 +67,7 @@ const IntroPage = () => {
 
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
-    const totalPages = 4;
+    const totalPages = 3;
     if (pagerRef.current && currentPage < totalPages - 1) {
       pagerRef.current.setPage(currentPage + 1);
       setCurrentPage(currentPage + 1);

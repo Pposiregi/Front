@@ -7,6 +7,7 @@ import {
   TextInput,
   Animated,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch, useAppSelector } from '@store/index';
@@ -55,7 +56,10 @@ export default function PetCreatePage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!petType || !name) return;
+    if (!petType || !name) {
+      Alert.alert('알림', '펫 종류와 이름을 모두 입력해주세요.');
+      return;
+    }
 
     try {
       const pet = await postPets({
@@ -68,6 +72,7 @@ export default function PetCreatePage() {
       dispatch(userSlice.actions.setPet(pet.petId));
     } catch (e) {
       console.error(e);
+      Alert.alert('오류', '펫 생성에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
