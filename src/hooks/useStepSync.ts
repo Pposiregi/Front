@@ -1,8 +1,9 @@
 import { postDailyWalks } from '@api/mainApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback } from 'react';
+import { formatDateKeyKST } from '@utils/dateUtil';
+import { STEP_SYNC_UPLOAD_POLICY } from '@utils/stepSyncPolicy';
 
-const STEP_UNIT = 1000;
 const STORAGE_KEY = 'LAST_SYNCED_STEPS';
 const STORAGE_DATE_KEY = 'LAST_SYNCED_DATE';
 
@@ -10,7 +11,7 @@ export const useStepSync = () => {
   const syncSteps = useCallback(async (currentSteps: number) => {
     try {
       // 오늘 날짜 key
-      const todayKey = new Date().toISOString().slice(0, 10);
+      const todayKey = formatDateKeyKST(new Date());
 
       // 마지막 동기화 날짜 확인
       const storedDate = await AsyncStorage.getItem(STORAGE_DATE_KEY);
@@ -24,25 +25,31 @@ export const useStepSync = () => {
         await AsyncStorage.setItem(STORAGE_KEY, '0');
         await AsyncStorage.setItem(STORAGE_DATE_KEY, todayKey);
       }
-
       const diff = currentSteps - lastSyncedSteps;
-      if (diff < STEP_UNIT) return;
 
-      const sendCount = Math.floor(diff / STEP_UNIT);
-      const stepsToSend = sendCount * STEP_UNIT;
+      if (__DEV__) {
+        console.log('---------------- STEP SYNC DEBUG ----------------');
+        console.log('currentSteps:', currentSteps);
+        console.log('lastSyncedSteps:', lastSyncedSteps);
+        console.log('calculated diff:', diff);
+        console.log('--------------------------------------------------');
+      }
 
-      // distanceKm, burnCaloreis는 현재 계산하는 로직이 없어 0으로 전송,
-      // 프론트에서 계산해서 보내줘야할지??
+      if (diff < STEP_SYNC_UPLOAD_POLICY.minStepDelta) return;
+
+      if (__DEV__) {
+        console.log('서버 전송 step(diff):', diff);
+      }
+      // 증가분만 전송
       await postDailyWalks({
-        step: stepsToSend,
+        step: diff,
         distanceKm: 0,
         burnCalories: 0,
       });
-
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        String(lastSyncedSteps + stepsToSend)
-      );
+      if (__DEV__) {
+        console.log('✅ 서버 전송 성공');
+      }
+      await AsyncStorage.setItem(STORAGE_KEY, String(currentSteps));
     } catch (error) {
       console.error('>>> [useStepSync] step sync failed', error);
     }

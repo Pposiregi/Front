@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '@env';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { DEV_USER_ID } from '@env';
+import { notifySessionExpired } from './authSession';
 
 if (!API_BASE_URL) {
   throw new Error('API_BASE_URL 환경변수가 설정되지 않았습니다.');
@@ -55,17 +55,9 @@ const redactHeaders = (headers: unknown) => {
 
 /**
  * 요청 인터셉터.
- * - 개발 환경 dev-user-id 주입
  * - accessToken 자동 부착
  */
 apiClient.interceptors.request.use(async (config) => {
-  if (__DEV__ && DEV_USER_ID) {
-    // 개발환경에서는 env 값으로 dev_user_id를 고정한다.
-    config.headers = config.headers ?? {};
-    config.headers['dev-user-id'] = DEV_USER_ID;
-    console.log('>>> dev-user-id: ' + DEV_USER_ID);
-  }
-
   const hasAuthHeader =
     Boolean(config.headers?.Authorization) ||
     Boolean(
@@ -127,12 +119,21 @@ apiClient.interceptors.response.use(
         );
         const newAccessToken = refreshRes.data.serverAccessToken;
         await EncryptedStorage.setItem('serverAccessToken', newAccessToken);
+        if (__DEV__) {
+          console.log(
+            `>>> [AUTH] refresh success, token updated (${newAccessToken.slice(0, 12)}...)`
+          );
+        }
         // 원본 요청에 새 토큰 주입
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         return apiClient(originalRequest);
       } catch (refreshErr) {
-        await EncryptedStorage.clear();
+        const refreshStatus = (refreshErr as { response?: { status?: number } })
+          ?.response?.status;
+        await notifySessionExpired(
+          refreshStatus === 401 ? 'REFRESH_TOKEN_INVALID' : 'REFRESH_FAILED'
+        );
         return Promise.reject(refreshErr);
       }
     }

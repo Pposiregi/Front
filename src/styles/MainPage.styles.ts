@@ -1,62 +1,111 @@
 import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 // 화면 크기 기반 반응형 사이즈 계산
-const BOTTOM_NAV_HEIGHT = 60;
+const BOTTOM_NAV_HEIGHT = Math.max(56, Math.round(SCREEN_HEIGHT * 0.075));
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
   80,
   Math.min(120, SCREEN_HEIGHT * 0.1)
 );
 const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
 const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));
-const START_BUTTON_PADDING_H = Math.max(28, Math.round(SCREEN_WIDTH * 0.1));
-const START_BUTTON_PADDING_V = Math.max(10, Math.round(SCREEN_HEIGHT * 0.015));
-const START_BUTTON_RADIUS = Math.max(18, Math.round(SCREEN_WIDTH * 0.05));
-const START_BUTTON_FONT = Math.max(14, Math.round(SCREEN_WIDTH * 0.04));
+const CONTAINER_TOP_PADDING = Platform.select({
+  ios: Math.max(34, Math.round(SCREEN_HEIGHT * 0.05)),
+  android: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
+  default: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
+});
+const START_BUTTON_SIZE = Math.max(
+  66,
+  Math.min(82, Math.round(SCREEN_WIDTH * 0.205))
+);
+const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
+const START_BUTTON_FONT = Math.max(16, Math.round(SCREEN_WIDTH * 0.045));
 const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
-const START_BUTTON_BASE_BOTTOM = BOTTOM_NAV_HEIGHT - 20;
+const START_BUTTON_BASE_BOTTOM = Math.max(
+  Math.round(BOTTOM_NAV_HEIGHT * 0.66),
+  BOTTOM_NAV_HEIGHT - Math.max(14, Math.round(SCREEN_HEIGHT * 0.025))
+);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
-// Approximation term for font descender/line-box differences in RN text layout.
-const START_BUTTON_ESTIMATED_HEIGHT =
-  START_BUTTON_PADDING_V * 2 + START_BUTTON_FONT + 6;
+const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
 const PET_BOTTOM_FROM_START =
-  START_BUTTON_BASE_BOTTOM + START_BUTTON_ESTIMATED_HEIGHT + 8;
+  START_BUTTON_BASE_BOTTOM +
+  START_BUTTON_ESTIMATED_HEIGHT +
+  Math.max(6, Math.round(SCREEN_HEIGHT * 0.01));
+const MISSION_BUTTON_TOP = Math.max(96, Math.round(SCREEN_HEIGHT * 0.125));
+const MESSAGE_MARGIN_TOP = Math.max(4, Math.round(SCREEN_HEIGHT * 0.006));
+const MESSAGE_ROW_TOP = Math.max(112, Math.round(SCREEN_HEIGHT * 0.15));
+const RUN_HUD_TOP = Math.max(28, Math.round(SCREEN_HEIGHT * 0.05));
+const RUN_HUD_MIN_HEIGHT = Math.max(58, Math.round(SCREEN_HEIGHT * 0.07));
+const RUN_HUD_HORIZONTAL_PADDING = Math.max(
+  Spacing.lg,
+  Math.round(SCREEN_WIDTH * 0.045)
+);
+const RUN_HUD_VERTICAL_PADDING = Math.max(Spacing.sm - 2, Math.round(SCREEN_HEIGHT * 0.007));
+const TIMER_LINE_HEIGHT = Math.max(42, Math.round(SCREEN_WIDTH * 0.112));
+const START_ICON_SIZE = Math.max(50, Math.round(SCREEN_WIDTH * 0.14));
+const DEV_BUTTON_STACK_BOTTOM = BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006));
+const DEV_BUTTON_HORIZONTAL_PADDING = Math.max(10, Math.round(SCREEN_WIDTH * 0.028));
+const DEV_BUTTON_VERTICAL_PADDING = Math.max(6, Math.round(SCREEN_HEIGHT * 0.008));
+const RUN_LOCK_NOTICE_RIGHT = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
+const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = Math.max(
+  Spacing.md,
+  Math.round(SCREEN_WIDTH * 0.03)
+);
+const RUN_LOCK_NOTICE_VERTICAL_PADDING = Math.max(7, Math.round(SCREEN_HEIGHT * 0.009));
+const MISSION_BUTTON_SIZE = Math.max(44, Math.min(52, Math.round(SCREEN_WIDTH * 0.12)));
+const MISSION_BUTTON_PADDING = Math.max(Spacing.sm, Math.round(MISSION_BUTTON_SIZE * 0.17));
+const MISSION_ICON_SIZE = Math.max(28, Math.round(MISSION_BUTTON_SIZE * 0.65));
 
 export default StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F8',
-    paddingTop: Platform.select({ ios: 40, android: 24 }),
+    backgroundColor: Colors.background,
+    paddingTop: CONTAINER_TOP_PADDING,
   },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
   },
   progressRow: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
   },
   missionCard: {
-    marginRight: 12,
+    marginRight: Spacing.md,
     alignItems: 'center',
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
     textAlign: 'center',
-    color: '#000000ff',
-    fontSize: 24,
-    marginTop: Math.max(4, Math.round(SCREEN_HEIGHT * 0.0002)),
+    color: Colors.textPrimary,
+    fontSize: Typography.h1,
+    marginTop: MESSAGE_MARGIN_TOP,
   },
   messageRow: {
+    position: 'absolute',
+    top: MESSAGE_ROW_TOP,
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    zIndex: 6,
+  },
+  devButtonGroup: {
+    position: 'absolute',
+    left: Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.035)),
+    bottom: DEV_BUTTON_STACK_BOTTOM,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    zIndex: 12,
   },
   mainBackground: {
     flex: 1,
@@ -69,148 +118,116 @@ export default StyleSheet.create({
   mapContainer: {
     flex: 1,
     width: '100%',
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
   },
-  map: {
-    flex: 1,
-  },
-  locateButton: {
+  runHud: {
+    zIndex: 2,
     position: 'absolute',
-    right: 18,
-    bottom: 18,
-    backgroundColor: '#FFFFFFEE',
-    borderRadius: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 4,
-  },
-  locateText: {
-    fontFamily: 'Roboto-VariableFont',
-    fontWeight: '600',
-    fontSize: 12,
-    color: '#1F1F1F',
-  },
-  currentPin: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(116, 80, 255, 0.25)',
+    top: RUN_HUD_TOP,
+    left: -TOKKI_PADDING_H,
+    right: -TOKKI_PADDING_H,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  currentPinInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#7450FF',
-  },
-  mapOverlay: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  overlayText: {
-    color: '#fff',
-    fontFamily: 'Roboto-VariableFont',
-    fontSize: 14,
-  },
-  runHud: {
-    alignSelf: 'center',
-    marginTop: Math.max(10, Math.round(SCREEN_HEIGHT * 0.014)),
-    minWidth: Math.max(240, Math.round(SCREEN_WIDTH * 0.68)),
-    paddingHorizontal: Math.max(20, Math.round(SCREEN_WIDTH * 0.06)),
-    paddingVertical: 8,
+  runHudInner: {
+    width: '100%',
+    minHeight: RUN_HUD_MIN_HEIGHT,
+    paddingHorizontal: RUN_HUD_HORIZONTAL_PADDING,
+    paddingVertical: RUN_HUD_VERTICAL_PADDING,
+    borderRadius: 0,
+    backgroundColor: Colors.surfaceOverlay,
+    ...Shadows.soft,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   runTimerValue: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(44, Math.round(SCREEN_WIDTH * 0.12)),
-    color: '#2E313D',
-    letterSpacing: 1.2,
-    textShadowColor: 'rgba(255, 255, 255, 0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.108)),
+    color: Colors.textPrimary,
+    letterSpacing: 1,
+    lineHeight: TIMER_LINE_HEIGHT,
+    textAlign: 'center',
+  },
+  runBgScroller: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    zIndex: 0,
+  },
+  runBgTile: {
+    height: '100%',
+    marginTop: 0,
   },
   startButton: {
     position: 'absolute',
     bottom: START_BUTTON_BASE_BOTTOM,
     alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: START_BUTTON_PADDING_H,
-    paddingVertical: START_BUTTON_PADDING_V,
+    width: START_BUTTON_SIZE,
+    height: START_BUTTON_SIZE,
     borderRadius: START_BUTTON_RADIUS,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: Shadows.medium,
+      android: { elevation: 0 },
+    }),
   },
   fatButton: {
     position: 'absolute',
-    bottom: BOTTOM_NAV_HEIGHT - 16,
+    bottom: Math.max(Spacing.sm, BOTTOM_NAV_HEIGHT - Math.round(SCREEN_HEIGHT * 0.02)),
     left: '50%',
     marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
-    backgroundColor: '#1f2937',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: Colors.devButton,
+    paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
+    paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
+    borderRadius: Radius.md,
+  },
+  startButtonInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: START_BUTTON_RADIUS,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceOverlaySolid,
+    overflow: 'hidden',
+    ...Platform.select({
+      android: Shadows.medium,
+    }),
   },
   runningLockNotice: {
     position: 'absolute',
-    right: 12,
+    right: RUN_LOCK_NOTICE_RIGHT,
     bottom: RUN_LOCK_NOTICE_BOTTOM,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: 'rgba(254, 194, 136, 0.35)',
+    paddingHorizontal: RUN_LOCK_NOTICE_HORIZONTAL_PADDING,
+    paddingVertical: RUN_LOCK_NOTICE_VERTICAL_PADDING,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.accentSoft,
     borderWidth: 1,
-    borderColor: 'rgba(254, 194, 136, 0.62)',
-  },
-  runningLockNoticeText: {
-    fontFamily: 'Roboto-VariableFont',
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#7A3E00',
-    letterSpacing: 0.2,
+    borderColor: Colors.accent,
   },
   startText: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontWeight: 'bold',
     fontSize: START_BUTTON_FONT,
+    color: Colors.textSecondary,
+  },
+  startIcon: {
+    width: START_ICON_SIZE,
+    height: START_ICON_SIZE,
   },
   devHealthButton: {
-    backgroundColor: '#1f2937',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: Colors.devButton,
+    paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
+    paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
+    borderRadius: Radius.md,
   },
   devHealthButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: Colors.surface,
+    fontSize: Typography.caption,
     fontWeight: '700',
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-  },
-  navIcon: {
-    fontSize: 24,
-  },
-  removeText: {
-    marginTop: 4,
-    color: '#fff',
-    fontSize: 12,
   },
   pet: {
     position: 'absolute',
@@ -226,6 +243,7 @@ export default StyleSheet.create({
     bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
+    zIndex: 2,
   },
   countdownOverlay: {
     position: 'absolute',
@@ -233,14 +251,14 @@ export default StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
   },
   countdownText: {
-    fontSize: 90,
-    color: 'white',
+    fontSize: Typography.display,
+    color: Colors.surface,
     fontWeight: 'bold',
   },
   emptyMissionContainer: {
@@ -249,27 +267,28 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   emptyMissionText: {
-    fontSize: 18,
-    color: '#888',
-    fontWeight: '500',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textPrimary,
+    fontWeight: '600',
     textAlign: 'center',
   },
   missionButton: {
     position: 'absolute',
-    top: 15, // 상단 여백
-    right: 15, // 오른쪽 여백
-    width: 50,
-    height: 50,
-    padding: 10,
-    backgroundColor: '#ca4949',
-    borderRadius: 8,
+    top: MISSION_BUTTON_TOP,
+    right: Math.max(Spacing.md + 2, Math.round(SCREEN_WIDTH * 0.04)),
+    width: MISSION_BUTTON_SIZE,
+    height: MISSION_BUTTON_SIZE,
+    padding: MISSION_BUTTON_PADDING,
+    backgroundColor: Colors.accentStrong,
+    borderRadius: Radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Shadows.accent,
     zIndex: 10,
   },
-  missionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  missionIcon: {
+    width: MISSION_ICON_SIZE,
+    height: MISSION_ICON_SIZE,
   },
   /**
    * 펫 관련

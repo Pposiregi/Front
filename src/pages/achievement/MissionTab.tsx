@@ -15,6 +15,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { styles } from '@styles/Achievement_Mission.styles';
 import { MissionHistoryItem } from '../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
+import { Colors } from '@styles/theme';
 
 type MissionStatus = 'LOADING' | 'READY' | 'ERROR';
 
@@ -24,8 +25,8 @@ type MissionSection = {
 };
 
 const CATEGORY_META = {
-  STEP: { icon: '👟', color: '#4CAF50' },
-  MEAL: { icon: '🍽️', color: '#FF9800' },
+  STEP: { icon: '👟', color: Colors.success },
+  MEAL: { icon: '🍽️', color: Colors.accentStrong },
 };
 
 const MissionTab = () => {

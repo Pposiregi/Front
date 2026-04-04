@@ -1,7 +1,12 @@
+import {
+  getPetAssetRegistryEntry,
+  type PetTemplateId,
+} from '@assets/pet/petAssetRegistry';
+
 /**
- * assets > pet 내의 template.json 검사를 위함
- * - 템플릿 데이터가 정상인지 검사, 문제 발견 시 기본 템플릿으로 복구
- *
+ * 펫 파츠 템플릿(JSON) 검증 유틸.
+ * - 레지스트리에서 로드된 raw 템플릿을 안전한 구조로 정규화한다.
+ * - 일부 필드가 손상되어도 가능한 범위에서 복구해 렌더를 지속한다.
  */
 
 export type AnchorPoint = {
@@ -43,7 +48,7 @@ export type PetTemplateValidationResult = {
   usedFallback: boolean;
 };
 
-const LOG_PREFIX = '[PetTemplate]';
+const LOG_PREFIX = '>>> [PetTemplate]';
 
 export const FALLBACK_PET_TEMPLATE: PetTemplate = {
   id: 'fallback_empty_v1',
@@ -328,24 +333,43 @@ export function loadPetTemplateWithFallback(
   return template;
 }
 
-let cachedTemplate: PetTemplate | null = null;
+const bundledTemplateCache = new Map<PetTemplateId, PetTemplate>();
 
 /**
- * 번들된 기본 템플릿을 1회 로드 후 메모리에 캐시해 재사용한다.
- * 앱 런타임에서 가장 기본이 되는 템플릿 진입점이다.
+ * 번들된 템플릿을 templateId 기준으로 1회 로드 후 메모리에 캐시한다.
+ * templateId를 넘기지 않으면 기본값(browncat_v1)을 사용한다.
  */
-export function getBundledPetTemplate(): PetTemplate {
-  if (cachedTemplate) return cachedTemplate;
+export function getBundledPetTemplate(
+  templateId: PetTemplateId = 'browncat_v1'
+): PetTemplate {
+  const cached = bundledTemplateCache.get(templateId);
+  if (cached) return cached;
 
-  const bundledTemplate = require('@assets/pet/template.json');
-  cachedTemplate = loadPetTemplateWithFallback(bundledTemplate);
-  return cachedTemplate;
+  const entry = getPetAssetRegistryEntry(templateId);
+  if (!entry) {
+    console.error(
+      `${LOG_PREFIX} 알 수 없는 템플릿 id: "${templateId}"입니다. (in getBundledPetTemplate). fallback을 사용합니다.`
+    );
+    bundledTemplateCache.set(templateId, FALLBACK_PET_TEMPLATE);
+    return FALLBACK_PET_TEMPLATE;
+  }
+
+  const loadedTemplate = loadPetTemplateWithFallback(
+    entry.template,
+    FALLBACK_PET_TEMPLATE
+  );
+  bundledTemplateCache.set(templateId, loadedTemplate);
+  return loadedTemplate;
 }
 
 /**
- * 테스트/디버깅 용도로 번들 템플릿 캐시를 강제로 비운다.
- * 프로덕션 코드에서는 일반적으로 호출할 필요가 없다.
+ * 테스트/디버깅 용도로 번들 템플릿 캐시를 비운다.
+ * templateId가 주어지면 해당 엔트리만, 없으면 전체 캐시를 삭제한다.
  */
-export function resetBundledPetTemplateCache(): void {
-  cachedTemplate = null;
+export function resetBundledPetTemplateCache(templateId?: PetTemplateId): void {
+  if (!templateId) {
+    bundledTemplateCache.clear();
+    return;
+  }
+  bundledTemplateCache.delete(templateId);
 }

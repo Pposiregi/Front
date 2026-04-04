@@ -1,0 +1,119 @@
+{
+  "id": "sibadog_v1",
+  "canvas": { "baseSize": 1024 },
+  "naming": {
+    "pattern": "{pet}_{version}_{zIndex}_{part}_{direction}.png",
+    "pet": "sibadog",
+    "version": "v1"
+  },
+  "anchors": {
+    "root": { "x": 0.4501953125, "y": 0.650390625 },
+    "torso": { "x": 0.4901953125, "y": 0.609375 },
+    "face": { "x": 0.4501953125, "y": 0.5126953125 },
+    "neck": { "x": 0.4501953125, "y": 0.5126953125 },
+    "tail": { "x": 0.4970703125, "y": 0.6083984375 },
+    "shoulder_left": { "x": 0.3974609375, "y": 0.5263671875 },
+    "shoulder_right": { "x": 0.5419921875, "y": 0.5263671875 },
+    "hip_left": { "x": 0.4052734375, "y": 0.66796875 },
+    "hip_right": { "x": 0.5048828125, "y": 0.66796875 }
+  },
+  "parts": [
+    {
+      "key": "tail",
+      "file": "sibadog_v1_00_tail_none.png",
+      "zIndex": 0,
+      "anchor": "tail"
+    },
+    {
+      "key": "leg_left",
+      "file": "sibadog_v1_01_leg_left.png",
+      "zIndex": 5,
+      "anchor": "hip_left"
+    },
+    {
+      "key": "leg_right",
+      "file": "sibadog_v1_01_leg_right.png",
+      "zIndex": 5,
+      "anchor": "hip_right"
+    },
+    {
+      "key": "torso",
+      "file": "sibadog_v1_02_torso_none.png",
+      "zIndex": 2,
+      "anchor": "torso",
+      "morph": {
+        "pbf": {
+          "range": { "min": 10, "max": 40 },
+          "scaleX": [1.0, 1.18],
+          "scaleY": [1.0, 1.05]
+        }
+      }
+    },
+    {
+      "key": "arm_left",
+      "file": "sibadog_v1_03_arm_left.png",
+      "zIndex": 3,
+      "anchor": "shoulder_left"
+    },
+    {
+      "key": "arm_right",
+      "file": "sibadog_v1_03_arm_right.png",
+      "zIndex": 3,
+      "anchor": "shoulder_right"
+    },
+    {
+      "key": "ear_left",
+      "file": "sibadog_v1_04_ear_left.png",
+      "zIndex": 4,
+      "anchor": "face"
+    },
+    {
+      "key": "ear_right",
+      "file": "sibadog_v1_04_ear_right.png",
+      "zIndex": 4,
+      "anchor": "face"
+    },
+    {
+      "key": "face",
+      "file": "sibadog_v1_05_face.png",
+      "zIndex": 5,
+      "anchor": "face"
+    },
+    {
+      "key": "flushing_left",
+      "file": "sibadog_v1_06_flushing_left.png",
+      "zIndex": 6,
+      "anchor": "face"
+    },
+    {
+      "key": "flushing_right",
+      "file": "sibadog_v1_06_flushing_right.png",
+      "zIndex": 6,
+      "anchor": "face"
+    },
+    {
+      "key": "mouth",
+      "file": "sibadog_v1_07_mouth_none.png",
+      "zIndex": 7,
+      "anchor": "face"
+    },
+    {
+      "key": "eye_left",
+      "file": "sibadog_v1_08_eye_left.png",
+      "zIndex": 8,
+      "anchor": "face"
+    },
+    {
+      "key": "eye_right",
+      "file": "sibadog_v1_08_eye_right.png",
+      "zIndex": 8,
+      "anchor": "face"
+    }
+  ],
+  "rendering": {
+    "sortBy": "zIndex",
+    "stableSort": true,
+    "tieBreak": ["key"],
+    "drawOrigin": { "x": 0, "y": 0 }
+  }
+}

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 export default StyleSheet.create({
   backdrop: {
@@ -7,16 +8,16 @@ export default StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
   title: {
-    fontSize: 20,
-    fontFamily: 'JUA',
+    fontSize: Typography.h2,
+    fontFamily: Fonts.JUA,
     marginBottom: 16,
-    color: '#333',
+    color: Colors.textPrimary,
   },
   row: {
     justifyContent: 'space-between',
@@ -31,7 +32,7 @@ export default StyleSheet.create({
   },
   selected: {
     borderWidth: 3,
-    borderColor: '#4F46E5',
+    borderColor: Colors.infoStrong,
   },
   footer: {
     flexDirection: 'row',
@@ -43,9 +44,9 @@ export default StyleSheet.create({
     padding: 10,
   },
   cancelText: {
-    fontFamily: 'JUA',
-    fontSize: 22,
-    color: '#333',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
   },
   saveBtn: {
     padding: 10,
@@ -53,8 +54,8 @@ export default StyleSheet.create({
     borderRadius: 8,
   },
   saveText: {
-    fontFamily: 'JUA',
-    fontSize: 22,
-    color: '#fff',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.surface,
   },
 });

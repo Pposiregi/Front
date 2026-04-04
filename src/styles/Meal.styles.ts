@@ -1,8 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CONTENT_HORIZONTAL_PADDING = 24;
-const CALENDAR_HORIZONTAL_PADDING = 8;
+const CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const CALENDAR_HORIZONTAL_PADDING = Math.max(Spacing.sm, Math.round(SCREEN_WIDTH * 0.02));
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
 const CALENDAR_OUTER_GUTTER = Math.max(
   4,
@@ -13,9 +14,7 @@ const CALENDAR_CONTAINER_EXPAND = Math.max(
   CONTENT_HORIZONTAL_PADDING - CALENDAR_OUTER_GUTTER
 );
 const CALENDAR_AVAILABLE_WIDTH =
-  SCREEN_WIDTH -
-  CALENDAR_OUTER_GUTTER * 2 -
-  CALENDAR_HORIZONTAL_PADDING * 2;
+  SCREEN_WIDTH - CALENDAR_OUTER_GUTTER * 2 - CALENDAR_HORIZONTAL_PADDING * 2;
 const DAY_CELL_GAP_RATIO = 0.045;
 const GRID_SIZE = Math.min(
   52,
@@ -26,6 +25,14 @@ const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
 const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
+const CONTENT_TOP_PADDING = Math.max(Spacing.md, Math.round(SCREEN_HEIGHT * 0.015));
+const CONTENT_BOTTOM_PADDING = Math.max(40, Math.round(SCREEN_HEIGHT * 0.05));
+const HEADER_BUTTON_SIZE = Math.max(36, Math.round(SCREEN_WIDTH * 0.09));
+const HEADER_BUTTON_RADIUS = Math.round(HEADER_BUTTON_SIZE / 2);
+const HEADER_SECTION_SPACING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const CALENDAR_RADIUS = Math.max(28, Math.round(SCREEN_WIDTH * 0.07));
+const CALENDAR_VERTICAL_PADDING = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
+const MONTH_ROW_MARGIN_BOTTOM = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
 const MODAL_CARD_SIZE = Math.round(
   Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
 );
@@ -43,8 +50,19 @@ const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
   Math.min(280, Math.round(SCREEN_HEIGHT * 0.33))
 );
 
+const MODAL_CONTENT_RADIUS = Math.max(32, Math.round(SCREEN_WIDTH * 0.08));
+const MODAL_CONTENT_VERTICAL_PADDING = Math.max(26, Math.round(SCREEN_HEIGHT * 0.032));
+const MODAL_CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const MODAL_HEADER_MARGIN_BOTTOM = Math.max(18, Math.round(SCREEN_HEIGHT * 0.022));
+const MODAL_NOTICE_RADIUS = Math.max(14, Math.round(SCREEN_WIDTH * 0.035));
+const MODAL_NOTICE_ICON_SIZE = Math.max(24, Math.round(SCREEN_WIDTH * 0.06));
+const MODAL_NOTICE_ICON_RADIUS = Math.round(MODAL_NOTICE_ICON_SIZE / 2);
+const MODAL_LIST_TOP_MARGIN = Math.max(Spacing.xs, Math.round(SCREEN_WIDTH * 0.01));
+const STACK_IMAGE_BORDER = Colors.surface;
+const STACK_IMAGE_SHADOW = Colors.shadow;
+
 const baseShadow = {
-  shadowColor: '#000000',
+  ...Shadows.soft,
   shadowOpacity: 0.08,
   shadowOffset: { width: 0, height: 6 },
   shadowRadius: 12,
@@ -59,13 +77,13 @@ const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.3);
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F8',
+    backgroundColor: Colors.background,
   },
   content: {
     flexGrow: 1,
     paddingHorizontal: CONTENT_HORIZONTAL_PADDING,
-    paddingTop: 12,
-    paddingBottom: 40,
+    paddingTop: CONTENT_TOP_PADDING,
+    paddingBottom: CONTENT_BOTTOM_PADDING,
   },
   header: {
     flexDirection: 'row',
@@ -73,32 +91,32 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: HEADER_BUTTON_SIZE,
+    height: HEADER_BUTTON_SIZE,
+    borderRadius: HEADER_BUTTON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 20,
-    color: '#14151A',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
+    textShadowColor: Colors.shadowSoft,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   headerTitle: {
-    fontFamily: 'JUA',
-    fontSize: 27,
-    color: '#2B2B2B',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
   },
   headerSpacing: {
-    marginBottom: 24,
+    marginBottom: HEADER_SECTION_SPACING,
   },
   calendarContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingVertical: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: CALENDAR_RADIUS,
+    paddingVertical: CALENDAR_VERTICAL_PADDING,
     paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
     marginHorizontal: -CALENDAR_CONTAINER_EXPAND,
     ...baseShadow,
@@ -107,12 +125,12 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: MONTH_ROW_MARGIN_BOTTOM,
   },
   calendarMonthLabel: {
-    fontFamily: 'JUA',
-    fontSize: 18,
-    color: '#2B2B2B',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodyLarge,
+    color: Colors.textPrimary,
   },
   calendarLoadingIndicator: {
     marginLeft: 8,
@@ -125,9 +143,9 @@ export default StyleSheet.create({
   weekDayLabel: {
     flex: 1,
     textAlign: 'center',
-    fontSize: Math.max(12, Math.round(GRID_SIZE * 0.25)),
-    color: '#9597A3',
-    fontFamily: 'JUA',
+    fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.25)),
+    color: Colors.textMuted,
+    fontFamily: Fonts.JUA,
   },
   weekRow: {
     flexDirection: 'row',
@@ -151,245 +169,64 @@ export default StyleSheet.create({
     paddingVertical: GRID_PADDING_V,
     paddingHorizontal: GRID_PADDING_H,
     borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#FFFFFF',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
     marginHorizontal: DAY_CELL_GAP,
     marginVertical: DAY_CELL_GAP,
   },
   dayNumber: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(13, Math.round(GRID_SIZE * 0.3)),
-    color: '#383A45',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.3)),
+    color: Colors.textPrimary,
   },
   dayNumberMuted: {
-    color: '#C8CAD4',
+    color: Colors.textMuted,
   },
   selectedDayBackground: {
-    borderColor: '#1D7ED8',
+    borderColor: Colors.info,
     borderWidth: 2,
-    backgroundColor: '#EAF3FF',
+    backgroundColor: Colors.infoSoft,
   },
   todayDayOutline: {
-    borderColor: '#FF9F43',
+    borderColor: Colors.accentStrong,
     borderWidth: 2,
-    backgroundColor: '#FFF7EB',
+    backgroundColor: Colors.accentSoft,
   },
   selectedDayNumber: {
-    color: '#1D7ED8',
+    color: Colors.info,
   },
   todayDayNumber: {
-    color: '#FF9F43',
-  },
-  dayPreviewThumbnail: {
-    width: STACK_ITEM_SIZE,
-    height: STACK_ITEM_SIZE,
-    borderRadius: STACK_ITEM_RADIUS,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#F4F6FB',
+    color: Colors.accentStrong,
   },
   dayPreviewPlaceholder: {
     width: STACK_ITEM_SIZE,
     height: STACK_ITEM_SIZE,
     borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 1,
-    borderColor: '#E4E6F1',
-    backgroundColor: '#F4F6FB',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   dayPreviewPlaceholderText: {
-    fontSize: 14,
-    color: '#C2C7D8',
-  },
-  catContainer: {
-    alignItems: 'center',
-  },
-  catImage: {
-    width: 240,
-    height: 180,
-    resizeMode: 'contain',
-  },
-  detailContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 30,
-    padding: 24,
-    ...baseShadow,
+    fontSize: Typography.bodySmall,
+    color: Colors.divider,
   },
   sectionSpacing: {
-    marginBottom: 24,
-  },
-  detailHeader: {},
-  detailDate: {
-    fontFamily: 'JUA',
-    fontSize: 20,
-    color: '#292C36',
-  },
-  detailSubtitle: {
-    fontSize: 13,
-    color: '#9CA0AE',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  badge: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#FFD970',
-  },
-  badgeSpacing: {
-    marginRight: 8,
-  },
-  badgeLabel: {
-    fontFamily: 'JUA',
-    color: '#714A00',
-    fontSize: 13,
-  },
-  mealsSection: {
-    marginTop: 12,
-  },
-  mealRowSpacing: {
-    marginTop: 12,
-  },
-  mealRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 18,
-    backgroundColor: '#F5F6FB',
-  },
-  mealImagePlaceholder: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: '#FFE1A8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  mealPlaceholderText: {
-    fontFamily: 'JUA',
-    color: '#C97E09',
-    fontSize: 16,
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealInfoSpacing: {
-    marginBottom: 4,
-  },
-  mealName: {
-    fontFamily: 'JUA',
-    fontSize: 15,
-    color: '#2E313D',
-  },
-  mealCalories: {
-    fontSize: 12,
-    color: '#888DA0',
-  },
-  mealActions: {
-    alignItems: 'flex-end',
-  },
-  mealActionSpacing: {
-    marginBottom: 8,
-  },
-  iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E2EC',
-  },
-  iconButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 14,
-    color: '#7781A9',
-  },
-  emptyState: {
-    padding: 20,
-    borderRadius: 18,
-    backgroundColor: '#F6F7FC',
-    alignItems: 'center',
-  },
-  emptyStateSpacing: {
-    marginBottom: 6,
-  },
-  emptyStateTitle: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#5F6485',
-  },
-  emptyStateText: {
-    fontSize: 12,
-    color: '#949AB6',
-    textAlign: 'center',
-  },
-  addRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 16,
-    backgroundColor: '#EFF1F9',
-    paddingHorizontal: 14,
-  },
-  addRowSpacing: {
-    marginTop: 20,
-  },
-  addRowLabelPrimary: {
-    flex: 1,
-    color: '#9AA0BB',
-    fontSize: 13,
-  },
-  addRowLabelSecondary: {
-    color: '#C1C5DA',
-    fontSize: 13,
-    marginLeft: 8,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#4A4E66',
-  },
-  summaryValue: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FF9157',
-  },
-  saveButton: {
-    marginTop: 8,
-    backgroundColor: '#FF9F43',
-    borderRadius: 20,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FFFFFF',
+    marginBottom: HEADER_SECTION_SPACING,
   },
   calendarHelperText: {
-    marginTop: 24,
+    marginTop: HEADER_SECTION_SPACING,
     textAlign: 'center',
-    color: '#7C8098',
-    fontSize: 14,
+    color: Colors.textSecondary,
+    fontSize: Typography.bodySmall,
   },
   calendarErrorText: {
-    marginTop: 16,
+    marginTop: Math.max(Spacing.lg, Math.round(SCREEN_HEIGHT * 0.02)),
     textAlign: 'center',
-    color: '#D9534F',
-    fontSize: 13,
+    color: Colors.error,
+    fontSize: Typography.bodySmall,
   },
   modalContainer: {
     flex: 1,
@@ -402,72 +239,72 @@ export default StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.overlaySoft,
   },
   modalContentWrapper: {
     width: '88%',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 32,
-    paddingVertical: 26,
-    paddingHorizontal: 24,
+    backgroundColor: Colors.surface,
+    borderRadius: MODAL_CONTENT_RADIUS,
+    paddingVertical: MODAL_CONTENT_VERTICAL_PADDING,
+    paddingHorizontal: MODAL_CONTENT_HORIZONTAL_PADDING,
     maxHeight: MODAL_MAX_HEIGHT,
     ...baseShadow,
   },
   modalHeaderSection: {
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: MODAL_HEADER_MARGIN_BOTTOM,
   },
   modalTitle: {
-    fontFamily: 'JUA',
-    fontSize: 22,
-    color: '#222430',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h1,
+    color: Colors.textPrimary,
   },
   modalSubtitle: {
     marginTop: Math.max(4, Math.round(SCREEN_WIDTH * 0.012)),
-    fontSize: Math.max(12, Math.round(SCREEN_WIDTH * 0.034)),
-    color: '#9DA2B5',
+    fontSize: Math.max(Typography.caption, Math.round(SCREEN_WIDTH * 0.034)),
+    color: Colors.textMuted,
   },
   modalFutureNoticeBox: {
-    marginTop: 8,
+    marginTop: Spacing.sm,
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    paddingVertical: Math.max(10, Math.round(SCREEN_HEIGHT * 0.012)),
+    paddingHorizontal: Spacing.md,
+    borderRadius: MODAL_NOTICE_RADIUS,
     borderWidth: 1,
-    borderColor: '#FFD59A',
-    backgroundColor: '#FFF7EA',
+    borderColor: Colors.accentStrong,
+    backgroundColor: Colors.accentSoft,
   },
   modalFutureNoticeIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: MODAL_NOTICE_ICON_SIZE,
+    height: MODAL_NOTICE_ICON_SIZE,
+    borderRadius: MODAL_NOTICE_ICON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFB84D',
-    marginRight: 10,
+    backgroundColor: Colors.accentStrong,
+    marginRight: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.025)),
   },
   modalFutureNoticeIcon: {
-    fontFamily: 'JUA',
-    color: '#FFFFFF',
-    fontSize: 13,
+    fontFamily: Fonts.JUA,
+    color: Colors.surface,
+    fontSize: Typography.caption,
     lineHeight: 16,
   },
   modalFutureNoticeBody: {
     flex: 1,
   },
   modalFutureNoticeTitle: {
-    fontFamily: 'JUA',
-    fontSize: 13,
-    color: '#B55B00',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodySmall,
+    color: Colors.accentStrong,
   },
   modalFutureNoticeText: {
     marginTop: 1,
-    fontSize: 11,
-    color: '#A15A00',
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
   },
   modalPhotoRowScroll: {
     marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
@@ -482,7 +319,7 @@ export default StyleSheet.create({
     height: MODAL_CARD_SIZE,
     borderRadius: MODAL_CARD_RADIUS,
     overflow: 'hidden',
-    backgroundColor: '#F4F6FB',
+    backgroundColor: Colors.infoSoft,
     marginHorizontal: Math.max(6, Math.round(SCREEN_WIDTH * 0.018)),
     position: 'relative',
   },
@@ -492,7 +329,7 @@ export default StyleSheet.create({
     resizeMode: 'cover',
   },
   modalMealList: {
-    marginTop: 4,
+    marginTop: MODAL_LIST_TOP_MARGIN,
     // 외부 컨테이너와 ScrollView 둘 다 maxHeight를 둬 iOS/Android에서
     // 스크롤 영역이 의도보다 늘어나는 케이스를 방지한다.
     maxHeight: MODAL_MEAL_LIST_MAX_HEIGHT,
@@ -512,32 +349,32 @@ export default StyleSheet.create({
   },
   modalEmptyText: {
     textAlign: 'center',
-    color: '#9DA2B5',
-    fontSize: 13,
-    marginTop: 8,
+    color: Colors.textMuted,
+    fontSize: Typography.bodySmall,
+    marginTop: 6,
   },
   modalErrorText: {
     marginTop: 8,
     textAlign: 'center',
-    color: '#D9534F',
-    fontSize: 12,
+    color: Colors.error,
+    fontSize: Typography.caption,
   },
   modalMealRowContainer: {
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: MODAL_ROW_RADIUS,
     paddingVertical: Math.max(12, Math.round(SCREEN_WIDTH * 0.03)),
     paddingHorizontal: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
     marginBottom: Math.max(10, Math.round(SCREEN_WIDTH * 0.025)),
     borderWidth: 1,
-    borderColor: '#E4E6F1',
+    borderColor: Colors.divider,
     ...baseShadow,
   },
   modalMealRowEditing: {
-    borderColor: '#5F6BEA',
-    backgroundColor: '#EDF1FF',
+    borderColor: Colors.infoStrong,
+    backgroundColor: Colors.infoSoft,
   },
   modalMealControls: {
     flexDirection: 'row',
@@ -549,7 +386,7 @@ export default StyleSheet.create({
     height: MODAL_BUTTON_SIZE,
     borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
-    borderColor: '#D8DBE8',
+    borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
@@ -558,9 +395,9 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalMealRemoveLabel: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(16, Math.round(SCREEN_WIDTH * 0.042)),
-    color: '#8F95AF',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.body, Math.round(SCREEN_WIDTH * 0.042)),
+    color: Colors.textMuted,
   },
   modalMealRemoveIcon: {
     width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
@@ -570,14 +407,14 @@ export default StyleSheet.create({
     flex: 1,
   },
   modalMealRowName: {
-    fontFamily: 'JUA',
-    fontSize: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
-    color: '#2E313D',
+    fontFamily: Fonts.JUA,
+    fontSize: Math.max(Typography.bodySmall, Math.round(SCREEN_WIDTH * 0.036)),
+    color: Colors.textPrimary,
   },
   modalMealRowCalories: {
     marginTop: 4,
     fontSize: Math.max(11, Math.round(SCREEN_WIDTH * 0.028)),
-    color: '#9398B3',
+    color: Colors.textMuted,
   },
   modalMealRowImage: {
     width: MODAL_ROW_IMAGE,
@@ -590,28 +427,28 @@ export default StyleSheet.create({
     height: MODAL_BUTTON_SIZE,
     borderRadius: Math.round(MODAL_BUTTON_SIZE / 2),
     borderWidth: 1,
-    borderColor: '#D8DBE8',
+    borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
   },
   modalMealEditIcon: {
     width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
     height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
   },
   modalMealEditLabel: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
     fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
-    color: '#4C5AC7',
+    color: Colors.infoStrong,
   },
   modalMealDragHandle: {
     width: 22,
     alignItems: 'center',
   },
   modalMealDragLabel: {
-    fontSize: 18,
-    color: '#B6BBCE',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textMuted,
   },
   modalAddRow: {
     flexDirection: 'row',
@@ -620,22 +457,22 @@ export default StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 18,
-    backgroundColor: '#F6F7FC',
+    backgroundColor: Colors.infoSoft,
   },
   modalAddIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E0E3F1',
-    backgroundColor: '#FFFFFF',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalAddIconLabel: {
-    fontFamily: 'JUA',
-    fontSize: 18,
-    color: '#FF9F43',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.bodyLarge,
+    color: Colors.accentStrong,
   },
   modalAddEditIcon: {
     width: 32,
@@ -644,7 +481,7 @@ export default StyleSheet.create({
   modalAddInput: {
     marginLeft: 12,
     fontSize: 13,
-    color: '#2E313D',
+    color: Colors.textPrimary,
     paddingVertical: 0,
   },
   modalAddInputName: {
@@ -658,8 +495,8 @@ export default StyleSheet.create({
     height: 40,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E0E3F1',
-    backgroundColor: '#FFFFFF',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
@@ -668,12 +505,12 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalCameraIcon: {
-    fontSize: 18,
-    color: '#9DA3BB',
+    fontSize: Typography.bodyLarge,
+    color: Colors.textMuted,
   },
   modalEditRow: {
     marginTop: 18,
-    backgroundColor: '#F5F7FF',
+    backgroundColor: Colors.infoSoft,
   },
   modalEditActions: {
     flexDirection: 'row',
@@ -689,25 +526,25 @@ export default StyleSheet.create({
   modalEditCancel: {
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#C8CCE0',
-    backgroundColor: '#FFFFFF',
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
   },
   modalEditSubmit: {
     marginLeft: 8,
-    backgroundColor: '#FF9F43',
+    backgroundColor: Colors.accentStrong,
   },
   modalEditActionDisabled: {
     opacity: 0.5,
   },
   modalEditCancelLabel: {
-    fontFamily: 'JUA',
-    color: '#8F95AF',
-    fontSize: 14,
+    fontFamily: Fonts.JUA,
+    color: Colors.textMuted,
+    fontSize: Typography.bodySmall,
   },
   modalEditSubmitLabel: {
-    fontFamily: 'JUA',
-    color: '#FFFFFF',
-    fontSize: 14,
+    fontFamily: Fonts.JUA,
+    color: Colors.surface,
+    fontSize: Typography.bodySmall,
   },
   modalTotalRow: {
     flexDirection: 'row',
@@ -715,19 +552,19 @@ export default StyleSheet.create({
     marginTop: 22,
   },
   modalTotalLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#4A4E66',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.textSecondary,
   },
   modalTotalValue: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FF9157',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.accentStrong,
     marginLeft: 6,
   },
   modalPrimaryButton: {
     marginTop: 20,
-    backgroundColor: '#FF9F43',
+    backgroundColor: Colors.accentStrong,
     borderRadius: 22,
     paddingVertical: 14,
     alignItems: 'center',
@@ -737,17 +574,17 @@ export default StyleSheet.create({
     opacity: 0.6,
   },
   modalPrimaryButtonLabel: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.body,
+    color: Colors.surface,
   },
   modalSecondaryButton: {
     marginTop: 10,
     alignItems: 'center',
   },
   modalSecondaryButtonLabel: {
-    fontSize: 14,
-    color: '#8F94AB',
+    fontSize: Typography.bodySmall,
+    color: Colors.textMuted,
   },
   stackThumb: {
     width: '100%',
@@ -763,8 +600,8 @@ export default StyleSheet.create({
     height: STACK_ITEM_SIZE,
     borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 2, // 겹침 경계 또렷하게
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: STACK_IMAGE_BORDER,
+    shadowColor: STACK_IMAGE_SHADOW,
     shadowOpacity: 0.15,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },

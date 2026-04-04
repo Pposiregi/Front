@@ -66,17 +66,14 @@ const MissionCard: React.FC<MissionCardProps> = ({
             onPress={() => onComplete(mission.missionCheckId)}
             style={[
               styles.completeButton,
-              isReadyToComplete
-                ? { backgroundColor: '#FEC288' }
-                : { backgroundColor: '#ccc' },
+              !isReadyToComplete && styles.completeButtonDisabled,
             ]}
           >
             <Text
-              style={
-                isReadyToComplete
-                  ? styles.completeButtonText
-                  : styles.completeButtonTextDisabled
-              }
+              style={[
+                styles.completeButtonText,
+                !isReadyToComplete && styles.completeButtonTextDisabled,
+              ]}
             >
               완료
             </Text>

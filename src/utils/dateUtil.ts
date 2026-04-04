@@ -49,3 +49,17 @@ export const parseDateKey = (dateKey: string) => {
  */
 export const formatDateLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/**
+ * KST(UTC+9) 기준 'YYYY-MM-DD' 날짜 키를 반환합니다.
+ * @param date {Date} 기준 시각(기본값: 현재)
+ */
+export const formatDateKeyKST = (date: Date = new Date()) => {
+  const shifted = new Date(date.getTime() + KST_OFFSET_MS);
+  const year = shifted.getUTCFullYear();
+  const month = String(shifted.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(shifted.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

@@ -18,6 +18,7 @@ import {
   View,
 } from 'react-native';
 import styles from '@styles/Meal.styles';
+import { Colors } from '@styles/theme';
 import type { MealListItem } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WEEKDAYS } from './constant';
@@ -39,6 +40,7 @@ import { isZeroSizedMealImage } from '@utils/imageUtil';
 
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
+const HEADER_ICON_COLOR = Colors.infoStrong;
 
 const getDiaryTitle = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월의 식사`;
@@ -650,7 +652,7 @@ function MealPage() {
             {isCalendarLoading ? (
               <ActivityIndicator
                 size='small'
-                color='#5F6BEA'
+                color={HEADER_ICON_COLOR}
                 style={styles.calendarLoadingIndicator}
               />
             ) : null}

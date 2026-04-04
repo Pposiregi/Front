@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
+import { Colors, Fonts, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   tabHeaderContainer: {
@@ -7,7 +8,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: Colors.background,
   },
   tabButton: {
     flex: 1,
@@ -22,15 +23,15 @@ export const styles = StyleSheet.create({
     width: 100, // 밑줄 길이 조절
     height: 2,
     borderRadius: 1,
-    backgroundColor: '#333', // 밑줄 색
+    backgroundColor: Colors.textPrimary,
   },
   tabText: {
-    fontFamily: 'JUA',
-    fontSize: 20,
-    color: '#888',
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.textMuted,
   },
   activeTabText: {
-    color: '#333',
+    color: Colors.textPrimary,
     marginBottom: 3,
   },
   // 모달
@@ -41,7 +42,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
@@ -58,14 +59,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: Typography.h1,
     marginBottom: 5,
-    fontFamily: 'JUA',
+    fontFamily: Fonts.JUA,
   },
   modalKcalText: {
-    fontSize: 18,
+    fontSize: Typography.bodyLarge,
     color: '#555',
-    fontFamily: 'Roboto-VariableFont',
+    fontFamily: Fonts.Roboto_VariableFont,
   },
 });

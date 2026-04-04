@@ -1,4 +1,5 @@
 import { Pet } from './pet';
+import type { PetType } from './profile';
 
 /**
  * 일정 걸음 마다 수집해서 보내는 요청 타입
@@ -27,6 +28,7 @@ export type getUserResponse = {
   userId: number;
   email: string;
   nickname: string | null;
+  petType?: PetType;
   age: number;
   gender: 'female' | 'male' | null;
   weightKg: number;

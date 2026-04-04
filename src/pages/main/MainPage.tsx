@@ -8,6 +8,7 @@ import React, {
 import {
   View,
   Text,
+  Image,
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
@@ -15,7 +16,9 @@ import {
   Pressable,
   Animated,
   Alert,
+  BackHandler,
   Platform,
+  Easing,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,12 +27,11 @@ import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
-import mainBackGround_day from '@assets/images/mainBackground_track.png';
+import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
+import { SCREEN_WIDTH } from '@styles/dimensions';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
-import { getPetTemplate } from '@utils/petAssetLoader';
-import { getTorsoScaleByPbf } from '@utils/petMorphUtils';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
@@ -42,33 +44,18 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
-const IDLE_BREATH_LOOP_MS = 3000;
-const RUN_LOOP_MS = 520;
+const RUN_PET_SCALE = 0.7;
 const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
+const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
+const KCAL_PER_STEP = 0.04;
+const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
+const RUN_BG_LOOP_MS = 8000;
+const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
-const HEAD_PART_KEYS = [
-  'face',
-  'ear_left',
-  'ear_right',
-  'eye_left',
-  'eye_right',
-  'eyebrow_left',
-  'eyebrow_right',
-  'mouth',
-  'flushing_left',
-  'flushing_right',
-  'beard_leftDown',
-  'beard_leftUp',
-  'beard_rightDown',
-  'beard_rightUp',
-  'neckRuff',
-] as const;
-const toMutableRange = <T extends string | number>(
-  values: readonly [T, T, T]
-): T[] => [...values];
 
+/** 밀리초 단위 러닝 시간을 한국어 문자열로 변환한다. */
 const formatDuration = (durationMs: number) => {
   const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
   const hours = Math.floor(totalSeconds / 3600);
@@ -80,6 +67,7 @@ const formatDuration = (durationMs: number) => {
   return `${minutes}분 ${seconds}초`;
 };
 
+/** 초 단위 경과 시간을 HH:MM:SS 형식으로 변환한다. */
 const formatRunningElapsed = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(safeSeconds / 3600);
@@ -97,18 +85,25 @@ import { MissionActiveItem } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
-import {
-  FAT_MORPH_FOLLOW_RATIOS,
-  MAIN_PET_TEMPLATE_ID,
-  PET_RUN_MOTION,
-} from './petMotionConfig';
+import MainStatCards from './MainStatCards';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
 import { useAppDispatch } from '@store/index';
 import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
 import RunningSummaryModal from './RunningSummaryModal';
-import type { PartTransformInput } from '@utils/petTransformUtils';
+import {
+  startRunningNotification,
+  stopRunningNotification,
+  updateRunningNotification,
+} from '@hooks/useRunningService';
+import { getAndroidApiLevel, STEP_SYNC_MESSAGES, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
+import type { PetType } from 'types/profile';
+import { useMainPetMotion } from './useMainPetMotion';
+import {
+  PET_TEMPLATE_ID_BY_TYPE,
+  PET_TYPE_STORAGE_KEY,
+} from '@shared/config/petConfig';
 
 /**
  * 메인 화면 컴포넌트
@@ -131,7 +126,9 @@ export const MainPage = () => {
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [trans, setTrans] = useState(false); // 미션 완료 트리거
+  /** 미션 목록 모달을 연다. */
   const handleOpenMission = () => setShowMissionModal(true);
+  /** 미션 모달을 닫고 필요하면 펫 완료 연출을 재생한다. */
   const handleCloseMission = () => {
     // 모달 닫힐 때 강아지 웃음 트리거
     if (trans) {
@@ -152,11 +149,12 @@ export const MainPage = () => {
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
   const [showPetOnboarding, setShowPetOnboarding] = useState(false);
+  const selectedPetType = useSelector((state: RootState) => state.user.petType);
+  const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
+  const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
   const dispatch = useAppDispatch();
-  /**
-   * 사용자 정보 받아오기
-   */
   useEffect(() => {
+    /** 사용자 기본 정보와 petType 캐시를 메인 진입 시 동기화한다. */
     const fetchUser = async () => {
       try {
         const data = await getUser();
@@ -168,14 +166,41 @@ export const MainPage = () => {
           setShowPetOnboarding(true);
           return;
         }
+        const resolvedPetType =
+          data.petType === 'DOG' || data.petType === 'CAT'
+            ? data.petType
+            : null;
+        // 전역 상태는 서버 응답을 우선 반영한다.
+        // 이전 세션의 로컬 petType이 최신 서버값을 덮어쓰지 않도록 여기서 우선순위를 고정한다.
         dispatch(
           userSlice.actions.setUser({
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
             profileImageId: data.profileImageUrl,
+            petType: resolvedPetType ?? undefined,
           })
         );
+
+        if (resolvedPetType) {
+          try {
+            // 서버가 준 최신 petType으로 로컬 캐시를 재정렬해 다음 진입 시 stale 값을 줄인다.
+            await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, resolvedPetType);
+          } catch (storageError) {
+            console.warn('[MainPage] petType 캐시 저장 실패', storageError);
+          }
+          return;
+        }
+
+        try {
+          // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
+          const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
+          if (storedPetType === 'DOG' || storedPetType === 'CAT') {
+            dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
+          }
+        } catch (storageError) {
+          console.warn('[MainPage] petType 로드 실패', storageError);
+        }
       } catch (e) {
         console.log('유저 정보 로드 실패', e);
       } finally {
@@ -194,18 +219,8 @@ export const MainPage = () => {
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
-  const isAndroid13OrLower =
-    Platform.OS === 'android' &&
-    Number(Platform.Version) > 0 &&
-    Number(Platform.Version) <= 33;
-  const getSamsungHealthGuide = useCallback(() => {
-    return (
-      'Android 13 이하에서는 삼성 헬스 연동이 필요합니다.\n' +
-      '1) 삼성 헬스 → 더 보기(⋮) → 설정 → 헬스 커넥트 → 앱 권한 → 삼성 헬스 → 모두 허용\n' +
-      '2) 삼성 헬스 → 설정 → 개인정보 → 민감정보 동의\n' +
-      '3) 삼성 헬스 → 설정 → 삼성 클라우드 동기화 → 지금 동기화'
-    );
-  }, []);
+  const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
+  const runBgProgress = useRef(new Animated.Value(0)).current;
 
   const mapRef = useRef<MapView | null>(null);
   const runningStartMsRef = useRef<number | null>(null);
@@ -215,6 +230,29 @@ export const MainPage = () => {
   const bodyPromptDate = new Date();
   const bodyPromptBaseDate = formatDateKey(bodyPromptDate);
   const bodyPromptDateLabel = formatDateLabel(bodyPromptDate);
+  /** 오늘 날짜 기준 누적 러닝 시간 저장 키를 계산한다. */
+  const getTodayRunSecondsKey = useCallback(
+    () => `${DAILY_RUN_SECONDS_KEY_PREFIX}${formatDateKey(new Date())}`,
+    []
+  );
+
+  /** 오늘 누적 러닝 시간을 storage와 state에 함께 반영한다. */
+  const appendTodayRunSeconds = useCallback(
+    async (addSeconds: number) => {
+      if (addSeconds <= 0) return;
+      try {
+        const key = getTodayRunSecondsKey();
+        const raw = await AsyncStorage.getItem(key);
+        const prev = Number(raw ?? '0');
+        const next = Math.max(0, prev) + Math.floor(addSeconds);
+        await AsyncStorage.setItem(key, String(next));
+        setTodayRunAccumulatedSec(next);
+      } catch (error) {
+        console.warn('[MainPage] 러닝 시간 누적 저장 실패', error);
+      }
+    },
+    [getTodayRunSecondsKey]
+  );
 
   useEffect(() => {
     // 러닝 중 여부를 전역 상태로 동기화한다.
@@ -258,11 +296,48 @@ export const MainPage = () => {
   }, [isTracking]);
 
   useEffect(() => {
+    if (!isTracking) {
+      runBgProgress.stopAnimation();
+      runBgProgress.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.timing(runBgProgress, {
+        toValue: 1,
+        duration: RUN_BG_LOOP_MS,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+      runBgProgress.stopAnimation();
+    };
+  }, [isTracking, runBgProgress]);
+
+  useEffect(() => {
     /**
      * 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
      */
     loadBodyGoals().then(setBodyGoals);
   }, []);
+
+  useEffect(() => {
+    const loadTodayRunAccumulatedSec = async () => {
+      try {
+        const key = getTodayRunSecondsKey();
+        const raw = await AsyncStorage.getItem(key);
+        setTodayRunAccumulatedSec(Math.max(0, Number(raw ?? '0')));
+      } catch (error) {
+        console.warn('[MainPage] 누적 러닝 시간 로드 실패', error);
+        setTodayRunAccumulatedSec(0);
+      }
+    };
+    loadTodayRunAccumulatedSec();
+  }, [getTodayRunSecondsKey]);
 
   /**
    * 오늘 몸 기록이 있는지 확인
@@ -318,215 +393,20 @@ export const MainPage = () => {
    */
   // FSM state value is intentionally not consumed yet; this page currently uses transition events only.
   const { transition: changePetState } = usePetFSM();
-  const idleBreathProgress = useRef(new Animated.Value(0)).current;
-  const runCycleProgress = useRef(new Animated.Value(0)).current;
   const baselinePbf =
     userGender === 'female' ? FEMALE_BASELINE_PBF : MALE_BASELINE_PBF;
   const selectedPreviewPbf =
     fatVerIndex >= 0 ? FAT_VER_PBF_PRESETS[fatVerIndex] : null;
   const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
-  const torsoTemplatePart = useMemo(
-    () =>
-      getPetTemplate({ templateId: MAIN_PET_TEMPLATE_ID }).parts.find(
-        (part) => part.key === 'torso'
-      ),
-    []
-  );
-  const torsoMorph = useMemo(
-    () => getTorsoScaleByPbf(torsoTemplatePart, effectivePbf),
-    [effectivePbf, torsoTemplatePart]
-  );
+  const { idlePartTransforms, runPartTransforms } = useMainPetMotion({
+    isTracking,
+    effectivePbf,
+    selectedPetType,
+    mainPetTemplateId,
+    petRenderSize: PET_RENDER_SIZE,
+  });
 
-  // Animated.Value is created by useRef and remains stable through component lifetime.
-  useEffect(() => {
-    if (isTracking) {
-      idleBreathProgress.stopAnimation();
-      return;
-    }
-
-    const idleLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(idleBreathProgress, {
-          toValue: 1,
-          duration: IDLE_BREATH_LOOP_MS / 2,
-          useNativeDriver: true,
-        }),
-        Animated.timing(idleBreathProgress, {
-          toValue: 0,
-          duration: IDLE_BREATH_LOOP_MS / 2,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    idleLoop.start();
-    return () => {
-      idleLoop.stop();
-    };
-  }, [idleBreathProgress, isTracking]);
-
-  // Animated.Value is created by useRef and remains stable through component lifetime.
-  useEffect(() => {
-    if (!isTracking) {
-      runCycleProgress.stopAnimation();
-      runCycleProgress.setValue(0);
-      return;
-    }
-
-    const runLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(runCycleProgress, {
-          toValue: 1,
-          duration: RUN_LOOP_MS / 2,
-          useNativeDriver: true,
-        }),
-        Animated.timing(runCycleProgress, {
-          toValue: 0,
-          duration: RUN_LOOP_MS / 2,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    runLoop.start();
-    return () => {
-      runLoop.stop();
-    };
-  }, [isTracking, runCycleProgress]);
-
-  const idlePartTransforms: Record<string, PartTransformInput> = useMemo(() => {
-    const torsoScaleY = idleBreathProgress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 1.03],
-    });
-    const headTranslateY = idleBreathProgress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, -2],
-    });
-    const armFollowOffset =
-      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.arm * torsoMorph.t;
-    const legFollowOffset =
-      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.leg * torsoMorph.t;
-    const tailFollowOffset =
-      PET_RENDER_SIZE * FAT_MORPH_FOLLOW_RATIOS.tail * torsoMorph.t;
-
-    const transforms: Record<string, PartTransformInput> = {
-      torso: {
-        scaleX: torsoMorph.scaleX,
-        scaleY: torsoScaleY,
-        useAnchorPivot: true,
-      },
-      arm_left: { translateX: -armFollowOffset },
-      arm_right: { translateX: armFollowOffset },
-      leg_left: { translateX: -legFollowOffset },
-      leg_right: { translateX: legFollowOffset },
-      tail: { translateX: tailFollowOffset },
-    };
-
-    HEAD_PART_KEYS.forEach((partKey) => {
-      transforms[partKey] = { translateY: headTranslateY };
-    });
-
-    return transforms;
-  }, [idleBreathProgress, torsoMorph.scaleX, torsoMorph.t]);
-
-  const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
-    const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 2;
-    // Animated.interpolate 타입은 readonly 튜플 대신 mutable 배열을 요구한다.
-    const phase = toMutableRange(PET_RUN_MOTION.phase);
-    const limbLeftX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.limbLeftX),
-    });
-    const limbRightX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.limbRightX),
-    });
-    const torsoX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.torsoX),
-    });
-    const torsoY = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.torsoY),
-    });
-    const faceX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.faceX),
-    });
-    const faceY = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.faceY),
-    });
-    const armLeftRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.armLeftRotate),
-    });
-    const armRightRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.armRightRotate),
-    });
-    const legLeftRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.legLeftRotate),
-    });
-    const legRightRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.legRightRotate),
-    });
-    const tailRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.tailRotate),
-    });
-    const tailX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.tailX),
-    });
-    const neckRuffX = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffX),
-    });
-    const neckRuffRotate = runCycleProgress.interpolate({
-      inputRange: phase,
-      outputRange: toMutableRange(PET_RUN_MOTION.neckRuffRotate),
-    });
-
-    return {
-      torso: { translateX: torsoX, translateY: torsoY, scaleX: runTorsoScaleX },
-      arm_left: {
-        translateX: limbLeftX,
-        rotateDeg: armLeftRotate,
-      },
-      arm_right: {
-        translateX: limbRightX,
-        rotateDeg: armRightRotate,
-      },
-      leg_left: {
-        translateX: limbRightX,
-        rotateDeg: legLeftRotate,
-      },
-      leg_right: {
-        translateX: limbLeftX,
-        rotateDeg: legRightRotate,
-      },
-      tail: {
-        translateX: tailX,
-        rotateDeg: tailRotate,
-      },
-      neckRuff: {
-        translateX: neckRuffX,
-        rotateDeg: neckRuffRotate,
-      },
-      face: { translateX: faceX, translateY: faceY },
-      eye_left: { translateX: faceX, translateY: faceY },
-      eye_right: { translateX: faceX, translateY: faceY },
-      mouth: { translateX: faceX, translateY: faceY },
-    };
-  }, [runCycleProgress, torsoMorph.scaleX]);
-
-  /**
-   * 펫 터치 시 상태 전환.
-   */
+  /** 펫을 터치했을 때 HAPPY 상태 전환을 트리거한다. */
   const onPetTouch = () => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });
@@ -562,8 +442,35 @@ export const MainPage = () => {
     addSteps,
     error: healthError,
     writing: healthWriting,
-    loading: healthLoading,
   } = useHealthSteps();
+
+  /**
+   * 2초마다 걸음수 서버 동기화 (값이 바뀐 경우에만)
+   */
+  const prevSyncedStepsRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (healthSteps == null) return;
+
+    if (prevSyncedStepsRef.current !== healthSteps) {
+      if (__DEV__) {
+        console.log('syncSteps 호출', {
+          healthSteps,
+          prev: prevSyncedStepsRef.current,
+        });
+      }
+      syncSteps(healthSteps);
+      prevSyncedStepsRef.current = healthSteps;
+    }
+  }, [healthSteps, syncSteps]);
+
+  useEffect(() => {
+    if (!isTracking) return;
+    if (healthSteps == null) return;
+
+    updateRunningNotification(runningElapsedSec, healthSteps);
+  }, [runningElapsedSec, healthSteps, isTracking]);
+
   const healthErrorShownRef = useRef(false);
   /**
    * 개발용 걸음수 +1000 버튼.
@@ -583,10 +490,12 @@ export const MainPage = () => {
 
   const handleForceEnd = useCallback(async () => {
     try {
-      const result = await endSession({ forceNoSteps: true });
+      const result = await endSession();
+      await stopRunningNotification();
       if (result?.summary) {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
+        await appendTodayRunSeconds(result.summary.durationMs / 1000);
       }
       setEndFailureCount(0);
     } catch (err: any) {
@@ -596,7 +505,7 @@ export const MainPage = () => {
         err?.message ?? '러닝 종료 중 문제가 발생했어요.'
       );
     }
-  }, [endSession]);
+  }, [appendTodayRunSeconds, endSession]);
 
   const handleToggleFatVer = useCallback(() => {
     setFatVerIndex((prev) => {
@@ -608,49 +517,19 @@ export const MainPage = () => {
 
   /**
    * Running 시작/종료 핸들러
-   * - isTracking이 true면 러닝 종료를 시도하되,
-   *   Android에서는 Health Connect 상태(로딩/권한/데이터)에 따라 종료를 차단할 수 있음.
-   * - isTracking이 false면 러닝 전이므로 카운트다운 후 시작
+   * - isTracking이 true면 러닝 종료
+   * - isTracking이 false면 카운트다운 후 시작
    */
   const handleToggleTracking = useCallback(async () => {
-    // 추적 중이면 종료를 시도한다(안드로이드에서는 HC 상태에 따라 차단 가능).
+    // 추적 중이면 종료를 시도한다.
     if (isTracking) {
-      if (Platform.OS === 'android') {
-        if (healthLoading) {
-          Alert.alert(
-            '걸음 수 확인 중',
-            'Health Connect 데이터를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.'
-          );
-          return;
-        }
-        if (healthError || healthSteps == null) {
-          const baseMessage =
-            healthError ??
-            'Health Connect 권한/데이터가 없습니다. 권한을 허용하고 다시 시도해 주세요.';
-          Alert.alert(
-            '걸음 수 권한 필요',
-            isAndroid13OrLower
-              ? `${baseMessage}\n\n${getSamsungHealthGuide()}`
-              : baseMessage,
-            [
-              {
-                text: '강제 종료',
-                style: 'destructive',
-                onPress: () => {
-                  handleForceEnd();
-                },
-              },
-              { text: '취소', style: 'cancel' },
-            ]
-          );
-          return;
-        }
-      }
       try {
         const result = await endSession();
+        await stopRunningNotification();
         if (result?.summary) {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
+          await appendTodayRunSeconds(result.summary.durationMs / 1000);
         }
         setEndFailureCount(0);
       } catch (err: any) {
@@ -681,15 +560,12 @@ export const MainPage = () => {
       }
       return;
     }
+
     setCountdown(3);
   }, [
+    appendTodayRunSeconds,
     endSession,
-    getSamsungHealthGuide,
-    healthError,
-    healthLoading,
-    healthSteps,
     handleForceEnd,
-    isAndroid13OrLower,
     endFailureCount,
     isTracking,
   ]);
@@ -761,8 +637,10 @@ export const MainPage = () => {
           const started = await startSession();
           if (!started) {
             // 권한 거부 등은 하위 훅(startTracking)에서 이미 안내한다.
+            await stopRunningNotification();
             return;
           }
+          await startRunningNotification();
           setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(
@@ -796,30 +674,17 @@ export const MainPage = () => {
     return () => clearTimeout(timer);
   }, [countdown, scaleAnim, opacityAnim, startSession]);
 
-  const [lastSyncedSteps, setLastSyncedSteps] = useState(0);
   /**
-   * Health Steps 서버 전송 + 미션 최신화.
+   * 미션 새로고침.
    */
   const refreshMissions = useCallback(async () => {
     try {
-      if (healthSteps != null) {
-        const diff = healthSteps - lastSyncedSteps;
-        if (diff >= 1000) {
-          await syncSteps(healthSteps);
-          setLastSyncedSteps(healthSteps);
-        }
-      }
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
-      // if (__DEV__) {
-      //   const activeMission = mockActiveMissions;
-      //   setMissionApiItems(activeMission.missions);
-      // }
     } catch (err) {
       console.error('미션 업데이트 실패', err);
     }
-  }, [healthSteps, lastSyncedSteps, syncSteps]);
-
+  }, []);
   /**
    * Health Steps 변화 시 호출 (1000보 단위로 제한).
    */
@@ -878,13 +743,22 @@ export const MainPage = () => {
     }
     if (healthErrorShownRef.current) return;
     healthErrorShownRef.current = true;
-    Alert.alert(
-      '걸음 수 연동 실패',
-      isAndroid13OrLower
-        ? `${healthError}\n\n${getSamsungHealthGuide()}`
-        : healthError
-    );
-  }, [getSamsungHealthGuide, healthError, isAndroid13OrLower]);
+    const apiLevel = getAndroidApiLevel();
+    const isUnsupportedDevice =
+      Platform.OS === 'android' &&
+      apiLevel != null &&
+      apiLevel <= STEP_SYNC_OS_POLICY.unsupportedMaxApi &&
+      healthError === STEP_SYNC_MESSAGES.unsupported;
+    if (isUnsupportedDevice) {
+      Alert.alert(
+        '걸음 수 연동 불가',
+        `${healthError}\n\n현재 단말에서는 걸음수 자동 동기화를 지원하지 않습니다.`,
+        [{ text: '확인', style: 'default', onPress: () => BackHandler.exitApp() }]
+      );
+      return;
+    }
+    Alert.alert('걸음 수 연동 실패', healthError);
+  }, [healthError]);
 
   /**
    * 유저 데이터가 아직 없다면 스피너 표시.
@@ -902,6 +776,14 @@ export const MainPage = () => {
    * - 권한 거부/불러오기 실패 시 기본값으로 대체
    */
   const displayedSteps = healthSteps ?? 8954;
+  const todayTotalRunSec =
+    todayRunAccumulatedSec + (isTracking ? runningElapsedSec : 0);
+  const estimatedKcal = Math.round(displayedSteps * KCAL_PER_STEP);
+  const runPetRenderSize = Math.round(PET_RENDER_SIZE * RUN_PET_SCALE);
+  const runBgTranslateX = runBgProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, RUN_BG_TILE_WIDTH],
+  });
   return (
     <View style={styles.container}>
       {/*
@@ -960,20 +842,37 @@ export const MainPage = () => {
       </View>
       {isTracking ? (
         <View style={styles.mapContainer}>
-          {/* 지도 대신 PNG 배경 */}
-          <ImageBackground
-            source={mainBackGround_day}
-            style={styles.mainBackground}
-            resizeMode='cover'
-          >
+          <View style={styles.mainBackground}>
+            <Animated.View
+              style={[
+                styles.runBgScroller,
+                {
+                  left: -RUN_BG_TILE_WIDTH,
+                  width: RUN_BG_TILE_WIDTH * 3,
+                  transform: [{ translateX: runBgTranslateX }],
+                },
+              ]}
+            >
+              {/* 동일한 배경 타일을 반복 배치해 무한 스크롤 배경을 단순하게 구성한다. */}
+              {RUN_BG_TILE_OFFSETS.map((offset) => (
+                <Image
+                  key={offset}
+                  source={mainBackGroundWide}
+                  style={[styles.runBgTile, { width: RUN_BG_TILE_WIDTH }]}
+                  resizeMode='stretch'
+                />
+              ))}
+            </Animated.View>
             <View style={styles.runHud}>
-              <Text style={styles.runTimerValue}>
-                {formatRunningElapsed(runningElapsedSec)}
-              </Text>
+              <View style={styles.runHudInner}>
+                <Text style={styles.runTimerValue}>
+                  {formatRunningElapsed(runningElapsedSec)}
+                </Text>
+              </View>
             </View>
             <PetRenderer
-              size={PET_RENDER_SIZE}
-              templateId='browncat_v1_run'
+              size={runPetRenderSize}
+              templateId={runPetTemplateId}
               partTransforms={runPartTransforms}
               style={[
                 styles.running_pet,
@@ -981,13 +880,13 @@ export const MainPage = () => {
                   transform: [
                     {
                       translateY:
-                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                        runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
                     },
                   ],
                 },
               ]}
             />
-          </ImageBackground>
+          </View>
         </View>
       ) : (
         // 배경 이미지 & 펫 이미지와 함께 메시지 표시
@@ -1001,7 +900,11 @@ export const MainPage = () => {
             onPress={handleOpenMission}
             style={styles.missionButton}
           >
-            <Text style={styles.missionButtonText}>미션</Text>
+            <Image
+              source={require('@assets/images/Icon_colored/fb_mission.png')}
+              style={styles.missionIcon}
+              resizeMode='contain'
+            />
           </TouchableOpacity>
           <MissionModal
             visible={showMissionModal}
@@ -1021,13 +924,12 @@ export const MainPage = () => {
             distanceMeters={runSummary?.distanceMeters ?? 0}
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
-            stepCountMissing={runSummary?.stepCountMissing}
           />
           {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
           <Pressable onPress={onPetTouch} style={styles.pet}>
             <PetRenderer
               size={PET_RENDER_SIZE}
-              templateId={MAIN_PET_TEMPLATE_ID}
+              templateId={mainPetTemplateId}
               partTransforms={idlePartTransforms}
               style={[
                 styles.petImage,
@@ -1042,10 +944,12 @@ export const MainPage = () => {
               ]}
             />
           </Pressable>
-          <View style={styles.messageRow}>
-            <Text style={styles.message}>
-              {`${displayedSteps.toLocaleString()}보 걸었어요!`}
-            </Text>
+          <MainStatCards
+            stepCount={displayedSteps}
+            totalRunSec={todayTotalRunSec}
+            estimatedKcal={estimatedKcal}
+          />
+          <View style={styles.devButtonGroup}>
             {__DEV__ && (
               <TouchableOpacity
                 style={styles.devHealthButton}
@@ -1065,6 +969,22 @@ export const MainPage = () => {
                 <Text style={styles.devHealthButtonText}>RESET</Text>
               </TouchableOpacity>
             )}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devHealthButton}
+                onPress={handleToggleFatVer}
+                accessibilityRole='button'
+                accessibilityLabel={`체형 테스트 pbf ${
+                  selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
+                }`}
+              >
+                <Text style={styles.devHealthButtonText}>
+                  {selectedPreviewPbf == null
+                    ? 'FAT:15'
+                    : `FAT:${selectedPreviewPbf}`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ImageBackground>
       )}
@@ -1075,24 +995,18 @@ export const MainPage = () => {
         accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
         onPress={handleToggleTracking}
       >
-        <Text style={styles.startText}>{isTracking ? 'END' : 'START'}</Text>
+        <View style={styles.startButtonInner}>
+          {isTracking ? (
+            <Text style={styles.startText}>END</Text>
+          ) : (
+            <Image
+              source={require('@assets/images/Icon_colored/fb_run.png')}
+              style={styles.startIcon}
+              resizeMode='contain'
+            />
+          )}
+        </View>
       </TouchableOpacity>
-      {__DEV__ && (
-        <TouchableOpacity
-          style={styles.fatButton}
-          onPress={handleToggleFatVer}
-          accessibilityRole='button'
-          accessibilityLabel={`체형 테스트 pbf ${
-            selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
-          }`}
-        >
-          <Text style={styles.devHealthButtonText}>
-            {selectedPreviewPbf == null
-              ? '[fat:15]'
-              : `[fat:${selectedPreviewPbf}]`}
-          </Text>
-        </TouchableOpacity>
-      )}
       <BodyRecordPrompt
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}

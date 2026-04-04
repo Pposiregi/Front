@@ -27,6 +27,7 @@ import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
 import { isValidNickname } from '@utils/validation';
+import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 
 const PET_ID_FALLBACK = 1;
 
@@ -36,11 +37,7 @@ type SettingRowProps = {
   muted?: boolean;
 };
 
-/**
- *  설정 항목 행 컴포넌트
- * @param param0
- * @returns
- */
+/** 설정 화면에서 공통으로 사용하는 한 줄짜리 메뉴 행 UI다. */
 const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   <Pressable style={styles.row} onPress={onPress}>
     <Text style={[styles.rowLabel, muted && styles.rowMuted]}>{label}</Text>
@@ -48,10 +45,7 @@ const SettingRow = ({ label, onPress, muted }: SettingRowProps) => (
   </Pressable>
 );
 
-/**
- *  프로필 설정 페이지
- * @returns
- */
+/** 프로필 설정, 펫 설정, 로그아웃 진입점을 제공하는 화면이다. */
 const ProfileSettingPage = () => {
   const navigation =
     useNavigation<ProfileStackNavigationProp<'ProfileSettings'>>();
@@ -71,6 +65,7 @@ const ProfileSettingPage = () => {
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
   const [petId, setPetId] = useState(PET_ID_FALLBACK);
+  const currentPetType = useSelector((state: RootState) => state.user.petType);
 
   useEffect(() => {
     let mounted = true;
@@ -86,11 +81,25 @@ const ProfileSettingPage = () => {
     };
   }, []);
 
-  /**
-   * 임시로 구현한 로그아웃 핸들러
-   *  - 로그아웃 시, Device Token 삭제(푸쉬알람 전송방지)
-   * @returns
-   */
+  useEffect(() => {
+    setPetType(currentPetType);
+  }, [currentPetType]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(PET_TYPE_STORAGE_KEY)
+      .then((stored) => {
+        if (stored === 'DOG' || stored === 'CAT') {
+          // 로컬 캐시는 모달 초기값 hydrate 용도만 맡긴다.
+          // Redux 전역 상태는 서버 응답을 source of truth로 유지한다.
+          setPetType(stored);
+        }
+      })
+      .catch((error) => {
+        console.warn('>>> [ProfileSettings] petType 로드 실패', error);
+      });
+  }, []);
+
+  /** 플랫폼 로그아웃과 푸시 토큰 정리를 포함한 전체 로그아웃 플로우를 수행한다. */
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
@@ -124,7 +133,12 @@ const ProfileSettingPage = () => {
       }
 
       await EncryptedStorage.removeItem('refreshToken');
-      await AsyncStorage.multiRemove(['platform', 'isSignUpInProgress']);
+      await EncryptedStorage.removeItem('serverAccessToken');
+      await AsyncStorage.multiRemove([
+        'platform',
+        'isSignUpInProgress',
+        PET_TYPE_STORAGE_KEY,
+      ]);
       dispatch(userSlice.actions.resetUser());
       Alert.alert('로그아웃 완료', '다음에 다시 만나요!');
     } catch (err) {
@@ -135,10 +149,12 @@ const ProfileSettingPage = () => {
     }
   };
 
+  /** 탈퇴 대체 안내 모달을 연다. */
   const handleWithdraw = () => {
     setWithdrawModalVisible(true);
   };
 
+  /** 현재는 탈퇴 대신 로그아웃으로 대체되는 안내 플로우를 실행한다. */
   const confirmWithdraw = async () => {
     setWithdrawModalVisible(false);
     Alert.alert(
@@ -488,6 +504,17 @@ const ProfileSettingPage = () => {
                       name: petNameInput.trim(),
                       petType,
                     });
+                    dispatch(userSlice.actions.updatePetType(petType));
+                    try {
+                      // 서버 상태 반영 이후의 캐시 저장 실패는 보조 저장소 문제이므로
+                      // 사용자에게 전체 실패로 보이지 않게 분리한다.
+                      await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
+                    } catch (storageError) {
+                      console.warn(
+                        '>>> [ProfileSettings] petType 캐시 저장 실패',
+                        storageError
+                      );
+                    }
                     Alert.alert('완료', '펫 정보가 변경되었습니다.');
                     setPetModalVisible(false);
                   } catch (err) {
