@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
+import { GOOGLE_CLIENT_ID } from '@env';
 import {
   ActivityIndicator,
   Alert,
@@ -41,7 +41,6 @@ import {
   setSessionExpiredHandler,
 } from '@api/authSession';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
-import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
   getLastSentPushToken,
   setLastSentPushToken,
@@ -225,8 +224,6 @@ function AppInner() {
           const deviceUuid = await getDeviceUuid();
 
           if (__DEV__) {
-            // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
-            await ensurePetIdStored(DEV_PET_ID);
             console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
           }
         } catch (err) {

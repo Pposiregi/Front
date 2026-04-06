@@ -44,13 +44,6 @@ export const getHealthConnectStepCount = async (
       }
     }
 
-    const granted = await getCurrentGrantedPermissions();
-    if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
-      throw new Error(
-        'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
-      );
-    }
-
     const result = await readRecords('Steps', {
       timeRangeFilter: {
         operator: 'between',

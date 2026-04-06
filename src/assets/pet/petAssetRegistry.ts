@@ -1,6 +1,8 @@
 import type { ImageSourcePropType } from 'react-native';
 
 export type PetTemplateId =
+  | 'bagiccat_v1'
+  | 'bagiccat_v1_run'
   | 'browncat_v1'
   | 'browncat_v1_run'
   | 'sibadog_v1'
@@ -36,6 +38,25 @@ const browncatV1MainPartAssets: Record<string, ImageSourcePropType> = {
   'browncat_v1_09_eyebrow_right.png': require('./brown_cat/main/browncat_v1_09_eyebrow_right.png'),
   'browncat_v1_10_mouth_none.png': require('./brown_cat/main/browncat_v1_10_mouth_none.png'),
   'browncat_v1_11_neckRuff_none.png': require('./brown_cat/main/browncat_v1_11_neckRuff_none.png'),
+};
+
+const bagiccatV1MainPartAssets: Record<string, ImageSourcePropType> = {
+  'cat_v1_00_tail_none.png': require('./bagic_cat/main/cat_v1_00_tail_none.png'),
+  'cat_v1_03_arm_left.png': require('./bagic_cat/main/cat_v1_03_arm_left.png'),
+  'cat_v1_03_arm_right.png': require('./bagic_cat/main/cat_v1_03_arm_right.png'),
+  'cat_v1_04_torso_none.png': require('./bagic_cat/main/cat_v1_04_torso_none.png'),
+  'cat_v1_05_face_none.png': require('./bagic_cat/main/cat_v1_05_face_none.png'),
+  'cat_v1_07_mouth_none.png': require('./bagic_cat/main/cat_v1_07_mouth_none.png'),
+};
+
+const bagiccatV1RunPartAssets: Record<string, ImageSourcePropType> = {
+  'cat_v1_00_tail_none.png': require('./bagic_cat/run/cat_v1_00_tail_none.png'),
+  'cat_v1_02_arm_left.png': require('./bagic_cat/run/cat_v1_02_arm_left.png'),
+  'cat_v1_02_leg_left.png': require('./bagic_cat/run/cat_v1_02_leg_left.png'),
+  'cat_v1_03_torso_none.png': require('./bagic_cat/run/cat_v1_03_torso_none.png'),
+  'cat_v1_05_arm_right.png': require('./bagic_cat/run/cat_v1_05_arm_right.png'),
+  'cat_v1_05_leg_right.png': require('./bagic_cat/run/cat_v1_05_leg_right.png'),
+  'cat_v1_07_face_none.png': require('./bagic_cat/run/cat_v1_07_face_none.png'),
 };
 
 const browncatV1RunPartAssets: Record<string, ImageSourcePropType> = {
@@ -83,6 +104,16 @@ const sibadogV1RunPartAssets: Record<string, ImageSourcePropType> = {
 };
 
 const petAssetRegistry: Record<PetTemplateId, PetAssetRegistryEntry> = {
+  bagiccat_v1: {
+    version: 'v1',
+    template: require('./bagic_cat/template_main.json'),
+    partAssets: bagiccatV1MainPartAssets,
+  },
+  bagiccat_v1_run: {
+    version: 'v1_run',
+    template: require('./bagic_cat/template_run.json'),
+    partAssets: bagiccatV1RunPartAssets,
+  },
   browncat_v1: {
     version: 'v1',
     template: require('./brown_cat/template_main.json'),

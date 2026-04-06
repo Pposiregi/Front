@@ -48,7 +48,7 @@ type Params = {
   /** 현재 선택된 펫 타입(CAT/DOG). */
   selectedPetType: PetType;
   /** 선택 펫의 main 템플릿 ID. torso morph 기준 파츠 조회에 사용한다. */
-  mainPetTemplateId: 'browncat_v1' | 'sibadog_v1';
+  mainPetTemplateId: 'bagiccat_v1' | 'sibadog_v1';
   /** 렌더 기준 크기(px). follow offset과 미세 보정 계산의 기준 단위다. */
   petRenderSize: number;
 };

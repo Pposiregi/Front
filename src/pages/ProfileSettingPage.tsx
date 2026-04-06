@@ -25,11 +25,9 @@ import { deletePushToken } from '@api/pushTokenApi';
 import { getDeviceUuid } from '@utils/deviceUuid';
 import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
-import { getResolvedPetId } from '@utils/petIdStorage';
+import { getPetId } from '@utils/petIdStorage';
 import { isValidNickname } from '@utils/validation';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
-
-const PET_ID_FALLBACK = 1;
 
 type SettingRowProps = {
   label: string;
@@ -64,22 +62,42 @@ const ProfileSettingPage = () => {
   const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
-  const [petId, setPetId] = useState(PET_ID_FALLBACK);
+  const [petId, setPetId] = useState<number | null>(null);
+  const currentPetId = useSelector((state: RootState) => state.user.petId);
   const currentPetType = useSelector((state: RootState) => state.user.petType);
 
   useEffect(() => {
     let mounted = true;
-    getResolvedPetId(PET_ID_FALLBACK, '>>> [ProfileSettings]').then(
-      (resolved) => {
+    const loadPetId = async () => {
+      if (currentPetId != null) {
         if (mounted) {
-          setPetId(resolved);
+          setPetId(currentPetId);
+        }
+        return;
+      }
+
+      try {
+        const raw = await getPetId();
+        if (!mounted) return;
+        if (!raw) {
+          setPetId(null);
+          return;
+        }
+        const parsed = Number(raw);
+        setPetId(Number.isFinite(parsed) ? parsed : null);
+      } catch (error) {
+        console.warn('>>> [ProfileSettings] petId 로드 실패', error);
+        if (mounted) {
+          setPetId(null);
         }
       }
-    );
+    };
+
+    loadPetId();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentPetId]);
 
   useEffect(() => {
     setPetType(currentPetType);
@@ -496,6 +514,13 @@ const ProfileSettingPage = () => {
                 onPress={async () => {
                   if (!petNameInput.trim()) {
                     Alert.alert('입력 오류', '펫 이름을 입력하세요.');
+                    return;
+                  }
+                  if (petId == null) {
+                    Alert.alert(
+                      '펫 정보 없음',
+                      '내 펫 정보를 찾지 못했어요. 앱을 다시 열어 동기화한 뒤 다시 시도해주세요.'
+                    );
                     return;
                   }
                   setSavingPet(true);

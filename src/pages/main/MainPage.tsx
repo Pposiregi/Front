@@ -104,6 +104,7 @@ import {
   PET_TEMPLATE_ID_BY_TYPE,
   PET_TYPE_STORAGE_KEY,
 } from '@shared/config/petConfig';
+import { setPetId } from '@utils/petIdStorage';
 
 /**
  * 메인 화면 컴포넌트
@@ -166,6 +167,7 @@ export const MainPage = () => {
           setShowPetOnboarding(true);
           return;
         }
+        dispatch(userSlice.actions.setPet(data.pet.petId));
         const resolvedPetType =
           data.petType === 'DOG' || data.petType === 'CAT'
             ? data.petType
@@ -184,6 +186,7 @@ export const MainPage = () => {
 
         if (resolvedPetType) {
           try {
+            await setPetId(data.pet.petId);
             // 서버가 준 최신 petType으로 로컬 캐시를 재정렬해 다음 진입 시 stale 값을 줄인다.
             await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, resolvedPetType);
           } catch (storageError) {
@@ -193,6 +196,7 @@ export const MainPage = () => {
         }
 
         try {
+          await setPetId(data.pet.petId);
           // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
           const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
           if (storedPetType === 'DOG' || storedPetType === 'CAT') {
@@ -355,12 +359,9 @@ export const MainPage = () => {
         return true;
       }
     } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setCurrentPbf(null);
-        return false; // 기록 없음
-      }
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
     }
+    setCurrentPbf(null);
     return false;
   }, []);
 

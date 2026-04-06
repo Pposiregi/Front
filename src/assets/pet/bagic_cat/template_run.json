@@ -1,0 +1,69 @@
+{
+  "id": "bagiccat_v1_run",
+  "canvas": { "baseSize": 1024 },
+  "naming": {
+    "pattern": "{pet}_{version}_{zIndex}_{part}_{direction}.png",
+    "pet": "cat",
+    "version": "v1"
+  },
+  "anchors": {
+    "root": { "x": 0.4501953125, "y": 0.650390625 },
+    "torso": { "x": 0.5, "y": 0.626953125 },
+    "face": { "x": 0.4501953125, "y": 0.5126953125 },
+    "tail": { "x": 0.4970703125, "y": 0.6083984375 },
+    "shoulder_left": { "x": 0.3974609375, "y": 0.5263671875 },
+    "shoulder_right": { "x": 0.5419921875, "y": 0.5263671875 },
+    "hip_left": { "x": 0.4052734375, "y": 0.66796875 },
+    "hip_right": { "x": 0.5048828125, "y": 0.66796875 }
+  },
+  "parts": [
+    {
+      "key": "tail",
+      "file": "cat_v1_00_tail_none.png",
+      "zIndex": 0,
+      "anchor": "tail"
+    },
+    {
+      "key": "leg_left",
+      "file": "cat_v1_02_leg_left.png",
+      "zIndex": 2,
+      "anchor": "hip_left"
+    },
+    {
+      "key": "arm_left",
+      "file": "cat_v1_02_arm_left.png",
+      "zIndex": 2,
+      "anchor": "shoulder_left"
+    },
+    {
+      "key": "torso",
+      "file": "cat_v1_03_torso_none.png",
+      "zIndex": 3,
+      "anchor": "torso"
+    },
+    {
+      "key": "arm_right",
+      "file": "cat_v1_05_arm_right.png",
+      "zIndex": 5,
+      "anchor": "shoulder_right"
+    },
+    {
+      "key": "leg_right",
+      "file": "cat_v1_05_leg_right.png",
+      "zIndex": 5,
+      "anchor": "hip_right"
+    },
+    {
+      "key": "face",
+      "file": "cat_v1_07_face_none.png",
+      "zIndex": 7,
+      "anchor": "face"
+    }
+  ],
+  "rendering": {
+    "sortBy": "zIndex",
+    "stableSort": true,
+    "tieBreak": ["key"],
+    "drawOrigin": { "x": 0, "y": 0 }
+  }
+}

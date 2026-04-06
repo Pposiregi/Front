@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,9 +22,8 @@ import SessionItem from './SessionItem';
 import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import {
-  getActivityRange,
-  getDailyActivity,
   getMonthlySessions,
+  getSessionDetail,
   getWeeklySteps,
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
@@ -37,18 +37,6 @@ import type { getUserResponse } from 'types/main';
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 /**
- * 해당 월의 시작/끝 날짜 키를 반환한다.
- */
-const getMonthRange = (date: Date) => {
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return {
-    from: formatDateKey(start),
-    to: formatDateKey(end),
-  };
-};
-
-/**
  * 일별 리스트용 날짜 라벨을 생성한다.
  * - 포맷: MM/DD (요일)
  */
@@ -58,6 +46,12 @@ const formatDailyLabel = (dateKey: string) => {
   const day = String(parsed.getDate()).padStart(2, '0');
   const weekday = WEEKDAY_LABELS[parsed.getDay()] ?? '';
   return `${month}/${day} (${weekday})`;
+};
+
+type MonthlyDailySessionSummary = {
+  date: string;
+  totalDistanceMeters: number;
+  sessionCount: number;
 };
 
 type ProgressRingProps = {
@@ -115,15 +109,13 @@ const ProgressRing = ({
  * - 오늘 요약, 최근 7일, 이달 기록(일별/활동별) 제공
  */
 function ActivityPage() {
+  const isFocused = useIsFocused();
   const [loading, setLoading] = useState<boolean>(true);
   const today = useMemo(() => formatDateKey(new Date()), []);
   const [currentMonth, setCurrentMonth] = useState(
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
   const [monthlyActivities, setMonthlyActivities] = useState<GPS_SESSION[]>([]);
-  const [monthlyDailyActivities, setMonthlyDailyActivities] = useState<
-    DailyActivity[]
-  >([]);
   const [dailyActivity, setDailyActivity] = useState<DailyActivity | null>(
     null
   );
@@ -156,31 +148,27 @@ function ActivityPage() {
 
   const normalizedMonthlyDaily = useMemo(
     () => {
-      const byDate = new Map<string, DailyActivity>();
+      const byDate = new Map<string, MonthlyDailySessionSummary>();
 
-      monthlyDailyActivities.forEach((item) => {
-        if (!item.date) return;
-        // 백엔드가 date-time 문자열을 내려줄 수 있어 일 단위 키로 정규화한다.
-        const dayKey = item.date.slice(0, 10);
+      monthlyActivities.forEach((session) => {
+        if (!session.startTime) return;
+        const dayKey = formatDateKey(new Date(session.startTime));
+        const totalDistanceMeters = Number(session.totalDistance) || 0;
 
         const prev = byDate.get(dayKey);
         if (!prev) {
           byDate.set(dayKey, {
             date: dayKey,
-            steps: Number(item.steps) || 0,
-            distanceKm: Number(item.distanceKm) || 0,
-            burnCalories: Number(item.burnCalories) || 0,
+            totalDistanceMeters,
+            sessionCount: 1,
           });
           return;
         }
 
         byDate.set(dayKey, {
           date: dayKey,
-          steps: (Number(prev.steps) || 0) + (Number(item.steps) || 0),
-          distanceKm:
-            (Number(prev.distanceKm) || 0) + (Number(item.distanceKm) || 0),
-          burnCalories:
-            (Number(prev.burnCalories) || 0) + (Number(item.burnCalories) || 0),
+          totalDistanceMeters: prev.totalDistanceMeters + totalDistanceMeters,
+          sessionCount: prev.sessionCount + 1,
         });
       });
 
@@ -189,7 +177,7 @@ function ActivityPage() {
           parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
       );
     },
-    [monthlyDailyActivities]
+    [monthlyActivities]
   );
 
   const weeklyStepStats = useMemo(() => {
@@ -282,35 +270,18 @@ function ActivityPage() {
   }, []);
 
   /**
-   * 월간 일별 요약 리스트
-   */
-  const fetchMonthlyDaily = useCallback(async (date: Date) => {
-    try {
-      const { from, to } = getMonthRange(date);
-      const data = await getActivityRange(from, to);
-      setMonthlyDailyActivities(data ?? []);
-    } catch (err) {
-      console.log('>>> 월별 일일 활동 조회 실패', err);
-      setMonthlyDailyActivities([]);
-    }
-  }, []);
-
-  /**
    * 월간 데이터(세션/일별)를 동시에 갱신한다.
    */
   const fetchMonthlyBundle = useCallback(
     async (date: Date) => {
       setLoading(true);
       try {
-        await Promise.all([
-          fetchMonthlySessions(date),
-          fetchMonthlyDaily(date),
-        ]);
+        await fetchMonthlySessions(date);
       } finally {
         setLoading(false);
       }
     },
-    [fetchMonthlyDaily, fetchMonthlySessions]
+    [fetchMonthlySessions]
   );
 
   /**
@@ -340,21 +311,67 @@ function ActivityPage() {
    */
   const fetchDailySummary = useCallback(async () => {
     try {
-      const response = await getDailyActivity(today);
+      const todayDate = parseDateKey(today);
+      const monthSessions = await getMonthlySessions(
+        todayDate.getFullYear(),
+        todayDate.getMonth() + 1
+      );
+      const todaySessions = monthSessions.filter(
+        (session) => formatDateKey(new Date(session.startTime)) === today
+      );
+
+      if (todaySessions.length === 0) {
+        setDailyActivity({
+          date: today,
+          steps: 0,
+          distanceKm: 0,
+          burnCalories: 0,
+        });
+        return;
+      }
+
+      const aggregated: DailyActivity = {
+        date: today,
+        steps: 0,
+        distanceKm: 0,
+        burnCalories: 0,
+      };
+
+      for (const session of todaySessions) {
+        try {
+          const detail = await getSessionDetail(session.sessionId);
+          aggregated.steps += Math.max(0, Number(detail.stepCount) || 0);
+          aggregated.distanceKm +=
+            Math.max(0, Number(detail.totalDistance) || 0) / 1000;
+          aggregated.burnCalories += Math.max(
+            0,
+            Number(detail.burnCalories) || 0
+          );
+        } catch (detailError) {
+          console.warn(
+            '[Activity] 세션 상세 조회 실패',
+            session.sessionId,
+            detailError
+          );
+        }
+      }
+
       if (__DEV__) {
         console.log(
           '>>> [Activity] daily summary',
           JSON.stringify(
             {
               date: today,
-              response,
+              sessionCount: todaySessions.length,
+              aggregated,
             },
             null,
             0
           )
         );
       }
-      setDailyActivity(response);
+
+      setDailyActivity(aggregated);
     } catch (err) {
       console.warn('오늘 활동 요약 fetch 실패', err);
       setDailyActivity(null);
@@ -409,14 +426,16 @@ function ActivityPage() {
   }, [normalizedWeeklySteps]);
 
   useEffect(() => {
+    if (!isFocused) return;
     fetchMonthlyBundle(currentMonth);
-  }, [currentMonth, fetchMonthlyBundle]);
+  }, [currentMonth, fetchMonthlyBundle, isFocused]);
 
   useEffect(() => {
+    if (!isFocused) return;
     fetchWeeklySteps();
     fetchDailySummary();
     fetchUserProfile();
-  }, [fetchDailySummary, fetchUserProfile, fetchWeeklySteps]);
+  }, [fetchDailySummary, fetchUserProfile, fetchWeeklySteps, isFocused]);
 
   useEffect(() => {
     calculateWeeklyChart();
@@ -706,9 +725,8 @@ function ActivityPage() {
             </View>
           ) : (
             normalizedMonthlyDaily.map((item) => {
-              // 일별 목록도 동일한 거리 표기 규칙을 사용한다.
               const itemDistanceLabel = formatDistanceFromKm(
-                Number(item.distanceKm) || 0
+                (Number(item.totalDistanceMeters) || 0) / 1000
               );
               return (
                 <View key={item.date} style={styles.listCard}>
@@ -718,14 +736,24 @@ function ActivityPage() {
                       {formatDailyLabel(item.date)}
                     </Text>
                     <Text style={styles.listSubtitle}>
-                      {itemDistanceLabel.value} {itemDistanceLabel.unit} ·{' '}
-                      {(Number(item.burnCalories) || 0).toLocaleString()} kcal
+                      러닝 {item.sessionCount}회
                     </Text>
                   </View>
                   <View style={styles.listRight}>
-                    <Text style={[styles.listValue, styles.listValueAccent]}>
-                      {(Number(item.steps) || 0).toLocaleString()} 걸음
-                    </Text>
+                    <View style={styles.listDistanceRow}>
+                      <Text
+                        style={[
+                          styles.listValue,
+                          styles.listValueAccent,
+                          styles.listValueNumber,
+                        ]}
+                      >
+                        {itemDistanceLabel.value}
+                      </Text>
+                      <Text style={styles.listValueUnit}>
+                        {itemDistanceLabel.unit}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               );

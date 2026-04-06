@@ -17,8 +17,11 @@ export const PET_TYPE_STORAGE_KEY = 'fitpet:profile:petType';
  */
 export const PET_TEMPLATE_ID_BY_TYPE: Record<
   PetType,
-  { main: 'browncat_v1' | 'sibadog_v1'; run: 'browncat_v1_run' | 'sibadog_v1_run' }
+  {
+    main: 'bagiccat_v1' | 'sibadog_v1';
+    run: 'bagiccat_v1_run' | 'sibadog_v1_run';
+  }
 > = {
-  CAT: { main: 'browncat_v1', run: 'browncat_v1_run' },
+  CAT: { main: 'bagiccat_v1', run: 'bagiccat_v1_run' },
   DOG: { main: 'sibadog_v1', run: 'sibadog_v1_run' },
 } as const;
