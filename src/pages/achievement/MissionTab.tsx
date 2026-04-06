@@ -217,7 +217,7 @@ const MissionTab = () => {
             <View>
               <Text style={styles.listHeaderTitle}>오늘도 열심히</Text>
               <Text style={styles.listHeaderSubtitle}>
-                펫이랑 함께 완료한 미션들이에요 🙂
+                펫이랑 함께 완료한 미션들이에요!
               </Text>
             </View>
 

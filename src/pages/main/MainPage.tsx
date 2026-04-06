@@ -148,6 +148,7 @@ export const MainPage = () => {
   const [fatVerIndex, setFatVerIndex] = useState(-1);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
+  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
@@ -161,12 +162,14 @@ export const MainPage = () => {
         if (data.userId == null || data.nickname == null) {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
-
+        if (!data.pet) {
+          setShowPetOnboarding(true);
+          return;
+        }
         const resolvedPetType =
           data.petType === 'DOG' || data.petType === 'CAT'
             ? data.petType
             : null;
-
         // 전역 상태는 서버 응답을 우선 반영한다.
         // 이전 세션의 로컬 petType이 최신 서버값을 덮어쓰지 않도록 여기서 우선순위를 고정한다.
         dispatch(
@@ -174,7 +177,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageId ?? 2,
+            profileImageId: data.profileImageUrl,
             petType: resolvedPetType ?? undefined,
           })
         );

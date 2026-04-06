@@ -9,6 +9,7 @@ import PermissionPage from './PermissionPage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
 import { authRequest } from '../../types/auth';
+import PetCreatePage from './PetCreatePage';
 
 const IntroPage = () => {
   //현재 페이지 주소 나타냄
@@ -105,6 +106,11 @@ const IntroPage = () => {
     };
     try {
       await signUp(requestBody);
+      dispatch(
+        userSlice.actions.setNickName({
+          nickname: requestBody.nickname,
+        })
+      );
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {

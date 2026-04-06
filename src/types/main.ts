@@ -1,3 +1,4 @@
+import { Pet } from './pet';
 import type { PetType } from './profile';
 
 /**
@@ -37,5 +38,6 @@ export type getUserResponse = {
   targetPbf: number | null;
   targetStepCount: number | null;
   dailyStepCount: number;
-  profileImageId: number;
+  profileImageUrl: number;
+  pet: Pet | null;
 };
