@@ -50,7 +50,7 @@ const userSlice = createSlice({
     setRunningActive(state, action: PayloadAction<boolean>) {
       state.isRunningActive = action.payload;
     },
-    setPet(state, action: PayloadAction<number>) {
+    setPet(state, action: PayloadAction<number | null>) {
       state.petId = action.payload;
     },
     updateNickname(state, action: PayloadAction<string>) {

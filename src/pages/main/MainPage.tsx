@@ -97,7 +97,11 @@ import {
   stopRunningNotification,
   updateRunningNotification,
 } from '@hooks/useRunningService';
-import { getAndroidApiLevel, STEP_SYNC_MESSAGES, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
+import {
+  getAndroidApiLevel,
+  STEP_SYNC_MESSAGES,
+  STEP_SYNC_OS_POLICY,
+} from '@utils/stepSyncPolicy';
 import type { PetType } from 'types/profile';
 import { useMainPetMotion } from './useMainPetMotion';
 import {
@@ -148,7 +152,6 @@ export const MainPage = () => {
   const [fatVerIndex, setFatVerIndex] = useState(-1);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
-  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
@@ -163,7 +166,8 @@ export const MainPage = () => {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
         if (!data.pet) {
-          setShowPetOnboarding(true);
+          await AsyncStorage.removeItem('petId');
+          dispatch(userSlice.actions.setPet(null));
           return;
         }
         const resolvedPetType =
@@ -194,7 +198,9 @@ export const MainPage = () => {
 
         try {
           // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
-          const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
+          const storedPetType = await AsyncStorage.getItem(
+            PET_TYPE_STORAGE_KEY
+          );
           if (storedPetType === 'DOG' || storedPetType === 'CAT') {
             dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
           }
@@ -753,7 +759,13 @@ export const MainPage = () => {
       Alert.alert(
         '걸음 수 연동 불가',
         `${healthError}\n\n현재 단말에서는 걸음수 자동 동기화를 지원하지 않습니다.`,
-        [{ text: '확인', style: 'default', onPress: () => BackHandler.exitApp() }]
+        [
+          {
+            text: '확인',
+            style: 'default',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]
       );
       return;
     }
