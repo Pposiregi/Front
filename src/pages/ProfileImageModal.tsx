@@ -18,11 +18,9 @@ import {
   SECRET_PRESET_URLS,
   SECRET_TARGET_URL,
 } from '@shared/constants/profileIcons';
-import {
-  requestProfileImageUpload,
-  updateUserProfile,
-} from '@api/profileApi';
+import { requestProfileImageUpload, updateUserProfile } from '@api/profileApi';
 import { uploadMealImage } from '@api/uploadMealImage';
+import { getUser } from '@api/mainApi';
 
 type Props = {
   visible: boolean;
@@ -71,7 +69,7 @@ export default function ProfileImageModal({
     if (lastTapTime && now - lastTapTime > TAP_TIMEOUT) {
       setTapCount(1);
     } else {
-      setTapCount(prev => prev + 1);
+      setTapCount((prev) => prev + 1);
     }
     setLastTapTime(now);
   };
@@ -129,9 +127,9 @@ export default function ProfileImageModal({
         mimeType: asset.type ?? 'image/jpeg',
       });
 
-      // 서버가 imageKey로 profileImageUrl을 자동 갱신하므로
-      // 업로드 완료 후 선택된 URI를 임시로 Redux에 반영
-      dispatch(userSlice.actions.updateProfileImageUrl(asset.uri));
+      // 업로드 완료 후 서버에서 실제 S3 URL 받아오기
+      const user = await getUser();
+      dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       handleClose();
     } catch {
       Alert.alert('업로드 실패', '이미지를 업로드하지 못했어요.');
@@ -162,7 +160,7 @@ export default function ProfileImageModal({
           <FlatList
             data={imageList}
             numColumns={3}
-            keyExtractor={item => item}
+            keyExtractor={(item) => item}
             columnWrapperStyle={styles.row}
             renderItem={({ item }) => {
               const selected = item === selectedUrl;
