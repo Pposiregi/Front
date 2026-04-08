@@ -618,3 +618,6 @@ codex/
 
 ### Markdown files ###
 *.md
+
+### Local settings ###
+*.local.json
