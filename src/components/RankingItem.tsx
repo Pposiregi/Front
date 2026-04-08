@@ -7,7 +7,7 @@ type RankingItemProps = {
   rank: number;
   nickname: string;
   dailyStepCount: number;
-  profileImageId?: number;
+  profileImageUrl?: string;
   isTop3?: boolean;
   highlight?: boolean;
 };
@@ -16,7 +16,7 @@ export const RankingItem = ({
   rank,
   nickname,
   dailyStepCount,
-  profileImageId,
+  profileImageUrl,
   isTop3 = false,
   highlight = false,
 }: RankingItemProps) => {
@@ -40,7 +40,7 @@ export const RankingItem = ({
       </View>
 
       <View style={styles.rankAvatarContainer}>
-        {profileImageId && <ProfileAvatar profileImageId={profileImageId} />}
+        {profileImageUrl && <ProfileAvatar profileImageUrl={profileImageUrl} />}
       </View>
 
       <View style={styles.rankingNameScoreContainer}>

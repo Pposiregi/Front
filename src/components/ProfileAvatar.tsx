@@ -1,22 +1,17 @@
 import React from 'react';
-import { Image, StyleSheet } from 'react-native';
-import {
-  PROFILE_ICONS,
-  DEFAULT_PROFILE_ICON_ID,
-} from '../shared/constants/profileIcons';
+import { Image } from 'react-native';
+import { DEFAULT_PROFILE_URL } from '@shared/constants/profileIcons';
 
 interface Props {
-  profileImageId?: number;
+  profileImageUrl?: string;
 }
 
-export const ProfileAvatar = ({ profileImageId }: Props) => {
-  const source =
-    PROFILE_ICONS[profileImageId ?? DEFAULT_PROFILE_ICON_ID] ??
-    PROFILE_ICONS[DEFAULT_PROFILE_ICON_ID];
+export const ProfileAvatar = ({ profileImageUrl }: Props) => {
+  const uri = profileImageUrl || DEFAULT_PROFILE_URL;
 
   return (
     <Image
-      source={source}
+      source={{ uri }}
       style={{
         width: '100%',
         height: '100%',

@@ -38,6 +38,6 @@ export type getUserResponse = {
   targetPbf: number | null;
   targetStepCount: number | null;
   dailyStepCount: number;
-  profileImageUrl: number;
+  profileImageUrl: string;
   pet: Pet | null;
 };

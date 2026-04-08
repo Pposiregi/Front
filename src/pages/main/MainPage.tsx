@@ -177,7 +177,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageUrl,
+            profileImageUrl: data.profileImageUrl,
             petType: resolvedPetType ?? undefined,
           })
         );

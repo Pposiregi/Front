@@ -31,9 +31,9 @@ function RankingTab() {
     rankingFilter === 'ALL' ||
     (rankingFilter === 'MALE' && myGender === 'male') ||
     (rankingFilter === 'FEMALE' && myGender === 'female');
-  // 추후에는 랭킹 데이터에서 ID 받아오기
-  const profileImageId = useSelector(
-    (state: RootState) => state.user.profileImageId
+  // 추후에는 랭킹 데이터에서 URL 받아오기
+  const profileImageUrl = useSelector(
+    (state: RootState) => state.user.profileImageUrl
   );
 
   useEffect(() => {
@@ -128,7 +128,7 @@ function RankingTab() {
                 rank={index + 1}
                 nickname={item.nickname}
                 dailyStepCount={item.score}
-                profileImageId={profileImageId}
+                profileImageUrl={profileImageUrl}
                 isTop3={index < 3}
                 highlight={item.userId === myUserId}
               />
@@ -151,7 +151,7 @@ function RankingTab() {
             rank={rankingData.myRanking?.rank ?? 0}
             nickname='나'
             dailyStepCount={rankingData.myRanking?.score ?? 0}
-            profileImageId={profileImageId}
+            profileImageUrl={profileImageUrl}
             highlight={true}
           />
         </View>

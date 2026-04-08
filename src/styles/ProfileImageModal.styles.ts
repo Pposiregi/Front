@@ -58,4 +58,18 @@ export default StyleSheet.create({
     fontSize: Typography.h2,
     color: Colors.surface,
   },
+  galleryBtn: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.divider,
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  galleryBtnText: {
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
+  },
 });
