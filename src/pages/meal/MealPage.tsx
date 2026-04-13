@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -30,6 +25,9 @@ import { createMeal, deleteMeal, updateMeal } from '@api/mealApi';
 import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
 import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
 import {
+  type CameraOptions,
+  type ImageLibraryOptions,
+  launchCamera,
   launchImageLibrary,
   type ImagePickerResponse,
 } from 'react-native-image-picker';
@@ -41,6 +39,22 @@ import { isZeroSizedMealImage } from '@utils/imageUtil';
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
 const HEADER_ICON_COLOR = Colors.infoStrong;
+
+/* 후면 카메라 설정 */
+const IMAGE_LIBRARY_OPTIONS: ImageLibraryOptions = {
+  mediaType: 'photo',
+  selectionLimit: 1,
+  includeBase64: false,
+  quality: 0.9,
+};
+
+const CAMERA_PICKER_OPTIONS: CameraOptions = {
+  mediaType: 'photo',
+  includeBase64: false,
+  quality: 0.9,
+  cameraType: 'back',
+  saveToPhotos: false,
+};
 
 const getDiaryTitle = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월의 식사`;
@@ -100,7 +114,6 @@ function MealPage() {
   const [editingMealImage, setEditingMealImage] =
     useState<PendingMealImage | null>(null);
   const [isUpdatingMeal, setIsUpdatingMeal] = useState(false);
-  const [isPermissionChecked, setPermissionChecked] = useState(false);
   const [failedCalendarImageMap, setFailedCalendarImageMap] = useState<
     Record<string, true>
   >({});
@@ -266,12 +279,7 @@ function MealPage() {
     ) => {
       const pick = () =>
         launchImageLibrary(
-          {
-            mediaType: 'photo',
-            selectionLimit: 1,
-            includeBase64: false,
-            quality: 0.9,
-          },
+          IMAGE_LIBRARY_OPTIONS,
           (response: ImagePickerResponse) => {
             if (response.didCancel) return;
             if (response.errorCode) {
@@ -324,31 +332,139 @@ function MealPage() {
     [requestPhotoPermission]
   );
 
+  /* 2026.04.13 KKR] 카메라 기능 추가  ---- START */
+  const requestCameraPermission = useCallback(async () => {
+    if (Platform.OS !== 'android') {
+      return true;
+    }
+
+    const permission = PermissionsAndroid.PERMISSIONS.CAMERA;
+    const alreadyGranted = await PermissionsAndroid.check(permission);
+    if (alreadyGranted) {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(permission, {
+      title: '카메라 접근 권한',
+      message: '식단 사진을 촬영하려면 카메라 접근 권한이 필요합니다.',
+      buttonPositive: '허용',
+    });
+
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+
+    if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      Alert.alert('권한 필요', '설정에서 카메라 접근 권한을 허용해주세요.', [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '설정 열기',
+          onPress: () => {
+            Linking.openSettings();
+          },
+        },
+      ]);
+    } else {
+      Alert.alert(
+        '권한 필요',
+        '식단 사진을 촬영하려면 카메라 접근 권한이 필요합니다.'
+      );
+    }
+
+    return false;
+  }, []);
+
+  const pickImageFromCamera = useCallback(
+    async (
+      onSelected: (image: PendingMealImage) => void,
+      onRejected?: () => void
+    ) => {
+      const granted = await requestCameraPermission();
+      if (!granted) {
+        return;
+      }
+
+      launchCamera(CAMERA_PICKER_OPTIONS, (response: ImagePickerResponse) => {
+        if (response.didCancel) return;
+        if (response.errorCode) {
+          Alert.alert(
+            '사진 촬영',
+            response.errorMessage ?? '카메라를 실행하지 못했습니다.'
+          );
+          return;
+        }
+
+        const asset = response.assets?.[0];
+        if (!asset?.uri) {
+          Alert.alert('사진 촬영', '촬영한 이미지 정보를 읽을 수 없습니다.');
+          return;
+        }
+
+        if (isUnsupportedImageAsset(asset)) {
+          onRejected?.();
+          Alert.alert(
+            '이미지 형식 오류',
+            '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
+          );
+          return;
+        }
+
+        onSelected({
+          uri: asset.uri,
+          type: asset.type,
+          fileName: asset.fileName,
+        });
+      });
+    },
+    [requestCameraPermission]
+  );
+
+  const openImageSourcePicker = useCallback(
+    (
+      onSelected: (image: PendingMealImage) => void,
+      onRejected?: () => void
+    ) => {
+      Alert.alert('식단 사진 추가', '사진을 어떻게 추가할까요?', [
+        {
+          text: '카메라로 촬영',
+          onPress: () => {
+            pickImageFromCamera(onSelected, onRejected).catch((error) => {
+              console.error('[MealPage] Failed to launch camera', error);
+            });
+          },
+        },
+        {
+          text: '앨범에서 선택',
+          onPress: () => {
+            pickImageFromLibrary(onSelected, onRejected);
+          },
+        },
+        { text: '취소', style: 'cancel' },
+      ]);
+    },
+    [pickImageFromCamera, pickImageFromLibrary]
+  );
+  /* 2026.04.13 KKR] 카메라 기능 추가  ---- END */
+
   const handlePickMealImage = useCallback(() => {
-    pickImageFromLibrary(
+    openImageSourcePicker(
       (image) => setMealImage(image),
       () => setMealImage(null)
     );
-  }, [pickImageFromLibrary]);
+  }, [openImageSourcePicker]);
 
   const handlePickEditingMealImage = useCallback(() => {
     if (!editingMealInfo) return;
-    pickImageFromLibrary(
+    openImageSourcePicker(
       (image) => setEditingMealImage(image),
       () => setEditingMealImage(null)
     );
-  }, [editingMealInfo, pickImageFromLibrary]);
+  }, [editingMealInfo, openImageSourcePicker]);
 
   /**
    * 컴포넌트 마운트 시 안드로이드 권한 체크
    * 팝업 시마다 권한 요청이 뜨는 것을 방지하기 위함
    */
-  useEffect(() => {
-    if (Platform.OS === 'android' && !isPermissionChecked) {
-      requestPhotoPermission().finally(() => setPermissionChecked(true));
-    }
-  }, [isPermissionChecked, requestPhotoPermission]);
-
   useEffect(() => {
     handleCancelEditMeal();
   }, [selectedDateKey, handleCancelEditMeal]);
@@ -373,31 +489,36 @@ function MealPage() {
       return next;
     });
 
-    void Promise.all(
+    Promise.all(
       calendarImageUris.map(async (uri) => ({
         uri,
         isZeroSized: await isZeroSizedMealImage(uri),
       }))
-    ).then((results) => {
-      if (isCancelled) {
-        return;
-      }
-
-      const next: Record<string, true> = {};
-      results.forEach(({ uri, isZeroSized }) => {
-        if (isZeroSized) {
-          next[uri] = true;
+    )
+      .then((results) => {
+        if (isCancelled) {
+          return;
         }
+
+        const next: Record<string, true> = {};
+        results.forEach(({ uri, isZeroSized }) => {
+          if (isZeroSized) {
+            next[uri] = true;
+          }
+        });
+        setZeroSizedCalendarImageMap(next);
+      })
+      .catch((error) => {
+        if (isCancelled) {
+          return;
+        }
+        console.warn(
+          '>>> [MealPage] calendar zero-sized 이미지 확인 실패',
+          error
+        );
+        // 실패 시 안전한 기본값으로 초기화해 stale 상태를 남기지 않는다.
+        setZeroSizedCalendarImageMap({});
       });
-      setZeroSizedCalendarImageMap(next);
-    }).catch((error) => {
-      if (isCancelled) {
-        return;
-      }
-      console.warn('>>> [MealPage] calendar zero-sized 이미지 확인 실패', error);
-      // 실패 시 안전한 기본값으로 초기화해 stale 상태를 남기지 않는다.
-      setZeroSizedCalendarImageMap({});
-    });
 
     return () => {
       isCancelled = true;
@@ -598,7 +719,9 @@ function MealPage() {
           text: '삭제',
           style: 'destructive',
           onPress: () => {
-            void executeDeleteMeal(mealId);
+            executeDeleteMeal(mealId).catch((error) => {
+              console.error('[MealPage] Unexpected delete failure', error);
+            });
           },
         },
       ]);
@@ -743,9 +866,7 @@ function MealPage() {
                                       }, // 살짝씩 오른쪽으로 가도록
                                     ]}
                                     resizeMode='cover'
-                                    onError={() =>
-                                      markCalendarImageFailed(uri)
-                                    }
+                                    onError={() => markCalendarImageFailed(uri)}
                                   />
                                 );
                               })
