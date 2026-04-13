@@ -225,6 +225,8 @@ const shouldCompressPickedAsset = (metadata: {
 
   return (
     (typeof longEdge === 'number' && longEdge > MAX_IMAGE_DIMENSION) ||
+    // 바이트 크기를 확정하지 못하면 800KB 제한 우회를 막기 위해 압축 경로로 보낸다.
+    typeof metadata.fileSize !== 'number' ||
     (typeof metadata.fileSize === 'number' &&
       metadata.fileSize > MAX_IMAGE_BYTES)
   );
@@ -539,6 +541,7 @@ function MealPage() {
 
         onSelected(normalizedImage);
       } catch (error) {
+        onRejected?.();
         console.error('[MealPage] Failed to prepare meal image', error);
         const message =
           error instanceof Error &&
