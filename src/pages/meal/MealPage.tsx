@@ -33,10 +33,10 @@ import {
   launchImageLibrary,
   type ImagePickerResponse,
 } from 'react-native-image-picker';
-import { uploadMealImage } from '@api/uploadMealImage';
+import { uploadPhoto } from '@api/uploadPhoto';
 import { isAxiosError } from 'axios';
 import mealPlaceholderImage from '@assets/images/meal.png';
-import { isZeroSizedMealImage } from '@utils/imageUtil';
+import { isZeroSizedMealImage, validateImageAsset } from '@utils/imageUtil';
 
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
@@ -54,22 +54,6 @@ const getNextSequence = (meals: MealListItem[]) => {
   );
 };
 
-const isUnsupportedImageAsset = (asset: {
-  type?: string;
-  fileName?: string;
-}): boolean => {
-  const mimeType = asset.type?.toLowerCase() ?? '';
-  const fileName = asset.fileName?.toLowerCase() ?? '';
-  const hasFileName = fileName.length > 0;
-  const isJpegByMime = mimeType === 'image/jpeg' || mimeType === 'image/jpg';
-  const isJpegByExt = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
-
-  if (hasFileName) {
-    return !isJpegByExt;
-  }
-
-  return !isJpegByMime;
-};
 
 /**
  * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드
@@ -289,12 +273,10 @@ function MealPage() {
               );
               return;
             }
-            if (isUnsupportedImageAsset(asset)) {
+            const validationError = validateImageAsset(asset, 'meal');
+            if (validationError) {
               onRejected?.();
-              Alert.alert(
-                '이미지 형식 오류',
-                '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
-              );
+              Alert.alert(validationError.title, validationError.message);
               return;
             }
             onSelected({
@@ -460,7 +442,7 @@ function MealPage() {
       // 2. 이미지가 있을 경우 업로드 처리
       if (mealImage?.uri && creationResult.uploadUrl) {
         console.log('>>> 이미지 업로드 시작');
-        await uploadMealImage(creationResult.uploadUrl, {
+        await uploadPhoto(creationResult.uploadUrl, {
           uri: mealImage.uri,
           mimeType: mealImage.type,
         });
@@ -533,7 +515,7 @@ function MealPage() {
       });
 
       if (changeImage && editingMealImage?.uri && updateResult.uploadUrl) {
-        await uploadMealImage(updateResult.uploadUrl, {
+        await uploadPhoto(updateResult.uploadUrl, {
           uri: editingMealImage.uri,
           mimeType: editingMealImage.type,
         });

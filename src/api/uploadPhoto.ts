@@ -1,6 +1,6 @@
 import type { UploadImagePayload } from 'types/upload';
 
-export const uploadMealImage = async (
+export const uploadPhoto = async (
   uploadUrl: string,
   payload: UploadImagePayload
 ) => {
@@ -9,7 +9,7 @@ export const uploadMealImage = async (
   }
   const mime = payload.mimeType ?? 'image/jpeg';
   if (__DEV__) {
-    console.log('>>> uploadMealImage URI 업로드 준비', {
+    console.log('>>> uploadPhoto URI 업로드 준비', {
       uploadUrl,
       mime,
       uri: payload.uri,
@@ -23,14 +23,14 @@ export const uploadMealImage = async (
   } catch (fileError) {
     if (__DEV__) {
       if (fileError instanceof Error) {
-        console.error('>>> uploadMealImage URI fetch 실패', {
+        console.error('>>> uploadPhoto URI fetch 실패', {
           name: fileError.name,
           message: fileError.message,
           stack: fileError.stack,
         });
       } else {
         console.error(
-          '>>> uploadMealImage URI fetch 실패 (non-error)',
+          '>>> uploadPhoto URI fetch 실패 (non-error)',
           fileError
         );
       }
@@ -39,7 +39,7 @@ export const uploadMealImage = async (
   }
 
   if (__DEV__) {
-    console.log('>>> uploadMealImage 요청 준비', {
+    console.log('>>> uploadPhoto 요청 준비', {
       uploadUrl,
       mime,
       blobSize: blob.size,
@@ -58,14 +58,14 @@ export const uploadMealImage = async (
   } catch (networkError) {
     if (__DEV__) {
       if (networkError instanceof Error) {
-        console.error('>>> uploadMealImage fetch 실패', {
+        console.error('>>> uploadPhoto fetch 실패', {
           name: networkError.name,
           message: networkError.message,
           stack: networkError.stack,
         });
       } else {
         console.error(
-          '>>> uploadMealImage fetch 실패 (non-error)',
+          '>>> uploadPhoto fetch 실패 (non-error)',
           networkError
         );
       }
@@ -74,7 +74,7 @@ export const uploadMealImage = async (
   }
 
   if (__DEV__) {
-    console.log('>>> uploadMealImage response status:', response.status);
+    console.log('>>> uploadPhoto response status:', response.status);
   }
 
   if (!response.ok) {
@@ -82,7 +82,7 @@ export const uploadMealImage = async (
     try {
       errorBody = await response.text();
       if (__DEV__) {
-        console.log('>>> uploadMealImage error body:', errorBody);
+        console.log('>>> uploadPhoto error body:', errorBody);
       }
     } catch {
       // ignore body parsing error
