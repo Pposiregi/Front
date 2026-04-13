@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch } from '../../store';
@@ -117,14 +117,15 @@ const IntroPage = () => {
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
-      console.error('회원가입 상태 업데이트 실패', err);
+      console.error('회원가입 실패', err);
+      Alert.alert('회원가입 실패', '서버 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={(styles.text, { color: '#666666' })}>
+        <Text style={[styles.text, { color: '#666666' }]}>
           환영합니다! FietPet이 처음이신가요?
         </Text>
       </View>

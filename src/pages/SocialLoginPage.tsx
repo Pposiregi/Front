@@ -64,6 +64,13 @@ const SocialLoginPage = () => {
       await loginFunction();
     } catch (err) {
       console.error('로그인 에러', err);
+      // firstLoginCheck 내부의 서버 오류 Alert와 중복되지 않도록
+      // SDK 레벨(앱 미설치, 사용자 취소 제외) 오류만 표시
+      const code = (err as any)?.code;
+      const isCancelled = code === 'SIGN_IN_CANCELLED' || code === 'E_CANCELLED';
+      if (!isCancelled) {
+        Alert.alert('로그인 실패', '로그인 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
+      }
     } finally {
       setLoading(false);
     }
@@ -158,10 +165,14 @@ const SocialLoginPage = () => {
   // 카카오 로그인 // 라이브러리 삭제 후 웹뷰 형식으로 변경 예정
   const signInWithKakao = async (): Promise<void> => {
     const token = await login();
+    if (!token.idToken) {
+      Alert.alert('로그인 실패', 'Kakao idToken을 받아오지 못했습니다.\nKakao OIDC 설정을 확인해주세요.');
+      return;
+    }
     await AsyncStorage.setItem('platform', 'kakao');
     await firstLoginCheck({
       platform: 'kakao',
-      idToken: token.idToken!,
+      idToken: token.idToken,
       accessToken: token.accessToken,
     });
   };

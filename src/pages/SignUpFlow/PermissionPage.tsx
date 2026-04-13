@@ -22,23 +22,22 @@ type PermissionProps = {
  * - 필수 동의가 완료되면 다음 단계로 진행한다.
  */
 const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
-  const [agreeAll, setAgreeAll] = useState(false);
   const [serviceAgree, setServiceAgree] = useState(false);
   const [locationAgree, setLocationAgree] = useState(false);
   const [privacyAgree, setPrivacyAgree] = useState(false);
   const [healthAgree, setHealthAgree] = useState(false);
   const [pushAgree, setPushAgree] = useState(false);
 
-  /**
-   * 전체 동의 토글 처리.
-   */
-  const handleAgreeAll = (newValue: boolean) => {
-    setAgreeAll(newValue);
-    setServiceAgree(newValue);
-    setLocationAgree(newValue);
-    setPrivacyAgree(newValue);
-    setHealthAgree(newValue);
-    setPushAgree(newValue);
+  // 개별 state에서 파생 — 별도 state로 관리하면 동기화 불일치 발생
+  const agreeAll = serviceAgree && locationAgree && privacyAgree && healthAgree && pushAgree;
+
+  const handleAgreeAll = () => {
+    const next = !agreeAll;
+    setServiceAgree(next);
+    setLocationAgree(next);
+    setPrivacyAgree(next);
+    setHealthAgree(next);
+    setPushAgree(next);
   };
 
   return (
@@ -50,48 +49,48 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
         아래 약관에 <Text style={{ color: 'red' }}>동의</Text>하시면 시작됩니다.
       </Text>
       {/* 전체 동의 */}
-      <View style={styles.checkboxContainer}>
-        <CheckBox value={agreeAll} onValueChange={handleAgreeAll} />
+      <Pressable style={styles.checkboxContainer} onPress={handleAgreeAll}>
+        <CheckBox value={agreeAll} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>전체 동의</Text>
-      </View>
+      </Pressable>
       {/* 개별 동의 항목 */}
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setServiceAgree(!serviceAgree)}
+        onPress={() => setServiceAgree((v) => !v)}
       >
-        <CheckBox value={serviceAgree} onValueChange={setServiceAgree} />
+        <CheckBox value={serviceAgree} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>서비스 이용약관 동의(필수)</Text>
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setPrivacyAgree(!privacyAgree)}
+        onPress={() => setPrivacyAgree((v) => !v)}
       >
-        <CheckBox value={privacyAgree} onValueChange={setPrivacyAgree} />
+        <CheckBox value={privacyAgree} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>개인정보 수집이용 동의(필수)</Text>
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setLocationAgree(!locationAgree)}
+        onPress={() => setLocationAgree((v) => !v)}
       >
-        <CheckBox value={locationAgree} onValueChange={setLocationAgree} />
+        <CheckBox value={locationAgree} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>
           위치 기반 서비스 약관 동의(필수)
         </Text>
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setHealthAgree(!healthAgree)}
+        onPress={() => setHealthAgree((v) => !v)}
       >
-        <CheckBox value={healthAgree} onValueChange={setHealthAgree} />
+        <CheckBox value={healthAgree} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>
           건강정보(민감정보) 수집·이용 동의(필수)
         </Text>
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setPushAgree(!pushAgree)}
+        onPress={() => setPushAgree((v) => !v)}
       >
-        <CheckBox value={pushAgree} onValueChange={setPushAgree} />
+        <CheckBox value={pushAgree} onValueChange={undefined} />
         <Text style={styles.checkboxLabel}>푸시 알림 수신(마케팅) 동의(선택)</Text>
       </Pressable>
       <View style={{ alignItems: 'center' }}>

@@ -120,7 +120,9 @@ const logGrantedPermissions = async (
 const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
   const [requestingRequired, setRequestingRequired] = useState(false);
   const [requestingOptional, setRequestingOptional] = useState(false);
-  const [requiredAttempted, setRequiredAttempted] = useState(false);
+  // 실제 권한 부여 여부 (클릭 여부가 아닌 실제 결과)
+  const [requiredGranted, setRequiredGranted] = useState(false);
+  const [optionalAttempted, setOptionalAttempted] = useState(false);
 
   const sdkVersion = Number(Platform.Version);
 
@@ -132,13 +134,23 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
   const handleAllowRequired = async () => {
     setRequestingRequired(true);
     await requestHealthConnectPermissions();
+    // 요청 후 실제로 READ_STEPS 권한이 부여됐는지 확인
+    try {
+      const granted = await getCurrentGrantedPermissions();
+      const hasSteps = granted.some(
+        (p) => p.recordType === 'Steps' && p.accessType === 'read'
+      );
+      setRequiredGranted(hasSteps);
+    } catch {
+      setRequiredGranted(false);
+    }
     setRequestingRequired(false);
-    setRequiredAttempted(true);
   };
 
-  const [optionalAttempted, setOptionalAttempted] = useState(false);
+  const canRequestOptional = pushAgree && sdkVersion >= 33;
 
   const handleAllowOptional = async () => {
+    if (!canRequestOptional) return;
     setRequestingOptional(true);
     await requestOptionalPermissions(pushAgree);
     setRequestingOptional(false);
@@ -166,12 +178,16 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
 
       <View style={styles.buttonContainer}>
         <Pressable
-          style={[styles.requiredButton, requiredAttempted && styles.attemptedButton]}
+          style={[styles.requiredButton, requiredGranted && styles.attemptedButton]}
           onPress={handleAllowRequired}
           disabled={requestingRequired || requestingOptional}
         >
           <Text style={styles.requiredButtonText}>
-            {requestingRequired ? '처리 중...' : requiredAttempted ? '✓ 필수 권한 허용됨' : '필수 권한 허용하기'}
+            {requestingRequired
+              ? '처리 중...'
+              : requiredGranted
+              ? '✓ 필수 권한 허용됨'
+              : '필수 권한 허용하기'}
           </Text>
         </Pressable>
         <Pressable
@@ -180,13 +196,19 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
           disabled={requestingRequired || requestingOptional}
         >
           <Text style={styles.optionalButtonText}>
-            {requestingOptional ? '처리 중...' : optionalAttempted ? '✓ 선택 권한 허용됨' : '선택 권한 허용하기'}
+            {!canRequestOptional
+              ? '해당 없음'
+              : requestingOptional
+              ? '처리 중...'
+              : optionalAttempted
+              ? '✓ 선택 권한 시도됨'
+              : '선택 권한 허용하기'}
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.nextButton, !requiredAttempted && styles.nextButtonDisabled]}
+          style={[styles.nextButton, !requiredGranted && styles.nextButtonDisabled]}
           onPress={handleNext}
-          disabled={!requiredAttempted}
+          disabled={!requiredGranted}
         >
           <Text style={styles.nextButtonText}>다음으로</Text>
         </Pressable>
