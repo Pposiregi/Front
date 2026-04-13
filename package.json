@@ -14,6 +14,7 @@
     "start-here": "npx react-native start --reset-cache"
   },
   "dependencies": {
+    "@bam.tech/react-native-image-resizer": "^3.0.11",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/checkbox": "^0.5.20",

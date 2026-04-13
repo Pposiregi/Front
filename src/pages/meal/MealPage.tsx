@@ -25,12 +25,14 @@ import { createMeal, deleteMeal, updateMeal } from '@api/mealApi';
 import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
 import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
 import {
+  type Asset,
   type CameraOptions,
   type ImageLibraryOptions,
   launchCamera,
   launchImageLibrary,
   type ImagePickerResponse,
 } from 'react-native-image-picker';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 import { uploadMealImage } from '@api/uploadMealImage';
 import { isAxiosError } from 'axios';
 import mealPlaceholderImage from '@assets/images/meal.png';
@@ -39,6 +41,16 @@ import { isZeroSizedMealImage } from '@utils/imageUtil';
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
 const HEADER_ICON_COLOR = Colors.infoStrong;
+
+/* 2026.04.13 KKR] Image 리사이즈 기준치*/
+const MAX_IMAGE_DIMENSION = 1600;
+const MIN_IMAGE_DIMENSION = 1280;
+const MAX_IMAGE_BYTES = 800 * 1024;
+const COMPRESSION_STEPS = [
+  { maxDimension: MAX_IMAGE_DIMENSION, quality: 80 },
+  { maxDimension: 1440, quality: 75 },
+  { maxDimension: MIN_IMAGE_DIMENSION, quality: 70 },
+] as const;
 
 /* 후면 카메라 설정 */
 const IMAGE_LIBRARY_OPTIONS: ImageLibraryOptions = {
@@ -84,6 +96,177 @@ const isUnsupportedImageAsset = (asset: {
 
   return !isJpegByMime;
 };
+
+// 2026.04.13 KKR] 이미지 리사이즈 & 압축 ---- START
+/**
+ * 로컬 URI에서 이미지의 실제 픽셀 크기 읽기
+ * @param uri picker 메타데이터가 비어 있을 때 실제 이미지 크기를 읽어올 로컬 URI
+ * @returns 이미지의 실제 width/height를 담은 Promise
+ */
+const getImageDimensions = (uri: string) =>
+  new Promise<{ width: number; height: number }>((resolve, reject) => {
+    Image.getSize(
+      uri,
+      (width, height) => resolve({ width, height }),
+      (error) => reject(error)
+    );
+  });
+
+/**
+ * 로컬 URI에서 이미지 파일 크기를 바이트 단위로 읽기
+ * @param uri 로컬 이미지 파일 크기를 읽어올 URI
+ * @returns 파일 크기(byte) 또는 읽기에 실패한 경우 null
+ */
+const getImageFileSize = async (uri: string) => {
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return blob.size;
+  } catch (error) {
+    if (__DEV__) {
+      console.warn('>>> [MealPage] Failed to read local image size', {
+        uri,
+        error,
+      });
+    }
+    return null;
+  }
+};
+
+/**
+ * picker asset의 압축 판단용 메타데이터 보강
+ * @param asset picker가 반환한 원본 이미지 메타데이터
+ * @returns 압축 판단에 필요한 width, height, fileSize를 보강한 객체
+ */
+const resolvePickedAssetMetadata = async (asset: Asset) => {
+  let width = asset.width;
+  let height = asset.height;
+  let fileSize = asset.fileSize;
+
+  if ((!width || !height) && asset.uri) {
+    try {
+      const size = await getImageDimensions(asset.uri);
+      width = size.width;
+      height = size.height;
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('>>> [MealPage] Failed to read image dimensions', {
+          uri: asset.uri,
+          error,
+        });
+      }
+    }
+  }
+
+  if (!fileSize && asset.uri) {
+    fileSize = (await getImageFileSize(asset.uri)) ?? undefined;
+  }
+
+  return { width, height, fileSize };
+};
+
+/**
+ * 이미지가 후처리 압축 대상인지 판단
+ * @param metadata 이미지 크기/용량 메타데이터
+ * @returns 목표치(1600px, 800KB) 초과로 후처리 압축이 필요한지 여부
+ */
+const shouldCompressPickedAsset = (metadata: {
+  width?: number;
+  height?: number;
+  fileSize?: number | null;
+}) => {
+  const longEdge =
+    typeof metadata.width === 'number' && typeof metadata.height === 'number'
+      ? Math.max(metadata.width, metadata.height)
+      : null;
+
+  return (
+    (typeof longEdge === 'number' && longEdge > MAX_IMAGE_DIMENSION) ||
+    (typeof metadata.fileSize === 'number' &&
+      metadata.fileSize > MAX_IMAGE_BYTES)
+  );
+};
+
+/**
+ * 업로드용 PendingMealImage 객체 생성
+ * @param uri 업로드에 사용할 이미지 URI
+ * @param type 업로드에 사용할 MIME 타입
+ * @param fileName 업로드에 사용할 파일명
+ * @returns 저장/수정 로직에서 공통으로 쓰는 PendingMealImage 객체
+ */
+const buildPendingMealImage = (
+  uri: string,
+  type?: string,
+  fileName?: string
+): PendingMealImage => ({
+  uri,
+  type,
+  fileName,
+});
+
+/**
+ * 이미지를 목표치에 맞게 단계적으로 JPEG 재인코딩
+ * @param asset 선택 또는 촬영 직후의 원본 이미지 asset
+ * @returns 목표치에 맞게 재인코딩된 PendingMealImage
+ */
+const compressPickedImage = async (asset: Asset) => {
+  if (!asset.uri) {
+    throw new Error('이미지 URI가 없습니다.');
+  }
+
+  let compressedImage: {
+    uri: string;
+    name: string;
+    size: number;
+  } | null = null;
+
+  for (const step of COMPRESSION_STEPS) {
+    const resized = await ImageResizer.createResizedImage(
+      asset.uri,
+      step.maxDimension,
+      step.maxDimension,
+      'JPEG',
+      step.quality,
+      0,
+      undefined,
+      false,
+      {
+        mode: 'contain',
+        onlyScaleDown: true,
+      }
+    );
+
+    compressedImage = {
+      uri: resized.uri,
+      name: resized.name,
+      size: resized.size,
+    };
+
+    if (resized.size <= MAX_IMAGE_BYTES) {
+      break;
+    }
+  }
+
+  if (!compressedImage) {
+    throw new Error('이미지 압축 결과를 생성하지 못했습니다.');
+  }
+
+  if (__DEV__) {
+    console.log('>>> [MealPage] Compressed meal image', {
+      originalUri: asset.uri,
+      compressedUri: compressedImage.uri,
+      compressedSize: compressedImage.size,
+    });
+  }
+
+  return buildPendingMealImage(
+    compressedImage.uri,
+    'image/jpeg',
+    compressedImage.name || asset.fileName
+  );
+};
+
+// 2026.04.13 KKR] 이미지 리사이즈 & 압축 ---- END
 
 /**
  * 월 이동 기능, 일별 식단 미리보기를 표시하는 캘린더 그리드
@@ -270,8 +453,50 @@ function MealPage() {
   }, []);
 
   /**
-   * 공통 이미지 선택 헬퍼
+   * picker asset을 업로드 가능한 이미지로 최종 정리
+   * @param asset picker가 반환한 원본 이미지 asset
+   * @param onSelected 최종 정리된 이미지를 상태로 반영하는 콜백
+   * @param onRejected 이미지 형식 오류 등으로 선택을 취소할 때 실행할 콜백
+   * @returns 이미지 검증, 메타데이터 보강, 필요 시 JPEG 재인코딩까지 수행하는 Promise
    */
+  const finalizePickedImage = useCallback(
+    async (
+      asset: Asset,
+      onSelected: (image: PendingMealImage) => void,
+      onRejected?: () => void
+    ) => {
+      if (!asset.uri) {
+        Alert.alert('이미지 선택', '선택한 이미지 정보를 읽을 수 없습니다.');
+        return;
+      }
+
+      if (isUnsupportedImageAsset(asset)) {
+        onRejected?.();
+        Alert.alert(
+          '이미지 형식 오류',
+          '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
+        );
+        return;
+      }
+
+      try {
+        const metadata = await resolvePickedAssetMetadata(asset);
+        const normalizedImage = shouldCompressPickedAsset(metadata)
+          ? await compressPickedImage(asset)
+          : buildPendingMealImage(asset.uri, asset.type, asset.fileName);
+
+        onSelected(normalizedImage);
+      } catch (error) {
+        console.error('[MealPage] Failed to prepare meal image', error);
+        Alert.alert(
+          '이미지 처리',
+          '사진을 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.'
+        );
+      }
+    },
+    []
+  );
+
   const pickImageFromLibrary = useCallback(
     (
       onSelected: (image: PendingMealImage) => void,
@@ -290,7 +515,7 @@ function MealPage() {
               return;
             }
             const asset = response.assets?.[0];
-            if (!asset?.uri) {
+            if (!asset) {
               Alert.alert(
                 '이미지 선택',
                 '선택한 이미지 정보를 읽을 수 없습니다.'
@@ -305,11 +530,14 @@ function MealPage() {
               );
               return;
             }
-            onSelected({
-              uri: asset.uri,
-              type: asset.type,
-              fileName: asset.fileName,
-            });
+            finalizePickedImage(asset, onSelected, onRejected).catch(
+              (error) => {
+                console.error(
+                  '[MealPage] Failed to finalize library image',
+                  error
+                );
+              }
+            );
           }
         );
 
@@ -329,10 +557,14 @@ function MealPage() {
       }
       pick();
     },
-    [requestPhotoPermission]
+    [finalizePickedImage, requestPhotoPermission]
   );
 
   /* 2026.04.13 KKR] 카메라 기능 추가  ---- START */
+  /**
+   * Android 카메라 권한 확인, 요청
+   * @returns Android에서 카메라 권한이 확보되었는지 여부
+   */
   const requestCameraPermission = useCallback(async () => {
     if (Platform.OS !== 'android') {
       return true;
@@ -374,6 +606,12 @@ function MealPage() {
     return false;
   }, []);
 
+  /**
+   * 카메라 실행 및 결과 이미지 후처리
+   * @param onSelected 최종 정리된 이미지를 상태로 반영하는 콜백
+   * @param onRejected 이미지 형식 오류 등으로 선택을 취소할 때 실행할 콜백
+   * @returns 카메라 실행과 후처리까지 포함한 Promise
+   */
   const pickImageFromCamera = useCallback(
     async (
       onSelected: (image: PendingMealImage) => void,
@@ -395,7 +633,7 @@ function MealPage() {
         }
 
         const asset = response.assets?.[0];
-        if (!asset?.uri) {
+        if (!asset) {
           Alert.alert('사진 촬영', '촬영한 이미지 정보를 읽을 수 없습니다.');
           return;
         }
@@ -409,16 +647,24 @@ function MealPage() {
           return;
         }
 
-        onSelected({
-          uri: asset.uri,
-          type: asset.type,
-          fileName: asset.fileName,
+        finalizePickedImage(asset, onSelected, onRejected).catch((error) => {
+          console.error(
+            '[MealPage] 카메라 이미지 최종 업로드를 실패했어요. ',
+            error
+          );
         });
       });
     },
-    [requestCameraPermission]
+    [finalizePickedImage, requestCameraPermission]
   );
 
+  /**
+   * 사진 입력 소스 선택을 위한 액션시트 열기
+   *
+   * @param onSelected 최종 정리된 이미지를 상태로 반영하는 콜백
+   * @param onRejected 이미지 형식 오류 등으로 선택을 취소할 때 실행할 콜백
+   * @returns 사용자의 입력 소스 선택에 따라 카메라 또는 앨범 흐름을 여는 함수
+   */
   const openImageSourcePicker = useCallback(
     (
       onSelected: (image: PendingMealImage) => void,
