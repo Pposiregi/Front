@@ -1,5 +1,23 @@
 import type { UploadImagePayload } from 'types/upload';
 
+// 서버 PUT 전에 MIME이 비어 있으면 경로 확장자로 Content-Type을 맞춘다.
+const inferMimeTypeFromPath = (path?: string) => {
+  const normalizedPath = path?.toLowerCase() ?? '';
+
+  if (normalizedPath.endsWith('.png')) {
+    return 'image/png';
+  }
+
+  if (
+    normalizedPath.endsWith('.jpg') ||
+    normalizedPath.endsWith('.jpeg')
+  ) {
+    return 'image/jpeg';
+  }
+
+  return undefined;
+};
+
 export const uploadMealImage = async (
   uploadUrl: string,
   payload: UploadImagePayload
@@ -7,7 +25,8 @@ export const uploadMealImage = async (
   if (!payload.uri) {
     throw new Error('이미지 URI가 없습니다.');
   }
-  const mime = payload.mimeType ?? 'image/jpeg';
+  const mime =
+    payload.mimeType ?? inferMimeTypeFromPath(payload.fileName ?? payload.uri) ?? 'image/jpeg';
   if (__DEV__) {
     console.log('>>> uploadMealImage URI 업로드 준비', {
       uploadUrl,

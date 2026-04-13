@@ -87,6 +87,8 @@ const isUnsupportedImageAsset = (asset: {
   const mimeType = asset.type?.toLowerCase() ?? '';
   const fileName = asset.fileName?.toLowerCase() ?? '';
   const hasFileName = fileName.length > 0;
+
+  // TODO: 나중에 공통 유틸에서 검사할 예정
   const isSupportedByMime =
     mimeType === 'image/jpeg' ||
     mimeType === 'image/jpg' ||
@@ -101,6 +103,41 @@ const isUnsupportedImageAsset = (asset: {
   }
 
   return !isSupportedByMime;
+};
+
+const inferMimeTypeFromPath = (path?: string) => {
+  const normalizedPath = path?.toLowerCase() ?? '';
+
+  if (normalizedPath.endsWith('.png')) {
+    return 'image/png';
+  }
+
+  if (normalizedPath.endsWith('.jpg') || normalizedPath.endsWith('.jpeg')) {
+    return 'image/jpeg';
+  }
+
+  return undefined;
+};
+
+// picker가 MIME을 비워서 주는 경우를 대비해 파일명/URI 확장자로 업로드 타입을 보정한다.
+const normalizePickedImageMimeType = (asset: {
+  type?: string;
+  fileName?: string;
+  uri?: string;
+}) => {
+  const mimeType = asset.type?.toLowerCase();
+
+  if (mimeType === 'image/png') {
+    return mimeType;
+  }
+
+  if (mimeType === 'image/jpg' || mimeType === 'image/jpeg') {
+    return 'image/jpeg';
+  }
+
+  return (
+    inferMimeTypeFromPath(asset.fileName) ?? inferMimeTypeFromPath(asset.uri)
+  );
 };
 
 // 2026.04.13 KKR] 이미지 리사이즈 & 압축 ---- START
@@ -255,6 +292,11 @@ const compressPickedImage = async (asset: Asset) => {
 
   if (!compressedImage) {
     throw new Error('이미지 압축 결과를 생성하지 못했습니다.');
+  }
+
+  // 최종 단계까지 줄여도 상한을 넘기면 업로드 자체를 막아 목표 용량을 강제한다.
+  if (compressedImage.size > MAX_IMAGE_BYTES) {
+    throw new Error('이미지를 800KB 이하로 압축하지 못했습니다.');
   }
 
   if (__DEV__) {
@@ -489,15 +531,21 @@ function MealPage() {
         const metadata = await resolvePickedAssetMetadata(asset);
         const normalizedImage = shouldCompressPickedAsset(metadata)
           ? await compressPickedImage(asset)
-          : buildPendingMealImage(asset.uri, asset.type, asset.fileName);
+          : buildPendingMealImage(
+              asset.uri,
+              normalizePickedImageMimeType(asset),
+              asset.fileName
+            );
 
         onSelected(normalizedImage);
       } catch (error) {
         console.error('[MealPage] Failed to prepare meal image', error);
-        Alert.alert(
-          '이미지 처리',
-          '사진을 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.'
-        );
+        const message =
+          error instanceof Error &&
+          error.message === '이미지를 800KB 이하로 압축하지 못했습니다.'
+            ? '선택한 사진이 너무 커서 업로드할 수 없습니다. 다른 사진을 선택해주세요.'
+            : '사진을 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.';
+        Alert.alert('이미지 처리', message);
       }
     },
     []
@@ -836,6 +884,7 @@ function MealPage() {
         await uploadMealImage(creationResult.uploadUrl, {
           uri: mealImage.uri,
           mimeType: mealImage.type,
+          fileName: mealImage.fileName,
         });
       } else {
         console.log('>>> 이미지 업로드 생략', {
@@ -909,6 +958,7 @@ function MealPage() {
         await uploadMealImage(updateResult.uploadUrl, {
           uri: editingMealImage.uri,
           mimeType: editingMealImage.type,
+          fileName: editingMealImage.fileName,
         });
       }
 
