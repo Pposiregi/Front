@@ -239,18 +239,15 @@ export const useMainPetMotion = ({
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const isHighPbf = effectivePbf >= 25;
-    const legSpreadFactor = isHighPbf ? 0.84 : 1;
-    // 고PBF 구간에서 팔 체형 변화가 덜 보이는 문제를 보정한다.
-    const runArmFatBoost = isHighPbf ? 1.25 : 1;
+    const runArmFatBoost = isHighPbf ? 1.15 : 1;
     const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 1.35;
-    const runTorsoScaleY = 1 + (torsoMorph.scaleY - 1) * 1.2;
-    const armFatScaleX = 1 + torsoMorph.t * 0.18 * runArmFatBoost;
-    const armFatScaleY = 1 + torsoMorph.t * 0.13 * runArmFatBoost;
-    const legFatScaleX = 1 + torsoMorph.t * 0.05;
-    const legFatScaleY = 1 + torsoMorph.t * 0.035;
-    const faceFatScaleX = 1 + torsoMorph.t * 0.12;
-    const faceFatScaleY = 1 + torsoMorph.t * 0.1;
-    const runLegMorphOffsetY = petRenderSize * 0.0025 * torsoMorph.t;
+    const runTorsoScaleY = 1 + (torsoMorph.scaleY - 1) * 1.14;
+    const armFatScaleX = 1 + torsoMorph.t * 0.14 * runArmFatBoost;
+    const armFatScaleY = 1 + torsoMorph.t * 0.1 * runArmFatBoost;
+    const faceFatScaleX = 1 + torsoMorph.t * 0.08;
+    const faceFatScaleY = 1 + torsoMorph.t * 0.07;
+    const hiddenLegScale = 0.01;
+    const hiddenLegOffsetY = petRenderSize * 0.24;
 
     // readonly tuple -> mutable array 변환 후 interpolate에 전달한다.
     const runPhase = toMutableRange(PET_RUN_MOTION.phase);
@@ -346,18 +343,16 @@ export const useMainPetMotion = ({
         scaleY: armFatScaleY,
       },
       leg_left: {
-        translateX: Animated.multiply(limbRightX, legSpreadFactor),
-        translateY: runLegMorphOffsetY,
+        translateY: hiddenLegOffsetY,
         rotateDeg: legLeftRotate,
-        scaleX: legFatScaleX,
-        scaleY: legFatScaleY,
+        scaleX: hiddenLegScale,
+        scaleY: hiddenLegScale,
       },
       leg_right: {
-        translateX: Animated.multiply(limbLeftX, legSpreadFactor),
-        translateY: runLegMorphOffsetY,
+        translateY: hiddenLegOffsetY,
         rotateDeg: legRightRotate,
-        scaleX: legFatScaleX,
-        scaleY: legFatScaleY,
+        scaleX: hiddenLegScale,
+        scaleY: hiddenLegScale,
       },
       tail: {
         translateX: tailX,

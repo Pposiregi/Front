@@ -112,6 +112,32 @@ const wait = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
 /**
+ * 느리거나 멈춘 비동기 초기화가 앱 첫 진입을 영구 차단하지 않도록 제한 시간을 둔다.
+ */
+const withTimeout = async <T,>(
+  label: string,
+  task: Promise<T>,
+  ms: number
+): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      task,
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${ms}ms`));
+        }, ms);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+};
+
+/**
  * FCM 권한 상태를 라벨로 변환한다.
  */
 const getPermissionLabel = (status: number) => {
@@ -217,11 +243,29 @@ function AppInner() {
    * - refreshToken 갱신 및 유저 상태 초기화
    */
   useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const fallbackTimer = setTimeout(() => {
+      console.warn('[Startup] 초기화 제한 시간 초과, 앱 셸을 먼저 표시합니다.');
+      SplashScreen.hide();
+      setLoading(false);
+    }, 7000);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [loading]);
+
+  useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         try {
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
-          const deviceUuid = await getDeviceUuid();
+          const deviceUuid = await withTimeout(
+            'getDeviceUuid',
+            getDeviceUuid(),
+            2000
+          );
 
           if (__DEV__) {
             console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
@@ -235,7 +279,11 @@ function AppInner() {
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
         if (refreshToken) {
           try {
-            const result = await refreshAccessToken();
+            const result = await withTimeout(
+              'refreshAccessToken',
+              refreshAccessToken(),
+              5000
+            );
             if (result?.serverAccessToken) {
               await EncryptedStorage.setItem(
                 'serverAccessToken',
@@ -261,7 +309,11 @@ function AppInner() {
           }
         }
         try {
-          const petId = await AsyncStorage.getItem('petId');
+          const petId = await withTimeout(
+            'getPetId',
+            AsyncStorage.getItem('petId'),
+            1000
+          );
           if (petId) {
             dispatch(userSlice.actions.setPet(Number(petId)));
           }

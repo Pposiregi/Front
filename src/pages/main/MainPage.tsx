@@ -28,6 +28,7 @@ import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
 import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
+import runLegSwirl from '@assets/pet/etc/swirl.png';
 import { SCREEN_WIDTH } from '@styles/dimensions';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
@@ -51,6 +52,7 @@ const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
 const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
+const RUN_SWIRL_LOOP_MS = 420;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
@@ -97,7 +99,11 @@ import {
   stopRunningNotification,
   updateRunningNotification,
 } from '@hooks/useRunningService';
-import { getAndroidApiLevel, STEP_SYNC_MESSAGES, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
+import {
+  getAndroidApiLevel,
+  STEP_SYNC_MESSAGES,
+  STEP_SYNC_OS_POLICY,
+} from '@utils/stepSyncPolicy';
 import type { PetType } from 'types/profile';
 import { useMainPetMotion } from './useMainPetMotion';
 import {
@@ -198,7 +204,9 @@ export const MainPage = () => {
         try {
           await setPetId(data.pet.petId);
           // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
-          const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
+          const storedPetType = await AsyncStorage.getItem(
+            PET_TYPE_STORAGE_KEY
+          );
           if (storedPetType === 'DOG' || storedPetType === 'CAT') {
             dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
           }
@@ -225,6 +233,7 @@ export const MainPage = () => {
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
   const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
   const runBgProgress = useRef(new Animated.Value(0)).current;
+  const runSwirlProgress = useRef(new Animated.Value(0)).current;
 
   const mapRef = useRef<MapView | null>(null);
   const runningStartMsRef = useRef<number | null>(null);
@@ -321,6 +330,29 @@ export const MainPage = () => {
       runBgProgress.stopAnimation();
     };
   }, [isTracking, runBgProgress]);
+
+  useEffect(() => {
+    if (!isTracking) {
+      runSwirlProgress.stopAnimation();
+      runSwirlProgress.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.timing(runSwirlProgress, {
+        toValue: 1,
+        duration: RUN_SWIRL_LOOP_MS,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+      runSwirlProgress.stopAnimation();
+    };
+  }, [isTracking, runSwirlProgress]);
 
   useEffect(() => {
     /**
@@ -754,7 +786,13 @@ export const MainPage = () => {
       Alert.alert(
         '걸음 수 연동 불가',
         `${healthError}\n\n현재 단말에서는 걸음수 자동 동기화를 지원하지 않습니다.`,
-        [{ text: '확인', style: 'default', onPress: () => BackHandler.exitApp() }]
+        [
+          {
+            text: '확인',
+            style: 'default',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]
       );
       return;
     }
@@ -784,6 +822,14 @@ export const MainPage = () => {
   const runBgTranslateX = runBgProgress.interpolate({
     inputRange: [0, 1],
     outputRange: [0, RUN_BG_TILE_WIDTH],
+  });
+  const runLegSwirlRotate = runSwirlProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  const runLegSwirlScale = runSwirlProgress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.92, 1.08, 0.92],
   });
   return (
     <View style={styles.container}>
@@ -871,22 +917,46 @@ export const MainPage = () => {
                 </Text>
               </View>
             </View>
-            <PetRenderer
-              size={runPetRenderSize}
-              templateId={runPetTemplateId}
-              partTransforms={runPartTransforms}
+            <View
               style={[
-                styles.running_pet,
-                {
-                  transform: [
-                    {
-                      translateY:
-                        runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
-                    },
-                  ],
-                },
+                styles.runningPetLayer,
+                { width: runPetRenderSize, height: runPetRenderSize },
               ]}
-            />
+            >
+              <PetRenderer
+                size={runPetRenderSize}
+                templateId={runPetTemplateId}
+                partTransforms={runPartTransforms}
+                style={[
+                  styles.running_pet,
+                  {
+                    transform: [
+                      {
+                        translateY:
+                          runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                      },
+                    ],
+                  },
+                ]}
+              />
+              <Animated.Image
+                source={runLegSwirl}
+                style={[
+                  styles.runningLegSwirl,
+                  {
+                    width: runPetRenderSize * 0.42,
+                    height: runPetRenderSize * 0.42,
+                    right: runPetRenderSize * 0.22,
+                    bottom: -runPetRenderSize * 0.11,
+                    transform: [
+                      { rotate: runLegSwirlRotate },
+                      { scale: runLegSwirlScale },
+                    ],
+                  },
+                ]}
+                resizeMode='contain'
+              />
+            </View>
           </View>
         </View>
       ) : (

@@ -52,20 +52,20 @@ const bagiccatV1MainPartAssets: Record<string, ImageSourcePropType> = {
 const bagiccatV1RunPartAssets: Record<string, ImageSourcePropType> = {
   'cat_v1_00_tail_none.png': require('./bagic_cat/run/cat_v1_00_tail_none.png'),
   'cat_v1_02_arm_left.png': require('./bagic_cat/run/cat_v1_02_arm_left.png'),
-  'cat_v1_02_leg_left.png': require('./bagic_cat/run/cat_v1_02_leg_left.png'),
+  'cat_v1_02_arm_right.png': require('./bagic_cat/run/cat_v1_02_arm_right.png'),
   'cat_v1_03_torso_none.png': require('./bagic_cat/run/cat_v1_03_torso_none.png'),
-  'cat_v1_05_arm_right.png': require('./bagic_cat/run/cat_v1_05_arm_right.png'),
+  'cat_v1_04_leg_left.png': require('./bagic_cat/run/cat_v1_04_leg_left.png'),
   'cat_v1_05_leg_right.png': require('./bagic_cat/run/cat_v1_05_leg_right.png'),
   'cat_v1_07_face_none.png': require('./bagic_cat/run/cat_v1_07_face_none.png'),
 };
 
 const browncatV1RunPartAssets: Record<string, ImageSourcePropType> = {
   'browncat_v1_00_tail_none.png': require('./brown_cat/run/browncat_v1_00_tail_none.png'),
-  'browncat_v1_01_leg_left.png': require('./brown_cat/run/browncat_v1_01_leg_left.png'),
+  'browncat_v1_03_leg_left.png': require('./brown_cat/run/browncat_v1_03_leg_left.png'),
   'browncat_v1_02_torso_none.png': require('./brown_cat/run/browncat_v1_02_torso_none.png'),
-  'browncat_v1_03_leg_right.png': require('./brown_cat/run/browncat_v1_03_leg_right.png'),
+  'browncat_v1_05_leg_right.png': require('./brown_cat/run/browncat_v1_05_leg_right.png'),
   'browncat_v1_01_arm_left.png': require('./brown_cat/run/browncat_v1_01_arm_left.png'),
-  'browncat_v1_05_arm_right.png': require('./brown_cat/run/browncat_v1_05_arm_right.png'),
+  'browncat_v1_01_arm_right.png': require('./brown_cat/run/browncat_v1_01_arm_right.png'),
   'browncat_v1_06_neckRuff_none.png': require('./brown_cat/run/browncat_v1_06_neckRuff_none.png'),
   'browncat_v1_07_face_none.png': require('./brown_cat/run/browncat_v1_07_face_none.png'),
   'browncat_v1_08_eye_left.png': require('./brown_cat/run/browncat_v1_08_eye_left.png'),

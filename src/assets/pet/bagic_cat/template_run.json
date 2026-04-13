@@ -24,12 +24,6 @@
       "anchor": "tail"
     },
     {
-      "key": "leg_left",
-      "file": "cat_v1_02_leg_left.png",
-      "zIndex": 2,
-      "anchor": "hip_left"
-    },
-    {
       "key": "arm_left",
       "file": "cat_v1_02_arm_left.png",
       "zIndex": 2,
@@ -43,15 +37,9 @@
     },
     {
       "key": "arm_right",
-      "file": "cat_v1_05_arm_right.png",
+      "file": "cat_v1_02_arm_right.png",
       "zIndex": 5,
       "anchor": "shoulder_right"
-    },
-    {
-      "key": "leg_right",
-      "file": "cat_v1_05_leg_right.png",
-      "zIndex": 5,
-      "anchor": "hip_right"
     },
     {
       "key": "face",

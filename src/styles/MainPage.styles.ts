@@ -240,10 +240,21 @@ export default StyleSheet.create({
   },
   running_pet: {
     position: 'absolute',
-    bottom: PET_BOTTOM_FROM_START,
+    bottom: 0,
     alignSelf: 'center',
     resizeMode: 'contain',
     zIndex: 2,
+  },
+  runningPetLayer: {
+    position: 'absolute',
+    bottom: PET_BOTTOM_FROM_START,
+    alignSelf: 'center',
+    zIndex: 2,
+  },
+  runningLegSwirl: {
+    position: 'absolute',
+    zIndex: 10,
+    opacity: 0.88,
   },
   countdownOverlay: {
     position: 'absolute',

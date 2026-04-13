@@ -26,8 +26,8 @@
     },
     {
       "key": "leg_left",
-      "file": "browncat_v1_01_leg_left.png",
-      "zIndex": 1,
+      "file": "browncat_v1_03_leg_left.png",
+      "zIndex": 3,
       "anchor": "hip_left"
     },
     {
@@ -38,8 +38,8 @@
     },
     {
       "key": "leg_right",
-      "file": "browncat_v1_03_leg_right.png",
-      "zIndex": 3,
+      "file": "browncat_v1_05_leg_right.png",
+      "zIndex": 5,
       "anchor": "hip_right"
     },
     {
@@ -50,8 +50,8 @@
     },
     {
       "key": "arm_right",
-      "file": "browncat_v1_05_arm_right.png",
-      "zIndex": 5,
+      "file": "browncat_v1_01_arm_right.png",
+      "zIndex": 1,
       "anchor": "shoulder_right"
     },
     {
