@@ -1,6 +1,11 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
+    // IDE가 상위 RN tsconfig를 놓치는 경우를 대비한 중복 명시.
+    // 런타임 기능과 무관, 에디터의 JSX/React import 인식 안정화 목적
+    "jsx": "react-native",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     "paths": {
       "@components/*": ["components/*"],

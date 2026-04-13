@@ -14,6 +14,7 @@
     "start-here": "npx react-native start --reset-cache"
   },
   "dependencies": {
+    "@bam.tech/react-native-image-resizer": "^3.0.11",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/checkbox": "^0.5.20",
@@ -28,7 +29,7 @@
     "@react-navigation/native": "^7.1.17",
     "@react-navigation/native-stack": "^7.3.26",
     "@reduxjs/toolkit": "^2.9.0",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "buffer": "^6.0.3",
     "react": "19.1.0",
     "react-native": "0.81.1",

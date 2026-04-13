@@ -155,7 +155,6 @@ export const MainPage = () => {
   const [fatVerIndex, setFatVerIndex] = useState(-1);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
-  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
@@ -170,7 +169,8 @@ export const MainPage = () => {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
         if (!data.pet) {
-          setShowPetOnboarding(true);
+          await AsyncStorage.removeItem('petId');
+          dispatch(userSlice.actions.setPet(null));
           return;
         }
         dispatch(userSlice.actions.setPet(data.pet.petId));
