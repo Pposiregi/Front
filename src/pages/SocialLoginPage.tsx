@@ -134,6 +134,15 @@ const SocialLoginPage = () => {
       } else {
         dispatch(userSlice.actions.setSignUpInProgress(false));
         console.log('회원가입이 완료된 사용자');
+        // 로그아웃 후 재로그인 시 Redux petId가 초기화되므로 AsyncStorage에서 복원
+        try {
+          const storedPetId = await AsyncStorage.getItem('petId');
+          if (storedPetId) {
+            dispatch(userSlice.actions.setPet(Number(storedPetId)));
+          }
+        } catch (err) {
+          console.warn('petId 복원 실패', err);
+        }
       }
     } catch (err: any) {
       console.error('>>> firstLoginCheck error', {

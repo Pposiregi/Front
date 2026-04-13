@@ -8,8 +8,10 @@ import CheckBox from '@react-native-community/checkbox';
 type PermissionProps = {
   onNext: (data: {
     permissions: {
+      serviceAgree: boolean;
       locationAgree: boolean;
       privacyAgree: boolean;
+      healthAgree: boolean;
       pushAgree: boolean;
     };
   }) => void;
@@ -21,8 +23,10 @@ type PermissionProps = {
  */
 const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
   const [agreeAll, setAgreeAll] = useState(false);
+  const [serviceAgree, setServiceAgree] = useState(false);
   const [locationAgree, setLocationAgree] = useState(false);
   const [privacyAgree, setPrivacyAgree] = useState(false);
+  const [healthAgree, setHealthAgree] = useState(false);
   const [pushAgree, setPushAgree] = useState(false);
 
   /**
@@ -30,8 +34,10 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
    */
   const handleAgreeAll = (newValue: boolean) => {
     setAgreeAll(newValue);
+    setServiceAgree(newValue);
     setLocationAgree(newValue);
     setPrivacyAgree(newValue);
+    setHealthAgree(newValue);
     setPushAgree(newValue);
   };
 
@@ -51,12 +57,10 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
       {/* 개별 동의 항목 */}
       <Pressable
         style={styles.checkboxContainer}
-        onPress={() => setLocationAgree(!locationAgree)}
+        onPress={() => setServiceAgree(!serviceAgree)}
       >
-        <CheckBox value={locationAgree} onValueChange={setLocationAgree} />
-        <Text style={styles.checkboxLabel}>
-          위치 기반 서비스 약관 동의(필수)
-        </Text>
+        <CheckBox value={serviceAgree} onValueChange={setServiceAgree} />
+        <Text style={styles.checkboxLabel}>서비스 이용약관 동의(필수)</Text>
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
@@ -67,23 +71,43 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
       </Pressable>
       <Pressable
         style={styles.checkboxContainer}
+        onPress={() => setLocationAgree(!locationAgree)}
+      >
+        <CheckBox value={locationAgree} onValueChange={setLocationAgree} />
+        <Text style={styles.checkboxLabel}>
+          위치 기반 서비스 약관 동의(필수)
+        </Text>
+      </Pressable>
+      <Pressable
+        style={styles.checkboxContainer}
+        onPress={() => setHealthAgree(!healthAgree)}
+      >
+        <CheckBox value={healthAgree} onValueChange={setHealthAgree} />
+        <Text style={styles.checkboxLabel}>
+          건강정보(민감정보) 수집·이용 동의(필수)
+        </Text>
+      </Pressable>
+      <Pressable
+        style={styles.checkboxContainer}
         onPress={() => setPushAgree(!pushAgree)}
       >
         <CheckBox value={pushAgree} onValueChange={setPushAgree} />
-        <Text style={styles.checkboxLabel}>푸시 알림 수신 동의(선택)</Text>
+        <Text style={styles.checkboxLabel}>푸시 알림 수신(마케팅) 동의(선택)</Text>
       </Pressable>
       <View style={{ alignItems: 'center' }}>
         <Pressable
           style={[
             styles.startButton,
-            !(locationAgree && privacyAgree) && { backgroundColor: '#ccc' },
+            !(serviceAgree && locationAgree && privacyAgree && healthAgree) && { backgroundColor: '#ccc' },
           ]}
-          disabled={!(locationAgree && privacyAgree)}
+          disabled={!(serviceAgree && locationAgree && privacyAgree && healthAgree)}
           onPress={() =>
             onNext({
               permissions: {
+                serviceAgree,
                 locationAgree,
                 privacyAgree,
+                healthAgree,
                 pushAgree,
               },
             })

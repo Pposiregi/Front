@@ -6,6 +6,7 @@ import { useAppDispatch } from '../../store';
 import userSlice from '../../slices/user';
 import OptionalInfoPage from './OptionalInfoPage';
 import PermissionPage from './PermissionPage';
+import AppPermissionGuidePage from './AppPermissionGuidePage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
 import { authRequest } from '../../types/auth';
@@ -44,8 +45,10 @@ const IntroPage = () => {
   const [formData, setFormData] = useState({
     // PermissionPage 정보
     permissions: {
+      serviceAgree: false,
       locationAgree: false,
       privacyAgree: false,
+      healthAgree: false,
       pushAgree: false,
     },
     // UserInfoPage 정보
@@ -67,7 +70,7 @@ const IntroPage = () => {
 
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
-    const totalPages = 3;
+    const totalPages = 4;
     if (pagerRef.current && currentPage < totalPages - 1) {
       pagerRef.current.setPage(currentPage + 1);
       setCurrentPage(currentPage + 1);
@@ -127,7 +130,7 @@ const IntroPage = () => {
       </View>
 
       <View style={styles.dotContainer}>
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <View
             key={i}
             style={[styles.dot, currentPage === i && styles.activeDot]}
@@ -142,8 +145,13 @@ const IntroPage = () => {
         ref={pagerRef}
       >
         <PermissionPage key='1' onNext={handleNext} />
-        <UserInfoPage key='2' onNext={handleNext} />
-        <OptionalInfoPage key='3' onFinish={handleFinish} />
+        <AppPermissionGuidePage
+          key='2'
+          onNext={goToNextPage}
+          pushAgree={formData.permissions.pushAgree}
+        />
+        <UserInfoPage key='3' onNext={handleNext} />
+        <OptionalInfoPage key='4' onFinish={handleFinish} />
       </PagerView>
     </View>
   );
