@@ -87,14 +87,20 @@ const isUnsupportedImageAsset = (asset: {
   const mimeType = asset.type?.toLowerCase() ?? '';
   const fileName = asset.fileName?.toLowerCase() ?? '';
   const hasFileName = fileName.length > 0;
-  const isJpegByMime = mimeType === 'image/jpeg' || mimeType === 'image/jpg';
-  const isJpegByExt = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+  const isSupportedByMime =
+    mimeType === 'image/jpeg' ||
+    mimeType === 'image/jpg' ||
+    mimeType === 'image/png';
+  const isSupportedByExt =
+    fileName.endsWith('.jpg') ||
+    fileName.endsWith('.jpeg') ||
+    fileName.endsWith('.png');
 
   if (hasFileName) {
-    return !isJpegByExt;
+    return !isSupportedByExt;
   }
 
-  return !isJpegByMime;
+  return !isSupportedByMime;
 };
 
 // 2026.04.13 KKR] 이미지 리사이즈 & 압축 ---- START
@@ -474,7 +480,7 @@ function MealPage() {
         onRejected?.();
         Alert.alert(
           '이미지 형식 오류',
-          '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
+          '현재 JPG/JPEG/PNG 파일만 업로드할 수 있어요.'
         );
         return;
       }
@@ -526,7 +532,7 @@ function MealPage() {
               onRejected?.();
               Alert.alert(
                 '이미지 형식 오류',
-                '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
+                '현재 JPG/JPEG/PNG 파일만 업로드할 수 있어요.'
               );
               return;
             }
@@ -642,7 +648,7 @@ function MealPage() {
           onRejected?.();
           Alert.alert(
             '이미지 형식 오류',
-            '현재 JPG/JPEG 파일만 업로드할 수 있어요.'
+            '현재 JPG/JPEG/PNG 파일만 업로드할 수 있어요.'
           );
           return;
         }
