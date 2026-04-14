@@ -870,19 +870,22 @@ function MealPage() {
     setIsSavingMeal(true);
 
     try {
+      const existImage = Boolean(mealImage?.uri);
+
       // 1. 식단 생성 API 호출
       const creationResult = await createMeal({
         day: selectedDateKey,
         title: trimmedTitle,
         kcal: kcalValue,
         sequence: getNextSequence(selectedMeals),
+        existImage,
       });
 
       // 헤더정보 추출해야함
       console.log('>>> Created 결과: ' + JSON.stringify(creationResult));
 
       // 2. 이미지가 있을 경우 업로드 처리
-      if (mealImage?.uri && creationResult.uploadUrl) {
+      if (existImage && mealImage?.uri && creationResult.uploadUrl) {
         console.log('>>> 이미지 업로드 시작');
         await uploadMealImage(creationResult.uploadUrl, {
           uri: mealImage.uri,
