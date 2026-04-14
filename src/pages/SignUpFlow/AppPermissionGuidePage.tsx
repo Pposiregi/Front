@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
   Pressable,
-  StyleSheet,
-  Dimensions,
   PermissionsAndroid,
   Platform,
+  Alert,
 } from 'react-native';
+import { styles } from '@styles/AppPermissionGuidePage.styles';
 import { initialize, requestPermission } from 'react-native-health-connect';
 import {
   HEALTH_STEP_READ_PERMISSIONS,
   HEALTH_STEP_WRITE_PERMISSIONS,
-  HEALTH_BACKGROUND_PERMISSION,
   ensureHealthConnectInstalledOrPrompt,
   getCurrentGrantedPermissions,
+  hasAllPermissions,
 } from '@utils/healthConnect';
 import { getAndroidApiLevel } from '@utils/stepSyncPolicy';
+import { Colors } from '@styles/theme';
 
 type Props = {
   onNext: () => void;
@@ -46,7 +47,7 @@ const OPTIONAL_ITEMS: PermissionItem[] = [
   },
 ];
 
-const requestHealthConnectPermissions = async () => {
+const requestHealthConnectPermissions = async (): Promise<boolean> => {
   try {
     const apiLevel = getAndroidApiLevel() ?? 0;
     if (__DEV__) console.log('[HC][Permission] apiLevel:', apiLevel);
@@ -56,17 +57,44 @@ const requestHealthConnectPermissions = async () => {
 
     const isInitialized = await initialize();
     if (__DEV__) console.log('[HC][Permission] initialize():', isInitialized);
-    if (!isInitialized) return;
+    if (!isInitialized) return false;
 
-    if (__DEV__) console.log('[HC][Permission] requestPermission 호출');
-    await requestPermission([
+    // 이미 허용된 권한 먼저 확인 (useHealthSteps 패턴)
+    const alreadyGranted = await getCurrentGrantedPermissions();
+    if (__DEV__)
+      console.log('[HC][Permission] 기존 허용 권한 수:', alreadyGranted.length);
+
+    const foregroundPermissions = [
       ...HEALTH_STEP_READ_PERMISSIONS,
       ...HEALTH_STEP_WRITE_PERMISSIONS,
-      HEALTH_BACKGROUND_PERMISSION,
-    ]);
-    if (__DEV__) console.log('[HC][Permission] requestPermission 완료');
+    ];
+
+    if (hasAllPermissions(alreadyGranted, foregroundPermissions)) {
+      if (__DEV__) console.log('[HC][Permission] 이미 권한 보유 → 요청 스킵');
+      return true;
+    }
+
+    // foreground 권한만 요청 (background는 별도 — useHealthSteps 방식)
+    if (__DEV__)
+      console.log('[HC][Permission] requestPermission 호출 (foreground only)');
+    const granted = await requestPermission(foregroundPermissions);
+    if (__DEV__) {
+      console.log('[HC][Permission] requestPermission 완료');
+      console.log('[HC][Permission] 허용된 권한 목록 ─────────────────');
+      if (granted.length === 0) {
+        console.log('[HC][Permission] 허용된 권한 없음 (사용자가 거부)');
+      } else {
+        granted.forEach((p) =>
+          console.log(`[HC][Permission]   ${p.accessType}:${p.recordType}`)
+        );
+      }
+      console.log('─────────────────────────────────────────────────');
+    }
+
+    return hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS);
   } catch (e) {
     if (__DEV__) console.error('[HC][Permission] 오류:', e);
+    return false;
   }
 };
 
@@ -123,6 +151,7 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
   // 실제 권한 부여 여부 (클릭 여부가 아닌 실제 결과)
   const [requiredGranted, setRequiredGranted] = useState(false);
   const [optionalAttempted, setOptionalAttempted] = useState(false);
+  const deniedCountRef = useRef(0);
 
   const sdkVersion = Number(Platform.Version);
 
@@ -133,18 +162,26 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
 
   const handleAllowRequired = async () => {
     setRequestingRequired(true);
-    await requestHealthConnectPermissions();
-    // 요청 후 실제로 READ_STEPS 권한이 부여됐는지 확인
-    try {
-      const granted = await getCurrentGrantedPermissions();
-      const hasSteps = granted.some(
-        (p) => p.recordType === 'Steps' && p.accessType === 'read'
-      );
-      setRequiredGranted(hasSteps);
-    } catch {
-      setRequiredGranted(false);
-    }
+    const hasSteps = await requestHealthConnectPermissions();
+    setRequiredGranted(hasSteps);
     setRequestingRequired(false);
+
+    if (!hasSteps) {
+      deniedCountRef.current += 1;
+      if (deniedCountRef.current === 1) {
+        Alert.alert(
+          '권한이 거부되었습니다',
+          '걸음 수 동기화를 위해 Health Connect 권한이 필요합니다. 다시 시도해주세요.',
+          [{ text: '확인' }]
+        );
+      } else {
+        Alert.alert(
+          '권한을 직접 허용해주세요',
+          'Health Connect 앱 → 앱 권한 → FitPet에서 걸음 수 권한을 직접 허용한 뒤 버튼을 다시 눌러주세요.',
+          [{ text: '확인' }]
+        );
+      }
+    }
   };
 
   const canRequestOptional = pushAgree && sdkVersion >= 33;
@@ -161,7 +198,9 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
     <View style={styles.container}>
       <Text style={styles.title}>앱 사용을 위한 권한 안내</Text>
       <Text style={styles.subtitle}>
-        허용하지 않아도 가입은 가능하지만{'\n'}일부 기능이 제한될 수 있어요.
+        <Text style={{ color: 'red' }}>필수</Text> 권한은 반드시 허용해 주세요.
+        {'\n'} <Text style={{ color: Colors.info }}>선택</Text> 권한은 허용하지
+        않아도 가입할 수 있어요.
       </Text>
 
       <View style={styles.list}>
@@ -178,35 +217,54 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
 
       <View style={styles.buttonContainer}>
         <Pressable
-          style={[styles.requiredButton, requiredGranted && styles.attemptedButton]}
+          style={[
+            styles.requiredButton,
+            requiredGranted && styles.attemptedButton,
+          ]}
           onPress={handleAllowRequired}
           disabled={requestingRequired || requestingOptional}
         >
-          <Text style={styles.requiredButtonText}>
-            {requestingRequired
-              ? '처리 중...'
-              : requiredGranted
-              ? '✓ 필수 권한 허용됨'
-              : '필수 권한 허용하기'}
-          </Text>
+          <View style={styles.buttonInner}>
+            {requiredGranted && !requestingRequired && (
+              <Text style={styles.checkIcon}>✔</Text>
+            )}
+            <Text style={styles.requiredButtonText}>
+              {requestingRequired
+                ? '처리 중...'
+                : requiredGranted
+                ? '필수 권한 허용됨'
+                : '필수 권한 허용하기'}
+            </Text>
+          </View>
         </Pressable>
         <Pressable
-          style={[styles.optionalButton, optionalAttempted && styles.attemptedOutlineButton]}
+          style={[
+            styles.optionalButton,
+            optionalAttempted && styles.attemptedOutlineButton,
+          ]}
           onPress={handleAllowOptional}
           disabled={requestingRequired || requestingOptional}
         >
-          <Text style={styles.optionalButtonText}>
-            {!canRequestOptional
-              ? '해당 없음'
-              : requestingOptional
-              ? '처리 중...'
-              : optionalAttempted
-              ? '✓ 선택 권한 시도됨'
-              : '선택 권한 허용하기'}
-          </Text>
+          <View style={styles.buttonInner}>
+            {optionalAttempted && !requestingOptional && canRequestOptional && (
+              <Text style={styles.checkIconOptional}>✔</Text>
+            )}
+            <Text style={styles.optionalButtonText}>
+              {!canRequestOptional
+                ? '해당 없음'
+                : requestingOptional
+                ? '처리 중...'
+                : optionalAttempted
+                ? '선택 권한 허용됨'
+                : '선택 권한 허용하기'}
+            </Text>
+          </View>
         </Pressable>
         <Pressable
-          style={[styles.nextButton, !requiredGranted && styles.nextButtonDisabled]}
+          style={[
+            styles.nextButton,
+            !requiredGranted && styles.nextButtonDisabled,
+          ]}
           onPress={handleNext}
           disabled={!requiredGranted}
         >
@@ -224,15 +282,19 @@ type PermissionRowProps = {
 
 const PermissionRow: React.FC<PermissionRowProps> = ({ item, required }) => (
   <View style={styles.permissionItem}>
+    {required ? (
+      <View style={styles.requiredBadge}>
+        <Text style={styles.requiredBadgeText}>필수</Text>
+      </View>
+    ) : (
+      <View style={styles.optionalBadge}>
+        <Text style={styles.optionalBadgeText}>선택</Text>
+      </View>
+    )}
     <Text style={styles.permissionIcon}>{item.icon}</Text>
     <View style={styles.permissionText}>
       <View style={styles.permissionTitleRow}>
         <Text style={styles.permissionTitle}>{item.title}</Text>
-        {required && (
-          <View style={styles.requiredBadge}>
-            <Text style={styles.requiredBadgeText}>필수</Text>
-          </View>
-        )}
       </View>
       <Text style={styles.permissionDescription}>{item.description}</Text>
     </View>
@@ -240,133 +302,3 @@ const PermissionRow: React.FC<PermissionRowProps> = ({ item, required }) => (
 );
 
 export default AppPermissionGuidePage;
-
-const { height } = Dimensions.get('window');
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: height * 0.04,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    textAlign: 'center',
-    fontFamily: 'JUA',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    lineHeight: 22,
-    marginBottom: 20,
-    fontFamily: 'Roboto-VariableFont',
-  },
-  list: {
-    flex: 1,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#999',
-    marginBottom: 8,
-    marginTop: 4,
-    fontFamily: 'Roboto-VariableFont',
-  },
-  permissionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
-  permissionIcon: {
-    fontSize: 28,
-    marginRight: 14,
-  },
-  permissionText: {
-    flex: 1,
-  },
-  permissionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  permissionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    fontFamily: 'JUA',
-  },
-  requiredBadge: {
-    backgroundColor: '#FF6347',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  requiredBadgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontFamily: 'Roboto-VariableFont',
-  },
-  permissionDescription: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'Roboto-VariableFont',
-    lineHeight: 18,
-  },
-  buttonContainer: {
-    paddingTop: 12,
-    paddingBottom: 16,
-    gap: 8,
-  },
-  requiredButton: {
-    backgroundColor: '#FF6347',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  requiredButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'JUA',
-  },
-  optionalButton: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FF6347',
-  },
-  optionalButtonText: {
-    color: '#FF6347',
-    fontSize: 16,
-    fontFamily: 'JUA',
-  },
-  attemptedButton: {
-    backgroundColor: '#4CAF50',
-  },
-  attemptedOutlineButton: {
-    borderColor: '#4CAF50',
-  },
-  nextButton: {
-    backgroundColor: '#FF6347',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'JUA',
-  },
-});
