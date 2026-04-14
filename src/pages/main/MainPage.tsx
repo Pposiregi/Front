@@ -116,6 +116,7 @@ import {
   PET_TYPE_STORAGE_KEY,
 } from '@shared/config/petConfig';
 import { setPetId } from '@utils/petIdStorage';
+import { usePetExpression } from './usePetExpression';
 
 /**
  * 메인 화면 컴포넌트
@@ -452,12 +453,20 @@ export const MainPage = () => {
     mainPetTemplateId,
     petRenderSize: PET_RENDER_SIZE,
   });
+  const {
+    expressionOverlays: petExpressionOverlays,
+    petPanHandlers,
+    resetPetExpression,
+    showPetPressExpression,
+    showRunCompleteExpression,
+  } = usePetExpression(selectedPetType);
 
   /** 펫을 터치했을 때 HAPPY 상태 전환을 트리거한다. */
-  const onPetTouch = () => {
+  const onPetTouch = useCallback(() => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });
-  };
+    showPetPressExpression();
+  }, [changePetState, showPetPressExpression]);
 
   /**
    * 지도 카메라 이동
@@ -543,6 +552,7 @@ export const MainPage = () => {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
         await appendTodayRunSeconds(result.summary.durationMs / 1000);
+        showRunCompleteExpression();
       }
       setEndFailureCount(0);
     } catch (err: any) {
@@ -552,7 +562,7 @@ export const MainPage = () => {
         err?.message ?? '러닝 종료 중 문제가 발생했어요.'
       );
     }
-  }, [appendTodayRunSeconds, endSession]);
+  }, [appendTodayRunSeconds, endSession, showRunCompleteExpression]);
 
   const handleSetDevPreviewPbf = useCallback((value: number) => {
     setDevPreviewPbf(clampDevPbf(value));
@@ -584,8 +594,9 @@ export const MainPage = () => {
       return () => {
         // 화면을 벗어나면 테스트값을 버리고, 재진입 시 실제 사용자 체지방률로 복귀한다.
         setDevPreviewPbf(null);
+        resetPetExpression();
       };
-    }, [])
+    }, [resetPetExpression])
   );
 
   /**
@@ -603,6 +614,7 @@ export const MainPage = () => {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
           await appendTodayRunSeconds(result.summary.durationMs / 1000);
+          showRunCompleteExpression();
         }
         setEndFailureCount(0);
       } catch (err: any) {
@@ -641,6 +653,7 @@ export const MainPage = () => {
     handleForceEnd,
     endFailureCount,
     isTracking,
+    showRunCompleteExpression,
   ]);
 
   /**
@@ -865,7 +878,7 @@ export const MainPage = () => {
   });
   const runLegSwirlRotate = runSwirlProgress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ['0deg', '-360deg'],
   });
   const runLegSwirlScale = runSwirlProgress.interpolate({
     inputRange: [0, 0.5, 1],
@@ -1036,25 +1049,32 @@ export const MainPage = () => {
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
           />
-          {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
-          <Pressable onPress={onPetTouch} style={styles.pet}>
-            <PetRenderer
-              size={PET_RENDER_SIZE}
-              templateId={mainPetTemplateId}
-              partTransforms={idlePartTransforms}
-              style={[
-                styles.petImage,
-                {
-                  transform: [
-                    {
-                      translateY:
-                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
-                    },
-                  ],
-                },
-              ]}
-            />
-          </Pressable>
+          <View
+            style={styles.pet}
+            collapsable={false}
+            // 드래그 상호작용은 표정 훅이 전담하고, 화면은 핸들러만 연결한다.
+            {...petPanHandlers}
+          >
+            <Pressable onPress={onPetTouch}>
+              <PetRenderer
+                size={PET_RENDER_SIZE}
+                templateId={mainPetTemplateId}
+                partTransforms={idlePartTransforms}
+                expressionOverlays={petExpressionOverlays}
+                style={[
+                  styles.petImage,
+                  {
+                    transform: [
+                      {
+                        translateY:
+                          PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                      },
+                    ],
+                  },
+                ]}
+              />
+            </Pressable>
+          </View>
           <MainStatCards
             stepCount={displayedSteps}
             totalRunSec={todayTotalRunSec}
