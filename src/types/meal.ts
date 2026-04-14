@@ -8,6 +8,7 @@ export type CreateMealRequest = {
   title: string;
   kcal: number;
   sequence: MealSequence;
+  existImage: boolean;
 };
 
 /**
