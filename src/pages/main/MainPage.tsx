@@ -157,6 +157,7 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
+  // __DEV__에서만 쓰는 체형 미세조정 프리뷰 값이다. null이면 실제 사용자 PBF를 따른다.
   const [devPreviewPbf, setDevPreviewPbf] = useState<number | null>(null);
   const [devPbfBarWidth, setDevPbfBarWidth] = useState(0);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
@@ -436,6 +437,7 @@ export const MainPage = () => {
     userGender === 'female' ? FEMALE_BASELINE_PBF : MALE_BASELINE_PBF;
   const selectedPreviewPbf = devPreviewPbf;
   const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
+  // 테스트 바 thumb/fill 위치 계산용 진행률이다.
   const devPbfProgress = Math.min(
     1,
     Math.max(
@@ -580,6 +582,7 @@ export const MainPage = () => {
   useFocusEffect(
     useCallback(() => {
       return () => {
+        // 화면을 벗어나면 테스트값을 버리고, 재진입 시 실제 사용자 체지방률로 복귀한다.
         setDevPreviewPbf(null);
       };
     }, [])
