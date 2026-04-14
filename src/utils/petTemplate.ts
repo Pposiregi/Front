@@ -337,10 +337,10 @@ const bundledTemplateCache = new Map<PetTemplateId, PetTemplate>();
 
 /**
  * 번들된 템플릿을 templateId 기준으로 1회 로드 후 메모리에 캐시한다.
- * templateId를 넘기지 않으면 기본값(browncat_v1)을 사용한다.
+ * templateId를 넘기지 않으면 기본값(bagiccat_v1)을 사용한다.
  */
 export function getBundledPetTemplate(
-  templateId: PetTemplateId = 'browncat_v1'
+  templateId: PetTemplateId = 'bagiccat_v1'
 ): PetTemplate {
   const cached = bundledTemplateCache.get(templateId);
   if (cached) return cached;
