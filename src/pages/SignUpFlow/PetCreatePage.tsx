@@ -1,5 +1,6 @@
 import { postPets } from '@api/petApi';
 import React, { useRef, useState, useEffect } from 'react';
+import { logPetCreate } from '@utils/analytics';
 import {
   View,
   Text,
@@ -70,6 +71,7 @@ export default function PetCreatePage() {
 
       await AsyncStorage.setItem('petId', String(pet.petId));
       dispatch(userSlice.actions.setPet(pet.petId));
+      await logPetCreate({ pet_type: petType, pet_name: name });
     } catch (e) {
       console.error(e);
       Alert.alert('오류', '펫 생성에 실패했습니다. 다시 시도해주세요.');

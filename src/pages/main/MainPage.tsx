@@ -36,6 +36,7 @@ import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
+import { logRunningStart, logRunningComplete } from '@utils/analytics';
 
 /**
  * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
@@ -496,6 +497,10 @@ export const MainPage = () => {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
         await appendTodayRunSeconds(result.summary.durationMs / 1000);
+        await logRunningComplete({
+          distance_m: Math.round(result.summary.distanceMeters),
+          duration_s: Math.round(result.summary.durationMs / 1000),
+        });
       }
       setEndFailureCount(0);
     } catch (err: any) {
@@ -530,6 +535,10 @@ export const MainPage = () => {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
           await appendTodayRunSeconds(result.summary.durationMs / 1000);
+          await logRunningComplete({
+            distance_m: Math.round(result.summary.distanceMeters),
+            duration_s: Math.round(result.summary.durationMs / 1000),
+          });
         }
         setEndFailureCount(0);
       } catch (err: any) {
@@ -641,6 +650,7 @@ export const MainPage = () => {
             return;
           }
           await startRunningNotification();
+          await logRunningStart();
           setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(
