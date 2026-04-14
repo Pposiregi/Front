@@ -9,7 +9,7 @@
     "pet:validate-assets": "node scripts/validatePetAssets.js",
     "start": "react-native start",
     "test": "jest",
-    "android:p6a": "~/Library/Android/sdk/emulator/emulator -avd Pixel_6a & sleep 5 && react-native run-android",
+    "android:md": "~/Library/Android/sdk/emulator/emulator -avd Medium_Phone & sleep 5 && react-native run-android",
     "android:p3": "~/Library/Android/sdk/emulator/emulator -avd Pixel_3 & sleep 5 && react-native run-android",
     "start-here": "npx react-native start --reset-cache"
   },
@@ -79,6 +79,7 @@
     "node": ">=20"
   },
   "overrides": {
-    "@isaacs/brace-expansion": "5.0.1"
+    "@isaacs/brace-expansion": "5.0.1",
+    "follow-redirects": "1.16.0"
   }
 }

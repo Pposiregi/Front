@@ -46,16 +46,21 @@ const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const RUN_PET_SCALE = 0.7;
-const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
 const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
 const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
 const RUN_SWIRL_LOOP_MS = 420;
+const DEV_PBF_MIN = 12;
+const DEV_PBF_MAX = 40;
+const DEV_PBF_STEP = 1;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
+
+const clampDevPbf = (value: number) =>
+  Math.min(DEV_PBF_MAX, Math.max(DEV_PBF_MIN, Math.round(value)));
 
 /** 밀리초 단위 러닝 시간을 한국어 문자열로 변환한다. */
 const formatDuration = (durationMs: number) => {
@@ -152,7 +157,8 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
-  const [fatVerIndex, setFatVerIndex] = useState(-1);
+  const [devPreviewPbf, setDevPreviewPbf] = useState<number | null>(null);
+  const [devPbfBarWidth, setDevPbfBarWidth] = useState(0);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
@@ -428,9 +434,15 @@ export const MainPage = () => {
   const { transition: changePetState } = usePetFSM();
   const baselinePbf =
     userGender === 'female' ? FEMALE_BASELINE_PBF : MALE_BASELINE_PBF;
-  const selectedPreviewPbf =
-    fatVerIndex >= 0 ? FAT_VER_PBF_PRESETS[fatVerIndex] : null;
+  const selectedPreviewPbf = devPreviewPbf;
   const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
+  const devPbfProgress = Math.min(
+    1,
+    Math.max(
+      0,
+      (effectivePbf - DEV_PBF_MIN) / (DEV_PBF_MAX - DEV_PBF_MIN)
+    )
+  );
   const { idlePartTransforms, runPartTransforms } = useMainPetMotion({
     isTracking,
     effectivePbf,
@@ -540,13 +552,38 @@ export const MainPage = () => {
     }
   }, [appendTodayRunSeconds, endSession]);
 
-  const handleToggleFatVer = useCallback(() => {
-    setFatVerIndex((prev) => {
-      if (prev < 0) return 0;
-      if (prev >= FAT_VER_PBF_PRESETS.length - 1) return -1;
-      return prev + 1;
-    });
+  const handleSetDevPreviewPbf = useCallback((value: number) => {
+    setDevPreviewPbf(clampDevPbf(value));
   }, []);
+
+  const handleAdjustDevPreviewPbf = useCallback((delta: number) => {
+    setDevPreviewPbf((prev) => {
+      const nextBase = prev ?? currentPbf ?? baselinePbf;
+      return clampDevPbf(nextBase + delta);
+    });
+  }, [baselinePbf, currentPbf]);
+
+  const handleClearDevPreviewPbf = useCallback(() => {
+    setDevPreviewPbf(null);
+  }, []);
+
+  const handlePressDevPbfBar = useCallback((locationX: number) => {
+    if (devPbfBarWidth <= 0) {
+      return;
+    }
+
+    const ratio = Math.min(1, Math.max(0, locationX / devPbfBarWidth));
+    const value = DEV_PBF_MIN + ratio * (DEV_PBF_MAX - DEV_PBF_MIN);
+    handleSetDevPreviewPbf(value);
+  }, [devPbfBarWidth, handleSetDevPreviewPbf]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setDevPreviewPbf(null);
+      };
+    }, [])
+  );
 
   /**
    * Running 시작/종료 핸들러
@@ -1041,20 +1078,63 @@ export const MainPage = () => {
               </TouchableOpacity>
             )}
             {__DEV__ && (
-              <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={handleToggleFatVer}
-                accessibilityRole='button'
-                accessibilityLabel={`체형 테스트 pbf ${
-                  selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
-                }`}
-              >
-                <Text style={styles.devHealthButtonText}>
-                  {selectedPreviewPbf == null
-                    ? 'FAT:15'
-                    : `FAT:${selectedPreviewPbf}`}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.devPbfPanel}>
+                <View style={styles.devPbfHeader}>
+                  <Text style={styles.devPbfTitle}>
+                    TEST PBF {effectivePbf}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.devPbfResetButton}
+                    onPress={handleClearDevPreviewPbf}
+                    accessibilityRole='button'
+                    accessibilityLabel='체형 테스트 pbf 초기화'
+                  >
+                    <Text style={styles.devPbfResetText}>LIVE</Text>
+                  </TouchableOpacity>
+                </View>
+                <Pressable
+                  style={styles.devPbfBar}
+                  onLayout={(event) => {
+                    setDevPbfBarWidth(event.nativeEvent.layout.width);
+                  }}
+                  onPress={(event) => {
+                    handlePressDevPbfBar(event.nativeEvent.locationX);
+                  }}
+                  accessibilityRole='adjustable'
+                  accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
+                >
+                  <View
+                    style={[
+                      styles.devPbfBarFill,
+                      { width: `${devPbfProgress * 100}%` },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.devPbfBarThumb,
+                      { left: `${devPbfProgress * 100}%` },
+                    ]}
+                  />
+                </Pressable>
+                <View style={styles.devPbfScaleRow}>
+                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
+                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
+                </View>
+                <View style={styles.devPbfControls}>
+                  <TouchableOpacity
+                    style={styles.devPbfAdjustButton}
+                    onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
+                  >
+                    <Text style={styles.devPbfAdjustText}>-1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.devPbfAdjustButton}
+                    onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
+                  >
+                    <Text style={styles.devPbfAdjustText}>+1</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
           </View>
         </ImageBackground>
