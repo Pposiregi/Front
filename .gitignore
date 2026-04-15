@@ -616,8 +616,8 @@ hs_err_pid*
 ### Codex Config Files ###
 codex/
 
-### Markdown files ###
-*.md
+### CLAUDE Markdown files ###
+CLAUDE.md
 
 ### Local settings ###
 *.local.json
