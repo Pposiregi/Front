@@ -40,7 +40,7 @@ export const RankingItem = ({
       </View>
 
       <View style={styles.rankAvatarContainer}>
-        {profileImageUrl && <ProfileAvatar profileImageUrl={profileImageUrl} />}
+        <ProfileAvatar profileImageUrl={profileImageUrl} />
       </View>
 
       <View style={styles.rankingNameScoreContainer}>
