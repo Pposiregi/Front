@@ -1,7 +1,79 @@
 import type { MealListItem } from '@pages/meal/types';
 import type { ImageSourcePropType } from 'react-native';
-
 import mealPlaceholderImage from '@assets/images/meal.png';
+
+// 이미지 검수
+const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_IMAGE_DIMENSION = 8000; // px
+
+type ImageAssetForValidation = {
+  fileSize?: number;
+  width?: number;
+  height?: number;
+  type?: string;
+  fileName?: string;
+};
+
+type ImageValidationMode = 'meal' | 'profile';
+
+/**
+ * 이미지 선택 결과(asset)를 검수한다.
+ * @returns 문제가 없으면 null, 문제가 있으면 { title, message }
+ */
+export const validateImageAsset = (
+  asset: ImageAssetForValidation,
+  mode: ImageValidationMode = 'meal'
+): { title: string; message: string } | null => {
+  // 파일 크기
+  if (asset.fileSize !== undefined && asset.fileSize > MAX_IMAGE_FILE_SIZE) {
+    const sizeMB = (asset.fileSize / (1024 * 1024)).toFixed(1);
+    return {
+      title: '파일 용량 초과',
+      message: `이미지 크기가 ${sizeMB}MB입니다.\n10MB 이하의 이미지를 사용해주세요.`,
+    };
+  }
+
+  // 해상도
+  if (
+    (asset.width !== undefined && asset.width > MAX_IMAGE_DIMENSION) ||
+    (asset.height !== undefined && asset.height > MAX_IMAGE_DIMENSION)
+  ) {
+    return {
+      title: '이미지 해상도 초과',
+      message: `이미지 해상도가 너무 큽니다.\n8000px 이하의 이미지를 사용해주세요.`,
+    };
+  }
+
+  // 파일 형식
+  const mimeType = asset.type?.toLowerCase() ?? '';
+  const fileName = (asset.fileName ?? '').toLowerCase();
+
+  if (mode === 'meal') {
+    const allowedMime = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+    const allowedExt = ['.jpg', '.jpeg', '.png'];
+    const hasAllowedMime = !!mimeType && allowedMime.has(mimeType);
+    const hasAllowedExt = allowedExt.some((ext) => fileName.endsWith(ext));
+    if (!hasAllowedMime && !hasAllowedExt) {
+      return {
+        title: '이미지 형식 오류',
+        message: '식단 사진은 JPG/JPEG/PNG 파일만 업로드할 수 있어요.',
+      };
+    }
+  } else {
+    const allowedMime = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+    const allowedExt = ['.jpg', '.jpeg', '.png'];
+    const hasAllowedMime = !!mimeType && allowedMime.has(mimeType);
+    const hasAllowedExt = allowedExt.some((ext) => fileName.endsWith(ext));
+    if (!hasAllowedMime && !hasAllowedExt) {
+      return {
+        title: '이미지 형식 오류',
+        message: '프로필 사진은 JPG/JPEG/PNG 파일만 업로드할 수 있어요.',
+      };
+    }
+  }
+
+  return null;
+};
 
 const ZERO_SIZED_CACHE_LIMIT = 300;
 const zeroSizedImageCache = new Map<string, boolean>();
@@ -22,7 +94,9 @@ const parseHeaderNumber = (value: string | null): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const parseContentRangeTotalSize = (contentRange: string | null): number | null => {
+const parseContentRangeTotalSize = (
+  contentRange: string | null
+): number | null => {
   if (!contentRange) return null;
   const match = contentRange.match(/\/(\d+)$/);
   if (!match) return null;
@@ -35,7 +109,9 @@ const getSizeByHead = async (uri: string): Promise<number | null> => {
     if (!response.ok) {
       return null;
     }
-    const contentLength = parseHeaderNumber(response.headers.get('content-length'));
+    const contentLength = parseHeaderNumber(
+      response.headers.get('content-length')
+    );
     return contentLength;
   } catch {
     return null;
@@ -57,7 +133,9 @@ const getSizeByRangeRequest = async (uri: string): Promise<number | null> => {
     if (totalByRange !== null) {
       return totalByRange;
     }
-    const contentLength = parseHeaderNumber(response.headers.get('content-length'));
+    const contentLength = parseHeaderNumber(
+      response.headers.get('content-length')
+    );
     return contentLength;
   } catch {
     return null;

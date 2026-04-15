@@ -1,14 +1,13 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
-  Dimensions,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { styles } from '@styles/OptionalInfoPage.styles';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   isValidPbf,
@@ -143,68 +142,3 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
 };
 
 export default OptionalInfoPage;
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'flex-start',
-    marginTop: -height * 0.02,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    marginVertical: 10,
-    fontFamily: 'JUA',
-    marginTop: height * 0.07,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'thin',
-    marginBottom: 10,
-    fontFamily: 'JUA',
-  },
-  label: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    fontFamily: 'JUA',
-    marginLeft: 4,
-    marginBottom: 10,
-  },
-  requiredInfo: {
-    fontSize: 14,
-    color: '#FF6347',
-    marginBottom: height * 0.04,
-    fontFamily: 'JUA',
-  },
-  inputWithUnit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: height * 0.05,
-  },
-  textInputFlex: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 5,
-  },
-  unit: {
-    fontSize: 16,
-    marginLeft: 5,
-  },
-  startButton: {
-    backgroundColor: '#FF6347',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: height * 0.05,
-    alignItems: 'center',
-    width: width * 0.4,
-    marginBottom: height * 0.1,
-  },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});

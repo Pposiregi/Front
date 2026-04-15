@@ -1,19 +1,27 @@
-export const DEFAULT_PROFILE_ICON_ID = 1;
+const S3_BASE =
+  'https://fitpet-bucket.s3.ap-northeast-2.amazonaws.com/profile-presets';
 
-export const PROFILE_ICONS: Record<number, any> = {
-  1: require('../../assets/images/profile/image_01.png'),
-  2: require('../../assets/images/profile/image_02.png'),
-  3: require('../../assets/images/profile/image_03.png'),
-  4: require('../../assets/images/profile/image_04.png'),
-  5: require('../../assets/images/profile/image_05.png'),
-  6: require('../../assets/images/profile/image_06.png'),
-  7: require('../../assets/images/profile/image_07.png'),
-  8: require('../../assets/images/profile/image_08.png'),
-  9: require('../../assets/images/profile/image_09.png'),
-  10: require('../../assets/images/profile/image_anime01.jpg'),
-  11: require('../../assets/images/profile/image_anime02.jpg'),
-  12: require('../../assets/images/profile/image_anime03.jpg'),
-  13: require('../../assets/images/profile/image_anime04.jpg'),
-  14: require('../../assets/images/profile/image_GigaChad.jpg'),
-  15: require('../../assets/images/profile/image_Poketmon_Snorlax.jpg'),
-};
+export const DEFAULT_PROFILE_URL = `${S3_BASE}/image_01.png`;
+
+export const PROFILE_PRESET_URLS: string[] = [
+  `${S3_BASE}/image_01.png`,
+  `${S3_BASE}/image_02.png`,
+  `${S3_BASE}/image_03.png`,
+  `${S3_BASE}/image_04.png`,
+  `${S3_BASE}/image_05.png`,
+  `${S3_BASE}/image_06.png`,
+  `${S3_BASE}/image_07.png`,
+  `${S3_BASE}/image_08.png`,
+  `${S3_BASE}/image_09.png`,
+];
+
+export const SECRET_TARGET_URL = `${S3_BASE}/image_07.png`;
+
+export const SECRET_PRESET_URLS: string[] = [
+  `${S3_BASE}/image_anime01.jpg`,
+  `${S3_BASE}/image_anime02.jpg`,
+  `${S3_BASE}/image_anime03.jpg`,
+  `${S3_BASE}/image_anime04.jpg`,
+  `${S3_BASE}/image_GigaChad.jpg`,
+  `${S3_BASE}/image_Poketmon_Snorlax.jpg`,
+];

@@ -48,6 +48,16 @@ export interface MissionActiveResponse {
 }
 
 /**
+ * SSE /missions/progress/stream mission-progress 이벤트 페이로드
+ */
+export interface MissionProgressEvent {
+  missionCheckId: number;
+  progressValue: number;
+  completed: boolean;
+  completedAt: string | null;
+}
+
+/**
  * 미션 완료 응답 타입
  */
 export interface MissionCompleteResponse {

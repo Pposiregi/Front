@@ -8,6 +8,7 @@ export type authRequest = {
   pbf?: number;
   targetPbf?: number;
   targetStepCount?: number;
+  termsAgreements: { termsId: number; isAgreed: boolean }[];
 };
 
 export type authResponse = {

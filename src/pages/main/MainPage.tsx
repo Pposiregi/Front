@@ -81,8 +81,9 @@ const formatRunningElapsed = (seconds: number) => {
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
-import { MissionActiveItem } from 'types/mission';
+import { MissionActiveItem, MissionProgressEvent } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
+import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import MainStatCards from './MainStatCards';
@@ -181,7 +182,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageUrl,
+            profileImageUrl: data.profileImageUrl,
             petType: resolvedPetType ?? undefined,
           })
         );
@@ -692,20 +693,33 @@ export const MainPage = () => {
     }
   }, []);
   /**
-   * Health Steps 변화 시 호출 (1000보 단위로 제한).
-   */
-  useEffect(() => {
-    refreshMissions();
-  }, [healthSteps, refreshMissions]);
-
-  /**
-   * 화면 포커스 시 최신 미션 불러오기.
+   * 화면 진입 시 최신 미션 1회 불러오기.
    */
   useFocusEffect(
     useCallback(() => {
       refreshMissions();
     }, [refreshMissions])
   );
+
+  /**
+   * SSE mission-progress 이벤트로 로컬 미션 상태 갱신.
+   */
+  const handleMissionProgress = useCallback((event: MissionProgressEvent) => {
+    setMissionApiItems((prev) =>
+      prev.map((item) =>
+        item.missionCheckId === event.missionCheckId
+          ? {
+              ...item,
+              progressValue: event.progressValue,
+              isCompleted: event.completed,
+              completedAt: event.completedAt,
+            }
+          : item
+      )
+    );
+  }, []);
+
+  useMissionSSE(handleMissionProgress);
 
   // Progress Bar 가공
   const progressMissions = useMemo(() => {

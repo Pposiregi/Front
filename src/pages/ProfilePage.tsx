@@ -298,8 +298,8 @@ function ProfilePage() {
   };
 
   const nickname = useSelector((state: RootState) => state.user.nickname);
-  const profileImageId = useSelector(
-    (state: RootState) => state.user.profileImageId
+  const profileImageUrl = useSelector(
+    (state: RootState) => state.user.profileImageUrl
   );
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -323,7 +323,7 @@ function ProfilePage() {
           <View style={styles.avatarWrapper}>
             <Pressable onPress={() => setProfileModalVisible(true)}>
               <View style={styles.avatar}>
-                <ProfileAvatar profileImageId={profileImageId} />
+                <ProfileAvatar profileImageUrl={profileImageUrl} />
               </View>
             </Pressable>
             <Pressable
@@ -396,7 +396,7 @@ function ProfilePage() {
       <ProfileImageModal
         visible={profileModalVisible}
         onClose={() => setProfileModalVisible(false)}
-        currentImageId={profileImageId}
+        currentImageUrl={profileImageUrl}
       />
       <BodyRecordPrompt
         visible={recordModalVisible}

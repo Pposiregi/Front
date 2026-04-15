@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { PetType } from 'types/profile';
+import { DEFAULT_PROFILE_URL } from '@shared/constants/profileIcons';
 
 const initialState = {
   email: '',
@@ -8,7 +9,7 @@ const initialState = {
   isRunningActive: false,
   userId: null as number | null,
   nickname: '',
-  profileImageId: 1,
+  profileImageUrl: DEFAULT_PROFILE_URL,
   gender: null as 'female' | 'male' | null,
   petId: null as number | null,
   petType: 'CAT' as PetType,
@@ -33,15 +34,15 @@ const userSlice = createSlice({
         userId: number;
         nickname: string;
         gender: 'female' | 'male' | null;
-        profileImageId?: number;
+        profileImageUrl?: string;
         petType?: PetType;
       }>
     ) {
       state.userId = action.payload.userId;
       state.nickname = action.payload.nickname;
       state.gender = action.payload.gender;
-      state.profileImageId =
-        action.payload.profileImageId ?? state.profileImageId;
+      state.profileImageUrl =
+        action.payload.profileImageUrl ?? DEFAULT_PROFILE_URL;
       state.petType = action.payload.petType ?? state.petType;
     },
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
@@ -56,14 +57,13 @@ const userSlice = createSlice({
     updateNickname(state, action: PayloadAction<string>) {
       state.nickname = action.payload;
     },
-    updateProfileImageId(state, action: PayloadAction<number>) {
-      state.profileImageId = action.payload;
+    updateProfileImageUrl(state, action: PayloadAction<string>) {
+      state.profileImageUrl = action.payload;
     },
     updatePetType(state, action: PayloadAction<PetType>) {
       state.petType = action.payload;
     },
     resetUser() {
-      // 상태를 초기 상태(initialState)로 재설정합니다.
       return initialState;
     },
   },

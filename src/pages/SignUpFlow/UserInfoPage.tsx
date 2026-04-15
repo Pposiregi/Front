@@ -1,15 +1,14 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
-  Dimensions,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { styles } from '@styles/UserInfoPage.styles';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   containsBannedWord,
@@ -53,15 +52,18 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
   }, []);
   const onChangeYear = useCallback((text: string) => {
     setYear(text.trim());
+    if (text.trim().length === 4) monthRef.current?.focus();
   }, []);
   const onChangeMonth = useCallback((text: string) => {
     setMonth(text.trim());
+    if (text.trim().length === 2) dayRef.current?.focus();
   }, []);
   const onChangeDay = useCallback((text: string) => {
     setDay(text.trim());
   }, []);
   const onChangeWeight = useCallback((text: string) => {
     setWeight(text.trim());
+    if (text.trim().length === 3) heightref.current?.focus();
   }, []);
   const onChangeHeight = useCallback((text: string) => {
     setHeight(text.trim());
@@ -153,8 +155,9 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             placeholder='사용할 닉네임을 입력하세요.'
             placeholderTextColor='#666'
             ref={nameRef}
+            returnKeyType='next'
             onSubmitEditing={() => yearRef.current?.focus()}
-          ></TextInput>
+          />
           <Text style={styles.label}>
             생년월일<Text style={styles.required}> *</Text>
           </Text>
@@ -261,119 +264,3 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
 };
 
 export default UserInfoPage;
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'flex-start',
-    marginTop: -height * 0.02,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 26,
-    marginVertical: 10,
-    fontFamily: 'JUA',
-    color: '#080505bb',
-    marginTop: height * 0.07,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'thin',
-    color: '#666',
-    marginBottom: 10,
-    fontFamily: 'JUA',
-  },
-  requiredInfo: {
-    fontSize: 14,
-    color: '#FF6347',
-    marginBottom: height * 0.04,
-    fontFamily: 'JUA',
-  },
-  label: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    fontFamily: 'JUA',
-    marginLeft: 4,
-  },
-  required: {
-    color: 'red',
-  },
-  textInput: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: height * 0.03,
-    fontSize: 16,
-  },
-  textInputView: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: width * 0.08,
-  },
-  textInputBirth: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: 30,
-    width: width * 0.18,
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  optionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 12,
-    backgroundColor: '#333',
-  },
-  gender_label: {
-    fontSize: 16,
-  },
-  startButton: {
-    backgroundColor: '#FF6347',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: height * 0.05,
-    alignItems: 'center',
-    width: width * 0.4,
-    marginBottom: height * 0.1,
-  },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  weightContainer: {
-    flexDirection: 'row',
-    borderColor: '#ccc',
-    marginBottom: 30,
-    height: height * 0.06, // 높이 고정
-  },
-  weightInput: {
-    flex: 1,
-    height: '100%',
-    textAlignVertical: 'center',
-    textAlign: 'center',
-    fontSize: 18,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  unit: {
-    fontSize: 20,
-    marginLeft: 5,
-    height: '100%',
-    textAlignVertical: 'center',
-  },
-});

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BackHandler, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, Text, View } from 'react-native';
+import { styles } from '@styles/IntroPage.styles';
 import PagerView from 'react-native-pager-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch } from '../../store';
 import userSlice from '../../slices/user';
 import OptionalInfoPage from './OptionalInfoPage';
 import PermissionPage from './PermissionPage';
+import AppPermissionGuidePage from './AppPermissionGuidePage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
 import { authRequest } from '../../types/auth';
@@ -44,8 +46,11 @@ const IntroPage = () => {
   const [formData, setFormData] = useState({
     // PermissionPage 정보
     permissions: {
+      serviceAgree: false,
+      privacyPolicyAgree: false,
       locationAgree: false,
       privacyAgree: false,
+      healthAgree: false,
       pushAgree: false,
     },
     // UserInfoPage 정보
@@ -67,7 +72,7 @@ const IntroPage = () => {
 
   // 각 페이지에서 버튼 눌렀을 때 호출 다음페이지로
   const goToNextPage = () => {
-    const totalPages = 3;
+    const totalPages = 4;
     if (pagerRef.current && currentPage < totalPages - 1) {
       pagerRef.current.setPage(currentPage + 1);
       setCurrentPage(currentPage + 1);
@@ -93,6 +98,15 @@ const IntroPage = () => {
       value.trim() === '' ? undefined : Number(value);
 
     // authRequest 타입에 맞게 변환
+    const {
+      serviceAgree,
+      privacyPolicyAgree,
+      locationAgree,
+      privacyAgree,
+      healthAgree,
+      pushAgree,
+    } = finalFormData.permissions;
+
     const requestBody: authRequest = {
       nickname: finalFormData.nickName,
       age,
@@ -103,6 +117,14 @@ const IntroPage = () => {
       pbf: toNumberOrUndefined(finalFormData.pbf),
       targetPbf: toNumberOrUndefined(finalFormData.targetPbf),
       targetStepCount: toNumberOrUndefined(finalFormData.targetStepCount),
+      termsAgreements: [
+        { termsId: 4, isAgreed: serviceAgree }, // SERVICE_USE v2.0
+        { termsId: 5, isAgreed: privacyPolicyAgree }, // PRIVACY_POLICY v2.0
+        { termsId: 7, isAgreed: privacyAgree }, // PRIVACY_COLLECTION v2.0
+        { termsId: 8, isAgreed: locationAgree }, // LOCATION_BASED v2.0
+        { termsId: 9, isAgreed: healthAgree }, // HEALTH_INFO v2.0
+        { termsId: 6, isAgreed: pushAgree }, // MARKETING v2.0
+      ],
     };
     try {
       await signUp(requestBody);
@@ -114,20 +136,22 @@ const IntroPage = () => {
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
-      console.error('회원가입 상태 업데이트 실패', err);
+      console.error('회원가입 실패', err);
+      Alert.alert(
+        '회원가입 실패',
+        '서버 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.'
+      );
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={(styles.text, { color: '#666666' })}>
-          환영합니다! FietPet이 처음이신가요?
-        </Text>
+        <Text style={styles.text}>환영합니다! FietPet이 처음이신가요?</Text>
       </View>
 
       <View style={styles.dotContainer}>
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <View
             key={i}
             style={[styles.dot, currentPage === i && styles.activeDot]}
@@ -142,48 +166,16 @@ const IntroPage = () => {
         ref={pagerRef}
       >
         <PermissionPage key='1' onNext={handleNext} />
-        <UserInfoPage key='2' onNext={handleNext} />
-        <OptionalInfoPage key='3' onFinish={handleFinish} />
+        <AppPermissionGuidePage
+          key='2'
+          onNext={goToNextPage}
+          pushAgree={formData.permissions.pushAgree}
+        />
+        <UserInfoPage key='3' onNext={handleNext} />
+        <OptionalInfoPage key='4' onFinish={handleFinish} />
       </PagerView>
     </View>
   );
 };
 
 export default IntroPage;
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  pagerView: { flex: 1 },
-  textContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: height * 0.1,
-  },
-  text: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontFamily: 'JUA',
-  },
-  dotContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: height * 0.03,
-    marginBottom: 5,
-  },
-  dot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#ccc',
-    marginHorizontal: 5,
-  },
-  activeDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#FF6347',
-  },
-});

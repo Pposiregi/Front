@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   TextInput,
   Animated,
-  StyleSheet,
   Alert,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import userSlice from '@slices/user';
-import { Image } from 'react-native';
-import { Colors } from '@styles/theme';
+import { styles } from '@styles/PetCreatePage.styles';
 
 export default function PetCreatePage() {
   const [petType, setPetType] = useState<'DOG' | 'CAT' | null>(null);
@@ -166,83 +165,3 @@ export default function PetCreatePage() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: Colors.surface,
-  },
-
-  introBox: {
-    alignItems: 'center',
-  },
-
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-  },
-
-  subtitle: {
-    fontSize: 18,
-    marginTop: 20,
-    color: '#666',
-  },
-
-  petContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 40,
-    marginBottom: 30,
-  },
-  petImage: { width: 80, height: 80, marginBottom: 10, resizeMode: 'contain' },
-
-  selectedPetImage: {
-    width: 200,
-    height: 200,
-    marginVertical: 20,
-    resizeMode: 'contain',
-    alignSelf: 'center',
-  },
-
-  card: {
-    width: 140,
-    height: 140,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  selected: {
-    borderColor: '#FF6347',
-    borderWidth: 2,
-  },
-
-  emoji: {
-    fontSize: 50,
-    marginBottom: 10,
-  },
-
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-  },
-
-  button: {
-    backgroundColor: '#FF6347',
-    padding: 18,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-
-  buttonText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-});
