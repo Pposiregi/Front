@@ -42,7 +42,7 @@ const userSlice = createSlice({
       state.nickname = action.payload.nickname;
       state.gender = action.payload.gender;
       state.profileImageUrl =
-        action.payload.profileImageUrl ?? state.profileImageUrl;
+        action.payload.profileImageUrl ?? DEFAULT_PROFILE_URL;
       state.petType = action.payload.petType ?? state.petType;
     },
     setSignUpInProgress(state, action: PayloadAction<boolean>) {
