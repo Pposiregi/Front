@@ -49,28 +49,22 @@ export const validateImageAsset = (
   const fileName = (asset.fileName ?? '').toLowerCase();
 
   if (mode === 'meal') {
-    const isAllowed =
-      mimeType === 'image/jpeg' ||
-      mimeType === 'image/jpg' ||
-      mimeType === 'image/png' ||
-      fileName.endsWith('.jpg') ||
-      fileName.endsWith('.jpeg') ||
-      fileName.endsWith('.png');
-    if (mimeType && !isAllowed) {
+    const allowedMime = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+    const allowedExt = ['.jpg', '.jpeg', '.png'];
+    const hasAllowedMime = !!mimeType && allowedMime.has(mimeType);
+    const hasAllowedExt = allowedExt.some((ext) => fileName.endsWith(ext));
+    if (!hasAllowedMime && !hasAllowedExt) {
       return {
         title: '이미지 형식 오류',
         message: '식단 사진은 JPG/JPEG/PNG 파일만 업로드할 수 있어요.',
       };
     }
   } else {
-    const isAllowed =
-      mimeType === 'image/jpeg' ||
-      mimeType === 'image/jpg' ||
-      mimeType === 'image/png' ||
-      fileName.endsWith('.jpg') ||
-      fileName.endsWith('.jpeg') ||
-      fileName.endsWith('.png');
-    if (mimeType && !isAllowed) {
+    const allowedMime = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+    const allowedExt = ['.jpg', '.jpeg', '.png'];
+    const hasAllowedMime = !!mimeType && allowedMime.has(mimeType);
+    const hasAllowedExt = allowedExt.some((ext) => fileName.endsWith(ext));
+    if (!hasAllowedMime && !hasAllowedExt) {
       return {
         title: '이미지 형식 오류',
         message: '프로필 사진은 JPG/JPEG/PNG 파일만 업로드할 수 있어요.',
