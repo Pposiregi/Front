@@ -12,6 +12,7 @@ import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
 import { authRequest } from '../../types/auth';
 import PetCreatePage from './PetCreatePage';
+import { logSignUp } from '@utils/analytics';
 
 const IntroPage = () => {
   //현재 페이지 주소 나타냄
@@ -127,12 +128,22 @@ const IntroPage = () => {
       ],
     };
     try {
-      await signUp(requestBody);
+      const signUpResult = await signUp(requestBody);
+      if (!signUpResult) {
+        throw new Error('회원가입 응답이 비어 있습니다.');
+      }
+
       dispatch(
         userSlice.actions.setNickName({
           nickname: requestBody.nickname,
         })
       );
+
+      const platform = await AsyncStorage.getItem('platform');
+      if (platform === 'kakao' || platform === 'google') {
+        await logSignUp(platform);
+      }
+
       await AsyncStorage.setItem('isSignUpInProgress', 'false');
       dispatch(userSlice.actions.setSignUpInProgress(false));
     } catch (err) {
