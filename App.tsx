@@ -4,6 +4,7 @@ import store from './src/store';
 import AppInner from './AppInner';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
+import { Colors } from '@styles/theme';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: '#f3f4f8',
+    backgroundColor: Colors.background,
   },
 });
 

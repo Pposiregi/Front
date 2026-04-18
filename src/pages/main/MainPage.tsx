@@ -37,6 +37,7 @@ import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
+import { logRunningStart, logRunningComplete } from '@utils/analytics';
 
 /**
  * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
@@ -88,8 +89,9 @@ const formatRunningElapsed = (seconds: number) => {
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
-import { MissionActiveItem } from 'types/mission';
+import { MissionActiveItem, MissionProgressEvent } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
+import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import MainStatCards from './MainStatCards';
@@ -193,7 +195,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageUrl,
+            profileImageUrl: data.profileImageUrl,
             petType: resolvedPetType ?? undefined,
           })
         );
@@ -441,10 +443,7 @@ export const MainPage = () => {
   // 테스트 바 thumb/fill 위치 계산용 진행률이다.
   const devPbfProgress = Math.min(
     1,
-    Math.max(
-      0,
-      (effectivePbf - DEV_PBF_MIN) / (DEV_PBF_MAX - DEV_PBF_MIN)
-    )
+    Math.max(0, (effectivePbf - DEV_PBF_MIN) / (DEV_PBF_MAX - DEV_PBF_MIN))
   );
   const { idlePartTransforms, runPartTransforms } = useMainPetMotion({
     isTracking,
@@ -553,6 +552,10 @@ export const MainPage = () => {
         setShowRunSummaryModal(true);
         await appendTodayRunSeconds(result.summary.durationMs / 1000);
         showRunCompleteExpression();
+        await logRunningComplete({
+          distance_m: Math.round(result.summary.distanceMeters),
+          duration_s: Math.round(result.summary.durationMs / 1000),
+        });
       }
       setEndFailureCount(0);
     } catch (err: any) {
@@ -568,26 +571,32 @@ export const MainPage = () => {
     setDevPreviewPbf(clampDevPbf(value));
   }, []);
 
-  const handleAdjustDevPreviewPbf = useCallback((delta: number) => {
-    setDevPreviewPbf((prev) => {
-      const nextBase = prev ?? currentPbf ?? baselinePbf;
-      return clampDevPbf(nextBase + delta);
-    });
-  }, [baselinePbf, currentPbf]);
+  const handleAdjustDevPreviewPbf = useCallback(
+    (delta: number) => {
+      setDevPreviewPbf((prev) => {
+        const nextBase = prev ?? currentPbf ?? baselinePbf;
+        return clampDevPbf(nextBase + delta);
+      });
+    },
+    [baselinePbf, currentPbf]
+  );
 
   const handleClearDevPreviewPbf = useCallback(() => {
     setDevPreviewPbf(null);
   }, []);
 
-  const handlePressDevPbfBar = useCallback((locationX: number) => {
-    if (devPbfBarWidth <= 0) {
-      return;
-    }
+  const handlePressDevPbfBar = useCallback(
+    (locationX: number) => {
+      if (devPbfBarWidth <= 0) {
+        return;
+      }
 
-    const ratio = Math.min(1, Math.max(0, locationX / devPbfBarWidth));
-    const value = DEV_PBF_MIN + ratio * (DEV_PBF_MAX - DEV_PBF_MIN);
-    handleSetDevPreviewPbf(value);
-  }, [devPbfBarWidth, handleSetDevPreviewPbf]);
+      const ratio = Math.min(1, Math.max(0, locationX / devPbfBarWidth));
+      const value = DEV_PBF_MIN + ratio * (DEV_PBF_MAX - DEV_PBF_MIN);
+      handleSetDevPreviewPbf(value);
+    },
+    [devPbfBarWidth, handleSetDevPreviewPbf]
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -615,6 +624,10 @@ export const MainPage = () => {
           setShowRunSummaryModal(true);
           await appendTodayRunSeconds(result.summary.durationMs / 1000);
           showRunCompleteExpression();
+          await logRunningComplete({
+            distance_m: Math.round(result.summary.distanceMeters),
+            duration_s: Math.round(result.summary.durationMs / 1000),
+          });
         }
         setEndFailureCount(0);
       } catch (err: any) {
@@ -727,6 +740,7 @@ export const MainPage = () => {
             return;
           }
           await startRunningNotification();
+          await logRunningStart();
           setEndFailureCount(0);
         } catch (err: any) {
           Alert.alert(
@@ -772,20 +786,33 @@ export const MainPage = () => {
     }
   }, []);
   /**
-   * Health Steps 변화 시 호출 (1000보 단위로 제한).
-   */
-  useEffect(() => {
-    refreshMissions();
-  }, [healthSteps, refreshMissions]);
-
-  /**
-   * 화면 포커스 시 최신 미션 불러오기.
+   * 화면 진입 시 최신 미션 1회 불러오기.
    */
   useFocusEffect(
     useCallback(() => {
       refreshMissions();
     }, [refreshMissions])
   );
+
+  /**
+   * SSE mission-progress 이벤트로 로컬 미션 상태 갱신.
+   */
+  const handleMissionProgress = useCallback((event: MissionProgressEvent) => {
+    setMissionApiItems((prev) =>
+      prev.map((item) =>
+        item.missionCheckId === event.missionCheckId
+          ? {
+              ...item,
+              progressValue: event.progressValue,
+              isCompleted: event.completed,
+              completedAt: event.completedAt,
+            }
+          : item
+      )
+    );
+  }, []);
+
+  useMissionSSE(handleMissionProgress);
 
   // Progress Bar 가공
   const progressMissions = useMemo(() => {

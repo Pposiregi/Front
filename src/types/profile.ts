@@ -11,10 +11,16 @@ export type UserUpdateRequest = {
   targetWeightKg?: number;
   targetPbf?: number;
   targetStepCount?: number;
+  profileImageUrl?: string;
 };
 
 export type PetUpdateRequest = {
   name?: string;
   petType?: PetType;
   color?: string;
+};
+
+export type ProfileImageUploadResponse = {
+  imageKey: string;
+  uploadUrl: string;
 };

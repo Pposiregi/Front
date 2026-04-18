@@ -4,6 +4,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
@@ -265,6 +266,18 @@ const ProfileSettingPage = () => {
             <Text style={styles.withdrawText}>회원탈퇴</Text>
           </Pressable>
         </View>
+
+        {__DEV__ && (
+          <Pressable
+            style={devStyles.button}
+            onPress={async () => {
+              await AsyncStorage.setItem('isSignUpInProgress', 'true');
+              dispatch(userSlice.actions.setSignUpInProgress(true));
+            }}
+          >
+            <Text style={devStyles.text}>[DEV] 회원가입 플로우 테스트</Text>
+          </Pressable>
+        )}
 
         <View style={styles.footerIconRow}>
           <Text style={styles.footerIcon}>💪</Text>
@@ -561,5 +574,20 @@ const ProfileSettingPage = () => {
     </View>
   );
 };
+
+const devStyles = StyleSheet.create({
+  button: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#1e293b',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  text: {
+    color: '#facc15',
+    fontSize: 13,
+    fontFamily: 'Roboto-VariableFont',
+  },
+});
 
 export default ProfileSettingPage;
