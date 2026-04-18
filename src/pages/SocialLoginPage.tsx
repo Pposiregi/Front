@@ -23,7 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
 import { getSocialLogin } from '@api/socialLoginApi';
-import { logLogin, logSignUp } from '@utils/analytics';
+import { logLogin } from '@utils/analytics';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
 const BYPASS_SOCIAL_LOGIN = false;
@@ -132,10 +132,18 @@ const SocialLoginPage = () => {
       if (result.registrationStatus === 'INCOMPLETE') {
         dispatch(userSlice.actions.setSignUpInProgress(true));
         console.log('회원가입이 완료 되지 않은 사용자');
-        await logSignUp(platform);
       } else {
         dispatch(userSlice.actions.setSignUpInProgress(false));
         console.log('회원가입이 완료된 사용자');
+        // 로그아웃 후 재로그인 시 Redux petId가 초기화되므로 AsyncStorage에서 복원
+        try {
+          const storedPetId = await AsyncStorage.getItem('petId');
+          if (storedPetId) {
+            dispatch(userSlice.actions.setPet(Number(storedPetId)));
+          }
+        } catch (err) {
+          console.warn('petId 복원 실패', err);
+        }
         await logLogin(platform);
       }
     } catch (err: any) {
