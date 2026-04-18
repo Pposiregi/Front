@@ -20,4 +20,5 @@ export interface DailyStepRankingItem {
   nickname: string;
   score: number; // 걸음 수
   rank: number;
+  profileImageUrl?: string;
 }

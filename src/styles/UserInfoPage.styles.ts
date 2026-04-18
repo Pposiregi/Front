@@ -1,0 +1,126 @@
+import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Spacing, Typography, Radius } from './theme';
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from './dimensions';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: Spacing.xl,
+    justifyContent: 'flex-start',
+    marginTop: -SCREEN_HEIGHT * 0.02,
+    backgroundColor: Colors.background,
+  },
+  title: {
+    fontSize: Typography.h1,
+    marginVertical: Spacing.sm,
+    fontFamily: Fonts.JUA,
+    color: Colors.textPrimary,
+    marginTop: SCREEN_HEIGHT * 0.07,
+  },
+  subtitle: {
+    fontSize: Typography.bodyLarge,
+    fontWeight: 'thin',
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+    fontFamily: Fonts.JUA,
+  },
+  requiredInfo: {
+    fontSize: Typography.bodySmall,
+    color: '#FF6347',
+    marginBottom: SCREEN_HEIGHT * 0.04,
+    fontFamily: Fonts.JUA,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: Typography.body,
+    fontFamily: Fonts.JUA,
+    marginLeft: Spacing.xs,
+    color: Colors.textPrimary,
+  },
+  required: {
+    color: Colors.error,
+  },
+  textInput: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: SCREEN_HEIGHT * 0.03,
+    fontSize: Typography.body,
+    color: Colors.textPrimary,
+  },
+  textInputView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: SCREEN_WIDTH * 0.08,
+  },
+  textInputBirth: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: 30,
+    width: SCREEN_WIDTH * 0.18,
+    textAlign: 'center',
+    fontSize: Typography.body,
+    color: Colors.textPrimary,
+  },
+  optionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.textPrimary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 12,
+    backgroundColor: Colors.textPrimary,
+  },
+  gender_label: {
+    fontSize: Typography.body,
+    color: Colors.textPrimary,
+  },
+  startButton: {
+    backgroundColor: '#FF6347',
+    padding: 15,
+    borderRadius: Radius.sm,
+    marginTop: SCREEN_HEIGHT * 0.05,
+    alignItems: 'center',
+    width: SCREEN_WIDTH * 0.4,
+    marginBottom: SCREEN_HEIGHT * 0.1,
+  },
+  startButtonText: {
+    color: Colors.surface,
+    fontSize: Typography.body,
+    fontWeight: '700',
+    fontFamily: Fonts.JUA,
+  },
+  weightContainer: {
+    flexDirection: 'row',
+    borderColor: Colors.disabled,
+    marginBottom: 30,
+    height: SCREEN_HEIGHT * 0.06,
+  },
+  weightInput: {
+    flex: 1,
+    height: '100%',
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    fontSize: Typography.bodyLarge,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    color: Colors.textPrimary,
+  },
+  unit: {
+    fontSize: Typography.h2,
+    marginLeft: Spacing.xs,
+    height: '100%',
+    textAlignVertical: 'center',
+    color: Colors.textPrimary,
+  },
+});

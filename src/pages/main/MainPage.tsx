@@ -82,8 +82,9 @@ const formatRunningElapsed = (seconds: number) => {
 
 import { usePetFSM } from '@utils/petFSM';
 import { PetStates } from '@utils/petState';
-import { MissionActiveItem } from 'types/mission';
+import { MissionActiveItem, MissionProgressEvent } from 'types/mission';
 import { getMissionsActive } from '@api/missionApi';
+import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
 import MainStatCards from './MainStatCards';
@@ -98,7 +99,11 @@ import {
   stopRunningNotification,
   updateRunningNotification,
 } from '@hooks/useRunningService';
-import { getAndroidApiLevel, STEP_SYNC_MESSAGES, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
+import {
+  getAndroidApiLevel,
+  STEP_SYNC_MESSAGES,
+  STEP_SYNC_OS_POLICY,
+} from '@utils/stepSyncPolicy';
 import type { PetType } from 'types/profile';
 import { useMainPetMotion } from './useMainPetMotion';
 import {
@@ -149,7 +154,6 @@ export const MainPage = () => {
   const [fatVerIndex, setFatVerIndex] = useState(-1);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
-  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
@@ -164,7 +168,8 @@ export const MainPage = () => {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
         if (!data.pet) {
-          setShowPetOnboarding(true);
+          await AsyncStorage.removeItem('petId');
+          dispatch(userSlice.actions.setPet(null));
           return;
         }
         const resolvedPetType =
@@ -178,7 +183,7 @@ export const MainPage = () => {
             userId: data.userId,
             nickname: data.nickname,
             gender: data.gender,
-            profileImageId: data.profileImageUrl,
+            profileImageUrl: data.profileImageUrl,
             petType: resolvedPetType ?? undefined,
           })
         );
@@ -195,7 +200,9 @@ export const MainPage = () => {
 
         try {
           // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
-          const storedPetType = await AsyncStorage.getItem(PET_TYPE_STORAGE_KEY);
+          const storedPetType = await AsyncStorage.getItem(
+            PET_TYPE_STORAGE_KEY
+          );
           if (storedPetType === 'DOG' || storedPetType === 'CAT') {
             dispatch(userSlice.actions.updatePetType(storedPetType as PetType));
           }
@@ -696,20 +703,33 @@ export const MainPage = () => {
     }
   }, []);
   /**
-   * Health Steps 변화 시 호출 (1000보 단위로 제한).
-   */
-  useEffect(() => {
-    refreshMissions();
-  }, [healthSteps, refreshMissions]);
-
-  /**
-   * 화면 포커스 시 최신 미션 불러오기.
+   * 화면 진입 시 최신 미션 1회 불러오기.
    */
   useFocusEffect(
     useCallback(() => {
       refreshMissions();
     }, [refreshMissions])
   );
+
+  /**
+   * SSE mission-progress 이벤트로 로컬 미션 상태 갱신.
+   */
+  const handleMissionProgress = useCallback((event: MissionProgressEvent) => {
+    setMissionApiItems((prev) =>
+      prev.map((item) =>
+        item.missionCheckId === event.missionCheckId
+          ? {
+              ...item,
+              progressValue: event.progressValue,
+              isCompleted: event.completed,
+              completedAt: event.completedAt,
+            }
+          : item
+      )
+    );
+  }, []);
+
+  useMissionSSE(handleMissionProgress);
 
   // Progress Bar 가공
   const progressMissions = useMemo(() => {
@@ -763,7 +783,13 @@ export const MainPage = () => {
       Alert.alert(
         '걸음 수 연동 불가',
         `${healthError}\n\n현재 단말에서는 걸음수 자동 동기화를 지원하지 않습니다.`,
-        [{ text: '확인', style: 'default', onPress: () => BackHandler.exitApp() }]
+        [
+          {
+            text: '확인',
+            style: 'default',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]
       );
       return;
     }

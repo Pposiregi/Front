@@ -615,3 +615,9 @@ hs_err_pid*
 */assets/images/pet_AI/*
 ### Codex Config Files ###
 codex/
+
+### CLAUDE Markdown files ###
+CLAUDE.md
+
+### Local settings ###
+*.local.json
