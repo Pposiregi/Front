@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from './src/store/reducer';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SocialLogin from './src/pages/SocialLoginPage';
@@ -40,6 +40,7 @@ import {
   resetSessionExpiredState,
   setSessionExpiredHandler,
 } from '@api/authSession';
+import { logScreenView } from '@utils/analytics';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
@@ -166,6 +167,9 @@ const runWithRetry = async <T,>(
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
+
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
+  const routeNameRef = useRef<string | undefined>(undefined);
 
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
@@ -415,7 +419,20 @@ function AppInner() {
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
+      }}
+      onStateChange={async () => {
+        const currentRoute = navigationRef.current?.getCurrentRoute();
+        const currentRouteName = currentRoute?.name;
+        if (currentRouteName && currentRouteName !== routeNameRef.current) {
+          await logScreenView(currentRouteName);
+          routeNameRef.current = currentRouteName;
+        }
+      }}
+    >
       {isLoggedIn ? (
         // 로그인 상태일 때
         isSignUpInProgress ? (

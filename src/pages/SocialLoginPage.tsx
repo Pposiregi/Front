@@ -23,6 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
 import { getSocialLogin } from '@api/socialLoginApi';
+import { logLogin } from '@utils/analytics';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
 const BYPASS_SOCIAL_LOGIN = false;
@@ -150,6 +151,7 @@ const SocialLoginPage = () => {
         } catch (err) {
           console.warn('petId 복원 실패', err);
         }
+        await logLogin(platform);
       }
     } catch (err: any) {
       console.error('>>> firstLoginCheck error', {
