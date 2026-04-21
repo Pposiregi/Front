@@ -46,6 +46,7 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
+// 런 화면에서는 기본 펫보다 크게 보여 속도감과 가시성을 확보한다.
 const RUN_PET_SCALE = 0.91;
 const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
@@ -53,6 +54,10 @@ const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
 const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
 const RUN_SWIRL_LOOP_MS = 420;
+// 바람개비 이펙트는 펫 레이어 기준 중앙에 두고, 발에 너무 떨어지지 않게 붙인다.
+const RUN_SWIRL_SIZE_RATIO = 0.257;
+const RUN_SWIRL_CENTER_LEFT_RATIO = (1 - RUN_SWIRL_SIZE_RATIO) / 2;
+const RUN_SWIRL_BOTTOM_RATIO = -0.02;
 const DEV_PBF_MIN = 12;
 const DEV_PBF_MAX = 40;
 const DEV_PBF_STEP = 1;
@@ -388,8 +393,11 @@ export const MainPage = () => {
   /**
    * 오늘 몸 기록이 있는지 확인
    * - 기록이 있으면 프롬프트를 스킵한다.
+   * - 조회 실패는 기록 없음과 구분해, 중복 입력을 유도하지 않는다.
    */
-  const checkTodayBodyHistory = useCallback(async () => {
+  const checkTodayBodyHistory = useCallback(async (): Promise<
+    'found' | 'missing' | 'failed'
+  > => {
     const todayKey = formatDateKey(new Date());
     try {
       const existing = await getBodyHistoryByDate(todayKey);
@@ -398,13 +406,16 @@ export const MainPage = () => {
         // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
         await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
         setShowBodyPrompt(false);
-        return true;
+        return 'found';
       }
+      setCurrentPbf(null);
+      return 'missing';
     } catch (err: any) {
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
+      // 서버/네트워크 오류 시에는 이미 기록한 사용자가 다시 입력하지 않도록 프롬프트를 닫는다.
+      setShowBodyPrompt(false);
+      return 'failed';
     }
-    setCurrentPbf(null);
-    return false;
   }, []);
 
   /**
@@ -419,12 +430,15 @@ export const MainPage = () => {
           setShowBodyPrompt(false);
           return;
         }
-        const hasTodayRecord = await checkTodayBodyHistory();
-        if (hasTodayRecord) return;
+        const bodyHistoryState = await checkTodayBodyHistory();
+        if (bodyHistoryState === 'found' || bodyHistoryState === 'failed') {
+          // found는 이미 기록됨, failed는 조회 불가 상태이므로 둘 다 프롬프트를 열지 않는다.
+          return;
+        }
         setShowBodyPrompt(true);
       } catch (err) {
         console.error('[BodyPrompt] 상태 로딩 실패', err);
-        setShowBodyPrompt(true);
+        setShowBodyPrompt(false);
       }
     };
 
@@ -1024,10 +1038,10 @@ export const MainPage = () => {
                 style={[
                   styles.runningLegSwirl,
                   {
-                    width: runPetRenderSize * 0.257,
-                    height: runPetRenderSize * 0.257,
-                    left: runPetRenderSize * 0.3715,
-                    bottom: -runPetRenderSize * 0.02,
+                    width: runPetRenderSize * RUN_SWIRL_SIZE_RATIO,
+                    height: runPetRenderSize * RUN_SWIRL_SIZE_RATIO,
+                    left: runPetRenderSize * RUN_SWIRL_CENTER_LEFT_RATIO,
+                    bottom: runPetRenderSize * RUN_SWIRL_BOTTOM_RATIO,
                     transform: [
                       { rotate: runLegSwirlRotate },
                       { scale: runLegSwirlScale },

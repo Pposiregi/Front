@@ -12,13 +12,16 @@ const PET_RUN_COMPLETE_SMILE_MS = PET_EXPRESSION_RESET_MS + 500;
 const PET_DRAG_RESET_MS = 700;
 const PET_DRAG_TRIGGER_DISTANCE = 18;
 
+const isSupportedPetType = (value: string): value is PetType =>
+  value === 'CAT' || value === 'DOG';
+
 /***
  * 펫 상호작용에 따른 표정 변화를 관리하는 커스텀 훅
  * - MainPage에서 펫과의 상호작용에 따른 표정 변화를 일관되게 관리한다.
  *
  */
 
-export const usePetExpression = (selectedPetType: PetType) => {
+export const usePetExpression = (selectedPetType: PetType | string) => {
   // neutral 이외의 값이 들어오면 해당 표정 오버레이를 렌더링
   const [petExpression, setPetExpression] = useState<PetExpression>('neutral');
   // 표정 자동 복귀 타이머를 한 곳에서 관리해 중복 setTimeout 누적 막기
@@ -112,10 +115,14 @@ export const usePetExpression = (selectedPetType: PetType) => {
     }, [resetPetExpression])
   );
 
+  // 서버/스토리지에 오래된 petType이 남아도 표정 렌더링이 화면을 크래시시키지 않게 막는다.
+  const expressionAssetsByType = isSupportedPetType(selectedPetType)
+    ? PET_EXPRESSION_ASSETS[selectedPetType]
+    : undefined;
   const expressionOverlays =
     petExpression === 'neutral'
       ? undefined
-      : PET_EXPRESSION_ASSETS[selectedPetType][petExpression];
+      : expressionAssetsByType?.[petExpression];
 
   // MainPage 에서는 실제 렌더링 오버레이와 연결용 핸들러만 받으면 되도록 인터페이스를 단순화한다.
   return {

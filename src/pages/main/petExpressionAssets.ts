@@ -43,7 +43,7 @@ export const PET_EXPRESSION_ASSETS: Record<
     sad: {
       baseFace: bagicCatFace,
       eyes: bagicCatSadEye,
-      mouth: bagicCatAmazedMouse,
+      // 고양이는 sad mouth 전용 자산이 없어 어색한 입 레이어 대신 눈만 교체한다.
     },
   },
   DOG: {

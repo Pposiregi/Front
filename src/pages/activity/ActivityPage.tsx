@@ -337,9 +337,14 @@ function ActivityPage() {
         burnCalories: 0,
       };
 
-      for (const session of todaySessions) {
-        try {
-          const detail = await getSessionDetail(session.sessionId);
+      // 세션 상세는 서로 독립적이므로 병렬 조회하고, 일부 실패해도 가능한 값은 합산한다.
+      const detailResults = await Promise.allSettled(
+        todaySessions.map((session) => getSessionDetail(session.sessionId))
+      );
+
+      detailResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const detail = result.value;
           aggregated.steps += Math.max(0, Number(detail.stepCount) || 0);
           aggregated.distanceKm +=
             Math.max(0, Number(detail.totalDistance) || 0) / 1000;
@@ -347,14 +352,15 @@ function ActivityPage() {
             0,
             Number(detail.burnCalories) || 0
           );
-        } catch (detailError) {
-          console.warn(
-            '[Activity] 세션 상세 조회 실패',
-            session.sessionId,
-            detailError
-          );
+          return;
         }
-      }
+
+        console.warn(
+          '[Activity] 세션 상세 조회 실패',
+          todaySessions[index]?.sessionId,
+          result.reason
+        );
+      });
 
       if (__DEV__) {
         console.log(
