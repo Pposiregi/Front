@@ -417,6 +417,7 @@ function AppInner() {
 
   console.log('Final isLoggedIn 값:', isLoggedIn);
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
+  console.log('Final petId 값:', petId, '/ hasPet:', hasPet);
 
   return (
     <NavigationContainer

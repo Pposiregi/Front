@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch } from '../../store';
 import userSlice from '../../slices/user';
 import OptionalInfoPage from './OptionalInfoPage';
-import PermissionPage from './PermissionPage';
+import PermissionPage, { TermsAgreement } from './PermissionPage';
 import AppPermissionGuidePage from './AppPermissionGuidePage';
 import UserInfoPage from './UserInfoPage';
 import { signUp } from '@api/authApi';
@@ -45,15 +45,8 @@ const IntroPage = () => {
 
   // 서버에 보낼 사용자 정보 저장
   const [formData, setFormData] = useState({
-    // PermissionPage 정보
-    permissions: {
-      serviceAgree: false,
-      privacyPolicyAgree: false,
-      locationAgree: false,
-      privacyAgree: false,
-      healthAgree: false,
-      pushAgree: false,
-    },
+    // PermissionPage 정보: 서버에서 받은 약관 목록을 동의 여부와 함께 저장
+    termsAgreements: [] as TermsAgreement[],
     // UserInfoPage 정보
     nickName: '',
     birth: { year: '', month: '', day: '' },
@@ -98,16 +91,6 @@ const IntroPage = () => {
     const toNumberOrUndefined = (value: string) =>
       value.trim() === '' ? undefined : Number(value);
 
-    // authRequest 타입에 맞게 변환
-    const {
-      serviceAgree,
-      privacyPolicyAgree,
-      locationAgree,
-      privacyAgree,
-      healthAgree,
-      pushAgree,
-    } = finalFormData.permissions;
-
     const requestBody: authRequest = {
       nickname: finalFormData.nickName,
       age,
@@ -118,14 +101,10 @@ const IntroPage = () => {
       pbf: toNumberOrUndefined(finalFormData.pbf),
       targetPbf: toNumberOrUndefined(finalFormData.targetPbf),
       targetStepCount: toNumberOrUndefined(finalFormData.targetStepCount),
-      termsAgreements: [
-        { termsId: 4, isAgreed: serviceAgree }, // SERVICE_USE v2.0
-        { termsId: 5, isAgreed: privacyPolicyAgree }, // PRIVACY_POLICY v2.0
-        { termsId: 7, isAgreed: privacyAgree }, // PRIVACY_COLLECTION v2.0
-        { termsId: 8, isAgreed: locationAgree }, // LOCATION_BASED v2.0
-        { termsId: 9, isAgreed: healthAgree }, // HEALTH_INFO v2.0
-        { termsId: 6, isAgreed: pushAgree }, // MARKETING v2.0
-      ],
+      termsAgreements: finalFormData.termsAgreements.map(({ termsId, isAgreed }) => ({
+        termsId,
+        isAgreed,
+      })),
     };
     try {
       const signUpResult = await signUp(requestBody);
@@ -180,7 +159,9 @@ const IntroPage = () => {
         <AppPermissionGuidePage
           key='2'
           onNext={goToNextPage}
-          pushAgree={formData.permissions.pushAgree}
+          pushAgree={
+            formData.termsAgreements.find((t) => t.termsCode === 'MARKETING')?.isAgreed ?? false
+          }
         />
         <UserInfoPage key='3' onNext={handleNext} />
         <OptionalInfoPage key='4' onFinish={handleFinish} />

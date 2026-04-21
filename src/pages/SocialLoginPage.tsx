@@ -23,6 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
 import { getSocialLogin } from '@api/socialLoginApi';
+import { getUser } from '@api/mainApi';
 import { logLogin } from '@utils/analytics';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
@@ -68,9 +69,13 @@ const SocialLoginPage = () => {
       // firstLoginCheck 내부의 서버 오류 Alert와 중복되지 않도록
       // SDK 레벨(앱 미설치, 사용자 취소 제외) 오류만 표시
       const code = (err as any)?.code;
-      const isCancelled = code === 'SIGN_IN_CANCELLED' || code === 'E_CANCELLED';
+      const isCancelled =
+        code === 'SIGN_IN_CANCELLED' || code === 'E_CANCELLED';
       if (!isCancelled) {
-        Alert.alert('로그인 실패', '로그인 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
+        Alert.alert(
+          '로그인 실패',
+          '로그인 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.'
+        );
       }
     } finally {
       setLoading(false);
@@ -127,7 +132,31 @@ const SocialLoginPage = () => {
         result.serverAccessToken
       );
 
-      // Redux 저장
+      // 기존 회원이면 dispatch 전에 petId를 먼저 읽어둔다.
+      // (setAuth dispatch 직후 렌더에서 hasPet=false로 PetCreatePage가 노출되는 것을 방지)
+      // AsyncStorage에 없으면(재설치 등) 서버에서 조회해 복원한다.
+      let storedPetId: string | null = null;
+      if (result.registrationStatus !== 'INCOMPLETE') {
+        try {
+          storedPetId = await AsyncStorage.getItem('petId');
+          if (!storedPetId) {
+            const userData = await getUser();
+            if (userData.pet?.petId) {
+              storedPetId = String(userData.pet.petId);
+              await AsyncStorage.setItem('petId', storedPetId);
+            }
+          }
+        } catch (err) {
+          console.warn('petId 복원 실패', err);
+          Alert.alert(
+            '데이터 로드 실패',
+            '사용자 정보를 불러오는 데 실패했습니다.\n잠시 후 다시 시도해주세요.'
+          );
+          return;
+        }
+      }
+
+      // 모든 async 작업 완료 후 dispatch를 한꺼번에 처리 → 렌더 1회로 일관된 상태 적용
       dispatch(
         userSlice.actions.setAuth({
           accessToken: result.serverAccessToken,
@@ -135,22 +164,15 @@ const SocialLoginPage = () => {
         })
       );
 
-      // 신규/기존 회원 분기
       if (result.registrationStatus === 'INCOMPLETE') {
         dispatch(userSlice.actions.setSignUpInProgress(true));
         console.log('회원가입이 완료 되지 않은 사용자');
       } else {
+        if (storedPetId) {
+          dispatch(userSlice.actions.setPet(Number(storedPetId)));
+        }
         dispatch(userSlice.actions.setSignUpInProgress(false));
         console.log('회원가입이 완료된 사용자');
-        // 로그아웃 후 재로그인 시 Redux petId가 초기화되므로 AsyncStorage에서 복원
-        try {
-          const storedPetId = await AsyncStorage.getItem('petId');
-          if (storedPetId) {
-            dispatch(userSlice.actions.setPet(Number(storedPetId)));
-          }
-        } catch (err) {
-          console.warn('petId 복원 실패', err);
-        }
         await logLogin(platform);
       }
     } catch (err: any) {
@@ -168,7 +190,10 @@ const SocialLoginPage = () => {
   const signInWithKakao = async (): Promise<void> => {
     const token = await login();
     if (!token.idToken) {
-      Alert.alert('로그인 실패', 'Kakao idToken을 받아오지 못했습니다.\nKakao OIDC 설정을 확인해주세요.');
+      Alert.alert(
+        '로그인 실패',
+        'Kakao idToken을 받아오지 못했습니다.\nKakao OIDC 설정을 확인해주세요.'
+      );
       return;
     }
     await AsyncStorage.setItem('platform', 'kakao');
