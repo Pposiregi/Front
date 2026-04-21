@@ -37,14 +37,14 @@
     },
     {
       "key": "arm_right",
-      "file": "cat_v1_02_arm_right.png",
-      "zIndex": 5,
+      "file": "cat_v1_04_arm_right.png",
+      "zIndex": 4,
       "anchor": "shoulder_right"
     },
     {
       "key": "face",
-      "file": "cat_v1_07_face_none.png",
-      "zIndex": 7,
+      "file": "cat_v1_05_face_none.png",
+      "zIndex": 5,
       "anchor": "face"
     }
   ],
