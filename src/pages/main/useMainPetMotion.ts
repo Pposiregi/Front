@@ -272,12 +272,20 @@ export const useMainPetMotion = ({
       outputRange: toMutableRange(PET_RUN_MOTION.faceX),
     });
     const faceY = runCycleProgress.interpolate({
-      inputRange: runPhase,
-      outputRange: toMutableRange(PET_RUN_MOTION.faceY),
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: [0, -0.7, 0.15, -0.45, 0],
+    });
+    const faceRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: ['-0.6deg', '0.45deg', '0.15deg', '-0.35deg', '-0.6deg'],
     });
     const armLeftRotate = runCycleProgress.interpolate({
       inputRange: runPhase,
       outputRange: toMutableRange(PET_RUN_MOTION.armLeftRotate),
+    });
+    const catArmLeftRotate = runCycleProgress.interpolate({
+      inputRange: runPhase,
+      outputRange: ['-8deg', '6deg', '-8deg'],
     });
     const armRightRotate = runCycleProgress.interpolate({
       inputRange: runPhase,
@@ -332,7 +340,7 @@ export const useMainPetMotion = ({
       },
       arm_left: {
         translateX: limbLeftX,
-        rotateDeg: armLeftRotate,
+        rotateDeg: selectedPetType === 'CAT' ? catArmLeftRotate : armLeftRotate,
         scaleX: armFatScaleX,
         scaleY: armFatScaleY,
       },
@@ -366,36 +374,42 @@ export const useMainPetMotion = ({
       face: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       flushing_left: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       flushing_right: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       eye_left: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       eye_right: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       mouth: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
@@ -404,6 +418,7 @@ export const useMainPetMotion = ({
     effectivePbf,
     petRenderSize,
     runCycleProgress,
+    selectedPetType,
     torsoMorph.scaleX,
     torsoMorph.scaleY,
     torsoMorph.t,

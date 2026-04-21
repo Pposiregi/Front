@@ -28,10 +28,10 @@
       "anchor": "tail"
     },
     {
-      "key": "leg_left",
-      "file": "sibadog_v1_02_leg_left.png",
-      "zIndex": 2,
-      "anchor": "hip_left"
+      "key": "arm_left",
+      "file": "sibadog_v1_01_arm_left.png",
+      "zIndex": 1,
+      "anchor": "shoulder_left"
     },
     {
       "key": "torso",
@@ -40,45 +40,15 @@
       "anchor": "torso"
     },
     {
-      "key": "leg_right",
-      "file": "sibadog_v1_05_leg_right.png",
-      "zIndex": 5,
-      "anchor": "hip_right"
-    },
-    {
-      "key": "arm_left",
-      "file": "sibadog_v1_02_arm_left.png",
-      "zIndex": 2,
-      "anchor": "shoulder_left"
-    },
-    {
       "key": "arm_right",
-      "file": "sibadog_v1_05_arm_right.png",
-      "zIndex": 5,
+      "file": "sibadog_v1_04_arm_right.png",
+      "zIndex": 4,
       "anchor": "shoulder_right"
     },
     {
       "key": "face",
-      "file": "sibadog_v1_04_face.png",
-      "zIndex": 4,
-      "anchor": "face"
-    },
-    {
-      "key": "flushing_right",
-      "file": "sibadog_v1_06_flushing_right.png",
-      "zIndex": 6,
-      "anchor": "face"
-    },
-    {
-      "key": "eye_right",
-      "file": "sibadog_v1_08_eye_right.png",
-      "zIndex": 8,
-      "anchor": "face"
-    },
-    {
-      "key": "mouth",
-      "file": "sibadog_v1_07_mouth_none.png",
-      "zIndex": 7,
+      "file": "sibadog_v1_05_face.png",
+      "zIndex": 5,
       "anchor": "face"
     }
   ],

@@ -46,7 +46,7 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
-const RUN_PET_SCALE = 0.7;
+const RUN_PET_SCALE = 0.91;
 const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
@@ -1024,10 +1024,10 @@ export const MainPage = () => {
                 style={[
                   styles.runningLegSwirl,
                   {
-                    width: runPetRenderSize * 0.42,
-                    height: runPetRenderSize * 0.42,
-                    right: runPetRenderSize * 0.22,
-                    bottom: -runPetRenderSize * 0.11,
+                    width: runPetRenderSize * 0.257,
+                    height: runPetRenderSize * 0.257,
+                    left: runPetRenderSize * 0.3715,
+                    bottom: -runPetRenderSize * 0.02,
                     transform: [
                       { rotate: runLegSwirlRotate },
                       { scale: runLegSwirlScale },

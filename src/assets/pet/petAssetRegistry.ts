@@ -50,15 +50,10 @@ const sibadogV1MainPartAssets: Record<string, ImageSourcePropType> = {
 
 const sibadogV1RunPartAssets: Record<string, ImageSourcePropType> = {
   'sibadog_v1_00_tail_none.png': require('./siba_dog/run/sibadog_v1_00_tail_none.png'),
-  'sibadog_v1_02_arm_left.png': require('./siba_dog/run/sibadog_v1_02_arm_left.png'),
-  'sibadog_v1_05_arm_right.png': require('./siba_dog/run/sibadog_v1_05_arm_right.png'),
-  'sibadog_v1_02_leg_left.png': require('./siba_dog/run/sibadog_v1_02_leg_left.png'),
-  'sibadog_v1_05_leg_right.png': require('./siba_dog/run/sibadog_v1_05_leg_right.png'),
+  'sibadog_v1_01_arm_left.png': require('./siba_dog/run/sibadog_v1_01_arm_left.png'),
   'sibadog_v1_03_torso_none.png': require('./siba_dog/run/sibadog_v1_03_torso_none.png'),
-  'sibadog_v1_04_face.png': require('./siba_dog/run/sibadog_v1_04_face.png'),
-  'sibadog_v1_06_flushing_right.png': require('./siba_dog/run/sibadog_v1_06_flushing_right.png'),
-  'sibadog_v1_07_mouth_none.png': require('./siba_dog/run/sibadog_v1_07_mouth_none.png'),
-  'sibadog_v1_08_eye_right.png': require('./siba_dog/run/sibadog_v1_08_eye_right.png'),
+  'sibadog_v1_04_arm_right.png': require('./siba_dog/run/sibadog_v1_04_arm_right.png'),
+  'sibadog_v1_05_face.png': require('./siba_dog/run/sibadog_v1_05_face.png'),
 };
 
 const petAssetRegistry: Record<PetTemplateId, PetAssetRegistryEntry> = {
