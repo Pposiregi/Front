@@ -5,7 +5,7 @@ export const badgeImages: Record<number, any> = {
   2: require('../../assets/images/badges/mission_2_BRONZE.png'),
   3: require('../../assets/images/badges/mission_3_BRONZE.png'),
   4: require('../../assets/images/badges/mission_4_BRONZE.png'),
-  //5: require('../../assets/images/badges/mission_5_BRONZE.png'),
+  5: require('../../assets/images/badges/mission_5_BRONZE.png'),
   //6: require('../../assets/images/badges/mission_6_BRONZE.png'),
   //7: require('../../assets/images/badges/mission_7_BRONZE.png'),
   //8: require('../../assets/images/badges/mission_8_BRONZE.png'),
