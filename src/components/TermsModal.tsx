@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { styles } from '@styles/TermsModal.styles';
+import { SCREEN_HEIGHT } from '@styles/dimensions';
 
 export type SelectedTerms = {
   title: string;
@@ -27,11 +28,11 @@ const TermsModal: React.FC<Props> = ({ terms, onClose }) => {
   return (
     <Modal
       visible
-      animationType="slide"
-      presentationStyle="pageSheet"
+      animationType='slide'
+      presentationStyle='pageSheet'
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <View style={styles.header}>
           <Text style={styles.headerTitle} numberOfLines={2}>
             {terms.title}
@@ -40,13 +41,10 @@ const TermsModal: React.FC<Props> = ({ terms, onClose }) => {
             <Text style={styles.closeButtonText}>✕</Text>
           </Pressable>
         </View>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
+        <ScrollView style={{ height: SCREEN_HEIGHT * 0.8 }}>
           <Text style={styles.content}>{terms.content}</Text>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };

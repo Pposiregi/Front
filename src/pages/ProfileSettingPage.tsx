@@ -29,6 +29,8 @@ import type { PetType } from 'types/profile';
 import { getResolvedPetId } from '@utils/petIdStorage';
 import { isValidNickname } from '@utils/validation';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
+import TermsModal, { SelectedTerms } from '@components/TermsModal';
+import { getTerms, TermsResponse } from '@api/termsApi';
 
 const PET_ID_FALLBACK = 1;
 
@@ -67,6 +69,10 @@ const ProfileSettingPage = () => {
   const [targetPbfInput, setTargetPbfInput] = useState('');
   const [petId, setPetId] = useState(PET_ID_FALLBACK);
   const currentPetType = useSelector((state: RootState) => state.user.petType);
+  const [termsListModalVisible, setTermsListModalVisible] = useState(false);
+  const [termsList, setTermsList] = useState<TermsResponse[]>([]);
+  const [termsLoading, setTermsLoading] = useState(false);
+  const [selectedTerms, setSelectedTerms] = useState<SelectedTerms>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -223,9 +229,21 @@ const ProfileSettingPage = () => {
           />
           <SettingRow
             label='약관 및 정책'
-            onPress={() =>
-              Alert.alert('약관 및 정책', '약관/정책 웹뷰를 연결해둘게요.')
-            }
+            onPress={async () => {
+              setTermsListModalVisible(true);
+              if (termsList.length === 0) {
+                setTermsLoading(true);
+                try {
+                  const data = await getTerms();
+                  setTermsList(data);
+                } catch {
+                  Alert.alert('오류', '약관을 불러오지 못했습니다.');
+                  setTermsListModalVisible(false);
+                } finally {
+                  setTermsLoading(false);
+                }
+              }
+            }}
           />
           <SettingRow label='현재버전 1.0.0' muted onPress={() => {}} />
         </View>
@@ -456,6 +474,45 @@ const ProfileSettingPage = () => {
           </View>
         </View>
       </Modal>
+
+      {/* 약관 및 정책 목록 모달 */}
+      <Modal
+        visible={termsListModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setTermsListModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>약관 및 정책</Text>
+            {termsLoading ? (
+              <Text style={styles.modalBody}>불러오는 중...</Text>
+            ) : (
+              termsList.map((term) => (
+                <Pressable
+                  key={term.termsId}
+                  style={styles.row}
+                  onPress={() => {
+                    setTermsListModalVisible(false);
+                    setSelectedTerms({ title: term.title, content: term.content });
+                  }}
+                >
+                  <Text style={styles.rowLabel}>{term.title}</Text>
+                  <Text style={styles.arrow}>{'>'}</Text>
+                </Pressable>
+              ))
+            )}
+            <Pressable
+              style={[styles.modalButton, styles.modalCancel, { marginTop: 12 }]}
+              onPress={() => setTermsListModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>닫기</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <TermsModal terms={selectedTerms} onClose={() => setSelectedTerms(null)} />
 
       {/* 펫 정보 수정 모달 */}
       <Modal
