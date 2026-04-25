@@ -21,6 +21,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
@@ -192,6 +193,7 @@ const runWithRetry = async <T,>(
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
+  const insets = useSafeAreaInsets();
 
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const routeNameRef = useRef<string | undefined>(undefined);
@@ -466,6 +468,7 @@ function AppInner() {
 
   console.log('Final isLoggedIn 값:', isLoggedIn);
   console.log('Final isSignUpInProgress 값:', isSignUpInProgress);
+  console.log('Final petId 값:', petId, '/ hasPet:', hasPet);
 
   return (
     <NavigationContainer
@@ -509,6 +512,10 @@ function AppInner() {
               ...getTabScreenOptions(route.name as TabIconKey),
               tabBarStyle: [
                 styles.tabBar,
+                {
+                  height: 60 + insets.bottom,
+                  paddingBottom: 16 + insets.bottom,
+                },
                 isRunningActive ? styles.tabBarLocked : null,
               ],
             })}
@@ -559,9 +566,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   tabBar: {
-    height: 60,
     paddingTop: 10,
-    paddingBottom: 16,
     backgroundColor: '#fff',
     borderTopWidth: 0.5,
     borderTopColor: '#e5e7eb',

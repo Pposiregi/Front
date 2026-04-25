@@ -45,10 +45,38 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   checkboxLabel: {
+    flex: 1,
     marginLeft: Spacing.sm,
     fontSize: Typography.body,
     fontFamily: Fonts.Roboto_VariableFont,
     color: Colors.textPrimary,
+  },
+  requiredBadge: {
+    color: Colors.accentStrong,
+    fontWeight: '600',
+  },
+  optionalBadge: {
+    color: Colors.textSecondary,
+  },
+  // 약관 항목 행 (체크 영역 + 화살표 버튼)
+  termRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  termCheckArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  arrowButton: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  arrowText: {
+    fontSize: Typography.body,
+    color: Colors.textSecondary,
+    fontFamily: Fonts.Roboto_VariableFont,
   },
   divider: {
     height: 1,
