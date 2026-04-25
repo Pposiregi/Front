@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm - 2,
-    paddingBottom: Spacing.sm + 2,
+    paddingBottom: Spacing.md,
   },
   backButton: {
     width: 44,
@@ -36,11 +36,21 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     paddingHorizontal: Spacing.sm,
   },
+  sectionHeader: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: Typography.caption,
+    fontWeight: '700',
+    color: Colors.textMuted,
+  },
   section: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: Colors.background,
     backgroundColor: Colors.surface,
+    marginBottom: Spacing.md,
   },
   row: {
     flexDirection: 'row',
@@ -65,7 +75,7 @@ const styles = StyleSheet.create({
   },
   actionArea: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xl - 2,
+    paddingTop: Spacing.md,
   },
   actionButton: {
     paddingVertical: Spacing.md + 2,
@@ -89,17 +99,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 15,
     color: Colors.errorText,
-  },
-  footerIconRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: Spacing.xxl + Spacing.sm,
-  },
-  footerIcon: {
-    fontSize: 42,
-    marginHorizontal: Spacing.md,
-    color: Colors.divider,
   },
   modalBackdrop: {
     flex: 1,
@@ -148,6 +147,9 @@ const styles = StyleSheet.create({
   modalConfirm: {
     backgroundColor: Colors.accentStrong,
   },
+  modalCloseButton: {
+    marginTop: Spacing.md,
+  },
   modalConfirmText: {
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
@@ -170,6 +172,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.divider,
     backgroundColor: Colors.surface,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
   },
   chipSelected: {
     borderColor: Colors.accentStrong,

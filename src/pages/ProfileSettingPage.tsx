@@ -217,6 +217,7 @@ const ProfileSettingPage = () => {
           <View style={styles.backButton} />
         </View>
 
+        <Text style={styles.sectionHeader}>프로필 관리</Text>
         <View style={styles.section}>
           <SettingRow
             label='계정설정'
@@ -232,6 +233,7 @@ const ProfileSettingPage = () => {
           />
         </View>
 
+        <Text style={styles.sectionHeader}>서비스 설정</Text>
         <View style={styles.section}>
           <SettingRow
             label='알림설정'
@@ -296,11 +298,6 @@ const ProfileSettingPage = () => {
             <Text style={devStyles.text}>[DEV] 회원가입 플로우 테스트</Text>
           </Pressable>
         )}
-
-        <View style={styles.footerIconRow}>
-          <Text style={styles.footerIcon}>💪</Text>
-          <Text style={styles.footerIcon}>🐶</Text>
-        </View>
       </ScrollView>
 
       <Modal
@@ -512,7 +509,10 @@ const ProfileSettingPage = () => {
                   style={styles.row}
                   onPress={() => {
                     setTermsListModalVisible(false);
-                    setSelectedTerms({ title: term.title, content: term.content });
+                    setSelectedTerms({
+                      title: term.title,
+                      content: term.content,
+                    });
                   }}
                 >
                   <Text style={styles.rowLabel}>{term.title}</Text>
@@ -521,7 +521,11 @@ const ProfileSettingPage = () => {
               ))
             )}
             <Pressable
-              style={[styles.modalButton, styles.modalCancel, { marginTop: 12 }]}
+              style={[
+                styles.modalButton,
+                styles.modalCancel,
+                styles.modalCloseButton,
+              ]}
               onPress={() => setTermsListModalVisible(false)}
             >
               <Text style={styles.modalCancelText}>닫기</Text>
@@ -530,7 +534,10 @@ const ProfileSettingPage = () => {
         </View>
       </Modal>
 
-      <TermsModal terms={selectedTerms} onClose={() => setSelectedTerms(null)} />
+      <TermsModal
+        terms={selectedTerms}
+        onClose={() => setSelectedTerms(null)}
+      />
 
       {/* 펫 정보 수정 모달 */}
       <Modal
@@ -549,7 +556,7 @@ const ProfileSettingPage = () => {
               value={petNameInput}
               onChangeText={setPetNameInput}
             />
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+            <View style={styles.chipRow}>
               {(['DOG', 'CAT'] as PetType[]).map((type) => (
                 <Pressable
                   key={type}
