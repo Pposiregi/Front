@@ -285,7 +285,7 @@ export const useMainPetMotion = ({
     });
     const catArmLeftRotate = runCycleProgress.interpolate({
       inputRange: runPhase,
-      outputRange: ['-8deg', '6deg', '-8deg'],
+      outputRange: toMutableRange(PET_RUN_MOTION.catArmLeftRotate),
     });
     const armRightRotate = runCycleProgress.interpolate({
       inputRange: runPhase,

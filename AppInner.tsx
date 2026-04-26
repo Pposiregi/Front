@@ -73,6 +73,7 @@ GoogleSignin.configure({
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const STARTUP_FAIL_SAFE_TIMEOUT_MS = 10000;
 
 /**
  * 탭바 아이콘 생성 함수.
@@ -197,6 +198,7 @@ function AppInner() {
 
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const routeNameRef = useRef<string | undefined>(undefined);
+  const startupFailSafeTriggeredRef = useRef(false);
 
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
@@ -255,9 +257,10 @@ function AppInner() {
 
     const fallbackTimer = setTimeout(() => {
       console.warn('[Startup] 초기화 제한 시간 초과, 앱 셸을 먼저 표시합니다.');
+      startupFailSafeTriggeredRef.current = true;
       SplashScreen.hide();
       setLoading(false);
-    }, 7000);
+    }, STARTUP_FAIL_SAFE_TIMEOUT_MS);
 
     return () => clearTimeout(fallbackTimer);
   }, [loading]);
@@ -283,6 +286,9 @@ function AppInner() {
           );
         }
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        if (startupFailSafeTriggeredRef.current) {
+          return;
+        }
         if (refreshToken) {
           try {
             const result = await withTimeout(
@@ -290,11 +296,17 @@ function AppInner() {
               refreshAccessToken(),
               5000
             );
+            if (startupFailSafeTriggeredRef.current) {
+              return;
+            }
             if (result?.serverAccessToken) {
               await EncryptedStorage.setItem(
                 'serverAccessToken',
                 result.serverAccessToken
               );
+              if (startupFailSafeTriggeredRef.current) {
+                return;
+              }
               dispatch(
                 userSlice.actions.setAuth({
                   accessToken: result.serverAccessToken,
@@ -307,6 +319,9 @@ function AppInner() {
               );
             }
           } catch (err: any) {
+            if (startupFailSafeTriggeredRef.current) {
+              return;
+            }
             const status = err?.response?.status;
             if (status === 401) {
               await notifySessionExpired('REFRESH_TOKEN_INVALID');
@@ -315,13 +330,16 @@ function AppInner() {
           }
         }
         try {
-          const petId = await withTimeout(
+          const storedPetId = await withTimeout(
             'getPetId',
             AsyncStorage.getItem('petId'),
             1000
           );
-          if (petId) {
-            dispatch(userSlice.actions.setPet(Number(petId)));
+          if (startupFailSafeTriggeredRef.current) {
+            return;
+          }
+          if (storedPetId) {
+            dispatch(userSlice.actions.setPet(Number(storedPetId)));
           }
         } catch (err) {
           console.warn('petId 확인 실패', err);

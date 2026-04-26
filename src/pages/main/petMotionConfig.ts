@@ -16,6 +16,7 @@ type PetRunMotionConfig = {
   faceX: NumberPhase;
   faceY: NumberPhase;
   armLeftRotate: DegreePhase;
+  catArmLeftRotate: DegreePhase;
   armRightRotate: DegreePhase;
   legLeftRotate: DegreePhase;
   legRightRotate: DegreePhase;
@@ -34,6 +35,7 @@ export const PET_RUN_MOTION = {
   faceX: [-0.5, 0.5, -0.5] as const,
   faceY: [0, -0.2, 0] as const,
   armLeftRotate: ['-22deg', '18deg', '-22deg'] as const,
+  catArmLeftRotate: ['-8deg', '6deg', '-8deg'] as const,
   armRightRotate: ['18deg', '-22deg', '18deg'] as const,
   legLeftRotate: ['0deg', '0deg', '0deg'] as const,
   legRightRotate: ['0deg', '0deg', '0deg'] as const,
