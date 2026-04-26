@@ -1215,7 +1215,7 @@ export const MainPage = () => {
             <Text style={styles.startText}>END</Text>
           ) : (
             <Image
-              source={require('@assets/images/Icon_colored/fb_run.png')}
+              source={require('@assets/images/Icon_colored/fb_run_2.png')}
               style={styles.startIcon}
               resizeMode='contain'
             />
