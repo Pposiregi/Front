@@ -355,7 +355,7 @@ export const styles = StyleSheet.create({
   sessionReloadRow: {
     // 숨긴 항목 복구 버튼은 러닝별 탭의 보조 액션으로 카드 목록 바로 위에 둔다.
     alignItems: 'stretch',
-    marginTop: -spacing.xs,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   sessionReloadButton: {
