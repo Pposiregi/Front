@@ -28,6 +28,7 @@ import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
 import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
 import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
+import runLegSwirl from '@assets/pet/etc/swirl.png';
 import { SCREEN_WIDTH } from '@styles/dimensions';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
@@ -45,16 +46,27 @@ const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
-const RUN_PET_SCALE = 0.7;
-const FAT_VER_PBF_PRESETS = [15, 25, 35] as const;
+// 런 화면에서는 기본 펫보다 크게 보여 속도감과 가시성을 확보한다.
+const RUN_PET_SCALE = 0.91;
 const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
 const RUN_BG_TILE_OFFSETS = [0, 1, 2] as const;
+const RUN_SWIRL_LOOP_MS = 420;
+// 바람개비 이펙트는 펫 레이어 기준 중앙에 두고, 발에 너무 떨어지지 않게 붙인다.
+const RUN_SWIRL_SIZE_RATIO = 0.257;
+const RUN_SWIRL_CENTER_LEFT_RATIO = (1 - RUN_SWIRL_SIZE_RATIO) / 2;
+const RUN_SWIRL_BOTTOM_RATIO = -0.02;
+const DEV_PBF_MIN = 12;
+const DEV_PBF_MAX = 40;
+const DEV_PBF_STEP = 1;
 // Baseline pbf values used only when no body-history pbf is available.
 const MALE_BASELINE_PBF = 17;
 const FEMALE_BASELINE_PBF = 25;
+
+const clampDevPbf = (value: number) =>
+  Math.min(DEV_PBF_MAX, Math.max(DEV_PBF_MIN, Math.round(value)));
 
 /** 밀리초 단위 러닝 시간을 한국어 문자열로 변환한다. */
 const formatDuration = (durationMs: number) => {
@@ -110,6 +122,8 @@ import {
   PET_TEMPLATE_ID_BY_TYPE,
   PET_TYPE_STORAGE_KEY,
 } from '@shared/config/petConfig';
+import { setPetId } from '@utils/petIdStorage';
+import { usePetExpression } from './usePetExpression';
 
 /**
  * 메인 화면 컴포넌트
@@ -151,7 +165,9 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
-  const [fatVerIndex, setFatVerIndex] = useState(-1);
+  // __DEV__에서만 쓰는 체형 미세조정 프리뷰 값이다. null이면 실제 사용자 PBF를 따른다.
+  const [devPreviewPbf, setDevPreviewPbf] = useState<number | null>(null);
+  const [devPbfBarWidth, setDevPbfBarWidth] = useState(0);
   const [currentPbf, setCurrentPbf] = useState<number | null>(null);
   const userGender = useSelector((state: RootState) => state.user.gender);
   const selectedPetType = useSelector((state: RootState) => state.user.petType);
@@ -172,6 +188,7 @@ export const MainPage = () => {
           dispatch(userSlice.actions.setPet(null));
           return;
         }
+        dispatch(userSlice.actions.setPet(data.pet.petId));
         const resolvedPetType =
           data.petType === 'DOG' || data.petType === 'CAT'
             ? data.petType
@@ -190,6 +207,7 @@ export const MainPage = () => {
 
         if (resolvedPetType) {
           try {
+            await setPetId(data.pet.petId);
             // 서버가 준 최신 petType으로 로컬 캐시를 재정렬해 다음 진입 시 stale 값을 줄인다.
             await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, resolvedPetType);
           } catch (storageError) {
@@ -199,6 +217,7 @@ export const MainPage = () => {
         }
 
         try {
+          await setPetId(data.pet.petId);
           // 구버전 응답 등으로 petType이 비어 있을 때만 로컬 캐시를 fallback으로 사용한다.
           const storedPetType = await AsyncStorage.getItem(
             PET_TYPE_STORAGE_KEY
@@ -229,6 +248,7 @@ export const MainPage = () => {
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
   const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
   const runBgProgress = useRef(new Animated.Value(0)).current;
+  const runSwirlProgress = useRef(new Animated.Value(0)).current;
 
   const mapRef = useRef<MapView | null>(null);
   const runningStartMsRef = useRef<number | null>(null);
@@ -327,6 +347,29 @@ export const MainPage = () => {
   }, [isTracking, runBgProgress]);
 
   useEffect(() => {
+    if (!isTracking) {
+      runSwirlProgress.stopAnimation();
+      runSwirlProgress.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.timing(runSwirlProgress, {
+        toValue: 1,
+        duration: RUN_SWIRL_LOOP_MS,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+      runSwirlProgress.stopAnimation();
+    };
+  }, [isTracking, runSwirlProgress]);
+
+  useEffect(() => {
     /**
      * 로컬에 저장된 몸 목표값 불러오기 (프롬프트 진행률 계산용)
      */
@@ -350,8 +393,11 @@ export const MainPage = () => {
   /**
    * 오늘 몸 기록이 있는지 확인
    * - 기록이 있으면 프롬프트를 스킵한다.
+   * - 조회 실패는 기록 없음과 구분해, 중복 입력을 유도하지 않는다.
    */
-  const checkTodayBodyHistory = useCallback(async () => {
+  const checkTodayBodyHistory = useCallback(async (): Promise<
+    'found' | 'missing' | 'failed'
+  > => {
     const todayKey = formatDateKey(new Date());
     try {
       const existing = await getBodyHistoryByDate(todayKey);
@@ -360,16 +406,16 @@ export const MainPage = () => {
         // 오늘 기록이 있으면 팝업을 띄우지 않고 스킵 상태로 저장
         await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
         setShowBodyPrompt(false);
-        return true;
+        return 'found';
       }
+      setCurrentPbf(null);
+      return 'missing';
     } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setCurrentPbf(null);
-        return false; // 기록 없음
-      }
       console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
+      // 서버/네트워크 오류 시에는 이미 기록한 사용자가 다시 입력하지 않도록 프롬프트를 닫는다.
+      setShowBodyPrompt(false);
+      return 'failed';
     }
-    return false;
   }, []);
 
   /**
@@ -384,12 +430,15 @@ export const MainPage = () => {
           setShowBodyPrompt(false);
           return;
         }
-        const hasTodayRecord = await checkTodayBodyHistory();
-        if (hasTodayRecord) return;
+        const bodyHistoryState = await checkTodayBodyHistory();
+        if (bodyHistoryState === 'found' || bodyHistoryState === 'failed') {
+          // found는 이미 기록됨, failed는 조회 불가 상태이므로 둘 다 프롬프트를 열지 않는다.
+          return;
+        }
         setShowBodyPrompt(true);
       } catch (err) {
         console.error('[BodyPrompt] 상태 로딩 실패', err);
-        setShowBodyPrompt(true);
+        setShowBodyPrompt(false);
       }
     };
 
@@ -403,9 +452,13 @@ export const MainPage = () => {
   const { transition: changePetState } = usePetFSM();
   const baselinePbf =
     userGender === 'female' ? FEMALE_BASELINE_PBF : MALE_BASELINE_PBF;
-  const selectedPreviewPbf =
-    fatVerIndex >= 0 ? FAT_VER_PBF_PRESETS[fatVerIndex] : null;
+  const selectedPreviewPbf = devPreviewPbf;
   const effectivePbf = selectedPreviewPbf ?? currentPbf ?? baselinePbf;
+  // 테스트 바 thumb/fill 위치 계산용 진행률이다.
+  const devPbfProgress = Math.min(
+    1,
+    Math.max(0, (effectivePbf - DEV_PBF_MIN) / (DEV_PBF_MAX - DEV_PBF_MIN))
+  );
   const { idlePartTransforms, runPartTransforms } = useMainPetMotion({
     isTracking,
     effectivePbf,
@@ -413,12 +466,20 @@ export const MainPage = () => {
     mainPetTemplateId,
     petRenderSize: PET_RENDER_SIZE,
   });
+  const {
+    expressionOverlays: petExpressionOverlays,
+    petPanHandlers,
+    resetPetExpression,
+    showPetPressExpression,
+    showRunCompleteExpression,
+  } = usePetExpression(selectedPetType);
 
   /** 펫을 터치했을 때 HAPPY 상태 전환을 트리거한다. */
-  const onPetTouch = () => {
+  const onPetTouch = useCallback(() => {
     // 1.5초 동안 HAPPY 상태 유지 후 자동 IDLE
     changePetState(PetStates.HAPPY, { duration: 1500 });
-  };
+    showPetPressExpression();
+  }, [changePetState, showPetPressExpression]);
 
   /**
    * 지도 카메라 이동
@@ -504,6 +565,7 @@ export const MainPage = () => {
         setRunSummary(result.summary);
         setShowRunSummaryModal(true);
         await appendTodayRunSeconds(result.summary.durationMs / 1000);
+        showRunCompleteExpression();
         await logRunningComplete({
           distance_m: Math.round(result.summary.distanceMeters),
           duration_s: Math.round(result.summary.durationMs / 1000),
@@ -517,15 +579,48 @@ export const MainPage = () => {
         err?.message ?? '러닝 종료 중 문제가 발생했어요.'
       );
     }
-  }, [appendTodayRunSeconds, endSession]);
+  }, [appendTodayRunSeconds, endSession, showRunCompleteExpression]);
 
-  const handleToggleFatVer = useCallback(() => {
-    setFatVerIndex((prev) => {
-      if (prev < 0) return 0;
-      if (prev >= FAT_VER_PBF_PRESETS.length - 1) return -1;
-      return prev + 1;
-    });
+  const handleSetDevPreviewPbf = useCallback((value: number) => {
+    setDevPreviewPbf(clampDevPbf(value));
   }, []);
+
+  const handleAdjustDevPreviewPbf = useCallback(
+    (delta: number) => {
+      setDevPreviewPbf((prev) => {
+        const nextBase = prev ?? currentPbf ?? baselinePbf;
+        return clampDevPbf(nextBase + delta);
+      });
+    },
+    [baselinePbf, currentPbf]
+  );
+
+  const handleClearDevPreviewPbf = useCallback(() => {
+    setDevPreviewPbf(null);
+  }, []);
+
+  const handlePressDevPbfBar = useCallback(
+    (locationX: number) => {
+      if (devPbfBarWidth <= 0) {
+        return;
+      }
+
+      const ratio = Math.min(1, Math.max(0, locationX / devPbfBarWidth));
+      const value = DEV_PBF_MIN + ratio * (DEV_PBF_MAX - DEV_PBF_MIN);
+      handleSetDevPreviewPbf(value);
+    },
+    [devPbfBarWidth, handleSetDevPreviewPbf]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // 화면을 벗어나면 테스트값을 버리고, 재진입 시 실제 사용자 체지방률로 복귀한다.
+        setDevPreviewPbf(null);
+        resetPetExpression();
+      };
+    }, [resetPetExpression])
+  );
 
   /**
    * Running 시작/종료 핸들러
@@ -542,6 +637,7 @@ export const MainPage = () => {
           setRunSummary(result.summary);
           setShowRunSummaryModal(true);
           await appendTodayRunSeconds(result.summary.durationMs / 1000);
+          showRunCompleteExpression();
           await logRunningComplete({
             distance_m: Math.round(result.summary.distanceMeters),
             duration_s: Math.round(result.summary.durationMs / 1000),
@@ -584,6 +680,7 @@ export const MainPage = () => {
     handleForceEnd,
     endFailureCount,
     isTracking,
+    showRunCompleteExpression,
   ]);
 
   /**
@@ -820,6 +917,14 @@ export const MainPage = () => {
     inputRange: [0, 1],
     outputRange: [0, RUN_BG_TILE_WIDTH],
   });
+  const runLegSwirlRotate = runSwirlProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '-360deg'],
+  });
+  const runLegSwirlScale = runSwirlProgress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.92, 1.08, 0.92],
+  });
   return (
     <View style={styles.container}>
       {/*
@@ -906,22 +1011,46 @@ export const MainPage = () => {
                 </Text>
               </View>
             </View>
-            <PetRenderer
-              size={runPetRenderSize}
-              templateId={runPetTemplateId}
-              partTransforms={runPartTransforms}
+            <View
               style={[
-                styles.running_pet,
-                {
-                  transform: [
-                    {
-                      translateY:
-                        runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
-                    },
-                  ],
-                },
+                styles.runningPetLayer,
+                { width: runPetRenderSize, height: runPetRenderSize },
               ]}
-            />
+            >
+              <PetRenderer
+                size={runPetRenderSize}
+                templateId={runPetTemplateId}
+                partTransforms={runPartTransforms}
+                style={[
+                  styles.running_pet,
+                  {
+                    transform: [
+                      {
+                        translateY:
+                          runPetRenderSize * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                      },
+                    ],
+                  },
+                ]}
+              />
+              <Animated.Image
+                source={runLegSwirl}
+                style={[
+                  styles.runningLegSwirl,
+                  {
+                    width: runPetRenderSize * RUN_SWIRL_SIZE_RATIO,
+                    height: runPetRenderSize * RUN_SWIRL_SIZE_RATIO,
+                    left: runPetRenderSize * RUN_SWIRL_CENTER_LEFT_RATIO,
+                    bottom: runPetRenderSize * RUN_SWIRL_BOTTOM_RATIO,
+                    transform: [
+                      { rotate: runLegSwirlRotate },
+                      { scale: runLegSwirlScale },
+                    ],
+                  },
+                ]}
+                resizeMode='contain'
+              />
+            </View>
           </View>
         </View>
       ) : (
@@ -961,25 +1090,32 @@ export const MainPage = () => {
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
           />
-          {/* 현재는 FSM 상태 테스트를 위해 pressable 후에 미션 성공시로 변경 */}
-          <Pressable onPress={onPetTouch} style={styles.pet}>
-            <PetRenderer
-              size={PET_RENDER_SIZE}
-              templateId={mainPetTemplateId}
-              partTransforms={idlePartTransforms}
-              style={[
-                styles.petImage,
-                {
-                  transform: [
-                    {
-                      translateY:
-                        PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
-                    },
-                  ],
-                },
-              ]}
-            />
-          </Pressable>
+          <View
+            style={styles.pet}
+            collapsable={false}
+            // 드래그 상호작용은 표정 훅이 전담하고, 화면은 핸들러만 연결한다.
+            {...petPanHandlers}
+          >
+            <Pressable onPress={onPetTouch}>
+              <PetRenderer
+                size={PET_RENDER_SIZE}
+                templateId={mainPetTemplateId}
+                partTransforms={idlePartTransforms}
+                expressionOverlays={petExpressionOverlays}
+                style={[
+                  styles.petImage,
+                  {
+                    transform: [
+                      {
+                        translateY:
+                          PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO,
+                      },
+                    ],
+                  },
+                ]}
+              />
+            </Pressable>
+          </View>
           <MainStatCards
             stepCount={displayedSteps}
             totalRunSec={todayTotalRunSec}
@@ -1006,20 +1142,63 @@ export const MainPage = () => {
               </TouchableOpacity>
             )}
             {__DEV__ && (
-              <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={handleToggleFatVer}
-                accessibilityRole='button'
-                accessibilityLabel={`체형 테스트 pbf ${
-                  selectedPreviewPbf ?? FAT_VER_PBF_PRESETS[0]
-                }`}
-              >
-                <Text style={styles.devHealthButtonText}>
-                  {selectedPreviewPbf == null
-                    ? 'FAT:15'
-                    : `FAT:${selectedPreviewPbf}`}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.devPbfPanel}>
+                <View style={styles.devPbfHeader}>
+                  <Text style={styles.devPbfTitle}>
+                    TEST PBF {effectivePbf}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.devPbfResetButton}
+                    onPress={handleClearDevPreviewPbf}
+                    accessibilityRole='button'
+                    accessibilityLabel='체형 테스트 pbf 초기화'
+                  >
+                    <Text style={styles.devPbfResetText}>LIVE</Text>
+                  </TouchableOpacity>
+                </View>
+                <Pressable
+                  style={styles.devPbfBar}
+                  onLayout={(event) => {
+                    setDevPbfBarWidth(event.nativeEvent.layout.width);
+                  }}
+                  onPress={(event) => {
+                    handlePressDevPbfBar(event.nativeEvent.locationX);
+                  }}
+                  accessibilityRole='adjustable'
+                  accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
+                >
+                  <View
+                    style={[
+                      styles.devPbfBarFill,
+                      { width: `${devPbfProgress * 100}%` },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.devPbfBarThumb,
+                      { left: `${devPbfProgress * 100}%` },
+                    ]}
+                  />
+                </Pressable>
+                <View style={styles.devPbfScaleRow}>
+                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
+                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
+                </View>
+                <View style={styles.devPbfControls}>
+                  <TouchableOpacity
+                    style={styles.devPbfAdjustButton}
+                    onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
+                  >
+                    <Text style={styles.devPbfAdjustText}>-1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.devPbfAdjustButton}
+                    onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
+                  >
+                    <Text style={styles.devPbfAdjustText}>+1</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
           </View>
         </ImageBackground>

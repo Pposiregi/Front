@@ -26,13 +26,11 @@ import { deletePushToken } from '@api/pushTokenApi';
 import { getDeviceUuid } from '@utils/deviceUuid';
 import { clearLastSentPushToken } from '@utils/pushTokenStorage';
 import type { PetType } from 'types/profile';
-import { getResolvedPetId } from '@utils/petIdStorage';
+import { getPetId } from '@utils/petIdStorage';
 import { isValidNickname } from '@utils/validation';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 import TermsModal, { SelectedTerms } from '@components/TermsModal';
 import { getTerms, TermsResponse } from '@api/termsApi';
-
-const PET_ID_FALLBACK = 1;
 
 type SettingRowProps = {
   label: string;
@@ -67,7 +65,8 @@ const ProfileSettingPage = () => {
   const [bodyGoalModalVisible, setBodyGoalModalVisible] = useState(false);
   const [targetWeightInput, setTargetWeightInput] = useState('');
   const [targetPbfInput, setTargetPbfInput] = useState('');
-  const [petId, setPetId] = useState(PET_ID_FALLBACK);
+  const [petId, setPetId] = useState<number | null>(null);
+  const currentPetId = useSelector((state: RootState) => state.user.petId);
   const currentPetType = useSelector((state: RootState) => state.user.petType);
   const [termsListModalVisible, setTermsListModalVisible] = useState(false);
   const [termsList, setTermsList] = useState<TermsResponse[]>([]);
@@ -76,17 +75,36 @@ const ProfileSettingPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    getResolvedPetId(PET_ID_FALLBACK, '>>> [ProfileSettings]').then(
-      (resolved) => {
+    const loadPetId = async () => {
+      if (currentPetId != null) {
         if (mounted) {
-          setPetId(resolved);
+          setPetId(currentPetId);
+        }
+        return;
+      }
+
+      try {
+        const raw = await getPetId();
+        if (!mounted) return;
+        if (!raw) {
+          setPetId(null);
+          return;
+        }
+        const parsed = Number(raw);
+        setPetId(Number.isFinite(parsed) ? parsed : null);
+      } catch (error) {
+        console.warn('>>> [ProfileSettings] petId 로드 실패', error);
+        if (mounted) {
+          setPetId(null);
         }
       }
-    );
+    };
+
+    loadPetId();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentPetId]);
 
   useEffect(() => {
     setPetType(currentPetType);
@@ -199,6 +217,7 @@ const ProfileSettingPage = () => {
           <View style={styles.backButton} />
         </View>
 
+        <Text style={styles.sectionHeader}>프로필 관리</Text>
         <View style={styles.section}>
           <SettingRow
             label='계정설정'
@@ -214,6 +233,7 @@ const ProfileSettingPage = () => {
           />
         </View>
 
+        <Text style={styles.sectionHeader}>서비스 설정</Text>
         <View style={styles.section}>
           <SettingRow
             label='알림설정'
@@ -278,11 +298,6 @@ const ProfileSettingPage = () => {
             <Text style={devStyles.text}>[DEV] 회원가입 플로우 테스트</Text>
           </Pressable>
         )}
-
-        <View style={styles.footerIconRow}>
-          <Text style={styles.footerIcon}>💪</Text>
-          <Text style={styles.footerIcon}>🐶</Text>
-        </View>
       </ScrollView>
 
       <Modal
@@ -494,7 +509,10 @@ const ProfileSettingPage = () => {
                   style={styles.row}
                   onPress={() => {
                     setTermsListModalVisible(false);
-                    setSelectedTerms({ title: term.title, content: term.content });
+                    setSelectedTerms({
+                      title: term.title,
+                      content: term.content,
+                    });
                   }}
                 >
                   <Text style={styles.rowLabel}>{term.title}</Text>
@@ -503,7 +521,11 @@ const ProfileSettingPage = () => {
               ))
             )}
             <Pressable
-              style={[styles.modalButton, styles.modalCancel, { marginTop: 12 }]}
+              style={[
+                styles.modalButton,
+                styles.modalCancel,
+                styles.modalCloseButton,
+              ]}
               onPress={() => setTermsListModalVisible(false)}
             >
               <Text style={styles.modalCancelText}>닫기</Text>
@@ -512,7 +534,10 @@ const ProfileSettingPage = () => {
         </View>
       </Modal>
 
-      <TermsModal terms={selectedTerms} onClose={() => setSelectedTerms(null)} />
+      <TermsModal
+        terms={selectedTerms}
+        onClose={() => setSelectedTerms(null)}
+      />
 
       {/* 펫 정보 수정 모달 */}
       <Modal
@@ -531,7 +556,7 @@ const ProfileSettingPage = () => {
               value={petNameInput}
               onChangeText={setPetNameInput}
             />
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+            <View style={styles.chipRow}>
               {(['DOG', 'CAT'] as PetType[]).map((type) => (
                 <Pressable
                   key={type}
@@ -566,6 +591,13 @@ const ProfileSettingPage = () => {
                 onPress={async () => {
                   if (!petNameInput.trim()) {
                     Alert.alert('입력 오류', '펫 이름을 입력하세요.');
+                    return;
+                  }
+                  if (petId == null) {
+                    Alert.alert(
+                      '펫 정보 없음',
+                      '내 펫 정보를 찾지 못했어요. 앱을 다시 열어 동기화한 뒤 다시 시도해주세요.'
+                    );
                     return;
                   }
                   setSavingPet(true);

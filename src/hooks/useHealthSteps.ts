@@ -23,10 +23,7 @@ import {
   getPreferredStepSyncProvider,
   getStepSyncUnsupportedReason,
 } from '@utils/stepSyncProvider';
-import {
-  getAndroidApiLevel,
-  STEP_SYNC_OS_POLICY,
-} from '@utils/stepSyncPolicy';
+import { getAndroidApiLevel, STEP_SYNC_OS_POLICY } from '@utils/stepSyncPolicy';
 
 type HealthStepsState = {
   steps: number | null;
@@ -35,6 +32,13 @@ type HealthStepsState = {
   error: string | null;
   addSteps: (delta: number) => Promise<void>;
 };
+
+/* FIX LOG 
+  26.04.23. Health Connect 권한 요청과 관련된 UX 이슈 대응을 위해 훅 내부에서 세션 단위로 권한 요청 여부를 추적하는 로직 추가
+  - Health Connect 권한 요청을 한 번이라도 띄운 세션에서는 사용자가 거부 후 앱으로 돌아와도 권한 요청 UI가 반복되지 않도록 함
+  - 단, 사용자가 +1 버튼처럼 명시적으로 다시 시도한 액션은 Android Health Connect의 재요청 기회를 앱 게이트가 먼저 막지 않도록 별도 옵션으로 허용함
+*/
+let stepPermissionPromptedInSession = false;
 
 /** Health Connect 기반 걸음 수 조회/기록과 polling을 관리하는 훅이다. */
 const useHealthSteps = (): HealthStepsState => {
@@ -46,6 +50,7 @@ const useHealthSteps = (): HealthStepsState => {
   const checkingRef = useRef(false);
   const lastWriteEndRef = useRef<Date | null>(null);
   const permissionDeniedRef = useRef(false);
+  const stepPermissionPromptedRef = useRef(stepPermissionPromptedInSession);
   const backgroundPermissionPromptedRef = useRef(false);
   const setupPendingRef = useRef(false);
   const lastErrorRef = useRef<string | null>(null);
@@ -111,7 +116,7 @@ const useHealthSteps = (): HealthStepsState => {
       return;
     }
 
-    const granted = await getCurrentGrantedPermissions();
+    const granted = await getCurrentGrantedPermissions({ forceRefresh: true });
     if (!hasAllPermissions(granted, HEALTH_STEP_READ_PERMISSIONS)) {
       return;
     }
@@ -163,7 +168,7 @@ const useHealthSteps = (): HealthStepsState => {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
 
-    const granted = await getCurrentGrantedPermissions();
+    const granted = await getCurrentGrantedPermissions({ forceRefresh: true });
     const hasStepPermissions = hasAllPermissions(
       granted,
       HEALTH_STEP_READ_PERMISSIONS
@@ -174,6 +179,9 @@ const useHealthSteps = (): HealthStepsState => {
       shouldPausePollingForSetup() && !hasStepPermissions;
 
     if (hasStepPermissions) {
+      permissionDeniedRef.current = false;
+      stepPermissionPromptedRef.current = false;
+      stepPermissionPromptedInSession = false;
       setStableError(null);
       if (shouldPausePollingForSetup()) {
         resumePolling();
@@ -193,11 +201,16 @@ const useHealthSteps = (): HealthStepsState => {
   /** Health Connect 초기화와 필요한 권한 보장을 한 번에 수행한다. */
   const ensureInitializedAndPermitted = async (
     requiredPermissions: GrantedHealthPermission[],
-    options?: { showPrompt?: boolean; requestBackgroundAfterGrant?: boolean }
+    options?: {
+      showPrompt?: boolean;
+      requestBackgroundAfterGrant?: boolean;
+      allowPromptRetry?: boolean;
+    }
   ) => {
     const showPrompt = options?.showPrompt ?? false;
     const requestBackgroundAfterGrant =
       options?.requestBackgroundAfterGrant ?? false;
+    const allowPromptRetry = options?.allowPromptRetry ?? false;
     const apiLevel = getAndroidApiLevel();
 
     await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
@@ -209,9 +222,13 @@ const useHealthSteps = (): HealthStepsState => {
       throw new Error('Health Connect를 사용할 수 없습니다.');
     }
 
-    const grantedBeforeRequest = await getCurrentGrantedPermissions();
+    const grantedBeforeRequest = await getCurrentGrantedPermissions({
+      forceRefresh: showPrompt,
+    });
     if (hasAllPermissions(grantedBeforeRequest, requiredPermissions)) {
       permissionDeniedRef.current = false;
+      stepPermissionPromptedRef.current = false;
+      stepPermissionPromptedInSession = false;
       if (requestBackgroundAfterGrant) {
         await maybeRequestBackgroundPermission(showPrompt);
       }
@@ -225,9 +242,20 @@ const useHealthSteps = (): HealthStepsState => {
       );
     }
 
-    const grantedAfterRequest: GrantedHealthPermission[] = await requestPermission(
-      requiredPermissions
-    );
+    // 자동/복귀성 호출은 세션 내 1회만 Health Connect 권한 요청 UI를 띄운다.
+    // 앱 복귀/포커스 변경으로 fetchSteps(true)가 재호출되어도 반복 프롬프트가 뜨지 않게 막는다.
+    // 사용자가 버튼을 다시 누른 명시적 재시도는 Android Health Connect가 허용하는 추가 시스템 다이얼로그 기회를 살리기 위해 우회한다.
+    if (stepPermissionPromptedRef.current && !allowPromptRetry) {
+      permissionDeniedRef.current = true;
+      throw new Error(
+        'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
+      );
+    }
+
+    stepPermissionPromptedRef.current = true;
+    stepPermissionPromptedInSession = true;
+    const grantedAfterRequest: GrantedHealthPermission[] =
+      await requestPermission(requiredPermissions);
 
     if (!hasAllPermissions(grantedAfterRequest, requiredPermissions)) {
       permissionDeniedRef.current = true;
@@ -237,6 +265,8 @@ const useHealthSteps = (): HealthStepsState => {
     }
 
     permissionDeniedRef.current = false;
+    stepPermissionPromptedRef.current = false;
+    stepPermissionPromptedInSession = false;
     if (requestBackgroundAfterGrant) {
       await maybeRequestBackgroundPermission(showPrompt);
     }
@@ -354,7 +384,12 @@ const useHealthSteps = (): HealthStepsState => {
     try {
       await ensureInitializedAndPermitted(
         [...HEALTH_STEP_READ_PERMISSIONS, ...HEALTH_STEP_WRITE_PERMISSIONS],
-        { showPrompt: true }
+        {
+          showPrompt: true,
+          // +1000은 사용자가 직접 누르는 재시도 경로이므로 세션 프롬프트 게이트를 우회한다.
+          // 첫 거부 직후에도 Health Connect 시스템 다이얼로그를 한 번 더 시도할 수 있어야 한다.
+          allowPromptRetry: true,
+        }
       );
       const now = new Date();
       // 마지막 기록 종료 시각 이후로부터 현재까지를 구간으로 설정해 중복/겹침 최소화
@@ -396,7 +431,11 @@ const useHealthSteps = (): HealthStepsState => {
         (async () => {
           try {
             const hasGrantedPermissions = await syncGrantedPermissionState();
-            await fetchSteps(hasGrantedPermissions ? false : true);
+            // 앱 복귀 시 권한이 없으면 다시 요청하지 않는다.
+            // 사용자가 Health Connect에서 직접 허용한 경우에만 조용히 걸음 수 동기화를 재개한다.
+            if (hasGrantedPermissions) {
+              await fetchSteps(false);
+            }
           } catch (err) {
             if (__DEV__) {
               console.log('[HC] active permission sync failed', err);

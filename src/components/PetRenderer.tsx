@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
-import { Animated, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  Animated,
+  type ImageSourcePropType,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { getPetPartAsset, getPetTemplate } from '@utils/petAssetLoader';
 import { getTemplateAnchorRenderPx } from '@utils/petAnchorUtils';
 import { buildRenderablePetParts, sortPetPartsForRender } from '@utils/petRenderUtils';
@@ -10,6 +17,12 @@ type Props = {
   templateId?: string;
   cacheBustToken?: string;
   partTransforms?: Record<string, PartTransformInput>;
+  expressionOverlays?: {
+    baseFace?: ImageSourcePropType;
+    eyes?: ImageSourcePropType;
+    eyebrows?: ImageSourcePropType;
+    mouth?: ImageSourcePropType;
+  };
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
@@ -29,6 +42,7 @@ export const PetRenderer = ({
   templateId,
   cacheBustToken,
   partTransforms,
+  expressionOverlays,
   style,
   testID = 'pet-renderer',
 }: Props) => {
@@ -57,6 +71,16 @@ export const PetRenderer = ({
     );
   }, [template.parts, templateId, cacheBustToken]);
   const missingFilesKey = missingFiles.join('|');
+  const faceTransformInput =
+    partTransforms?.face ??
+    partTransforms?.eye_left ??
+    partTransforms?.mouth ??
+    partTransforms?.eyebrow_left;
+  const facePivot = getTemplateAnchorRenderPx(template, 'face', size);
+  const expressionTransform =
+    faceTransformInput && facePivot
+      ? buildPivotTransform(facePivot, size, faceTransformInput)
+      : undefined;
 
   useEffect(() => {
     if (missingFiles.length === 0) return;
@@ -94,6 +118,62 @@ export const PetRenderer = ({
           />
         );
       })}
+      {expressionOverlays?.baseFace ? (
+        <Animated.Image
+          key='expression-base-face'
+          source={expressionOverlays.baseFace}
+          style={[
+            styles.layer,
+            styles.expressionLayer,
+            expressionTransform ? { transform: expressionTransform } : null,
+          ]}
+          resizeMode='contain'
+          fadeDuration={0}
+          testID='pet-expression-base-face'
+        />
+      ) : null}
+      {expressionOverlays?.eyebrows ? (
+        <Animated.Image
+          key='expression-eyebrows'
+          source={expressionOverlays.eyebrows}
+          style={[
+            styles.layer,
+            styles.expressionLayer,
+            expressionTransform ? { transform: expressionTransform } : null,
+          ]}
+          resizeMode='contain'
+          fadeDuration={0}
+          testID='pet-expression-eyebrows'
+        />
+      ) : null}
+      {expressionOverlays?.eyes ? (
+        <Animated.Image
+          key='expression-eyes'
+          source={expressionOverlays.eyes}
+          style={[
+            styles.layer,
+            styles.expressionLayer,
+            expressionTransform ? { transform: expressionTransform } : null,
+          ]}
+          resizeMode='contain'
+          fadeDuration={0}
+          testID='pet-expression-eyes'
+        />
+      ) : null}
+      {expressionOverlays?.mouth ? (
+        <Animated.Image
+          key='expression-mouth'
+          source={expressionOverlays.mouth}
+          style={[
+            styles.layer,
+            styles.expressionLayer,
+            expressionTransform ? { transform: expressionTransform } : null,
+          ]}
+          resizeMode='contain'
+          fadeDuration={0}
+          testID='pet-expression-mouth'
+        />
+      ) : null}
     </View>
   );
 };
@@ -111,5 +191,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     height: '100%',
+  },
+  expressionLayer: {
+    zIndex: 999,
   },
 });

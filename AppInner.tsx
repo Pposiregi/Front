@@ -13,7 +13,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAppDispatch } from './src/store';
 import userSlice from './src/slices/user';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { DEV_PET_ID, GOOGLE_CLIENT_ID } from '@env';
+import { GOOGLE_CLIENT_ID } from '@env';
 import {
   ActivityIndicator,
   Alert,
@@ -43,7 +43,6 @@ import {
 } from '@api/authSession';
 import { logScreenView } from '@utils/analytics';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
-import { ensurePetIdStored } from '@utils/petIdStorage';
 import {
   getLastSentPushToken,
   setLastSentPushToken,
@@ -74,6 +73,7 @@ GoogleSignin.configure({
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const STARTUP_FAIL_SAFE_TIMEOUT_MS = 12000;
 
 /**
  * 탭바 아이콘 생성 함수.
@@ -113,6 +113,32 @@ const getTabScreenOptions = (routeName: TabIconKey) => ({
  */
 const wait = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+
+/**
+ * 느리거나 멈춘 비동기 초기화가 앱 첫 진입을 영구 차단하지 않도록 제한 시간을 둔다.
+ */
+const withTimeout = async <T,>(
+  label: string,
+  task: Promise<T>,
+  ms: number
+): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      task,
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${ms}ms`));
+        }, ms);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+};
 
 /**
  * FCM 권한 상태를 라벨로 변환한다.
@@ -172,6 +198,7 @@ function AppInner() {
 
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const routeNameRef = useRef<string | undefined>(undefined);
+  const startupFailSafeTriggeredRef = useRef(false);
 
   const isLoggedIn = useSelector(
     (state: RootState) => !!state.user.accessToken
@@ -224,15 +251,32 @@ function AppInner() {
    * - refreshToken 갱신 및 유저 상태 초기화
    */
   useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const fallbackTimer = setTimeout(() => {
+      console.warn('[Startup] 초기화 제한 시간 초과, 앱 셸을 먼저 표시합니다.');
+      startupFailSafeTriggeredRef.current = true;
+      SplashScreen.hide();
+      setLoading(false);
+    }, STARTUP_FAIL_SAFE_TIMEOUT_MS);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [loading]);
+
+  useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         try {
           // 앱 진입 시 deviceUuid를 항상 확보해 둔다.
-          const deviceUuid = await getDeviceUuid();
+          const deviceUuid = await withTimeout(
+            'getDeviceUuid',
+            getDeviceUuid(),
+            2000
+          );
 
           if (__DEV__) {
-            // 개발환경에서만 env 값을 AsyncStorage에 시드한다.
-            await ensurePetIdStored(DEV_PET_ID);
             console.log('>>> [FCM][DeviceUuid] device UUID: ', deviceUuid);
           }
         } catch (err) {
@@ -242,14 +286,27 @@ function AppInner() {
           );
         }
         const refreshToken = await EncryptedStorage.getItem('refreshToken');
+        if (startupFailSafeTriggeredRef.current) {
+          return;
+        }
         if (refreshToken) {
           try {
-            const result = await refreshAccessToken();
+            const result = await withTimeout(
+              'refreshAccessToken',
+              refreshAccessToken(),
+              5000
+            );
+            if (startupFailSafeTriggeredRef.current) {
+              return;
+            }
             if (result?.serverAccessToken) {
               await EncryptedStorage.setItem(
                 'serverAccessToken',
                 result.serverAccessToken
               );
+              if (startupFailSafeTriggeredRef.current) {
+                return;
+              }
               dispatch(
                 userSlice.actions.setAuth({
                   accessToken: result.serverAccessToken,
@@ -262,6 +319,9 @@ function AppInner() {
               );
             }
           } catch (err: any) {
+            if (startupFailSafeTriggeredRef.current) {
+              return;
+            }
             const status = err?.response?.status;
             if (status === 401) {
               await notifySessionExpired('REFRESH_TOKEN_INVALID');
@@ -270,9 +330,16 @@ function AppInner() {
           }
         }
         try {
-          const petId = await AsyncStorage.getItem('petId');
-          if (petId) {
-            dispatch(userSlice.actions.setPet(Number(petId)));
+          const storedPetId = await withTimeout(
+            'getPetId',
+            AsyncStorage.getItem('petId'),
+            2000
+          );
+          if (startupFailSafeTriggeredRef.current) {
+            return;
+          }
+          if (storedPetId) {
+            dispatch(userSlice.actions.setPet(Number(storedPetId)));
           }
         } catch (err) {
           console.warn('petId 확인 실패', err);

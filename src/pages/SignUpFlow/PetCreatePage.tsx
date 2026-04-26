@@ -15,6 +15,9 @@ import { useAppDispatch, useAppSelector } from '@store/index';
 import userSlice from '@slices/user';
 import { styles } from '@styles/PetCreatePage.styles';
 
+const DOG_PREVIEW_IMAGE = require('@assets/pet/siba_dog/main/combine.png');
+const CAT_PREVIEW_IMAGE = require('@assets/pet/bagic_cat/main/combine.png');
+
 export default function PetCreatePage() {
   const [petType, setPetType] = useState<'DOG' | 'CAT' | null>(null);
   const [name, setName] = useState('');
@@ -53,7 +56,7 @@ export default function PetCreatePage() {
         useNativeDriver: true,
       }).start();
     }, 2500);
-  }, []);
+  }, [cardScale, fadeAnim, slideAnim]);
 
   const handleCreate = async () => {
     if (!petType || !name) {
@@ -114,9 +117,7 @@ export default function PetCreatePage() {
               style={[styles.card, petType === 'DOG' && styles.selected]}
               onPress={() => {
                 setPetType('DOG');
-                setSelectedPetImage(
-                  require('@assets/pet/brown_cat/origin/browncat_v1.png')
-                );
+                setSelectedPetImage(DOG_PREVIEW_IMAGE);
               }}
             >
               <Image
@@ -130,9 +131,7 @@ export default function PetCreatePage() {
               style={[styles.card, petType === 'CAT' && styles.selected]}
               onPress={() => {
                 setPetType('CAT');
-                setSelectedPetImage(
-                  require('@assets/pet/brown_cat/origin/browncat_v1.png')
-                );
+                setSelectedPetImage(CAT_PREVIEW_IMAGE);
               }}
             >
               <Image

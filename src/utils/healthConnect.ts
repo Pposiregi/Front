@@ -27,11 +27,16 @@ export const HEALTH_BACKGROUND_PERMISSION: BackgroundAccessPermission = {
 
 export const HEALTH_CONNECT_PROVIDER_PACKAGE = 'com.google.android.apps.healthdata';
 export const HEALTH_CONNECT_INSTALL_URL = `https://play.google.com/store/apps/details?id=${HEALTH_CONNECT_PROVIDER_PACKAGE}`;
+const GRANTED_PERMISSIONS_CACHE_TTL_MS = 60 * 1000;
 
 type HealthConnectSdkState =
   | 'available'
   | 'unavailable'
   | 'provider_update_required';
+
+let grantedPermissionsCache: GrantedHealthPermission[] | null = null;
+let grantedPermissionsFetchedAt = 0;
+let grantedPermissionsPromise: Promise<GrantedHealthPermission[]> | null = null;
 
 /** Health Connect SDK 상태 코드를 내부 상태 문자열로 변환한다. */
 const statusToState = (status: number): HealthConnectSdkState => {
@@ -129,8 +134,50 @@ export const hasAllPermissions = (
 };
 
 /** 현재 허용된 Health Connect 권한 목록을 가져온다. */
-export const getCurrentGrantedPermissions = async () => {
-  return (await getGrantedPermissions()) as GrantedHealthPermission[];
+export const getCurrentGrantedPermissions = async (
+  options?: { forceRefresh?: boolean }
+) => {
+  const forceRefresh = options?.forceRefresh ?? false;
+  const now = Date.now();
+
+  if (
+    !forceRefresh &&
+    grantedPermissionsCache &&
+    now - grantedPermissionsFetchedAt < GRANTED_PERMISSIONS_CACHE_TTL_MS
+  ) {
+    return grantedPermissionsCache;
+  }
+
+  if (!forceRefresh && grantedPermissionsPromise) {
+    return grantedPermissionsPromise;
+  }
+
+  grantedPermissionsPromise = (async () => {
+    try {
+      const granted = (await getGrantedPermissions()) as GrantedHealthPermission[];
+      grantedPermissionsCache = granted;
+      grantedPermissionsFetchedAt = Date.now();
+      return granted;
+    } catch (err: any) {
+      const message = String(err?.message ?? err ?? '');
+      const isRateLimited =
+        message.includes('Rate limited') || message.includes('quota');
+
+      if (isRateLimited) {
+        console.warn('[RUNNING][HC] getGrantedPermissions rate limited');
+        if (grantedPermissionsCache) {
+          return grantedPermissionsCache;
+        }
+        return [];
+      }
+
+      throw err;
+    } finally {
+      grantedPermissionsPromise = null;
+    }
+  })();
+
+  return grantedPermissionsPromise;
 };
 
 /** 백그라운드 접근 특수 권한 보유 여부를 반환한다. */

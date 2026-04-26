@@ -11,7 +11,7 @@ import {
 } from '@utils/petTemplate';
 
 const LOG_PREFIX = '[PetAssetLoader]';
-const DEFAULT_TEMPLATE_ID: PetTemplateId = 'browncat_v1';
+const DEFAULT_TEMPLATE_ID: PetTemplateId = 'bagiccat_v1';
 const MAX_PART_ASSET_CACHE_ENTRIES = 64;
 
 type TemplateCacheEntry = {

@@ -48,7 +48,7 @@ type Params = {
   /** 현재 선택된 펫 타입(CAT/DOG). */
   selectedPetType: PetType;
   /** 선택 펫의 main 템플릿 ID. torso morph 기준 파츠 조회에 사용한다. */
-  mainPetTemplateId: 'browncat_v1' | 'sibadog_v1';
+  mainPetTemplateId: 'bagiccat_v1' | 'sibadog_v1';
   /** 렌더 기준 크기(px). follow offset과 미세 보정 계산의 기준 단위다. */
   petRenderSize: number;
 };
@@ -239,18 +239,15 @@ export const useMainPetMotion = ({
 
   const runPartTransforms: Record<string, PartTransformInput> = useMemo(() => {
     const isHighPbf = effectivePbf >= 25;
-    const legSpreadFactor = isHighPbf ? 0.84 : 1;
-    // 고PBF 구간에서 팔 체형 변화가 덜 보이는 문제를 보정한다.
-    const runArmFatBoost = isHighPbf ? 1.25 : 1;
+    const runArmFatBoost = isHighPbf ? 1.15 : 1;
     const runTorsoScaleX = 1 + (torsoMorph.scaleX - 1) * 1.35;
-    const runTorsoScaleY = 1 + (torsoMorph.scaleY - 1) * 1.2;
-    const armFatScaleX = 1 + torsoMorph.t * 0.18 * runArmFatBoost;
-    const armFatScaleY = 1 + torsoMorph.t * 0.13 * runArmFatBoost;
-    const legFatScaleX = 1 + torsoMorph.t * 0.05;
-    const legFatScaleY = 1 + torsoMorph.t * 0.035;
-    const faceFatScaleX = 1 + torsoMorph.t * 0.12;
-    const faceFatScaleY = 1 + torsoMorph.t * 0.1;
-    const runLegMorphOffsetY = petRenderSize * 0.0025 * torsoMorph.t;
+    const runTorsoScaleY = 1 + (torsoMorph.scaleY - 1) * 1.14;
+    const armFatScaleX = 1 + torsoMorph.t * 0.14 * runArmFatBoost;
+    const armFatScaleY = 1 + torsoMorph.t * 0.1 * runArmFatBoost;
+    const faceFatScaleX = 1 + torsoMorph.t * 0.08;
+    const faceFatScaleY = 1 + torsoMorph.t * 0.07;
+    const hiddenLegScale = 0.01;
+    const hiddenLegOffsetY = petRenderSize * 0.24;
 
     // readonly tuple -> mutable array 변환 후 interpolate에 전달한다.
     const runPhase = toMutableRange(PET_RUN_MOTION.phase);
@@ -275,12 +272,20 @@ export const useMainPetMotion = ({
       outputRange: toMutableRange(PET_RUN_MOTION.faceX),
     });
     const faceY = runCycleProgress.interpolate({
-      inputRange: runPhase,
-      outputRange: toMutableRange(PET_RUN_MOTION.faceY),
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: [0, -0.7, 0.15, -0.45, 0],
+    });
+    const faceRotate = runCycleProgress.interpolate({
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: ['-0.6deg', '0.45deg', '0.15deg', '-0.35deg', '-0.6deg'],
     });
     const armLeftRotate = runCycleProgress.interpolate({
       inputRange: runPhase,
       outputRange: toMutableRange(PET_RUN_MOTION.armLeftRotate),
+    });
+    const catArmLeftRotate = runCycleProgress.interpolate({
+      inputRange: runPhase,
+      outputRange: toMutableRange(PET_RUN_MOTION.catArmLeftRotate),
     });
     const armRightRotate = runCycleProgress.interpolate({
       inputRange: runPhase,
@@ -335,7 +340,7 @@ export const useMainPetMotion = ({
       },
       arm_left: {
         translateX: limbLeftX,
-        rotateDeg: armLeftRotate,
+        rotateDeg: selectedPetType === 'CAT' ? catArmLeftRotate : armLeftRotate,
         scaleX: armFatScaleX,
         scaleY: armFatScaleY,
       },
@@ -346,18 +351,16 @@ export const useMainPetMotion = ({
         scaleY: armFatScaleY,
       },
       leg_left: {
-        translateX: Animated.multiply(limbRightX, legSpreadFactor),
-        translateY: runLegMorphOffsetY,
+        translateY: hiddenLegOffsetY,
         rotateDeg: legLeftRotate,
-        scaleX: legFatScaleX,
-        scaleY: legFatScaleY,
+        scaleX: hiddenLegScale,
+        scaleY: hiddenLegScale,
       },
       leg_right: {
-        translateX: Animated.multiply(limbLeftX, legSpreadFactor),
-        translateY: runLegMorphOffsetY,
+        translateY: hiddenLegOffsetY,
         rotateDeg: legRightRotate,
-        scaleX: legFatScaleX,
-        scaleY: legFatScaleY,
+        scaleX: hiddenLegScale,
+        scaleY: hiddenLegScale,
       },
       tail: {
         translateX: tailX,
@@ -371,36 +374,42 @@ export const useMainPetMotion = ({
       face: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       flushing_left: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       flushing_right: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       eye_left: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       eye_right: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
       mouth: {
         translateX: faceX,
         translateY: faceY,
+        rotateDeg: faceRotate,
         scaleX: faceFatScaleX,
         scaleY: faceFatScaleY,
       },
@@ -409,6 +418,7 @@ export const useMainPetMotion = ({
     effectivePbf,
     petRenderSize,
     runCycleProgress,
+    selectedPetType,
     torsoMorph.scaleX,
     torsoMorph.scaleY,
     torsoMorph.t,

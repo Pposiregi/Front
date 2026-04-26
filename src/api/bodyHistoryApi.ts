@@ -1,3 +1,4 @@
+import axios from 'axios';
 import type {
   BodyHistoryCreateRequest,
   BodyHistoryResponse,
@@ -38,10 +39,18 @@ export const getBodyHistoriesByUser =
 
 export const getBodyHistoryByDate = async (
   date: string
-): Promise<BodyHistoryResponse> => {
-  const { data } = await apiClient.get<BodyHistoryResponse>(
-    `${BASE_PATH}/date`,
-    { params: { date } }
-  );
-  return data;
+): Promise<BodyHistoryResponse | null> => {
+  try {
+    const { data } = await apiClient.get<BodyHistoryResponse>(
+      `${BASE_PATH}/date`,
+      { params: { date } }
+    );
+    return data;
+  } catch (error) {
+    // This endpoint uses 404 to mean "no record for the date".
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
