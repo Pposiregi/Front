@@ -127,6 +127,9 @@ function ActivityPage() {
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [listTab, setListTab] = useState<'daily' | 'sessions'>('daily');
+  const [hiddenSessionIds, setHiddenSessionIds] = useState<Set<number>>(
+    () => new Set()
+  );
   const chartPadding = activityTheme.spacing.lg;
   const contentPadding = activityTheme.spacing.xl;
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
@@ -480,6 +483,21 @@ function ActivityPage() {
     }
   }, [currentMonth, fetchDailySummary, fetchMonthlyBundle, fetchWeeklySteps]);
 
+  // 서버 기록은 지우지 않고, 현재 러닝별 목록에서만 임시로 숨긴다.
+  const handleHideSession = useCallback((sessionId: number) => {
+    setHiddenSessionIds((prev) => {
+      const next = new Set(prev);
+      next.add(sessionId);
+      return next;
+    });
+  }, []);
+
+  // 숨긴 항목을 초기화하고 서버의 현재 월 기록을 다시 받아온다.
+  const handleReloadAllSessions = useCallback(async () => {
+    setHiddenSessionIds(new Set());
+    await fetchMonthlyBundle(currentMonth);
+  }, [currentMonth, fetchMonthlyBundle]);
+
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
   // 일일 요약은 km 응답을 받아 공통 규칙(1000m 미만 m, 이상 km)으로 표시한다.
@@ -517,7 +535,16 @@ function ActivityPage() {
   const progressSize = Math.max(112, Math.round(SCREEN_WIDTH * 0.28));
   const progressStroke = Math.max(10, Math.round(progressSize * 0.1));
 
-  const showEmptySessions = !loading && monthlyActivities.length === 0;
+  const visibleMonthlyActivities = useMemo(
+    () =>
+      monthlyActivities.filter(
+        (session) => !hiddenSessionIds.has(session.sessionId)
+      ),
+    [hiddenSessionIds, monthlyActivities]
+  );
+  // 복구 버튼은 사용자가 x로 숨긴 기록이 있을 때만 노출한다.
+  const hasHiddenSessions = hiddenSessionIds.size > 0;
+  const showEmptySessions = !loading && visibleMonthlyActivities.length === 0;
   const showEmptyDaily = !loading && normalizedMonthlyDaily.length === 0;
   const isNextDisabled = useMemo(() => {
     const todayDate = new Date();
@@ -715,6 +742,21 @@ function ActivityPage() {
           </Pressable>
         </View>
       </View>
+      {/* 러닝별에서 숨긴 항목이 있을 때만 전체 기록 복구 액션을 보여준다. */}
+      {listTab === 'sessions' && hasHiddenSessions ? (
+        <View style={styles.sessionReloadRow}>
+          <Pressable
+            accessibilityRole='button'
+            onPress={handleReloadAllSessions}
+            style={({ pressed }) => [
+              styles.sessionReloadButton,
+              pressed && styles.sessionReloadButtonPressed,
+            ]}
+          >
+            <Text style={styles.sessionReloadText}>전체 기록 불러오기</Text>
+          </Pressable>
+        </View>
+      ) : null}
       {loading ? (
         <ActivityIndicator
           size='large'
@@ -781,8 +823,12 @@ function ActivityPage() {
               </Text>
             </View>
           ) : (
-            monthlyActivities.map((session) => (
-              <SessionItem key={session.sessionId} session={session} />
+            visibleMonthlyActivities.map((session) => (
+              <SessionItem
+                key={session.sessionId}
+                session={session}
+                onDelete={handleHideSession}
+              />
             ))
           )}
         </View>

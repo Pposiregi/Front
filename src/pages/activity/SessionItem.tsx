@@ -1,6 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useMemo } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import {
+  GestureResponderEvent,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { styles } from '@styles/Activity.styles';
 import { formatDistanceFromMeters } from '@utils/distanceFormat';
 import { parseGpsDateTime } from '@utils/dateUtil';
@@ -11,6 +16,7 @@ import type {
 
 type SessionItemProps = {
   session: GPS_SESSION;
+  onDelete?: (sessionId: number) => void;
 };
 
 /**
@@ -40,7 +46,7 @@ const formatTime = (date: Date) => {
  * 월간 GPS 세션 리스트 아이템
  * - 클릭 시 상세 화면으로 이동한다.
  */
-function SessionItem({ session }: SessionItemProps) {
+function SessionItem({ session, onDelete }: SessionItemProps) {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
 
   const formattedDate = useMemo(() => {
@@ -96,8 +102,25 @@ function SessionItem({ session }: SessionItemProps) {
     });
   };
 
+  const handleDeletePress = (event: GestureResponderEvent) => {
+    // 카드 전체의 상세 이동 press가 같이 실행되지 않도록 삭제 버튼에서 전파를 막는다.
+    event.stopPropagation();
+    onDelete?.(session.sessionId);
+  };
+
   return (
     <TouchableOpacity onPress={handlePress} style={styles.listCard}>
+      {/* 삭제 액션은 카드 콘텐츠를 밀지 않도록 우상단에 독립 배치한다. */}
+      {onDelete ? (
+        <TouchableOpacity
+          accessibilityRole='button'
+          accessibilityLabel='러닝 기록 삭제'
+          onPress={handleDeletePress}
+          style={styles.sessionDeleteButton}
+        >
+          <Text style={styles.sessionDeleteText}>×</Text>
+        </TouchableOpacity>
+      ) : null}
       <View style={styles.listMarker} />
       <View style={styles.listTextColumn}>
         <Text style={styles.listTitle}>{formattedDate}</Text>
