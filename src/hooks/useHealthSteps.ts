@@ -36,6 +36,7 @@ type HealthStepsState = {
 /* FIX LOG 
   26.04.23. Health Connect 권한 요청과 관련된 UX 이슈 대응을 위해 훅 내부에서 세션 단위로 권한 요청 여부를 추적하는 로직 추가
   - Health Connect 권한 요청을 한 번이라도 띄운 세션에서는 사용자가 거부 후 앱으로 돌아와도 권한 요청 UI가 반복되지 않도록 함
+  - 단, 사용자가 +1 버튼처럼 명시적으로 다시 시도한 액션은 Android Health Connect의 재요청 기회를 앱 게이트가 먼저 막지 않도록 별도 옵션으로 허용함
 */
 let stepPermissionPromptedInSession = false;
 
@@ -200,11 +201,16 @@ const useHealthSteps = (): HealthStepsState => {
   /** Health Connect 초기화와 필요한 권한 보장을 한 번에 수행한다. */
   const ensureInitializedAndPermitted = async (
     requiredPermissions: GrantedHealthPermission[],
-    options?: { showPrompt?: boolean; requestBackgroundAfterGrant?: boolean }
+    options?: {
+      showPrompt?: boolean;
+      requestBackgroundAfterGrant?: boolean;
+      allowPromptRetry?: boolean;
+    }
   ) => {
     const showPrompt = options?.showPrompt ?? false;
     const requestBackgroundAfterGrant =
       options?.requestBackgroundAfterGrant ?? false;
+    const allowPromptRetry = options?.allowPromptRetry ?? false;
     const apiLevel = getAndroidApiLevel();
 
     await ensureHealthConnectInstalledOrPrompt(apiLevel ?? 0, {
@@ -236,9 +242,10 @@ const useHealthSteps = (): HealthStepsState => {
       );
     }
 
-    // 최초 진입 때만 Health Connect 권한 요청 UI를 띄운다.
-    // 거부 후 앱 복귀/포커스 변경으로 fetchSteps(true)가 다시 호출되어도 알림창이 반복되지 않게 막는다.
-    if (stepPermissionPromptedRef.current) {
+    // 자동/복귀성 호출은 세션 내 1회만 Health Connect 권한 요청 UI를 띄운다.
+    // 앱 복귀/포커스 변경으로 fetchSteps(true)가 재호출되어도 반복 프롬프트가 뜨지 않게 막는다.
+    // 사용자가 버튼을 다시 누른 명시적 재시도는 Android Health Connect가 허용하는 추가 시스템 다이얼로그 기회를 살리기 위해 우회한다.
+    if (stepPermissionPromptedRef.current && !allowPromptRetry) {
       permissionDeniedRef.current = true;
       throw new Error(
         'Health Connect 권한이 허용되지 않았습니다. 설정에서 권한을 허용해주세요.'
@@ -377,7 +384,12 @@ const useHealthSteps = (): HealthStepsState => {
     try {
       await ensureInitializedAndPermitted(
         [...HEALTH_STEP_READ_PERMISSIONS, ...HEALTH_STEP_WRITE_PERMISSIONS],
-        { showPrompt: true }
+        {
+          showPrompt: true,
+          // +1000은 사용자가 직접 누르는 재시도 경로이므로 세션 프롬프트 게이트를 우회한다.
+          // 첫 거부 직후에도 Health Connect 시스템 다이얼로그를 한 번 더 시도할 수 있어야 한다.
+          allowPromptRetry: true,
+        }
       );
       const now = new Date();
       // 마지막 기록 종료 시각 이후로부터 현재까지를 구간으로 설정해 중복/겹침 최소화
