@@ -73,7 +73,7 @@ GoogleSignin.configure({
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const STARTUP_FAIL_SAFE_TIMEOUT_MS = 10000;
+const STARTUP_FAIL_SAFE_TIMEOUT_MS = 12000;
 
 /**
  * 탭바 아이콘 생성 함수.
@@ -333,7 +333,7 @@ function AppInner() {
           const storedPetId = await withTimeout(
             'getPetId',
             AsyncStorage.getItem('petId'),
-            1000
+            2000
           );
           if (startupFailSafeTriggeredRef.current) {
             return;
