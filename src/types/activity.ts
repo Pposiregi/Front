@@ -7,8 +7,8 @@ import { NavigationProp } from '@react-navigation/native';
 export type GPS_SESSION = {
   sessionId: number;
   startTime: string;
-  endTime: string;
-  totalDistance: number;
+  endTime: string | null;
+  totalDistance: number | null;
 };
 
 /**

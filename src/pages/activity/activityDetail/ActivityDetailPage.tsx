@@ -7,6 +7,7 @@ import { ActivityDetailRouteProp, GPS_LOG, SessionDetail } from './types';
 import { styles } from '@styles/ActivityDetail.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import { formatDistanceFromMeters } from '@utils/distanceFormat';
+import { parseGpsDateTime } from '@utils/dateUtil';
 import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
 import useActivityDetailMap from '@hooks/useActivityDetailMap';
@@ -263,10 +264,10 @@ const ActivityDetailPage = () => {
   );
 
   // 총 달린 시간 계산 (항상 HH:MM:SS)
-  const startDate = new Date(detailData.startTime);
+  const startDate = parseGpsDateTime(detailData.startTime);
   const endDate = detailData.endTime
-    ? new Date(detailData.endTime)
-    : new Date(detailData.startTime);
+    ? parseGpsDateTime(detailData.endTime)
+    : parseGpsDateTime(detailData.startTime);
   const durationMs = Math.max(0, endDate.getTime() - startDate.getTime());
   const totalSeconds = Math.floor(durationMs / 1000);
   const totalHours = Math.floor(totalSeconds / 3600);

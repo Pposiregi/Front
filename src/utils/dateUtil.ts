@@ -50,6 +50,25 @@ export const parseDateKey = (dateKey: string) => {
 export const formatDateLabel = (date: Date) =>
   `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 
+const ISO_TIMEZONE_PATTERN = /(?:Z|[+-]\d{2}:?\d{2})$/i;
+
+/**
+ * GPS API 시각 문자열을 Date 객체로 변환한다.
+ * - 앱은 /gps/start, /gps/end에 UTC ISO 문자열을 보낸다.
+ * - 일부 응답은 UTC 시각에서 timezone 표시(Z)를 제거해 내려올 수 있어,
+ *   timezone 없는 ISO date-time은 UTC로 해석한다.
+ */
+export const parseGpsDateTime = (value: string | null | undefined) => {
+  if (!value) return new Date(NaN);
+
+  const normalized = value.trim();
+  if (normalized.length === 0) return new Date(NaN);
+
+  const hasTime = normalized.includes('T');
+  const hasTimezone = ISO_TIMEZONE_PATTERN.test(normalized);
+  return new Date(hasTime && !hasTimezone ? `${normalized}Z` : normalized);
+};
+
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 /**

@@ -27,7 +27,7 @@ import {
   getWeeklySteps,
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
-import { formatDateKey, parseDateKey } from '@utils/dateUtil';
+import { formatDateKey, parseDateKey, parseGpsDateTime } from '@utils/dateUtil';
 import { formatDistanceFromKm } from '@utils/distanceFormat';
 import type { getUserResponse } from 'types/main';
 
@@ -152,7 +152,8 @@ function ActivityPage() {
 
       monthlyActivities.forEach((session) => {
         if (!session.startTime) return;
-        const dayKey = formatDateKey(new Date(session.startTime));
+        // 서버가 timezone 없는 UTC 문자열을 줄 수 있어 GPS 전용 파서로 일자를 맞춘다.
+        const dayKey = formatDateKey(parseGpsDateTime(session.startTime));
         const totalDistanceMeters = Number(session.totalDistance) || 0;
 
         const prev = byDate.get(dayKey);
@@ -257,10 +258,11 @@ function ActivityPage() {
       const month = date.getMonth() + 1;
       const data = await getMonthlySessions(year, month);
 
-      // startTime을 기준으로 최신순 정렬
+      // startTime을 기준으로 최신순 정렬한다. timezone 없는 응답도 UTC 기준으로 해석한다.
       const sortedData = [...data].sort(
         (a, b) =>
-          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+          parseGpsDateTime(b.startTime).getTime() -
+          parseGpsDateTime(a.startTime).getTime()
       );
       setMonthlyActivities(sortedData);
     } catch (err) {
@@ -316,9 +318,10 @@ function ActivityPage() {
         todayDate.getFullYear(),
         todayDate.getMonth() + 1
       );
-      const todaySessions = monthSessions.filter(
-        (session) => formatDateKey(new Date(session.startTime)) === today
-      );
+      const todaySessions = monthSessions.filter((session) => {
+        // 오늘 요약도 러닝별 리스트와 같은 시간 해석 규칙을 사용한다.
+        return formatDateKey(parseGpsDateTime(session.startTime)) === today;
+      });
 
       if (todaySessions.length === 0) {
         setDailyActivity({
