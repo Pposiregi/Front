@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
+    <!-- 걸음 수 센서 (TYPE_STEP_COUNTER) - Android 10 이상 필수 -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
      <!-- HealthConnect  -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.WRITE_STEPS" />

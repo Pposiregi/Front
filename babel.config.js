@@ -29,6 +29,7 @@ module.exports = {
           '@api': './src/api',
           '@shared': './src/shared',
           '@navigation': './src/navigation',
+          '@native': './src/native',
         },
       },
     ],
