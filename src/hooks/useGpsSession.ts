@@ -109,6 +109,7 @@ export type UseGpsSessionResult = {
   isSessionActive: boolean;
   sessionId: number | null;
   path: LatLng[];
+  trackPoints: RouteTrackPoint[];
   region: MapRegion;
   liveSteps: number;
   startSession: () => Promise<boolean>;
@@ -453,6 +454,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
     isSessionActive,
     sessionId,
     path,
+    trackPoints,
     region,
     liveSteps,
     startSession,

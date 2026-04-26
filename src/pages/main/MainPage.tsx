@@ -240,13 +240,24 @@ export const MainPage = () => {
   /**
    * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
-  const { isTracking, path, region, startSession, endSession } =
+  const { isTracking, path, trackPoints, region, liveSteps, startSession, endSession } =
     useGpsSession();
   const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
   const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
+
+  // 최근 3개 trackPoint의 speed(m/s) 평균으로 현재 페이스 계산
+  const livePaceMinPerKm = useMemo(() => {
+    const recent = trackPoints.slice(-3);
+    const speeds = recent
+      .map((p) => p.speed)
+      .filter((s): s is number => s != null && s > 0.5); // 정지(0.5m/s 미만) 제외
+    if (speeds.length === 0) return null;
+    const avgSpeedMps = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+    return 1000 / avgSpeedMps / 60; // min/km
+  }, [trackPoints]);
   const runBgProgress = useRef(new Animated.Value(0)).current;
   const runSwirlProgress = useRef(new Animated.Value(0)).current;
 
@@ -946,39 +957,76 @@ export const MainPage = () => {
         </View>
       )}
       {/*
-        미션 진행 상황을 가로 스크롤로 표시 
+        런닝 중: 페이스/걸음수/시간 스탯 패널
+        평시: 미션 진행 상황을 가로 스크롤로 표시
       */}
       <View style={styles.progressContainer}>
-        {/*
-          일일 미션을 수평 스크롤 카드 형태로 표시, 미션이 없으면 미션 X 띄움 
-        */}
-        {progressMissions.length === 0 ? (
-          <View style={styles.emptyMissionContainer}>
-            <Text style={styles.emptyMissionText}>
-              완벽한 하루예요! 내일도 함께해요!
-            </Text>
+        {isTracking ? (
+          <View style={styles.runningStatPanel}>
+            <View style={styles.runningStatPanelItem}>
+              <Text style={styles.runningStatPanelLabel}>페이스</Text>
+              <Text style={styles.runningStatPanelValue}>
+                {livePaceMinPerKm == null
+                  ? "--'--''"
+                  : `${Math.floor(livePaceMinPerKm)}'${String(
+                      Math.round(
+                        (livePaceMinPerKm - Math.floor(livePaceMinPerKm)) * 60
+                      )
+                    ).padStart(2, '0')}''`}
+              </Text>
+              <Text style={styles.runningStatPanelUnit}>min/km</Text>
+            </View>
+            <View style={styles.runningStatPanelDivider} />
+            <View style={styles.runningStatPanelItem}>
+              <Text style={styles.runningStatPanelLabel}>걸음 수</Text>
+              <Text style={styles.runningStatPanelValue}>
+                {liveSteps.toLocaleString()}
+              </Text>
+              <Text style={styles.runningStatPanelUnit}>보</Text>
+            </View>
+            <View style={styles.runningStatPanelDivider} />
+            <View style={styles.runningStatPanelItem}>
+              <Text style={styles.runningStatPanelLabel}>시간</Text>
+              <Text style={styles.runningStatPanelValue}>
+                {formatRunningElapsed(runningElapsedSec)}
+              </Text>
+              <Text style={styles.runningStatPanelUnit}>경과</Text>
+            </View>
           </View>
         ) : (
-          <FlatList
-            data={progressMissions}
-            horizontal
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <StepProgress
-                title={item.title}
-                current={item.current}
-                goal={item.goal}
-                unit={item.unit}
-                isReadyToComplete={item.isReadyToComplete}
-                onPress={() => {
-                  if (!item.isReadyToComplete) return;
-                  handleOpenMission();
-                }}
+          <>
+            {/*
+          일일 미션을 수평 스크롤 카드 형태로 표시, 미션이 없으면 미션 X 띄움
+        */}
+            {progressMissions.length === 0 ? (
+              <View style={styles.emptyMissionContainer}>
+                <Text style={styles.emptyMissionText}>
+                  완벽한 하루예요! 내일도 함께해요!
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={progressMissions}
+                horizontal
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <StepProgress
+                    title={item.title}
+                    current={item.current}
+                    goal={item.goal}
+                    unit={item.unit}
+                    isReadyToComplete={item.isReadyToComplete}
+                    onPress={() => {
+                      if (!item.isReadyToComplete) return;
+                      handleOpenMission();
+                    }}
+                  />
+                )}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.progressRow}
               />
             )}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.progressRow}
-          />
+          </>
         )}
       </View>
       {isTracking ? (
@@ -1116,11 +1164,13 @@ export const MainPage = () => {
               />
             </Pressable>
           </View>
-          <MainStatCards
-            stepCount={displayedSteps}
-            totalRunSec={todayTotalRunSec}
-            estimatedKcal={estimatedKcal}
-          />
+          {!isTracking && (
+            <MainStatCards
+              stepCount={displayedSteps}
+              totalRunSec={todayTotalRunSec}
+              estimatedKcal={estimatedKcal}
+            />
+          )}
           <View style={styles.devButtonGroup}>
             {__DEV__ && (
               <TouchableOpacity

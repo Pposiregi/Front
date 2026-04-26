@@ -41,20 +41,42 @@ const RUN_HUD_HORIZONTAL_PADDING = Math.max(
   Spacing.lg,
   Math.round(SCREEN_WIDTH * 0.045)
 );
-const RUN_HUD_VERTICAL_PADDING = Math.max(Spacing.sm - 2, Math.round(SCREEN_HEIGHT * 0.007));
+const RUN_HUD_VERTICAL_PADDING = Math.max(
+  Spacing.sm - 2,
+  Math.round(SCREEN_HEIGHT * 0.007)
+);
 const TIMER_LINE_HEIGHT = Math.max(42, Math.round(SCREEN_WIDTH * 0.112));
 const START_ICON_SIZE = Math.max(50, Math.round(SCREEN_WIDTH * 0.14));
-const DEV_BUTTON_STACK_BOTTOM = BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006));
-const DEV_BUTTON_HORIZONTAL_PADDING = Math.max(10, Math.round(SCREEN_WIDTH * 0.028));
-const DEV_BUTTON_VERTICAL_PADDING = Math.max(6, Math.round(SCREEN_HEIGHT * 0.008));
-const RUN_LOCK_NOTICE_RIGHT = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
+const DEV_BUTTON_STACK_BOTTOM =
+  BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006));
+const DEV_BUTTON_HORIZONTAL_PADDING = Math.max(
+  10,
+  Math.round(SCREEN_WIDTH * 0.028)
+);
+const DEV_BUTTON_VERTICAL_PADDING = Math.max(
+  6,
+  Math.round(SCREEN_HEIGHT * 0.008)
+);
+const RUN_LOCK_NOTICE_RIGHT = Math.max(
+  Spacing.md,
+  Math.round(SCREEN_WIDTH * 0.03)
+);
 const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = Math.max(
   Spacing.md,
   Math.round(SCREEN_WIDTH * 0.03)
 );
-const RUN_LOCK_NOTICE_VERTICAL_PADDING = Math.max(7, Math.round(SCREEN_HEIGHT * 0.009));
-const MISSION_BUTTON_SIZE = Math.max(44, Math.min(52, Math.round(SCREEN_WIDTH * 0.12)));
-const MISSION_BUTTON_PADDING = Math.max(Spacing.sm, Math.round(MISSION_BUTTON_SIZE * 0.17));
+const RUN_LOCK_NOTICE_VERTICAL_PADDING = Math.max(
+  7,
+  Math.round(SCREEN_HEIGHT * 0.009)
+);
+const MISSION_BUTTON_SIZE = Math.max(
+  44,
+  Math.min(52, Math.round(SCREEN_WIDTH * 0.12))
+);
+const MISSION_BUTTON_PADDING = Math.max(
+  Spacing.sm,
+  Math.round(MISSION_BUTTON_SIZE * 0.17)
+);
 const MISSION_ICON_SIZE = Math.max(28, Math.round(MISSION_BUTTON_SIZE * 0.65));
 
 export default StyleSheet.create({
@@ -177,7 +199,10 @@ export default StyleSheet.create({
   },
   fatButton: {
     position: 'absolute',
-    bottom: Math.max(Spacing.sm, BOTTOM_NAV_HEIGHT - Math.round(SCREEN_HEIGHT * 0.02)),
+    bottom: Math.max(
+      Spacing.sm,
+      BOTTOM_NAV_HEIGHT - Math.round(SCREEN_HEIGHT * 0.02)
+    ),
     left: '50%',
     marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
     backgroundColor: Colors.devButton,
@@ -427,5 +452,47 @@ export default StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
+  },
+
+  runningStatPanel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.accentSoft,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    marginHorizontal: 12,
+    paddingVertical: 12,
+  },
+
+  runningStatPanelItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+
+  runningStatPanelDivider: {
+    width: 1,
+    height: '70%',
+    backgroundColor: Colors.accent,
+  },
+
+  runningStatPanelLabel: {
+    fontSize: Typography.caption,
+    color: Colors.textSecondary,
+    fontFamily: Fonts.JUA,
+    marginBottom: 2,
+  },
+
+  runningStatPanelValue: {
+    fontSize: Typography.h2,
+    color: Colors.textPrimary,
+    fontFamily: Fonts.JUA,
+  },
+
+  runningStatPanelUnit: {
+    fontSize: Typography.caption,
+    color: Colors.textMuted,
+    fontFamily: Fonts.JUA,
+    marginTop: 2,
   },
 });
