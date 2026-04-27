@@ -46,5 +46,5 @@ class StepSensorModule(private val reactContext: ReactApplicationContext) :
     fun addListener(eventName: String) {}
 
     @ReactMethod
-    fun removeListeners(count: Double) {}
+    fun removeListeners(count: Int) {}
 }
