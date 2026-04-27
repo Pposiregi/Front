@@ -39,7 +39,10 @@ export const useNativeStepCounter = (active: boolean) => {
             startTotalRef.current = total;
             return;
           }
-          const sessionSteps = Math.max(0, total - startTotalRef.current);
+          const sessionSteps = Math.max(
+            0,
+            Math.round(total - startTotalRef.current)
+          );
           stepsRef.current = sessionSteps;
           setSteps(sessionSteps);
         }
