@@ -1,12 +1,19 @@
 import apiClient from './httpClient';
 import type {
   PetUpdateRequest,
+  ProfileImageHistoryItem,
   ProfileImageUploadResponse,
   UserUpdateRequest,
 } from 'types/profile';
+import type { getUserResponse } from 'types/main';
 
-export const updateUserProfile = async (payload: UserUpdateRequest) => {
+export const updateUserProfile = async (payload: UserUpdateRequest): Promise<getUserResponse> => {
   const { data } = await apiClient.patch('/users', payload);
+  return data;
+};
+
+export const getProfileImageHistory = async (): Promise<ProfileImageHistoryItem[]> => {
+  const { data } = await apiClient.get('/users/profile-image/history');
   return data;
 };
 

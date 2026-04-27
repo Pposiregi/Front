@@ -11,7 +11,13 @@ export type UserUpdateRequest = {
   targetWeightKg?: number;
   targetPbf?: number;
   targetStepCount?: number;
-  profileImageUrl?: string;
+  profileImageKey?: string;
+};
+
+export type ProfileImageHistoryItem = {
+  imageKey: string;
+  presignedUrl: string;
+  isCurrent: boolean;
 };
 
 export type PetUpdateRequest = {
