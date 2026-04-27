@@ -19,7 +19,8 @@
       "@api/*": ["api/*"],
       "@types/*": ["types/*"],
       "@shared/*": ["shared/*"],
-      "@navigation/*": ["navigation/*"]
+      "@navigation/*": ["navigation/*"],
+      "@native/*": ["native/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/types/images.d.ts"],

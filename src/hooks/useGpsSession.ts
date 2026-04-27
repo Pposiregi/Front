@@ -5,6 +5,7 @@ import {
   useRouteTracking,
   type RouteTrackPoint,
 } from '@hooks/useRouteTracking';
+import { useNativeStepCounter } from '@hooks/useNativeStepCounter';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
 import { getDistanceMeters } from '@utils/distance';
 import type {
@@ -108,7 +109,9 @@ export type UseGpsSessionResult = {
   isSessionActive: boolean;
   sessionId: number | null;
   path: LatLng[];
+  trackPoints: RouteTrackPoint[];
   region: MapRegion;
+  liveSteps: number;
   startSession: () => Promise<boolean>;
   endSession: () => Promise<GpsSessionEndResult | null>;
 };
@@ -137,6 +140,8 @@ export const useGpsSession = (): UseGpsSessionResult => {
     useRouteTracking();
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const { steps: liveSteps, stepsRef: liveStepsRef } =
+    useNativeStepCounter(isTracking);
 
   const sessionIdRef = useRef<number | null>(null);
   const startTimeRef = useRef<string | null>(null);
@@ -178,22 +183,25 @@ export const useGpsSession = (): UseGpsSessionResult => {
     }
   }, []);
 
-  const appendTrackPointsToPending = useCallback((points: RouteTrackPoint[]) => {
-    if (points.length <= lastTrackPointIndexRef.current) return;
+  const appendTrackPointsToPending = useCallback(
+    (points: RouteTrackPoint[]) => {
+      if (points.length <= lastTrackPointIndexRef.current) return;
 
-    const newPoints = points.slice(lastTrackPointIndexRef.current);
-    newPoints.forEach((point: RouteTrackPoint) => {
-      pendingLogsRef.current.push({
-        latitude: point.latitude,
-        longitude: point.longitude,
-        recordedAt: point.recordedAt,
-        // /gps/log 전송 단위는 km/h로 맞춘다.
-        speed: toKmh(point.speed),
-        altitude: point.altitude,
+      const newPoints = points.slice(lastTrackPointIndexRef.current);
+      newPoints.forEach((point: RouteTrackPoint) => {
+        pendingLogsRef.current.push({
+          latitude: point.latitude,
+          longitude: point.longitude,
+          recordedAt: point.recordedAt,
+          // /gps/log 전송 단위는 km/h로 맞춘다.
+          speed: toKmh(point.speed),
+          altitude: point.altitude,
+        });
       });
-    });
-    lastTrackPointIndexRef.current = points.length;
-  }, []);
+      lastTrackPointIndexRef.current = points.length;
+    },
+    []
+  );
 
   const appendNewTrackPointsToPending = useCallback(() => {
     appendTrackPointsToPending(trackPointsRef.current);
@@ -331,98 +339,97 @@ export const useGpsSession = (): UseGpsSessionResult => {
     stopTracking,
   ]);
 
-  const endSession = useCallback(
-    async () => {
-      if (!sessionIdRef.current || !startTimeRef.current) return null;
+  const endSession = useCallback(async () => {
+    if (!sessionIdRef.current || !startTimeRef.current) return null;
 
-      try {
-        const endTime = new Date();
-        const pathSnapshot = [...path];
-        const trackPointsSnapshot = [...trackPoints];
+    try {
+      const endTime = new Date();
+      const pathSnapshot = [...path];
+      const trackPointsSnapshot = [...trackPoints];
 
-        isEndingRef.current = true;
-        clearLogTimer();
-        appendTrackPointsToPending(trackPointsSnapshot);
-        const allLogsFlushed = await flushAllPendingLogs();
-        if (!allLogsFlushed) {
-          throw new Error(
-            'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
-          );
-        }
-
-        const startTimeValue = new Date(startTimeRef.current);
-        const durationMs = Math.max(
-          0,
-          endTime.getTime() - startTimeValue.getTime()
+      isEndingRef.current = true;
+      clearLogTimer();
+      appendTrackPointsToPending(trackPointsSnapshot);
+      const allLogsFlushed = await flushAllPendingLogs();
+      if (!allLogsFlushed) {
+        throw new Error(
+          'GPS 로그 전송에 실패해 종료를 완료하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.'
         );
-        const distance = calculateTotalDistanceMeters(pathSnapshot);
-        // backend 기준 단위(m/s)로 요약 속도를 관리한다.
-        const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
-        // 실제 step source가 없으므로, 평균 속도 기반 추정 보폭으로 걸음 수를 계산한다.
-        const estimatedStepLengthMeters =
-          getEstimatedRunningStepLengthMeters(avgSpeedMps);
-        const stepCount = Math.max(
-          0,
-          Math.round(distance / estimatedStepLengthMeters)
-        );
-        if (__DEV__) {
-          console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
-            distanceMeters: distance,
-            avgSpeedMps,
-            stepLengthMeters: estimatedStepLengthMeters,
-            stepCount,
-          });
-        }
+      }
 
-        const response = await endGpsSessionWithRetry({
-          sessionId: sessionIdRef.current,
-          endTime: endTime.toISOString(),
-          stepCount,
-        });
-        const summary: GpsSessionSummary = {
-          durationMs,
-          stepCount,
+      const startTimeValue = new Date(startTimeRef.current);
+      const durationMs = Math.max(
+        0,
+        endTime.getTime() - startTimeValue.getTime()
+      );
+      const distance = calculateTotalDistanceMeters(pathSnapshot);
+      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
+      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
+      // 센서 실측값 우선, 미지원 기기에서는 GPS 기반 추정값으로 fallback한다.
+      const sensorSteps = liveStepsRef.current;
+      const estimatedStepLengthMeters =
+        getEstimatedRunningStepLengthMeters(avgSpeedMps);
+      const stepCount =
+        sensorSteps > 0
+          ? sensorSteps
+          : Math.max(0, Math.round(distance / estimatedStepLengthMeters));
+      if (__DEV__) {
+        console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
           distanceMeters: distance,
           avgSpeedMps,
-        };
-
-        clearLogTimer();
-        pendingLogsRef.current = [];
-        lastTrackPointIndexRef.current = 0;
-        sessionIdRef.current = null;
-        startTimeRef.current = null;
-        setSessionId(null);
-        setIsSessionActive(false);
-        await clearPersistedSession();
-        stopTracking();
-        isEndingRef.current = false;
-
-        if (__DEV__) {
-          console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
-        }
-
-        return { response, summary };
-      } catch (err) {
-        // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
-        isEndingRef.current = false;
-        appendNewTrackPointsToPending();
-        startLogTimer();
-        throw err;
+          sensorSteps,
+          stepLengthMeters: estimatedStepLengthMeters,
+          stepCount,
+        });
       }
-    },
-    [
-      appendNewTrackPointsToPending,
-      appendTrackPointsToPending,
-      clearLogTimer,
-      clearPersistedSession,
-      endGpsSessionWithRetry,
-      flushAllPendingLogs,
-      path,
-      trackPoints,
-      startLogTimer,
-      stopTracking,
-    ]
-  );
+
+      const response = await endGpsSessionWithRetry({
+        sessionId: sessionIdRef.current,
+        endTime: endTime.toISOString(),
+        stepCount,
+      });
+      const summary: GpsSessionSummary = {
+        durationMs,
+        stepCount,
+        distanceMeters: distance,
+        avgSpeedMps,
+      };
+
+      clearLogTimer();
+      pendingLogsRef.current = [];
+      lastTrackPointIndexRef.current = 0;
+      sessionIdRef.current = null;
+      startTimeRef.current = null;
+      setSessionId(null);
+      setIsSessionActive(false);
+      await clearPersistedSession();
+      stopTracking();
+      isEndingRef.current = false;
+
+      if (__DEV__) {
+        console.debug('>>>[RUNNING][RUN] 세션 종료', response?.sessionId);
+      }
+
+      return { response, summary };
+    } catch (err) {
+      // 종료 실패 시 세션/큐를 유지하고 주기 전송을 재개한다.
+      isEndingRef.current = false;
+      appendNewTrackPointsToPending();
+      startLogTimer();
+      throw err;
+    }
+  }, [
+    appendNewTrackPointsToPending,
+    appendTrackPointsToPending,
+    clearLogTimer,
+    clearPersistedSession,
+    endGpsSessionWithRetry,
+    flushAllPendingLogs,
+    path,
+    trackPoints,
+    startLogTimer,
+    stopTracking,
+  ]);
 
   useEffect(() => {
     if (!isTracking) return;
@@ -447,7 +454,9 @@ export const useGpsSession = (): UseGpsSessionResult => {
     isSessionActive,
     sessionId,
     path,
+    trackPoints,
     region,
+    liveSteps,
     startSession,
     endSession,
   };
