@@ -25,9 +25,10 @@ export const useNativeStepCounter = (active: boolean) => {
     setSteps(0);
 
     let sub: ReturnType<typeof stepSensorEmitter.addListener> | null = null;
+    let cancelled = false;
 
     requestActivityRecognition().then((granted) => {
-      if (!granted) return;
+      if (!granted || cancelled) return;
 
       StepSensorModule.startListening();
 
@@ -47,9 +48,15 @@ export const useNativeStepCounter = (active: boolean) => {
           setSteps(sessionSteps);
         }
       );
+      if (cancelled) {
+        StepSensorModule.stopListening();
+        sub.remove();
+        sub = null;
+      }
     });
 
     return () => {
+      cancelled = true;
       StepSensorModule.stopListening();
       sub?.remove();
     };
