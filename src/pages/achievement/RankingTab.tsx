@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { styles } from '@styles/Achievement_Ranking.styles';
+import { useFocusEffect } from '@react-navigation/native';
 import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
 import { useSelector } from 'react-redux';
@@ -35,24 +36,34 @@ function RankingTab() {
     (state: RootState) => state.user.profileImageUrl
   );
 
-  useEffect(() => {
-    const fetchRanking = async () => {
-      try {
-        setLoading(true);
-        const data = await getDailyStepRanking({
-          gender: rankingFilter,
-        });
-        setRankingData({
-          topRankings: data.topRankings,
-          myRanking: data.myRanking,
-        });
-      } catch (e) {
-        console.log('랭킹 로드 실패', e);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchRanking = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getDailyStepRanking({ gender: rankingFilter });
+      setRankingData({
+        topRankings: data.topRankings,
+        myRanking: data.myRanking,
+      });
+    } catch (e) {
+      console.log('랭킹 로드 실패', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [rankingFilter]);
 
+  const isFirstFocus = useRef(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      fetchRanking();
+    }, [fetchRanking])
+  );
+
+  useEffect(() => {
     fetchRanking();
   }, [rankingFilter]);
 
@@ -127,7 +138,7 @@ function RankingTab() {
                 rank={index + 1}
                 nickname={item.nickname}
                 dailyStepCount={item.score}
-                profileImageUrl={item.profileImageUrl}
+                profileImageUrl={item.userId === myUserId ? myProfileImageUrl : item.profileImageUrl}
                 isTop3={index < 3}
                 highlight={item.userId === myUserId}
               />
@@ -150,7 +161,7 @@ function RankingTab() {
             rank={rankingData.myRanking?.rank ?? 0}
             nickname='나'
             dailyStepCount={rankingData.myRanking?.score ?? 0}
-            profileImageUrl={rankingData.myRanking?.profileImageUrl ?? myProfileImageUrl}
+            profileImageUrl={myProfileImageUrl}
             highlight={true}
           />
         </View>

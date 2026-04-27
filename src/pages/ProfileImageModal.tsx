@@ -82,14 +82,18 @@ export default function ProfileImageModal({
       setLastTapTime(null);
       getProfileImageHistory()
         .then((history) => {
+          console.log('[ProfileImage] 이력 조회 성공:', history.length, '개');
           setUploadHistory(history);
           const current = history.find((item) => item.isCurrent);
           if (current) {
+            console.log('[ProfileImage] 현재 프로필 key:', current.imageKey);
             setSelectedKey(current.imageKey);
             setSelectedUrl(current.presignedUrl);
           }
         })
-        .catch(() => {});
+        .catch((e) => {
+          console.warn('[ProfileImage] 이력 조회 실패:', e);
+        });
     }
   }, [visible, currentImageUrl]);
 
@@ -100,8 +104,10 @@ export default function ProfileImageModal({
   }, [secretUnlocked]);
 
   const handleAvatarPress = (url: string) => {
+    const key = extractImageKey(url);
+    console.log('[ProfileImage] 프리셋 선택 → key:', key);
     setSelectedUrl(url);
-    setSelectedKey(extractImageKey(url));
+    setSelectedKey(key);
 
     if (secretUnlocked || url !== SECRET_TARGET_URL) return;
 
@@ -136,12 +142,20 @@ export default function ProfileImageModal({
   const handleSave = async () => {
     try {
       setUploading(true);
-      const updated = await updateUserProfile({ profileImageKey: selectedKey });
-      dispatch(
-        userSlice.actions.updateProfileImageUrl(updated.profileImageUrl)
-      );
+      console.log('[ProfileImage] 저장 요청 → profileImageKey:', selectedKey);
+      await updateUserProfile({ profileImageKey: selectedKey });
+      const history = await getProfileImageHistory();
+      const current = history.find((item) => item.isCurrent);
+      if (current) {
+        console.log(
+          '[ProfileImage] 저장 성공 → presignedUrl:',
+          current.presignedUrl
+        );
+        dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
+      }
       handleClose();
-    } catch {
+    } catch (e) {
+      console.warn('[ProfileImage] 저장 실패:', e);
       Alert.alert('저장 실패', '프로필 이미지를 저장하지 못했어요.');
     } finally {
       setUploading(false);
@@ -173,16 +187,24 @@ export default function ProfileImageModal({
 
     try {
       setUploading(true);
-      const { uploadUrl } = await requestProfileImageUpload();
+      console.log('[ProfileImage] 갤러리 업로드 시작');
+      const { uploadUrl, imageKey } = await requestProfileImageUpload();
+      console.log('[ProfileImage] presigned URL 발급 → imageKey:', imageKey);
       await uploadPhoto(uploadUrl, {
         uri: pendingAsset.uri,
         mimeType: pendingAsset.type ?? 'image/jpeg',
       });
+      console.log('[ProfileImage] S3 업로드 성공');
       const user = await getUser();
+      console.log(
+        '[ProfileImage] 유저 정보 갱신 → profileImageUrl:',
+        user.profileImageUrl
+      );
       dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       setPendingAsset(null);
       handleClose();
-    } catch {
+    } catch (e) {
+      console.warn('[ProfileImage] 업로드 실패:', e);
       Alert.alert('업로드 실패', '이미지를 업로드하지 못했어요.');
     } finally {
       setUploading(false);
@@ -190,18 +212,21 @@ export default function ProfileImageModal({
   };
 
   const handleHistorySelect = (item: ProfileImageHistoryItem) => {
+    console.log('[ProfileImage] 이력 이미지 선택 → key:', item.imageKey);
     setSelectedKey(item.imageKey);
     setSelectedUrl(item.presignedUrl);
   };
 
   const handleHistoryImageError = async () => {
     if (historyRefreshingRef.current) return;
+    console.log('[ProfileImage] 이력 이미지 로드 실패 → presigned URL 재조회');
     historyRefreshingRef.current = true;
     try {
       const history = await getProfileImageHistory();
+      console.log('[ProfileImage] 이력 재조회 성공:', history.length, '개');
       setUploadHistory(history);
-    } catch {
-      // 실패 시 무시
+    } catch (e) {
+      console.warn('[ProfileImage] 이력 재조회 실패:', e);
     } finally {
       historyRefreshingRef.current = false;
     }

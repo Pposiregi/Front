@@ -108,8 +108,7 @@ function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
   const { width: windowWidth } = useWindowDimensions();
   const contentPadding = Math.max(16, Math.round(windowWidth * 0.048));
-  const chartWidth =
-    windowWidth - Math.max(12, contentPadding * 1.5) * 2;
+  const chartWidth = windowWidth - Math.max(12, contentPadding * 1.5) * 2;
   const chartHeight = Math.max(188, Math.round(windowWidth * 0.52));
   const chartStrokeWidth = Math.max(2, Math.round(windowWidth * 0.008));
   const chartDotRadius = Math.max(3, Math.round(windowWidth * 0.01));
