@@ -240,8 +240,15 @@ export const MainPage = () => {
   /**
    * 러닝 추적 상태/경로/카메라 영역/세션 시작·종료 핸들러.
    */
-  const { isTracking, path, trackPoints, region, liveSteps, startSession, endSession } =
-    useGpsSession();
+  const {
+    isTracking,
+    path,
+    trackPoints,
+    region,
+    liveSteps,
+    startSession,
+    endSession,
+  } = useGpsSession();
   const [runSummary, setRunSummary] = useState<GpsSessionSummary | null>(null);
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
@@ -968,11 +975,12 @@ export const MainPage = () => {
               <Text style={styles.runningStatPanelValue}>
                 {livePaceMinPerKm == null
                   ? "--'--''"
-                  : `${Math.floor(livePaceMinPerKm)}'${String(
-                      Math.round(
-                        (livePaceMinPerKm - Math.floor(livePaceMinPerKm)) * 60
-                      )
-                    ).padStart(2, '0')}''`}
+                  : (() => {
+                      const totalSec = Math.round(livePaceMinPerKm * 60);
+                      const min = Math.floor(totalSec / 60);
+                      const sec = totalSec % 60;
+                      return `${min}'${String(sec).padStart(2, '0')}''`;
+                    })()}
               </Text>
               <Text style={styles.runningStatPanelUnit}>min/km</Text>
             </View>
