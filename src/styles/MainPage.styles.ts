@@ -94,6 +94,8 @@ export default StyleSheet.create({
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
+    zIndex: 1,
+    elevation: 1,
   },
   progressRow: {
     paddingHorizontal: Spacing.lg,

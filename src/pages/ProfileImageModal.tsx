@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -10,7 +10,6 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { ProfileAvatar } from '@components/ProfileAvatar';
@@ -21,10 +20,15 @@ import {
   SECRET_PRESET_URLS,
   SECRET_TARGET_URL,
 } from '@shared/constants/profileIcons';
-import { requestProfileImageUpload, updateUserProfile } from '@api/profileApi';
+import {
+  requestProfileImageUpload,
+  updateUserProfile,
+  getProfileImageHistory,
+} from '@api/profileApi';
 import { uploadPhoto } from '@api/uploadPhoto';
 import { getUser } from '@api/mainApi';
 import { validateImageAsset } from '@utils/imageUtil';
+import type { ProfileImageHistoryItem } from 'types/profile';
 
 type Props = {
   visible: boolean;
@@ -33,31 +37,15 @@ type Props = {
 };
 
 const SECRET_TAP_REQUIRED = 5;
-const TAP_TIMEOUT = 2000; // ms
+const TAP_TIMEOUT = 2000;
 
-const PROFILE_HISTORY_KEY = 'fitpet:profile:imageHistory';
-const MAX_HISTORY = 10;
+const S3_ORIGIN = 'https://fitpet-bucket.s3.ap-northeast-2.amazonaws.com/';
 
-const loadProfileImageHistory = async (): Promise<string[]> => {
-  try {
-    const raw = await AsyncStorage.getItem(PROFILE_HISTORY_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
+const extractImageKey = (s3Url: string): string => {
+  if (s3Url.startsWith(S3_ORIGIN)) {
+    return s3Url.slice(S3_ORIGIN.length).split('?')[0];
   }
-};
-
-const addProfileImageToHistory = async (url: string): Promise<void> => {
-  try {
-    const current = await loadProfileImageHistory();
-    const deduped = [url, ...current.filter((u) => u !== url)];
-    await AsyncStorage.setItem(
-      PROFILE_HISTORY_KEY,
-      JSON.stringify(deduped.slice(0, MAX_HISTORY))
-    );
-  } catch {
-    // 이력 저장 실패는 무시
-  }
+  return s3Url;
 };
 
 export default function ProfileImageModal({
@@ -67,25 +55,44 @@ export default function ProfileImageModal({
 }: Props) {
   const dispatch = useDispatch();
   const [selectedUrl, setSelectedUrl] = useState(currentImageUrl);
+  const [selectedKey, setSelectedKey] = useState(() =>
+    extractImageKey(currentImageUrl)
+  );
   const [uploading, setUploading] = useState(false);
-  const [uploadHistory, setUploadHistory] = useState<string[]>([]);
+  const [uploadHistory, setUploadHistory] = useState<ProfileImageHistoryItem[]>(
+    []
+  );
   const [pendingAsset, setPendingAsset] = useState<{
     uri: string;
     type?: string;
   } | null>(null);
+
+  const historyRefreshingRef = useRef(false);
 
   /** 이스터에그 상태 */
   const [secretUnlocked, setSecretUnlocked] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const [lastTapTime, setLastTapTime] = useState<number | null>(null);
 
-  /** 모달 열릴 때 초기화 및 이력 로드 */
   useEffect(() => {
     if (visible) {
       setSelectedUrl(currentImageUrl);
+      setSelectedKey(extractImageKey(currentImageUrl));
       setTapCount(0);
       setLastTapTime(null);
-      loadProfileImageHistory().then(setUploadHistory);
+      getProfileImageHistory()
+        .then((history) => {
+          console.log('[ProfileImage] 이력 조회 성공:', history.length, '개');
+          setUploadHistory(history);
+          const current = history.find((item) => item.isCurrent);
+          if (current) {
+            setSelectedKey(current.imageKey);
+            setSelectedUrl(current.presignedUrl);
+          }
+        })
+        .catch((e) => {
+          console.warn('[ProfileImage] 이력 조회 실패:', e);
+        });
     }
   }, [visible, currentImageUrl]);
 
@@ -96,7 +103,9 @@ export default function ProfileImageModal({
   }, [secretUnlocked]);
 
   const handleAvatarPress = (url: string) => {
+    const key = extractImageKey(url);
     setSelectedUrl(url);
+    setSelectedKey(key);
 
     if (secretUnlocked || url !== SECRET_TARGET_URL) return;
 
@@ -128,21 +137,24 @@ export default function ProfileImageModal({
     onClose();
   };
 
-  /** 프리셋 선택 저장 */
   const handleSave = async () => {
     try {
       setUploading(true);
-      await updateUserProfile({ profileImageUrl: selectedUrl });
-      dispatch(userSlice.actions.updateProfileImageUrl(selectedUrl));
+      await updateUserProfile({ profileImageKey: selectedKey });
+      const history = await getProfileImageHistory();
+      const current = history.find((item) => item.isCurrent);
+      if (current) {
+        dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
+      }
       handleClose();
-    } catch {
+    } catch (e) {
+      console.warn('[ProfileImage] 저장 실패:', e);
       Alert.alert('저장 실패', '프로필 이미지를 저장하지 못했어요.');
     } finally {
       setUploading(false);
     }
   };
 
-  /** 갤러리에서 사진 선택 → 확인 모달 표시 */
   const handleGalleryUpload = async () => {
     const result = await launchImageLibrary({
       mediaType: 'photo',
@@ -163,156 +175,184 @@ export default function ProfileImageModal({
     setPendingAsset({ uri: asset.uri, type: asset.type });
   };
 
-  /** 확인 모달에서 "사용하기" → 실제 업로드 */
   const handleConfirmUpload = async () => {
     if (!pendingAsset) return;
 
     try {
       setUploading(true);
-      const { uploadUrl } = await requestProfileImageUpload();
+      console.log('[ProfileImage] 갤러리 업로드 시작');
+      const { uploadUrl, imageKey } = await requestProfileImageUpload();
       await uploadPhoto(uploadUrl, {
         uri: pendingAsset.uri,
         mimeType: pendingAsset.type ?? 'image/jpeg',
       });
-
+      console.log('[ProfileImage] S3 업로드 성공');
       const user = await getUser();
       dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
-      await addProfileImageToHistory(user.profileImageUrl);
       setPendingAsset(null);
       handleClose();
-    } catch {
+    } catch (e) {
+      console.warn('[ProfileImage] 업로드 실패:', e);
       Alert.alert('업로드 실패', '이미지를 업로드하지 못했어요.');
     } finally {
       setUploading(false);
     }
   };
 
+  const handleHistorySelect = (item: ProfileImageHistoryItem) => {
+    setSelectedKey(item.imageKey);
+    setSelectedUrl(item.presignedUrl);
+  };
+
+  const handleHistoryImageError = async () => {
+    if (historyRefreshingRef.current) return;
+    console.log('[ProfileImage] 이력 이미지 로드 실패 → presigned URL 재조회');
+    historyRefreshingRef.current = true;
+    try {
+      const history = await getProfileImageHistory();
+      console.log('[ProfileImage] 이력 재조회 성공:', history.length, '개');
+      setUploadHistory(history);
+    } catch (e) {
+      console.warn('[ProfileImage] 이력 재조회 실패:', e);
+    } finally {
+      historyRefreshingRef.current = false;
+    }
+  };
+
   return (
     <>
-    <Modal
-      visible={!!pendingAsset}
-      transparent
-      animationType='fade'
-      onRequestClose={() => setPendingAsset(null)}
-    >
-      <View style={styles.confirmBackdrop}>
-        <View style={styles.confirmContainer}>
-          <Text style={styles.confirmTitle}>이 사진으로 설정할까요?</Text>
-          {pendingAsset && (
-            <Image
-              source={{ uri: pendingAsset.uri }}
-              style={styles.confirmPreview}
-              resizeMode='cover'
-            />
-          )}
-          <View style={styles.footer}>
-            <Pressable
-              onPress={() => setPendingAsset(null)}
-              style={styles.cancelBtn}
-              disabled={uploading}
-            >
-              <Text style={styles.cancelText}>다시 선택</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleConfirmUpload}
-              style={styles.saveBtn}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <ActivityIndicator color='#fff' />
-              ) : (
-                <Text style={styles.saveText}>사용하기</Text>
-              )}
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </Modal>
-
-    <Modal
-      visible={visible}
-      transparent
-      animationType='slide'
-      onRequestClose={handleClose}
-    >
-      <View style={styles.backdrop}>
-        <View style={styles.container}>
-          <Text style={styles.title}>프로필 이미지 선택</Text>
-
-          <Pressable
-            onPress={handleGalleryUpload}
-            style={styles.galleryBtn}
-            disabled={uploading}
-          >
-            <Text style={styles.galleryBtnText}>📷 갤러리에서 선택</Text>
-          </Pressable>
-
-          {uploadHistory.length > 0 && (
-            <View>
-              <Text style={styles.sectionLabel}>내 사진</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.historyScroll}
+      <Modal
+        visible={!!pendingAsset}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setPendingAsset(null)}
+      >
+        <View style={styles.confirmBackdrop}>
+          <View style={styles.confirmContainer}>
+            <Text style={styles.confirmTitle}>이 사진으로 설정할까요?</Text>
+            {pendingAsset && (
+              <Image
+                source={{ uri: pendingAsset.uri }}
+                style={styles.confirmPreview}
+                resizeMode='cover'
+              />
+            )}
+            <View style={styles.footer}>
+              <Pressable
+                onPress={() => setPendingAsset(null)}
+                style={styles.cancelBtn}
+                disabled={uploading}
               >
-                {uploadHistory.map((url) => {
-                  const selected = url === selectedUrl;
-                  return (
-                    <Pressable
-                      key={url}
-                      onPress={() => setSelectedUrl(url)}
-                      style={[styles.avatarWrapper, selected && styles.selected]}
-                    >
-                      <ProfileAvatar profileImageUrl={url} />
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                <Text style={styles.cancelText}>다시 선택</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleConfirmUpload}
+                style={styles.saveBtn}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <ActivityIndicator color='#fff' />
+                ) : (
+                  <Text style={styles.saveText}>사용하기</Text>
+                )}
+              </Pressable>
             </View>
-          )}
-
-          <Text style={styles.sectionLabel}>기본 프로필</Text>
-          <FlatList
-            data={imageList}
-            numColumns={3}
-            keyExtractor={(item) => item}
-            columnWrapperStyle={styles.row}
-            renderItem={({ item }) => {
-              const selected = item === selectedUrl;
-              return (
-                <Pressable
-                  onPress={() => handleAvatarPress(item)}
-                  style={[styles.avatarWrapper, selected && styles.selected]}
-                >
-                  <ProfileAvatar profileImageUrl={item} />
-                </Pressable>
-              );
-            }}
-          />
-
-          <View style={styles.footer}>
-            <Pressable
-              onPress={handleClose}
-              style={styles.cancelBtn}
-              disabled={uploading}
-            >
-              <Text style={styles.cancelText}>취소</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSave}
-              style={styles.saveBtn}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <ActivityIndicator color='#fff' />
-              ) : (
-                <Text style={styles.saveText}>저장</Text>
-              )}
-            </Pressable>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+
+      <Modal
+        visible={visible}
+        transparent
+        animationType='slide'
+        onRequestClose={handleClose}
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.container}>
+            <Text style={styles.title}>프로필 이미지 선택</Text>
+
+            <Pressable
+              onPress={handleGalleryUpload}
+              style={styles.galleryBtn}
+              disabled={uploading}
+            >
+              <Text style={styles.galleryBtnText}>📷 갤러리에서 선택</Text>
+            </Pressable>
+
+            {uploadHistory.length > 0 && (
+              <View>
+                <Text style={styles.sectionLabel}>내 사진</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.historyScroll}
+                >
+                  {uploadHistory.map((item) => {
+                    const selected = item.imageKey === selectedKey;
+                    return (
+                      <Pressable
+                        key={item.imageKey}
+                        onPress={() => handleHistorySelect(item)}
+                        style={[
+                          styles.avatarWrapper,
+                          selected && styles.selected,
+                        ]}
+                      >
+                        <Image
+                          source={{ uri: item.presignedUrl }}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode='cover'
+                          onError={handleHistoryImageError}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+
+            <Text style={styles.sectionLabel}>기본 프로필</Text>
+            <FlatList
+              data={imageList}
+              numColumns={3}
+              keyExtractor={(item) => item}
+              columnWrapperStyle={styles.row}
+              renderItem={({ item }) => {
+                const selected = extractImageKey(item) === selectedKey;
+                return (
+                  <Pressable
+                    onPress={() => handleAvatarPress(item)}
+                    style={[styles.avatarWrapper, selected && styles.selected]}
+                  >
+                    <ProfileAvatar profileImageUrl={item} />
+                  </Pressable>
+                );
+              }}
+            />
+
+            <View style={styles.footer}>
+              <Pressable
+                onPress={handleClose}
+                style={styles.cancelBtn}
+                disabled={uploading}
+              >
+                <Text style={styles.cancelText}>취소</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSave}
+                style={styles.saveBtn}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <ActivityIndicator color='#fff' />
+                ) : (
+                  <Text style={styles.saveText}>저장</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }

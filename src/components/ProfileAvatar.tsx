@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image } from 'react-native';
 import { DEFAULT_PROFILE_URL } from '@shared/constants/profileIcons';
 
@@ -8,6 +8,11 @@ interface Props {
 
 export const ProfileAvatar = ({ profileImageUrl }: Props) => {
   const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [profileImageUrl]);
+
   const uri =
     !imageFailed && profileImageUrl ? profileImageUrl : DEFAULT_PROFILE_URL;
 
