@@ -93,7 +93,7 @@ const createTabBarIcon =
     return (
       <Image
         source={focused ? icon.focused : icon.unfocused}
-        style={styles.tabIcon}
+        style={[styles.tabIcon, icon.style]}
       />
     );
   };

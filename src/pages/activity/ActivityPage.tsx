@@ -27,7 +27,7 @@ import {
   getWeeklySteps,
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
-import { formatDateKey, parseDateKey } from '@utils/dateUtil';
+import { formatDateKey, parseDateKey, parseGpsDateTime } from '@utils/dateUtil';
 import { formatDistanceFromKm } from '@utils/distanceFormat';
 import type { getUserResponse } from 'types/main';
 
@@ -127,6 +127,9 @@ function ActivityPage() {
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [listTab, setListTab] = useState<'daily' | 'sessions'>('daily');
+  const [hiddenSessionIds, setHiddenSessionIds] = useState<Set<number>>(
+    () => new Set()
+  );
   const chartPadding = activityTheme.spacing.lg;
   const contentPadding = activityTheme.spacing.xl;
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
@@ -152,7 +155,8 @@ function ActivityPage() {
 
       monthlyActivities.forEach((session) => {
         if (!session.startTime) return;
-        const dayKey = formatDateKey(new Date(session.startTime));
+        // 서버가 timezone 없는 UTC 문자열을 줄 수 있어 GPS 전용 파서로 일자를 맞춘다.
+        const dayKey = formatDateKey(parseGpsDateTime(session.startTime));
         const totalDistanceMeters = Number(session.totalDistance) || 0;
 
         const prev = byDate.get(dayKey);
@@ -257,10 +261,11 @@ function ActivityPage() {
       const month = date.getMonth() + 1;
       const data = await getMonthlySessions(year, month);
 
-      // startTime을 기준으로 최신순 정렬
+      // startTime을 기준으로 최신순 정렬한다. timezone 없는 응답도 UTC 기준으로 해석한다.
       const sortedData = [...data].sort(
         (a, b) =>
-          new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+          parseGpsDateTime(b.startTime).getTime() -
+          parseGpsDateTime(a.startTime).getTime()
       );
       setMonthlyActivities(sortedData);
     } catch (err) {
@@ -316,9 +321,10 @@ function ActivityPage() {
         todayDate.getFullYear(),
         todayDate.getMonth() + 1
       );
-      const todaySessions = monthSessions.filter(
-        (session) => formatDateKey(new Date(session.startTime)) === today
-      );
+      const todaySessions = monthSessions.filter((session) => {
+        // 오늘 요약도 러닝별 리스트와 같은 시간 해석 규칙을 사용한다.
+        return formatDateKey(parseGpsDateTime(session.startTime)) === today;
+      });
 
       if (todaySessions.length === 0) {
         setDailyActivity({
@@ -477,6 +483,21 @@ function ActivityPage() {
     }
   }, [currentMonth, fetchDailySummary, fetchMonthlyBundle, fetchWeeklySteps]);
 
+  // 서버 기록은 지우지 않고, 현재 러닝별 목록에서만 임시로 숨긴다.
+  const handleHideSession = useCallback((sessionId: number) => {
+    setHiddenSessionIds((prev) => {
+      const next = new Set(prev);
+      next.add(sessionId);
+      return next;
+    });
+  }, []);
+
+  // 숨긴 항목을 초기화하고 서버의 현재 월 기록을 다시 받아온다.
+  const handleReloadAllSessions = useCallback(async () => {
+    setHiddenSessionIds(new Set());
+    await fetchMonthlyBundle(currentMonth);
+  }, [currentMonth, fetchMonthlyBundle]);
+
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
   // 일일 요약은 km 응답을 받아 공통 규칙(1000m 미만 m, 이상 km)으로 표시한다.
@@ -514,7 +535,16 @@ function ActivityPage() {
   const progressSize = Math.max(112, Math.round(SCREEN_WIDTH * 0.28));
   const progressStroke = Math.max(10, Math.round(progressSize * 0.1));
 
-  const showEmptySessions = !loading && monthlyActivities.length === 0;
+  const visibleMonthlyActivities = useMemo(
+    () =>
+      monthlyActivities.filter(
+        (session) => !hiddenSessionIds.has(session.sessionId)
+      ),
+    [hiddenSessionIds, monthlyActivities]
+  );
+  // 복구 버튼은 사용자가 x로 숨긴 기록이 있을 때만 노출한다.
+  const hasHiddenSessions = hiddenSessionIds.size > 0;
+  const showEmptySessions = !loading && visibleMonthlyActivities.length === 0;
   const showEmptyDaily = !loading && normalizedMonthlyDaily.length === 0;
   const isNextDisabled = useMemo(() => {
     const todayDate = new Date();
@@ -712,6 +742,21 @@ function ActivityPage() {
           </Pressable>
         </View>
       </View>
+      {/* 러닝별에서 숨긴 항목이 있을 때만 전체 기록 복구 액션을 보여준다. */}
+      {listTab === 'sessions' && hasHiddenSessions ? (
+        <View style={styles.sessionReloadRow}>
+          <Pressable
+            accessibilityRole='button'
+            onPress={handleReloadAllSessions}
+            style={({ pressed }) => [
+              styles.sessionReloadButton,
+              pressed && styles.sessionReloadButtonPressed,
+            ]}
+          >
+            <Text style={styles.sessionReloadText}>전체 기록 불러오기</Text>
+          </Pressable>
+        </View>
+      ) : null}
       {loading ? (
         <ActivityIndicator
           size='large'
@@ -778,8 +823,12 @@ function ActivityPage() {
               </Text>
             </View>
           ) : (
-            monthlyActivities.map((session) => (
-              <SessionItem key={session.sessionId} session={session} />
+            visibleMonthlyActivities.map((session) => (
+              <SessionItem
+                key={session.sessionId}
+                session={session}
+                onDelete={handleHideSession}
+              />
             ))
           )}
         </View>

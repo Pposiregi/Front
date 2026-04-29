@@ -278,6 +278,7 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   listCard: {
+    position: 'relative',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     marginVertical: spacing.sm,
@@ -327,6 +328,55 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginLeft: spacing.lg,
     marginRight: spacing.xs,
+    // 우상단 x 버튼과 시각적으로 겹치지 않도록 거리/화살표 묶음을 살짝 내린다.
+    transform: [{ translateY: spacing.xs }],
+  },
+  sessionDeleteButton: {
+    // 카드 레이아웃을 밀지 않고 삭제 액션만 우상단에 고정한다.
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 1,
+    width: 22,
+    height: 22,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.divider,
+  },
+  sessionDeleteText: {
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: 16,
+    lineHeight: 18,
+    color: Colors.textMuted,
+  },
+  sessionReloadRow: {
+    // 숨긴 항목 복구 버튼은 러닝별 탭의 보조 액션으로 카드 목록 바로 위에 둔다.
+    alignItems: 'stretch',
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  sessionReloadButton: {
+    minHeight: 42,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.accentStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sessionReloadButtonPressed: {
+    opacity: 0.75,
+  },
+  sessionReloadText: {
+    fontFamily: Fonts.JUA,
+    fontSize: 14,
+    color: Colors.accentStrong,
+    lineHeight: 18,
   },
   listDistanceRow: {
     flexDirection: 'row',
