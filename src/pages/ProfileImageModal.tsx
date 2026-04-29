@@ -86,7 +86,6 @@ export default function ProfileImageModal({
           setUploadHistory(history);
           const current = history.find((item) => item.isCurrent);
           if (current) {
-            console.log('[ProfileImage] 현재 프로필 key:', current.imageKey);
             setSelectedKey(current.imageKey);
             setSelectedUrl(current.presignedUrl);
           }
@@ -105,7 +104,6 @@ export default function ProfileImageModal({
 
   const handleAvatarPress = (url: string) => {
     const key = extractImageKey(url);
-    console.log('[ProfileImage] 프리셋 선택 → key:', key);
     setSelectedUrl(url);
     setSelectedKey(key);
 
@@ -142,15 +140,10 @@ export default function ProfileImageModal({
   const handleSave = async () => {
     try {
       setUploading(true);
-      console.log('[ProfileImage] 저장 요청 → profileImageKey:', selectedKey);
       await updateUserProfile({ profileImageKey: selectedKey });
       const history = await getProfileImageHistory();
       const current = history.find((item) => item.isCurrent);
       if (current) {
-        console.log(
-          '[ProfileImage] 저장 성공 → presignedUrl:',
-          current.presignedUrl
-        );
         dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
       }
       handleClose();
@@ -189,17 +182,12 @@ export default function ProfileImageModal({
       setUploading(true);
       console.log('[ProfileImage] 갤러리 업로드 시작');
       const { uploadUrl, imageKey } = await requestProfileImageUpload();
-      console.log('[ProfileImage] presigned URL 발급 → imageKey:', imageKey);
       await uploadPhoto(uploadUrl, {
         uri: pendingAsset.uri,
         mimeType: pendingAsset.type ?? 'image/jpeg',
       });
       console.log('[ProfileImage] S3 업로드 성공');
       const user = await getUser();
-      console.log(
-        '[ProfileImage] 유저 정보 갱신 → profileImageUrl:',
-        user.profileImageUrl
-      );
       dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       setPendingAsset(null);
       handleClose();
@@ -212,7 +200,6 @@ export default function ProfileImageModal({
   };
 
   const handleHistorySelect = (item: ProfileImageHistoryItem) => {
-    console.log('[ProfileImage] 이력 이미지 선택 → key:', item.imageKey);
     setSelectedKey(item.imageKey);
     setSelectedUrl(item.presignedUrl);
   };
