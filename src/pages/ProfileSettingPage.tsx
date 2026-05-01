@@ -32,6 +32,23 @@ import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 import TermsModal, { SelectedTerms } from '@components/TermsModal';
 import { getTerms, TermsResponse } from '@api/termsApi';
 
+type FaqItem = {
+  order: number;
+  id: string;
+  question: string;
+  answer: string;
+};
+
+const faqItems = require('@assets/content/faq.json') as FaqItem[];
+const sortedFaqItems = faqItems
+  .map((item, index) => ({ ...item, fallbackOrder: index }))
+  .sort(
+    (a, b) =>
+      a.order - b.order ||
+      a.fallbackOrder - b.fallbackOrder
+  );
+const getFaqKey = (item: FaqItem) => `${item.order}-${item.id}`;
+
 type SettingRowProps = {
   label: string;
   onPress: () => void;
@@ -72,6 +89,16 @@ const ProfileSettingPage = () => {
   const [termsList, setTermsList] = useState<TermsResponse[]>([]);
   const [termsLoading, setTermsLoading] = useState(false);
   const [selectedTerms, setSelectedTerms] = useState<SelectedTerms>(null);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [selectedFaqKey, setSelectedFaqKey] = useState<string | null>(null);
+  const selectedFaq = sortedFaqItems.find(
+    (item) => getFaqKey(item) === selectedFaqKey
+  );
+
+  const closeFaqModal = () => {
+    setFaqModalVisible(false);
+    setSelectedFaqKey(null);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -247,6 +274,7 @@ const ProfileSettingPage = () => {
               Alert.alert('공지사항', '공지 리스트 화면이 연결될 예정입니다.')
             }
           />
+          <SettingRow label='F&Q' onPress={() => setFaqModalVisible(true)} />
           <SettingRow
             label='약관 및 정책'
             onPress={async () => {
@@ -538,6 +566,51 @@ const ProfileSettingPage = () => {
         terms={selectedTerms}
         onClose={() => setSelectedTerms(null)}
       />
+
+      {/* F&Q 모달 */}
+      <Modal
+        visible={faqModalVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={closeFaqModal}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>F&Q</Text>
+            {selectedFaq ? (
+              <View style={styles.faqDetail}>
+                <Text style={styles.faqQuestion}>Q. {selectedFaq.question}</Text>
+                <Text style={styles.faqAnswer}>A. {selectedFaq.answer}</Text>
+              </View>
+            ) : (
+              <View style={styles.faqList}>
+                {sortedFaqItems.map((item) => (
+                  <Pressable
+                    key={getFaqKey(item)}
+                    style={styles.faqListItem}
+                    onPress={() => setSelectedFaqKey(getFaqKey(item))}
+                  >
+                    <Text style={styles.faqListTitle}>{item.question}</Text>
+                    <Text style={styles.arrow}>{'>'}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+            <Pressable
+              style={[
+                styles.modalButton,
+                styles.modalCancel,
+                styles.modalCloseButton,
+              ]}
+              onPress={selectedFaq ? () => setSelectedFaqKey(null) : closeFaqModal}
+            >
+              <Text style={styles.modalCancelText}>
+                {selectedFaq ? '목록으로' : '닫기'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       {/* 펫 정보 수정 모달 */}
       <Modal
