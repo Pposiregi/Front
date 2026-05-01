@@ -2,14 +2,12 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { styles } from '@styles/UserInfoPage.styles';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   containsBannedWord,
   isValidDate,
@@ -17,6 +15,7 @@ import {
   isValidNickname,
   isValidWeight,
 } from '../../utils/validation';
+import { KeyboardAwareScreen } from '@components/KeyboardAwareScreen';
 
 type UserInfoProps = {
   onNext: (data: {
@@ -83,9 +82,9 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
     if (!heightCm || !heightCm.trim())
       return Alert.alert('알림', '키를 입력해주세요.');
 
-    const y = parseInt(year);
-    const m = parseInt(month);
-    const d = parseInt(day);
+    const y = parseInt(year, 10);
+    const m = parseInt(month, 10);
+    const d = parseInt(day, 10);
 
     if (isNaN(y) || isNaN(m) || isNaN(d)) {
       return Alert.alert('알림', '생년월일을 올바르게 입력해주세요.');
@@ -128,138 +127,138 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
       weightKg,
       heightCm,
     });
-  }, [nickName, year, month, day, gender, weightKg, heightCm]);
+  }, [nickName, year, month, day, gender, weightKg, heightCm, onNext]);
 
   const canGoNext =
     nickName && year && month && day && gender && weightKg && heightCm;
   return (
-    <KeyboardAwareScrollView
-      enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
-      extraScrollHeight={100} // 키보드와의 간격 확보 이거 없으면 딱 붙어서 스크롤이 안된다..
-    >
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.title}>사용자님을 더 잘 알고 싶어요!</Text>
-          <Text style={styles.subtitle}>
-            함께할 준비가 되셨다면, 간단한 정보를 {'\n'}알려주세요.
-          </Text>
-          <Text style={styles.requiredInfo}>
-            * 표시가 있는 항목은 필수 입력입니다.
-          </Text>
-          <Text style={styles.label}>
-            닉네임<Text style={styles.required}> *</Text>
-          </Text>
+    /*
+      키보드 대응은 공통 KeyboardAwareScreen에서 처리한다.
+      이 화면은 하단의 체중/키 입력창이 숫자 키보드에 가려지기 쉬우므로,
+      별도 ScrollView를 중첩하지 않고 공통 래퍼가 직접 스크롤 위치를 계산하게 둔다.
+    */
+    <KeyboardAwareScreen>
+      <View style={styles.container}>
+        <Text style={styles.title}>사용자님을 더 잘 알고 싶어요!</Text>
+        <Text style={styles.subtitle}>
+          함께할 준비가 되셨다면, 간단한 정보를 {'\n'}알려주세요.
+        </Text>
+        <Text style={styles.requiredInfo}>
+          * 표시가 있는 항목은 필수 입력입니다.
+        </Text>
+        <Text style={styles.label}>
+          닉네임<Text style={styles.required}> *</Text>
+        </Text>
+        <TextInput
+          style={styles.textInput}
+          onChangeText={onChangeNickName}
+          placeholder='사용할 닉네임을 입력하세요.'
+          placeholderTextColor='#666'
+          ref={nameRef}
+          returnKeyType='next'
+          onSubmitEditing={() => yearRef.current?.focus()}
+        />
+        <Text style={styles.label}>
+          생년월일<Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.textInputView}>
           <TextInput
-            style={styles.textInput}
-            onChangeText={onChangeNickName}
-            placeholder='사용할 닉네임을 입력하세요.'
+            style={styles.textInputBirth}
+            onChangeText={onChangeYear}
+            placeholder='YYYY'
             placeholderTextColor='#666'
-            ref={nameRef}
-            returnKeyType='next'
-            onSubmitEditing={() => yearRef.current?.focus()}
+            ref={yearRef}
+            onSubmitEditing={() => monthRef.current?.focus()}
+            keyboardType='number-pad'
+            maxLength={4}
           />
-          <Text style={styles.label}>
-            생년월일<Text style={styles.required}> *</Text>
-          </Text>
-          <View style={styles.textInputView}>
-            <TextInput
-              style={styles.textInputBirth}
-              onChangeText={onChangeYear}
-              placeholder='YYYY'
-              placeholderTextColor='#666'
-              ref={yearRef}
-              onSubmitEditing={() => monthRef.current?.focus()}
-              keyboardType='number-pad'
-              maxLength={4}
-            ></TextInput>
-            <TextInput
-              style={styles.textInputBirth}
-              onChangeText={onChangeMonth}
-              placeholder='MM'
-              placeholderTextColor='#666'
-              ref={monthRef}
-              onSubmitEditing={() => dayRef.current?.focus()}
-              keyboardType='number-pad'
-              maxLength={2}
-            ></TextInput>
-            <TextInput
-              style={styles.textInputBirth}
-              onChangeText={onChangeDay}
-              placeholder='DD'
-              placeholderTextColor='#666'
-              ref={dayRef}
-              keyboardType='number-pad'
-              maxLength={2}
-            ></TextInput>
-          </View>
-          <Text style={styles.label}>
-            성별<Text style={styles.required}> *</Text>
-          </Text>
-          <View style={styles.optionContainer}>
-            {/* 남성 */}
-            <TouchableOpacity
-              style={styles.optionContainer}
-              onPress={() => setGender('male')}
-            >
-              <View style={styles.radioOuter}>
-                {gender === 'male' && <View style={styles.radioInner} />}
-              </View>
-              <Text style={styles.gender_label}>남성</Text>
-            </TouchableOpacity>
-
-            {/* 여성 */}
-            <TouchableOpacity
-              style={styles.optionContainer}
-              onPress={() => setGender('female')}
-            >
-              <View style={styles.radioOuter}>
-                {gender === 'female' && <View style={styles.radioInner} />}
-              </View>
-              <Text style={styles.gender_label}>여성</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.label}>
-            신체정보<Text style={styles.required}> *</Text>
-          </Text>
-          <View style={styles.weightContainer}>
-            <TextInput
-              style={styles.weightInput}
-              onChangeText={onChangeWeight}
-              placeholder='체중 입력'
-              placeholderTextColor='#666'
-              keyboardType='number-pad'
-              ref={weightRef}
-              maxLength={3}
-              onSubmitEditing={() => heightref.current?.focus()}
-            />
-            <Text style={styles.unit}>kg</Text>
-            <TextInput
-              style={styles.weightInput}
-              onChangeText={onChangeHeight}
-              placeholder='키 입력'
-              placeholderTextColor='#666'
-              keyboardType='number-pad'
-              maxLength={3}
-              ref={heightref}
-            />
-            <Text style={styles.unit}>cm</Text>
-          </View>
-
-          <View style={{ alignItems: 'center' }}>
-            <Pressable
-              style={[
-                styles.startButton,
-                !canGoNext && { backgroundColor: '#ccc' },
-              ]}
-              disabled={!canGoNext}
-              onPress={onSubmit}
-            >
-              <Text style={styles.startButtonText}>시작하기</Text>
-            </Pressable>
-          </View>
+          <TextInput
+            style={styles.textInputBirth}
+            onChangeText={onChangeMonth}
+            placeholder='MM'
+            placeholderTextColor='#666'
+            ref={monthRef}
+            onSubmitEditing={() => dayRef.current?.focus()}
+            keyboardType='number-pad'
+            maxLength={2}
+          />
+          <TextInput
+            style={styles.textInputBirth}
+            onChangeText={onChangeDay}
+            placeholder='DD'
+            placeholderTextColor='#666'
+            ref={dayRef}
+            keyboardType='number-pad'
+            maxLength={2}
+          />
         </View>
-      </ScrollView>
-    </KeyboardAwareScrollView>
+        <Text style={styles.label}>
+          성별<Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.optionContainer}>
+          {/* 남성 */}
+          <TouchableOpacity
+            style={styles.optionContainer}
+            onPress={() => setGender('male')}
+          >
+            <View style={styles.radioOuter}>
+              {gender === 'male' && <View style={styles.radioInner} />}
+            </View>
+            <Text style={styles.gender_label}>남성</Text>
+          </TouchableOpacity>
+
+          {/* 여성 */}
+          <TouchableOpacity
+            style={styles.optionContainer}
+            onPress={() => setGender('female')}
+          >
+            <View style={styles.radioOuter}>
+              {gender === 'female' && <View style={styles.radioInner} />}
+            </View>
+            <Text style={styles.gender_label}>여성</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.label}>
+          신체정보<Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.weightContainer}>
+          <TextInput
+            style={styles.weightInput}
+            onChangeText={onChangeWeight}
+            placeholder='체중 입력'
+            placeholderTextColor='#666'
+            keyboardType='number-pad'
+            ref={weightRef}
+            maxLength={3}
+            onSubmitEditing={() => heightref.current?.focus()}
+          />
+          <Text style={styles.unit}>kg</Text>
+          <TextInput
+            style={styles.weightInput}
+            onChangeText={onChangeHeight}
+            placeholder='키 입력'
+            placeholderTextColor='#666'
+            keyboardType='number-pad'
+            maxLength={3}
+            ref={heightref}
+          />
+          <Text style={styles.unit}>cm</Text>
+        </View>
+
+        <View style={styles.buttonWrapper}>
+          <Pressable
+            style={[
+              styles.startButton,
+              !canGoNext && styles.startButtonDisabled,
+            ]}
+            disabled={!canGoNext}
+            onPress={onSubmit}
+          >
+            <Text style={styles.startButtonText}>시작하기</Text>
+          </Pressable>
+        </View>
+      </View>
+    </KeyboardAwareScreen>
   );
 };
 

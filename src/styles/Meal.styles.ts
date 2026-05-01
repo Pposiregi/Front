@@ -450,6 +450,34 @@ export default StyleSheet.create({
     fontSize: Typography.bodyLarge,
     color: Colors.textMuted,
   },
+  imagePreviewContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxl,
+  },
+  imagePreviewBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.88)',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '82%',
+  },
+  imagePreviewCloseButton: {
+    marginTop: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface,
+  },
+  imagePreviewCloseText: {
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: Typography.bodySmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
   modalAddRow: {
     flexDirection: 'row',
     alignItems: 'center',

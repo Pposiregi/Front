@@ -22,6 +22,17 @@ import type { MealModalProps } from './MealModal.types';
 const MODAL_LOADING_COLOR = Colors.infoStrong;
 const MODAL_MUTED_LOADING_COLOR = Colors.textMuted;
 
+const getPreviewableImageSource = (source: ImageSourcePropType) => {
+  if (typeof source !== 'object' || source === null || Array.isArray(source)) {
+    return null;
+  }
+  const uri = 'uri' in source ? source.uri : undefined;
+  if (typeof uri !== 'string' || uri.trim().length === 0) {
+    return null;
+  }
+  return source;
+};
+
 /**
  * 지정된 날짜의 식단을 조회하고 수정할 수 있는 모달을 렌더링한다.
  *
@@ -83,6 +94,14 @@ function MealModal({
   const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>(
     {}
   );
+  const [previewImageSource, setPreviewImageSource] =
+    useState<ImageSourcePropType | null>(null);
+
+  useEffect(() => {
+    if (!visible) {
+      setPreviewImageSource(null);
+    }
+  }, [visible]);
 
   const mealImageUris = useMemo(
     () =>
@@ -128,7 +147,7 @@ function MealModal({
       return next;
     });
 
-    void Promise.all(
+    Promise.all(
       mealImageUris.map(async (uri) => ({
         uri,
         isZeroSized: await isZeroSizedMealImage(uri),
@@ -234,20 +253,21 @@ function MealModal({
   ]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType='fade'
-      statusBarTranslucent
-      navigationBarTranslucent
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalContainer}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.modalBackdrop} />
-        </TouchableWithoutFeedback>
-        <View style={styles.modalContentWrapper}>
-          <View style={styles.modalContent}>
+    <>
+      <Modal
+        visible={visible}
+        transparent
+        animationType='fade'
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback onPress={onClose}>
+            <View style={styles.modalBackdrop} />
+          </TouchableWithoutFeedback>
+          <View style={styles.modalContentWrapper}>
+            <View style={styles.modalContent}>
             <View style={styles.modalHeaderSection}>
               <Text style={styles.modalTitle}>{formattedDate}</Text>
               {isFutureDate ? (
@@ -279,16 +299,26 @@ function MealModal({
                 keyboardShouldPersistTaps='handled'
               >
                 {photoRowItems.map((item) => (
-                  <View
+                  <TouchableOpacity
                     key={`modal-photo-${item.key}`}
                     style={styles.modalPhotoCard}
+                    activeOpacity={0.85}
+                    disabled={!getPreviewableImageSource(item.source)}
+                    onPress={() => {
+                      const previewSource = getPreviewableImageSource(
+                        item.source
+                      );
+                      if (previewSource) {
+                        setPreviewImageSource(previewSource);
+                      }
+                    }}
                   >
                     <Image
                       source={item.source}
                       style={styles.modalPhotoImage}
                       onError={() => markImageFailed(item.uriForError)}
                     />
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </ScrollView>
             ) : null}
@@ -375,17 +405,29 @@ function MealModal({
                               {meal.kcal}kcal
                             </Text>
                           </View>
-                          <Image
-                            source={rowImageSource}
-                            style={styles.modalMealRowImage}
-                            onError={() =>
-                              markImageFailed(
-                                isEditingTarget && editingMealImageUri
-                                  ? null
-                                  : mealImageUri
-                              )
-                            }
-                          />
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            disabled={!getPreviewableImageSource(rowImageSource)}
+                            onPress={() => {
+                              const previewSource =
+                                getPreviewableImageSource(rowImageSource);
+                              if (previewSource) {
+                                setPreviewImageSource(previewSource);
+                              }
+                            }}
+                          >
+                            <Image
+                              source={rowImageSource}
+                              style={styles.modalMealRowImage}
+                              onError={() =>
+                                markImageFailed(
+                                  isEditingTarget && editingMealImageUri
+                                    ? null
+                                    : mealImageUri
+                                )
+                              }
+                            />
+                          </TouchableOpacity>
                           <View style={styles.modalMealDragHandle}>
                             <Text style={styles.modalMealDragLabel}>≡</Text>
                           </View>
@@ -532,10 +574,40 @@ function MealModal({
             >
               <Text style={styles.modalSecondaryButtonLabel}>닫기</Text>
             </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+
+      <Modal
+        visible={Boolean(previewImageSource)}
+        transparent
+        animationType='fade'
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setPreviewImageSource(null)}
+      >
+        <View style={styles.imagePreviewContainer}>
+          <TouchableWithoutFeedback onPress={() => setPreviewImageSource(null)}>
+            <View style={styles.imagePreviewBackdrop} />
+          </TouchableWithoutFeedback>
+          {previewImageSource ? (
+            <Image
+              source={previewImageSource}
+              style={styles.imagePreview}
+              resizeMode='contain'
+            />
+          ) : null}
+          <TouchableOpacity
+            style={styles.imagePreviewCloseButton}
+            activeOpacity={0.85}
+            onPress={() => setPreviewImageSource(null)}
+          >
+            <Text style={styles.imagePreviewCloseText}>닫기</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </>
   );
 }
 

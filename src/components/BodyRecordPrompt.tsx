@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import styles from '@styles/BodyRecordPrompt.styles';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
+import { KeyboardAwareModalContent } from '@components/KeyboardAwareScreen';
 
 type BodyRecordPromptProps = {
   visible: boolean;
@@ -125,127 +126,134 @@ const BodyRecordPrompt = ({
   return (
     <Modal transparent animationType='fade' visible={visible}>
       <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.headerRow}>
-            <View>
-              <Text style={styles.dateLabel}>{dateLabel}</Text>
-              <Text style={styles.subtitle}>오늘의 몸을 기록해요!</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeIcon}>😺</Text>
-            </View>
-          </View>
-
-          <View style={styles.field}>
-            <View style={styles.fieldHeader}>
-              <Text style={styles.fieldLabel}>키</Text>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.fieldInput}
-                  keyboardType='decimal-pad'
-                  value={heightInput}
-                  onChangeText={setHeightInput}
-                  placeholder='0'
-                  placeholderTextColor='#9CA3AF'
-                  selectTextOnFocus
-                />
-                <Text style={styles.fieldUnit}>cm</Text>
+        {/*
+          모달은 키보드가 올라와도 자동으로 화면이 밀리지 않는 경우가 많다.
+          공통 KeyboardAwareModalContent로 감싸서 체지방률 입력과 저장 버튼까지
+          사용자가 스크롤하며 확인할 수 있게 한다.
+        */}
+        <KeyboardAwareModalContent>
+          <View style={styles.card}>
+            <View style={styles.headerRow}>
+              <View>
+                <Text style={styles.dateLabel}>{dateLabel}</Text>
+                <Text style={styles.subtitle}>오늘의 몸을 기록해요!</Text>
+              </View>
+              <View style={styles.badge}>
+                <Text style={styles.badgeIcon}>😺</Text>
               </View>
             </View>
-          </View>
 
-          <View style={styles.field}>
-            <View style={styles.fieldHeader}>
-              <Text style={styles.fieldLabel}>체중</Text>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.fieldInput}
-                  keyboardType='decimal-pad'
-                  value={weightInput}
-                  onChangeText={setWeightInput}
-                  placeholder='0'
-                  placeholderTextColor='#9CA3AF'
-                  selectTextOnFocus
-                />
-                <Text style={styles.fieldUnit}>kg</Text>
+            <View style={styles.field}>
+              <View style={styles.fieldHeader}>
+                <Text style={styles.fieldLabel}>키</Text>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.fieldInput}
+                    keyboardType='decimal-pad'
+                    value={heightInput}
+                    onChangeText={setHeightInput}
+                    placeholder='0'
+                    placeholderTextColor='#9CA3AF'
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.fieldUnit}>cm</Text>
+                </View>
               </View>
             </View>
-            <View style={styles.progressTrack}>
-              <View style={weightBarStyle} />
-            </View>
-            {typeof weightAim === 'number' && (
-              <Text style={styles.aimText}>aim: {weightAim}</Text>
-            )}
-          </View>
 
-          <View style={styles.field}>
-            <View style={styles.fieldHeader}>
-              <Text style={styles.fieldLabel}>체지방률</Text>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={styles.fieldInput}
-                  keyboardType='decimal-pad'
-                  value={bodyFatInput}
-                  onChangeText={setBodyFatInput}
-                  placeholder='0'
-                  placeholderTextColor='#9CA3AF'
-                  selectTextOnFocus
-                />
-                <Text style={styles.fieldUnit}>%</Text>
+            <View style={styles.field}>
+              <View style={styles.fieldHeader}>
+                <Text style={styles.fieldLabel}>체중</Text>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.fieldInput}
+                    keyboardType='decimal-pad'
+                    value={weightInput}
+                    onChangeText={setWeightInput}
+                    placeholder='0'
+                    placeholderTextColor='#9CA3AF'
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.fieldUnit}>kg</Text>
+                </View>
               </View>
+              <View style={styles.progressTrack}>
+                <View style={weightBarStyle} />
+              </View>
+              {typeof weightAim === 'number' && (
+                <Text style={styles.aimText}>aim: {weightAim}</Text>
+              )}
             </View>
-            <View style={[styles.progressTrack, styles.progressTrackFat]}>
-              <View style={bodyFatBarStyle} />
+
+            <View style={styles.field}>
+              <View style={styles.fieldHeader}>
+                <Text style={styles.fieldLabel}>체지방률</Text>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.fieldInput}
+                    keyboardType='decimal-pad'
+                    value={bodyFatInput}
+                    onChangeText={setBodyFatInput}
+                    placeholder='0'
+                    placeholderTextColor='#9CA3AF'
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.fieldUnit}>%</Text>
+                </View>
+              </View>
+              <View style={[styles.progressTrack, styles.progressTrackFat]}>
+                <View style={bodyFatBarStyle} />
+              </View>
+              {typeof bodyFatAim === 'number' && (
+                <Text style={styles.aimText}>aim: {bodyFatAim}</Text>
+              )}
             </View>
-            {typeof bodyFatAim === 'number' && (
-              <Text style={styles.aimText}>aim: {bodyFatAim}</Text>
-            )}
-          </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>🧡</Text>
-            <Text style={styles.infoText}>
-              마이페이지에서 다시 기록할 수 있어요.
-            </Text>
-          </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoIcon}>🧡</Text>
+              <Text style={styles.infoText}>
+                마이페이지에서 다시 기록할 수 있어요.
+              </Text>
+            </View>
 
-          <View style={styles.buttonRow}>
-            <Pressable
-              style={[
-                styles.button,
-                styles.primaryButton,
-                saving && styles.buttonDisabled,
-              ]}
-              disabled={saving}
-              onPress={handleSave}
-            >
-              <Text style={styles.primaryText}>{primaryLabel}</Text>
-            </Pressable>
-            {onLater && (
+            <View style={styles.buttonRow}>
               <Pressable
                 style={[
                   styles.button,
-                  styles.secondaryButton,
+                  styles.primaryButton,
                   saving && styles.buttonDisabled,
                 ]}
                 disabled={saving}
-                onPress={onLater}
+                onPress={handleSave}
               >
-                <Text style={styles.secondaryText}>{secondaryLabel}</Text>
+                <Text style={styles.primaryText}>{primaryLabel}</Text>
+              </Pressable>
+              {onLater && (
+                <Pressable
+                  style={[
+                    styles.button,
+                    styles.secondaryButton,
+                    saving && styles.buttonDisabled,
+                  ]}
+                  disabled={saving}
+                  onPress={onLater}
+                >
+                  <Text style={styles.secondaryText}>{secondaryLabel}</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {showSkip && onSkipToday && (
+              <Pressable
+                style={styles.skipToday}
+                onPress={onSkipToday}
+                disabled={saving}
+              >
+                <Text style={styles.skipTodayText}>오늘은 안 볼래요</Text>
               </Pressable>
             )}
           </View>
-
-          {showSkip && onSkipToday && (
-            <Pressable
-              style={styles.skipToday}
-              onPress={onSkipToday}
-              disabled={saving}
-            >
-              <Text style={styles.skipTodayText}>오늘은 안 볼래요</Text>
-            </Pressable>
-          )}
-        </View>
+        </KeyboardAwareModalContent>
       </View>
     </Modal>
   );
