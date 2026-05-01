@@ -61,7 +61,7 @@ export const styles = StyleSheet.create({
     color: LOGIN_TEXT_COLOR,
   },
   loadingContainer: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: LOGIN_BACKGROUND_COLOR,
