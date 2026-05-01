@@ -1,4 +1,7 @@
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, {
+  AndroidImportance,
+  AuthorizationStatus,
+} from '@notifee/react-native';
 import { Platform } from 'react-native';
 
 const CHANNEL_ID = 'running-tracker';
@@ -29,26 +32,56 @@ const ensureRunningChannel = () => {
   return runningChannelPromise;
 };
 
-/** 러닝 시작용 foreground notification을 표시한다. */
-export async function startRunningNotification() {
-  if (Platform.OS !== 'android') return;
+/** Android 알림 권한이 꺼져 있으면 Notifee foreground notification 호출을 건너뛴다. */
+const canDisplayRunningNotification = async () => {
+  if (Platform.OS !== 'android') return false;
+
+  try {
+    const settings = await notifee.getNotificationSettings();
+    return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+  } catch (error) {
+    console.warn('[RUNNING][NOTIFICATION] 권한 상태 확인 실패', error);
+    return false;
+  }
+};
+
+const displayRunningNotification = async (
+  body: string,
+  options?: { showChronometer?: boolean; timestamp?: number }
+) => {
+  if (!(await canDisplayRunningNotification())) return;
 
   const createdChannelId = await ensureRunningChannel();
 
   await notifee.displayNotification({
     id: NOTI_ID,
     title: '🏃 러닝 기록 중',
-    body: '운동 시간을 측정하고 있습니다.',
+    body,
     android: {
       channelId: createdChannelId,
       asForegroundService: true,
       ongoing: true,
       smallIcon: SMALL_ICON,
+      onlyAlertOnce: true,
       pressAction: { id: 'default' },
-      showChronometer: true,
-      timestamp: Date.now(),
+      showChronometer: options?.showChronometer,
+      timestamp: options?.timestamp,
     },
   });
+};
+
+/** 러닝 시작용 foreground notification을 표시한다. */
+export async function startRunningNotification() {
+  if (Platform.OS !== 'android') return;
+
+  try {
+    await displayRunningNotification('운동 시간을 측정하고 있습니다.', {
+      showChronometer: true,
+      timestamp: Date.now(),
+    });
+  } catch (error) {
+    console.warn('[RUNNING][NOTIFICATION] 시작 알림 표시 실패', error);
+  }
 }
 
 /** 진행 중인 러닝 알림의 시간/걸음 수 텍스트를 갱신한다. */
@@ -58,25 +91,21 @@ export async function updateRunningNotification(
 ) {
   if (Platform.OS !== 'android') return;
 
-  const createdChannelId = await ensureRunningChannel();
-
-  await notifee.displayNotification({
-    id: NOTI_ID, // 🔥 같은 id
-    title: '🏃 러닝 기록 중',
-    body: `${elapsedSec}초 · ${steps.toLocaleString()}보`,
-    android: {
-      channelId: createdChannelId,
-      asForegroundService: true,
-      ongoing: true,
-      smallIcon: SMALL_ICON,
-      onlyAlertOnce: true, // 🔥 진동 반복 방지 (중요)
-      pressAction: { id: 'default' },
-    },
-  });
+  try {
+    await displayRunningNotification(
+      `${elapsedSec}초 · ${steps.toLocaleString()}보`
+    );
+  } catch (error) {
+    console.warn('[RUNNING][NOTIFICATION] 진행 알림 갱신 실패', error);
+  }
 }
 
 /** 러닝 foreground service와 notification을 종료한다. */
 export async function stopRunningNotification() {
   if (Platform.OS !== 'android') return;
-  await notifee.stopForegroundService();
+  try {
+    await notifee.stopForegroundService();
+  } catch (error) {
+    console.warn('[RUNNING][NOTIFICATION] foreground service 종료 실패', error);
+  }
 }
