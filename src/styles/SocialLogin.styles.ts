@@ -1,12 +1,16 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
+const LOGIN_TEXT_COLOR = '#2B2B2B';
+const LOGIN_BACKGROUND_COLOR = '#FFFFFF';
+
 export const styles = StyleSheet.create({
   container: {
     height: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 100,
+    backgroundColor: LOGIN_BACKGROUND_COLOR,
   },
   mainText: {
     fontSize: 50,
@@ -14,6 +18,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginBottom: SCREEN_HEIGHT * 0.23,
     fontFamily: 'JUA',
+    color: LOGIN_TEXT_COLOR,
   },
   kakaoButton: {
     backgroundColor: '#FDDC3F',
@@ -53,11 +58,12 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'GowunDodum',
     fontWeight: '800',
+    color: LOGIN_TEXT_COLOR,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: LOGIN_BACKGROUND_COLOR,
   },
 });
