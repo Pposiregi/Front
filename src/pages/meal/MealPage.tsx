@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WEEKDAYS } from './constant';
 import { formatDateKey, parseDateKey } from '@utils/dateUtil';
 import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 import MealModal from './MealModal';
 import type { PendingMealImage } from './MealPage.types';
 import { createMeal, deleteMeal, updateMeal } from '@api/mealApi';
@@ -324,6 +325,7 @@ const compressPickedImage = async (asset: Asset) => {
  * @returns 식단 일지 페이지를 나타내는 React 요소를 반환함
  */
 function MealPage() {
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => formatDateKey(today), [today]); // YYYY-MM-DD 형식
 
@@ -1040,6 +1042,14 @@ function MealPage() {
       selectedDate.getMonth() + 1
     }월 ${selectedDate.getDate()}일`;
   }, [selectedDate]);
+  const scrollContentStyle = useMemo(
+    () => [
+      styles.content,
+      // 식단 화면의 달력/기록 하단이 탭바나 시스템 내비게이션 바 아래로 숨지 않게 한다.
+      { paddingBottom: contentBottomPadding },
+    ],
+    [contentBottomPadding]
+  );
   const isFutureDate = selectedDateKey > todayKey;
 
   const disableSaveButton =
@@ -1052,7 +1062,7 @@ function MealPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={scrollContentStyle}>
         <View style={[styles.header, styles.headerSpacing]}>
           {/*  TouchableOpacity : 이전 달로 이동 */}
           <TouchableOpacity

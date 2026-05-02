@@ -107,6 +107,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.xxl + 4,
   },
+  keyboardModalBackdrop: {
+    flex: 1,
+    backgroundColor: Colors.overlayDark,
+  },
   modalCard: {
     width: '100%',
     backgroundColor: Colors.surface,

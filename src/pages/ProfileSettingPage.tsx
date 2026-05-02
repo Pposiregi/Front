@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -31,6 +31,8 @@ import { isValidNickname } from '@utils/validation';
 import { PET_TYPE_STORAGE_KEY } from '@shared/config/petConfig';
 import TermsModal, { SelectedTerms } from '@components/TermsModal';
 import { getTerms, TermsResponse } from '@api/termsApi';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
+import { KeyboardAwareModalContent } from '@components/KeyboardAwareScreen';
 
 type FaqItem = {
   order: number;
@@ -42,11 +44,7 @@ type FaqItem = {
 const faqItems = require('@assets/content/faq.json') as FaqItem[];
 const sortedFaqItems = faqItems
   .map((item, index) => ({ ...item, fallbackOrder: index }))
-  .sort(
-    (a, b) =>
-      a.order - b.order ||
-      a.fallbackOrder - b.fallbackOrder
-  );
+  .sort((a, b) => a.order - b.order || a.fallbackOrder - b.fallbackOrder);
 const getFaqKey = (item: FaqItem) => `${item.order}-${item.id}`;
 
 type SettingRowProps = {
@@ -68,6 +66,7 @@ const ProfileSettingPage = () => {
   const navigation =
     useNavigation<ProfileStackNavigationProp<'ProfileSettings'>>();
   const dispatch = useAppDispatch();
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
@@ -224,12 +223,20 @@ const ProfileSettingPage = () => {
       setNicknameInput(nickname ?? '');
     }
   }, [nicknameModalVisible, nickname]);
+  const scrollContentStyle = useMemo(
+    () => [
+      styles.contentContainer,
+      // 설정/FAQ 목록 끝부분이 하단 탭바와 시스템 버튼 영역 뒤에 숨지 않도록 공통 여백을 더한다.
+      { paddingBottom: contentBottomPadding },
+    ],
+    [contentBottomPadding]
+  );
 
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={scrollContentStyle}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerRow}>
@@ -366,63 +373,65 @@ const ProfileSettingPage = () => {
         animationType='fade'
         onRequestClose={() => setNicknameModalVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>닉네임 수정</Text>
-            <Text style={styles.modalBody}>
-              새 닉네임을 입력하세요. (2~20자)
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder='닉네임'
-              value={nicknameInput}
-              onChangeText={setNicknameInput}
-            />
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalButton, styles.modalCancel]}
-                onPress={() => setNicknameModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>취소</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.modalButton,
-                  styles.modalConfirm,
-                  savingProfile && styles.buttonDisabled,
-                ]}
-                disabled={savingProfile}
-                onPress={async () => {
-                  const newNickname = nicknameInput.trim();
-                  if (!isValidNickname(newNickname)) {
-                    Alert.alert(
-                      '닉네임 오류',
-                      '닉네임은 2~10자의 한글, 영문, 숫자만 가능하며 비속어는 사용할 수 없어요.'
-                    );
-                    return;
-                  }
-                  setSavingProfile(true);
-                  try {
-                    await updateUserProfile({
-                      nickname: newNickname,
-                    });
-                    dispatch(userSlice.actions.updateNickname(newNickname));
-                    Alert.alert('완료', '닉네임이 변경되었습니다.');
-                    setNicknameModalVisible(false);
-                  } catch (err) {
-                    console.error('[Profile] 닉네임 수정 실패', err);
-                    Alert.alert('실패', '닉네임을 수정하지 못했습니다.');
-                  } finally {
-                    setSavingProfile(false);
-                  }
-                }}
-              >
-                <Text style={styles.modalConfirmText}>
-                  {savingProfile ? '저장 중...' : '저장'}
-                </Text>
-              </Pressable>
+        <View style={styles.keyboardModalBackdrop}>
+          <KeyboardAwareModalContent>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>닉네임 수정</Text>
+              <Text style={styles.modalBody}>
+                새 닉네임을 입력하세요. (2~20자)
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder='닉네임'
+                value={nicknameInput}
+                onChangeText={setNicknameInput}
+              />
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalCancel]}
+                  onPress={() => setNicknameModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelText}>취소</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalConfirm,
+                    savingProfile && styles.buttonDisabled,
+                  ]}
+                  disabled={savingProfile}
+                  onPress={async () => {
+                    const newNickname = nicknameInput.trim();
+                    if (!isValidNickname(newNickname)) {
+                      Alert.alert(
+                        '닉네임 오류',
+                        '닉네임은 2~10자의 한글, 영문, 숫자만 가능하며 비속어는 사용할 수 없어요.'
+                      );
+                      return;
+                    }
+                    setSavingProfile(true);
+                    try {
+                      await updateUserProfile({
+                        nickname: newNickname,
+                      });
+                      dispatch(userSlice.actions.updateNickname(newNickname));
+                      Alert.alert('완료', '닉네임이 변경되었습니다.');
+                      setNicknameModalVisible(false);
+                    } catch (err) {
+                      console.error('[Profile] 닉네임 수정 실패', err);
+                      Alert.alert('실패', '닉네임을 수정하지 못했습니다.');
+                    } finally {
+                      setSavingProfile(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalConfirmText}>
+                    {savingProfile ? '저장 중...' : '저장'}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
+          </KeyboardAwareModalContent>
         </View>
       </Modal>
 
@@ -433,88 +442,90 @@ const ProfileSettingPage = () => {
         animationType='fade'
         onRequestClose={() => setBodyGoalModalVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>내 몸 목표 수정</Text>
-            <Text style={styles.modalBody}>
-              목표 체중(kg)과 체지방률(%)을 입력하세요.
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder='목표 체중 (kg)'
-              keyboardType='decimal-pad'
-              value={targetWeightInput}
-              onChangeText={setTargetWeightInput}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder='목표 체지방률 (%)'
-              keyboardType='decimal-pad'
-              value={targetPbfInput}
-              onChangeText={setTargetPbfInput}
-            />
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalButton, styles.modalCancel]}
-                onPress={() => setBodyGoalModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>취소</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.modalButton,
-                  styles.modalConfirm,
-                  savingGoal && styles.buttonDisabled,
-                ]}
-                disabled={savingGoal}
-                onPress={async () => {
-                  const weight = Number(targetWeightInput);
-                  const pbf = Number(targetPbfInput);
+        <View style={styles.keyboardModalBackdrop}>
+          <KeyboardAwareModalContent>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>내 몸 목표 수정</Text>
+              <Text style={styles.modalBody}>
+                목표 체중(kg)과 체지방률(%)을 입력하세요.
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder='목표 체중 (kg)'
+                keyboardType='decimal-pad'
+                value={targetWeightInput}
+                onChangeText={setTargetWeightInput}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder='목표 체지방률 (%)'
+                keyboardType='decimal-pad'
+                value={targetPbfInput}
+                onChangeText={setTargetPbfInput}
+              />
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalCancel]}
+                  onPress={() => setBodyGoalModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelText}>취소</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalConfirm,
+                    savingGoal && styles.buttonDisabled,
+                  ]}
+                  disabled={savingGoal}
+                  onPress={async () => {
+                    const weight = Number(targetWeightInput);
+                    const pbf = Number(targetPbfInput);
 
-                  if (!targetWeightInput.trim() || Number.isNaN(weight)) {
-                    Alert.alert(
-                      '입력 오류',
-                      '목표 체중을 올바르게 입력하세요.'
-                    );
-                    return;
-                  }
-                  if (!targetPbfInput.trim() || Number.isNaN(pbf)) {
-                    Alert.alert(
-                      '입력 오류',
-                      '목표 체지방률을 올바르게 입력하세요.'
-                    );
-                    return;
-                  }
+                    if (!targetWeightInput.trim() || Number.isNaN(weight)) {
+                      Alert.alert(
+                        '입력 오류',
+                        '목표 체중을 올바르게 입력하세요.'
+                      );
+                      return;
+                    }
+                    if (!targetPbfInput.trim() || Number.isNaN(pbf)) {
+                      Alert.alert(
+                        '입력 오류',
+                        '목표 체지방률을 올바르게 입력하세요.'
+                      );
+                      return;
+                    }
 
-                  setSavingGoal(true);
-                  try {
-                    // 서버 프로필 업데이트 후 로컬 목표값도 캐싱해 화면에서 즉시 사용
-                    await updateUserProfile({
-                      targetWeightKg: weight,
-                      targetPbf: pbf,
-                    });
-                    await saveBodyGoals({
-                      weightAim: weight,
-                      bodyFatAim: pbf,
-                    });
-                    Alert.alert('완료', '내 몸 목표가 수정되었습니다.');
-                    setBodyGoalModalVisible(false);
-                    setTargetWeightInput('');
-                    setTargetPbfInput('');
-                  } catch (err) {
-                    console.error('[Profile] 몸 목표 수정 실패', err);
-                    Alert.alert('실패', '몸 목표를 수정하지 못했습니다.');
-                  } finally {
-                    setSavingGoal(false);
-                  }
-                }}
-              >
-                <Text style={styles.modalConfirmText}>
-                  {savingGoal ? '저장 중...' : '저장'}
-                </Text>
-              </Pressable>
+                    setSavingGoal(true);
+                    try {
+                      // 서버 프로필 업데이트 후 로컬 목표값도 캐싱해 화면에서 즉시 사용
+                      await updateUserProfile({
+                        targetWeightKg: weight,
+                        targetPbf: pbf,
+                      });
+                      await saveBodyGoals({
+                        weightAim: weight,
+                        bodyFatAim: pbf,
+                      });
+                      Alert.alert('완료', '내 몸 목표가 수정되었습니다.');
+                      setBodyGoalModalVisible(false);
+                      setTargetWeightInput('');
+                      setTargetPbfInput('');
+                    } catch (err) {
+                      console.error('[Profile] 몸 목표 수정 실패', err);
+                      Alert.alert('실패', '몸 목표를 수정하지 못했습니다.');
+                    } finally {
+                      setSavingGoal(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalConfirmText}>
+                    {savingGoal ? '저장 중...' : '저장'}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
+          </KeyboardAwareModalContent>
         </View>
       </Modal>
 
@@ -579,7 +590,9 @@ const ProfileSettingPage = () => {
             <Text style={styles.modalTitle}>F&Q</Text>
             {selectedFaq ? (
               <View style={styles.faqDetail}>
-                <Text style={styles.faqQuestion}>Q. {selectedFaq.question}</Text>
+                <Text style={styles.faqQuestion}>
+                  Q. {selectedFaq.question}
+                </Text>
                 <Text style={styles.faqAnswer}>A. {selectedFaq.answer}</Text>
               </View>
             ) : (
@@ -602,7 +615,9 @@ const ProfileSettingPage = () => {
                 styles.modalCancel,
                 styles.modalCloseButton,
               ]}
-              onPress={selectedFaq ? () => setSelectedFaqKey(null) : closeFaqModal}
+              onPress={
+                selectedFaq ? () => setSelectedFaqKey(null) : closeFaqModal
+              }
             >
               <Text style={styles.modalCancelText}>
                 {selectedFaq ? '목록으로' : '닫기'}
@@ -619,93 +634,101 @@ const ProfileSettingPage = () => {
         animationType='fade'
         onRequestClose={() => setPetModalVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>펫 정보 수정</Text>
-            <Text style={styles.modalBody}>이름과 종류를 변경합니다.</Text>
-            <TextInput
-              style={styles.input}
-              placeholder='펫 이름'
-              value={petNameInput}
-              onChangeText={setPetNameInput}
-            />
-            <View style={styles.chipRow}>
-              {(['DOG', 'CAT'] as PetType[]).map((type) => (
-                <Pressable
-                  key={type}
-                  style={[styles.chip, petType === type && styles.chipSelected]}
-                  onPress={() => setPetType(type)}
-                >
-                  <Text
+        <View style={styles.keyboardModalBackdrop}>
+          <KeyboardAwareModalContent>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>펫 정보 수정</Text>
+              <Text style={styles.modalBody}>이름과 종류를 변경합니다.</Text>
+              <TextInput
+                style={styles.input}
+                placeholder='펫 이름'
+                value={petNameInput}
+                onChangeText={setPetNameInput}
+              />
+              <View style={styles.chipRow}>
+                {(['DOG', 'CAT'] as PetType[]).map((type) => (
+                  <Pressable
+                    key={type}
                     style={[
-                      styles.chipText,
-                      petType === type && styles.chipTextSelected,
+                      styles.chip,
+                      petType === type && styles.chipSelected,
                     ]}
+                    onPress={() => setPetType(type)}
                   >
-                    {type === 'DOG' ? '강아지' : '고양이'}
+                    <Text
+                      style={[
+                        styles.chipText,
+                        petType === type && styles.chipTextSelected,
+                      ]}
+                    >
+                      {type === 'DOG' ? '강아지' : '고양이'}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalCancel]}
+                  onPress={() => setPetModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelText}>취소</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalConfirm,
+                    savingPet && styles.buttonDisabled,
+                  ]}
+                  disabled={savingPet}
+                  onPress={async () => {
+                    if (!petNameInput.trim()) {
+                      Alert.alert('입력 오류', '펫 이름을 입력하세요.');
+                      return;
+                    }
+                    if (petId == null) {
+                      Alert.alert(
+                        '펫 정보 없음',
+                        '내 펫 정보를 찾지 못했어요. 앱을 다시 열어 동기화한 뒤 다시 시도해주세요.'
+                      );
+                      return;
+                    }
+                    setSavingPet(true);
+                    try {
+                      await updatePetProfile(petId, {
+                        name: petNameInput.trim(),
+                        petType,
+                      });
+                      dispatch(userSlice.actions.updatePetType(petType));
+                      try {
+                        // 서버 상태 반영 이후의 캐시 저장 실패는 보조 저장소 문제이므로
+                        // 사용자에게 전체 실패로 보이지 않게 분리한다.
+                        await AsyncStorage.setItem(
+                          PET_TYPE_STORAGE_KEY,
+                          petType
+                        );
+                      } catch (storageError) {
+                        console.warn(
+                          '>>> [ProfileSettings] petType 캐시 저장 실패',
+                          storageError
+                        );
+                      }
+                      Alert.alert('완료', '펫 정보가 변경되었습니다.');
+                      setPetModalVisible(false);
+                    } catch (err) {
+                      console.error('[Profile] 펫 정보 수정 실패', err);
+                      Alert.alert('실패', '펫 정보를 수정하지 못했습니다.');
+                    } finally {
+                      setSavingPet(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalConfirmText}>
+                    {savingPet ? '저장 중...' : '저장'}
                   </Text>
                 </Pressable>
-              ))}
+              </View>
             </View>
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalButton, styles.modalCancel]}
-                onPress={() => setPetModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>취소</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.modalButton,
-                  styles.modalConfirm,
-                  savingPet && styles.buttonDisabled,
-                ]}
-                disabled={savingPet}
-                onPress={async () => {
-                  if (!petNameInput.trim()) {
-                    Alert.alert('입력 오류', '펫 이름을 입력하세요.');
-                    return;
-                  }
-                  if (petId == null) {
-                    Alert.alert(
-                      '펫 정보 없음',
-                      '내 펫 정보를 찾지 못했어요. 앱을 다시 열어 동기화한 뒤 다시 시도해주세요.'
-                    );
-                    return;
-                  }
-                  setSavingPet(true);
-                  try {
-                    await updatePetProfile(petId, {
-                      name: petNameInput.trim(),
-                      petType,
-                    });
-                    dispatch(userSlice.actions.updatePetType(petType));
-                    try {
-                      // 서버 상태 반영 이후의 캐시 저장 실패는 보조 저장소 문제이므로
-                      // 사용자에게 전체 실패로 보이지 않게 분리한다.
-                      await AsyncStorage.setItem(PET_TYPE_STORAGE_KEY, petType);
-                    } catch (storageError) {
-                      console.warn(
-                        '>>> [ProfileSettings] petType 캐시 저장 실패',
-                        storageError
-                      );
-                    }
-                    Alert.alert('완료', '펫 정보가 변경되었습니다.');
-                    setPetModalVisible(false);
-                  } catch (err) {
-                    console.error('[Profile] 펫 정보 수정 실패', err);
-                    Alert.alert('실패', '펫 정보를 수정하지 못했습니다.');
-                  } finally {
-                    setSavingPet(false);
-                  }
-                }}
-              >
-                <Text style={styles.modalConfirmText}>
-                  {savingPet ? '저장 중...' : '저장'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+          </KeyboardAwareModalContent>
         </View>
       </Modal>
     </View>

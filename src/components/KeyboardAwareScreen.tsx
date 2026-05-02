@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleProp,
   StyleSheet,
   ViewStyle,
@@ -70,7 +69,9 @@ export const KeyboardAwareModalContent = ({
       style={styles.modalKeyboardAvoiding}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={24}
         style={styles.modalScroll}
         contentContainerStyle={[
           styles.modalScrollContent,
@@ -80,7 +81,7 @@ export const KeyboardAwareModalContent = ({
         showsVerticalScrollIndicator={false}
       >
         {children}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 };
