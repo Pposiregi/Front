@@ -12,13 +12,14 @@ import {
   View,
 } from 'react-native';
 import styles from '@styles/Meal.styles';
-import { Colors } from '@styles/theme';
+import { Colors, Spacing } from '@styles/theme';
 import modifyIcon from '@assets/images/icon/modify_icon.png';
 import deleteIcon from '@assets/images/icon/delete_icon.png';
 import mealPlaceholderImage from '@assets/images/meal.png';
 import { isZeroSizedMealImage, resolveMealImageSource } from '@utils/imageUtil';
 import type { MealModalProps } from './MealModal.types';
 import { KeyboardAwareModalContent } from '@components/KeyboardAwareScreen';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const MODAL_LOADING_COLOR = Colors.infoStrong;
 const MODAL_MUTED_LOADING_COLOR = Colors.textMuted;
@@ -89,6 +90,7 @@ function MealModal({
   editingMealImageUri,
   isUpdatingMeal,
 }: MealModalProps) {
+  const insets = useSafeAreaInsets();
   const [zeroSizedImageMap, setZeroSizedImageMap] = useState<
     Record<string, true>
   >({});
@@ -608,7 +610,15 @@ function MealModal({
         navigationBarTranslucent
         onRequestClose={() => setPreviewImageSource(null)}
       >
-        <View style={styles.imagePreviewContainer}>
+        <View
+          style={[
+            styles.imagePreviewContainer,
+            {
+              paddingTop: insets.top + Spacing.xxl,
+              paddingBottom: insets.bottom + Spacing.xxl,
+            },
+          ]}
+        >
           <TouchableWithoutFeedback onPress={() => setPreviewImageSource(null)}>
             <View style={styles.imagePreviewBackdrop} />
           </TouchableWithoutFeedback>

@@ -98,6 +98,14 @@ const ProfileSettingPage = () => {
     setFaqModalVisible(false);
     setSelectedFaqKey(null);
   };
+  const handleFaqRequestClose = () => {
+    if (selectedFaqKey) {
+      setSelectedFaqKey(null);
+      return;
+    }
+
+    closeFaqModal();
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -583,7 +591,7 @@ const ProfileSettingPage = () => {
         visible={faqModalVisible}
         transparent
         animationType='fade'
-        onRequestClose={closeFaqModal}
+        onRequestClose={handleFaqRequestClose}
       >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
