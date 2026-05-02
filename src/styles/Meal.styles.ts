@@ -2,8 +2,14 @@ import { StyleSheet, Dimensions } from 'react-native';
 import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
-const CALENDAR_HORIZONTAL_PADDING = Math.max(Spacing.sm, Math.round(SCREEN_WIDTH * 0.02));
+const CONTENT_HORIZONTAL_PADDING = Math.max(
+  Spacing.xxl,
+  Math.round(SCREEN_WIDTH * 0.06)
+);
+const CALENDAR_HORIZONTAL_PADDING = Math.max(
+  Spacing.sm,
+  Math.round(SCREEN_WIDTH * 0.02)
+);
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
 const CALENDAR_OUTER_GUTTER = Math.max(
   4,
@@ -25,14 +31,26 @@ const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
 const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
-const CONTENT_TOP_PADDING = Math.max(Spacing.md, Math.round(SCREEN_HEIGHT * 0.015));
+const CONTENT_TOP_PADDING = Math.max(
+  Spacing.md,
+  Math.round(SCREEN_HEIGHT * 0.015)
+);
 const CONTENT_BOTTOM_PADDING = Math.max(40, Math.round(SCREEN_HEIGHT * 0.05));
 const HEADER_BUTTON_SIZE = Math.max(36, Math.round(SCREEN_WIDTH * 0.09));
 const HEADER_BUTTON_RADIUS = Math.round(HEADER_BUTTON_SIZE / 2);
-const HEADER_SECTION_SPACING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
+const HEADER_SECTION_SPACING = Math.max(
+  Spacing.xxl,
+  Math.round(SCREEN_WIDTH * 0.06)
+);
 const CALENDAR_RADIUS = Math.max(28, Math.round(SCREEN_WIDTH * 0.07));
-const CALENDAR_VERTICAL_PADDING = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
-const MONTH_ROW_MARGIN_BOTTOM = Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.03));
+const CALENDAR_VERTICAL_PADDING = Math.max(
+  Spacing.md,
+  Math.round(SCREEN_WIDTH * 0.03)
+);
+const MONTH_ROW_MARGIN_BOTTOM = Math.max(
+  Spacing.md,
+  Math.round(SCREEN_WIDTH * 0.03)
+);
 const MODAL_CARD_SIZE = Math.round(
   Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
 );
@@ -51,13 +69,25 @@ const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
 );
 
 const MODAL_CONTENT_RADIUS = Math.max(32, Math.round(SCREEN_WIDTH * 0.08));
-const MODAL_CONTENT_VERTICAL_PADDING = Math.max(26, Math.round(SCREEN_HEIGHT * 0.032));
-const MODAL_CONTENT_HORIZONTAL_PADDING = Math.max(Spacing.xxl, Math.round(SCREEN_WIDTH * 0.06));
-const MODAL_HEADER_MARGIN_BOTTOM = Math.max(18, Math.round(SCREEN_HEIGHT * 0.022));
+const MODAL_CONTENT_VERTICAL_PADDING = Math.max(
+  26,
+  Math.round(SCREEN_HEIGHT * 0.032)
+);
+const MODAL_CONTENT_HORIZONTAL_PADDING = Math.max(
+  Spacing.xxl,
+  Math.round(SCREEN_WIDTH * 0.06)
+);
+const MODAL_HEADER_MARGIN_BOTTOM = Math.max(
+  18,
+  Math.round(SCREEN_HEIGHT * 0.022)
+);
 const MODAL_NOTICE_RADIUS = Math.max(14, Math.round(SCREEN_WIDTH * 0.035));
 const MODAL_NOTICE_ICON_SIZE = Math.max(24, Math.round(SCREEN_WIDTH * 0.06));
 const MODAL_NOTICE_ICON_RADIUS = Math.round(MODAL_NOTICE_ICON_SIZE / 2);
-const MODAL_LIST_TOP_MARGIN = Math.max(Spacing.xs, Math.round(SCREEN_WIDTH * 0.01));
+const MODAL_LIST_TOP_MARGIN = Math.max(
+  Spacing.xs,
+  Math.round(SCREEN_WIDTH * 0.01)
+);
 const STACK_IMAGE_BORDER = Colors.surface;
 const STACK_IMAGE_SHADOW = Colors.shadow;
 
@@ -230,8 +260,6 @@ export default StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   modalBackdrop: {
     position: 'absolute',
@@ -243,6 +271,11 @@ export default StyleSheet.create({
   },
   modalContentWrapper: {
     width: '88%',
+  },
+  mealModalKeyboardContent: {
+    width: '100%',
+    paddingHorizontal: 0,
+    paddingVertical: Math.max(16, Math.round(SCREEN_HEIGHT * 0.02)),
   },
   modalContent: {
     backgroundColor: Colors.surface,
@@ -449,6 +482,34 @@ export default StyleSheet.create({
   modalMealDragLabel: {
     fontSize: Typography.bodyLarge,
     color: Colors.textMuted,
+  },
+  imagePreviewContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxl,
+  },
+  imagePreviewBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.88)',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '82%',
+  },
+  imagePreviewCloseButton: {
+    marginTop: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface,
+  },
+  imagePreviewCloseText: {
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: Typography.bodySmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   modalAddRow: {
     flexDirection: 'row',

@@ -107,6 +107,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.xxl + 4,
   },
+  keyboardModalBackdrop: {
+    flex: 1,
+    backgroundColor: Colors.overlayDark,
+  },
   modalCard: {
     width: '100%',
     backgroundColor: Colors.surface,
@@ -154,6 +158,45 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.Roboto_VariableFont,
     fontSize: 14,
     color: Colors.surface,
+  },
+  faqList: {
+    marginTop: Spacing.md,
+    borderTopWidth: 1,
+    borderColor: Colors.background,
+  },
+  faqListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderColor: Colors.background,
+  },
+  faqListTitle: {
+    flex: 1,
+    paddingRight: Spacing.md,
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: 15,
+    color: Colors.textPrimary,
+  },
+  faqDetail: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderColor: Colors.background,
+  },
+  faqQuestion: {
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  faqAnswer: {
+    marginTop: Spacing.sm,
+    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 21,
   },
   input: {
     marginTop: Spacing.md,

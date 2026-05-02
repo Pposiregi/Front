@@ -96,6 +96,12 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
+  myRankingFloatingContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+  },
   myRankingText: {
     fontSize: Typography.body,
     fontFamily: Fonts.JUA,

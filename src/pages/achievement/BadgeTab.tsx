@@ -13,11 +13,14 @@ import { Badge, UserBadge } from '../../types/badge';
 import { ItemModal } from './ItemModal';
 import { getBadges, getUserBadges } from '@api/badgeApi';
 import { badgeImages } from '@shared/constants/badgeImages';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 
 interface BadgeUI extends Badge {
   unlocked: boolean;
   iconUrl: any;
 }
+
+const LOCKED_BADGE_IMAGE = require('../../assets/images/badges/mission_unRanked.png');
 
 const BadgeGrid = ({
   title,
@@ -64,10 +67,10 @@ const BadgeGrid = ({
 };
 
 function BadgeTab() {
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const [badges, setBadges] = useState<BadgeUI[]>([]);
   const [selectedBadge, setSelectedBadge] = useState<BadgeUI | null>(null);
   const [loading, setLoading] = useState(true);
-  const lockedImage = require('../../assets/images/badges/mission_unRanked.png');
   useEffect(() => {
     const fetchBadges = async () => {
       try {
@@ -81,7 +84,9 @@ function BadgeTab() {
           return {
             ...badge,
             unlocked,
-            iconUrl: unlocked ? badgeImages[badge.badgeId] : lockedImage,
+            iconUrl: unlocked
+              ? badgeImages[badge.badgeId]
+              : LOCKED_BADGE_IMAGE,
           };
         });
 
@@ -103,6 +108,13 @@ function BadgeTab() {
     () => badges.filter((b) => b.type === 'MEAL'),
     [badges]
   );
+  const scrollContentStyle = useMemo(
+    () => ({
+      // 뱃지 그리드의 마지막 줄이 하단 탭바/Android 3버튼 영역에 걸리지 않도록 한다.
+      paddingBottom: contentBottomPadding,
+    }),
+    [contentBottomPadding]
+  );
 
   if (loading) {
     return (
@@ -113,7 +125,11 @@ function BadgeTab() {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={scrollContentStyle}
+      showsVerticalScrollIndicator={false}
+    >
       <BadgeGrid
         title='🏃 걷기 챌린지'
         data={stepBadges}

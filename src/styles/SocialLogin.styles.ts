@@ -1,19 +1,44 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 
+const LOGIN_TEXT_COLOR = '#2B2B2B';
+const LOGIN_BACKGROUND_COLOR = '#FFFFFF';
+const LOGIN_APP_ICON_SIZE = Math.min(SCREEN_WIDTH * 0.32, 128);
+
 export const styles = StyleSheet.create({
   container: {
     height: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 100,
+    backgroundColor: LOGIN_BACKGROUND_COLOR,
+  },
+  loginIntro: {
+    width: SCREEN_WIDTH * 0.7,
+    alignItems: 'center',
+    marginBottom: SCREEN_HEIGHT * 0.08,
+  },
+  appIcon: {
+    width: LOGIN_APP_ICON_SIZE,
+    height: LOGIN_APP_ICON_SIZE,
+    marginBottom: 24,
+    resizeMode: 'contain',
   },
   mainText: {
-    fontSize: 50,
+    fontSize: 24,
+    lineHeight: 32,
     textAlign: 'center',
-    paddingHorizontal: 30,
-    marginBottom: SCREEN_HEIGHT * 0.23,
-    fontFamily: 'JUA',
+    fontFamily: 'GowunDodum',
+    fontWeight: '800',
+    color: LOGIN_TEXT_COLOR,
+  },
+  subText: {
+    marginTop: 10,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    fontFamily: 'GowunDodum',
+    color: '#686868',
   },
   kakaoButton: {
     backgroundColor: '#FDDC3F',
@@ -53,11 +78,12 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'GowunDodum',
     fontWeight: '800',
+    color: LOGIN_TEXT_COLOR,
   },
   loadingContainer: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: LOGIN_BACKGROUND_COLOR,
   },
 });

@@ -21,6 +21,7 @@ import {
 } from '@api/bodyHistoryApi';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import { loadBodyGoals, type BodyGoals } from '@utils/bodyGoalsStorage';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 import type {
   BodyHistoryFormValues,
   BodyHistoryResponse,
@@ -106,6 +107,7 @@ const MetricCard = ({
 /** 최신 몸 기록, 차트, 기록 저장 진입점을 제공하는 프로필 메인 화면이다. */
 function ProfilePage() {
   const navigation = useNavigation<ProfileStackNavigationProp<'ProfileMain'>>();
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const { width: windowWidth } = useWindowDimensions();
   const contentPadding = Math.max(16, Math.round(windowWidth * 0.048));
   const chartWidth = windowWidth - Math.max(12, contentPadding * 1.5) * 2;
@@ -302,6 +304,14 @@ function ProfilePage() {
   );
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const scrollContentStyle = useMemo(
+    () => [
+      styles.contentContainer,
+      // 프로필 하단 카드가 앱 탭바/Android 내비게이션 바에 가려지지 않도록 공통 하단 여백을 적용한다.
+      { paddingBottom: contentBottomPadding },
+    ],
+    [contentBottomPadding]
+  );
 
   if (loading) {
     return (
@@ -315,7 +325,7 @@ function ProfilePage() {
     <>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={scrollContentStyle}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>

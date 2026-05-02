@@ -2,18 +2,17 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { styles } from '@styles/OptionalInfoPage.styles';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   isValidPbf,
   isValidTargetStep,
   isValidWeight,
 } from '../../utils/validation';
+import { KeyboardAwareScreen } from '@components/KeyboardAwareScreen';
 
 type OptionalInfoProps = {
   onFinish: (data: {
@@ -63,81 +62,80 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
     onFinish({ targetWeightKg, pbf, targetPbf, targetStepCount });
   }, [targetWeightKg, pbf, targetPbf, targetStepCount, allEmpty, onFinish]);
   return (
-    <KeyboardAwareScrollView
-      enableOnAndroid={true} // 입력창이 키보드에 가려지지 않게 설정
-      extraScrollHeight={100} // 키보드와의 간격 확보 이거 없으면 딱 붙어서 스크롤이 안된다..
-    >
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.title}>함께 도달할 목표를 설정해요</Text>
-          <Text style={styles.subtitle}>
-            원하는 체중과 체지방률을 입력해주세요. {'\n'}목표를 세우면 여정이
-            시작돼요.
-          </Text>
-          <Text style={styles.requiredInfo}>
-            추후 입력 가능합니다. 너무 걱정하지 마세요!
-          </Text>
-          <Text style={styles.label}>목표 체중</Text>
-          <View style={styles.inputWithUnit}>
-            <TextInput
-              style={styles.textInputFlex}
-              placeholder='목표 체중을 입력하세요.'
-              placeholderTextColor='#666'
-              keyboardType='numeric'
-              onChangeText={setTargetWeight}
-              ref={targetWeightRef}
-              onSubmitEditing={() => targetWalkRef.current?.focus()}
-            />
-            <Text style={styles.unit}>kg</Text>
-          </View>
-          <Text style={styles.label}>목표 걸음</Text>
-          <View style={styles.inputWithUnit}>
-            <TextInput
-              style={styles.textInputFlex}
-              placeholder='목표 걸음을 입력하세요.'
-              placeholderTextColor='#666'
-              keyboardType='numeric'
-              onChangeText={setTargetStep}
-              ref={targetWalkRef}
-              onSubmitEditing={() => pbfRef.current?.focus()}
-            />
-            <Text style={styles.unit}>step</Text>
-          </View>
-          <Text style={styles.label}>현재 체지방률(pbf)</Text>
-          <View style={styles.inputWithUnit}>
-            <TextInput
-              style={styles.textInputFlex}
-              placeholder='현재 체지방률을 입력하세요.'
-              placeholderTextColor='#666'
-              keyboardType='numeric'
-              onChangeText={setcurrentPbf}
-              ref={pbfRef}
-              onSubmitEditing={() => targetPbfRef.current?.focus()}
-            />
-            <Text style={styles.unit}>%</Text>
-          </View>
-          <Text style={styles.label}>목표 체지방률(pbf)</Text>
-          <View style={styles.inputWithUnit}>
-            <TextInput
-              style={styles.textInputFlex}
-              placeholder='목표 체지방률을 입력하세요.'
-              placeholderTextColor='#666'
-              keyboardType='numeric'
-              onChangeText={setTargetPbf}
-              ref={targetPbfRef}
-            />
-            <Text style={styles.unit}>%</Text>
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Pressable style={[styles.startButton]} onPress={onSubmit}>
-              <Text style={styles.startButtonText}>
-                {allEmpty ? '건너뛰기' : '시작하기'}
-              </Text>
-            </Pressable>
-          </View>
+    /*
+      목표 체중/걸음/체지방률 입력창은 화면 하단으로 이어지므로 키보드가 올라올 때
+      현재 입력값이 보이도록 공통 KeyboardAwareScreen에 스크롤 보정을 위임한다.
+    */
+    <KeyboardAwareScreen>
+      <View style={styles.container}>
+        <Text style={styles.title}>함께 도달할 목표를 설정해요</Text>
+        <Text style={styles.subtitle}>
+          원하는 체중과 체지방률을 입력해주세요. {'\n'}목표를 세우면 여정이
+          시작돼요.
+        </Text>
+        <Text style={styles.requiredInfo}>
+          추후 입력 가능합니다. 너무 걱정하지 마세요!
+        </Text>
+        <Text style={styles.label}>목표 체중</Text>
+        <View style={styles.inputWithUnit}>
+          <TextInput
+            style={styles.textInputFlex}
+            placeholder='목표 체중을 입력하세요.'
+            placeholderTextColor='#666'
+            keyboardType='numeric'
+            onChangeText={setTargetWeight}
+            ref={targetWeightRef}
+            onSubmitEditing={() => targetWalkRef.current?.focus()}
+          />
+          <Text style={styles.unit}>kg</Text>
         </View>
-      </ScrollView>
-    </KeyboardAwareScrollView>
+        <Text style={styles.label}>목표 걸음</Text>
+        <View style={styles.inputWithUnit}>
+          <TextInput
+            style={styles.textInputFlex}
+            placeholder='목표 걸음을 입력하세요.'
+            placeholderTextColor='#666'
+            keyboardType='numeric'
+            onChangeText={setTargetStep}
+            ref={targetWalkRef}
+            onSubmitEditing={() => pbfRef.current?.focus()}
+          />
+          <Text style={styles.unit}>step</Text>
+        </View>
+        <Text style={styles.label}>현재 체지방률(pbf)</Text>
+        <View style={styles.inputWithUnit}>
+          <TextInput
+            style={styles.textInputFlex}
+            placeholder='현재 체지방률을 입력하세요.'
+            placeholderTextColor='#666'
+            keyboardType='numeric'
+            onChangeText={setcurrentPbf}
+            ref={pbfRef}
+            onSubmitEditing={() => targetPbfRef.current?.focus()}
+          />
+          <Text style={styles.unit}>%</Text>
+        </View>
+        <Text style={styles.label}>목표 체지방률(pbf)</Text>
+        <View style={styles.inputWithUnit}>
+          <TextInput
+            style={styles.textInputFlex}
+            placeholder='목표 체지방률을 입력하세요.'
+            placeholderTextColor='#666'
+            keyboardType='numeric'
+            onChangeText={setTargetPbf}
+            ref={targetPbfRef}
+          />
+          <Text style={styles.unit}>%</Text>
+        </View>
+        <View style={styles.buttonWrapper}>
+          <Pressable style={[styles.startButton]} onPress={onSubmit}>
+            <Text style={styles.startButtonText}>
+              {allEmpty ? '건너뛰기' : '시작하기'}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </KeyboardAwareScreen>
   );
 };
 

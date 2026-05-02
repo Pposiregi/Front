@@ -21,7 +21,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import messaging from '@react-native-firebase/messaging';
 import Index from './src/pages/SignUpFlow/IntroPage';
 import SplashScreen from 'react-native-splash-screen';
@@ -48,6 +47,7 @@ import {
   setLastSentPushToken,
 } from '@utils/pushTokenStorage';
 import PetCreatePage from '@pages/SignUpFlow/PetCreatePage';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -194,7 +194,7 @@ const runWithRetry = async <T,>(
 function AppInner() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true); // Redux 상태를 선택
-  const insets = useSafeAreaInsets();
+  const { tabBarHeight, tabBarPaddingBottom } = useSafeBottomSpacing();
 
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const routeNameRef = useRef<string | undefined>(undefined);
@@ -531,8 +531,8 @@ function AppInner() {
               tabBarStyle: [
                 styles.tabBar,
                 {
-                  height: 60 + insets.bottom,
-                  paddingBottom: 16 + insets.bottom,
+                  height: tabBarHeight,
+                  paddingBottom: tabBarPaddingBottom,
                 },
                 isRunningActive ? styles.tabBarLocked : null,
               ],

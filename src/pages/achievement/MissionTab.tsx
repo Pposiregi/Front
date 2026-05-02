@@ -16,6 +16,7 @@ import { styles } from '@styles/Achievement_Mission.styles';
 import { MissionHistoryItem } from '../../types/mission';
 import { getMissionHistory } from '@api/missionApi';
 import { Colors } from '@styles/theme';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 
 type MissionStatus = 'LOADING' | 'READY' | 'ERROR';
 
@@ -30,6 +31,7 @@ const CATEGORY_META = {
 };
 
 const MissionTab = () => {
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const [missions, setMissions] = useState<MissionHistoryItem[]>([]);
   const [status, setStatus] = useState<MissionStatus>('LOADING');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -106,6 +108,13 @@ const MissionTab = () => {
       }))
       .filter((section) => section.data.length > 0);
   }, [sections, dateRange]);
+  const listContentStyle = useMemo(
+    () => ({
+      // 완료 미션 리스트 끝까지 스크롤했을 때 하단 탭바와 시스템 내비게이션 바 위에 남도록 보정한다.
+      paddingBottom: contentBottomPadding,
+    }),
+    [contentBottomPadding]
+  );
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -211,6 +220,7 @@ const MissionTab = () => {
       {/* SectionList */}
       <SectionList
         sections={filteredSections}
+        contentContainerStyle={listContentStyle}
         keyExtractor={(item) => item.missionCheckId.toString()}
         ListHeaderComponent={() => (
           <View style={styles.listHeaderContainer}>

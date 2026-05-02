@@ -28,6 +28,7 @@ import { logLogin } from '@utils/analytics';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
 const BYPASS_SOCIAL_LOGIN = false;
+const LOGIN_APP_ICON = require('../../app_icon.png');
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -233,7 +234,14 @@ const SocialLoginPage = () => {
       ) : (
         // loading이 false일 때 버튼들을 보여줍니다.
         <>
-          <Text style={styles.mainText}>함께 달릴 준비 되셨나요?</Text>
+          <View style={styles.loginIntro}>
+            <Image source={LOGIN_APP_ICON} style={styles.appIcon} />
+            <Text style={styles.mainText}>나와 함께 건강해지는 펫</Text>
+            <Text style={styles.subText}>
+              내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금
+              만나요!
+            </Text>
+          </View>
           <Pressable style={styles.kakaoButton} onPress={handleReset}>
             <Text style={styles.text}>앱 초기화 (테스트용)</Text>
           </Pressable>

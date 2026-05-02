@@ -27,6 +27,7 @@ import {
   getWeeklySteps,
 } from '@api/activityApi';
 import { getUser } from '@api/mainApi';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 import { formatDateKey, parseDateKey, parseGpsDateTime } from '@utils/dateUtil';
 import { formatDistanceFromKm } from '@utils/distanceFormat';
 import type { getUserResponse } from 'types/main';
@@ -110,6 +111,7 @@ const ProgressRing = ({
  */
 function ActivityPage() {
   const isFocused = useIsFocused();
+  const { contentBottomPadding } = useSafeBottomSpacing();
   const [loading, setLoading] = useState<boolean>(true);
   const today = useMemo(() => formatDateKey(new Date()), []);
   const [currentMonth, setCurrentMonth] = useState(
@@ -135,6 +137,14 @@ function ActivityPage() {
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
   const chartHeight = Math.round(SCREEN_HEIGHT * 0.2);
   const chartTopInset = Math.round(chartPadding * 0.6);
+  const scrollContentStyle = useMemo(
+    () => [
+      styles.contentContainer,
+      // 앱 하단 탭바와 Android 3버튼 내비게이션 영역 위까지 마지막 컨텐츠가 올라오도록 보정한다.
+      { paddingBottom: contentBottomPadding },
+    ],
+    [contentBottomPadding]
+  );
 
   const normalizedWeeklySteps = useMemo(
     () =>
@@ -557,7 +567,7 @@ function ActivityPage() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
+      contentContainerStyle={scrollContentStyle}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl

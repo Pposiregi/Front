@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
@@ -15,10 +14,11 @@ import { getDailyStepRanking } from '@api/rankingApi';
 import { DailyStepRankingResponse } from 'types/ranking';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/reducer';
-import { ProfileAvatar } from '@components/ProfileAvatar';
 import { RankingItem } from '@components/RankingItem';
+import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 
 function RankingTab() {
+  const { bottomInset, contentBottomPadding } = useSafeBottomSpacing();
   const [loading, setLoading] = useState(false);
   const [rankingData, setRankingData] =
     useState<DailyStepRankingResponse | null>();
@@ -26,12 +26,6 @@ function RankingTab() {
     'ALL'
   );
   const myUserId = useSelector((state: RootState) => state.user.userId);
-  const myGender = useSelector((state: RootState) => state.user.gender);
-  // 추후에 랭킹 남성, 여성 별 탭에도 본인에게 맞는 성별 선택 시 랭킹 띄우기 위해 남겨둠
-  const showMyRanking =
-    rankingFilter === 'ALL' ||
-    (rankingFilter === 'MALE' && myGender === 'male') ||
-    (rankingFilter === 'FEMALE' && myGender === 'female');
   const myProfileImageUrl = useSelector(
     (state: RootState) => state.user.profileImageUrl
   );
@@ -65,7 +59,22 @@ function RankingTab() {
 
   useEffect(() => {
     fetchRanking();
-  }, [rankingFilter]);
+  }, [fetchRanking]);
+  const scrollContentStyle = useMemo(
+    () => ({
+      // 고정된 '내 순위' 바와 하단 시스템 버튼 영역만큼 리스트 하단 스크롤 여유를 만든다.
+      paddingBottom: contentBottomPadding,
+    }),
+    [contentBottomPadding]
+  );
+  const myRankingContainerStyle = useMemo(
+    () => [
+      styles.myRankingFloatingContainer,
+      // Android 3버튼 내비게이션이 safe-area를 0으로 주는 기기에서도 내 순위 바가 버튼 영역과 겹치지 않게 한다.
+      { bottom: bottomInset },
+    ],
+    [bottomInset]
+  );
 
   if (loading || !rankingData) {
     return (
@@ -121,6 +130,7 @@ function RankingTab() {
         style={{
           flex: 1,
         }}
+        contentContainerStyle={scrollContentStyle}
       >
         {/* 카드 스타일로 배경 */}
         <View>
@@ -149,13 +159,7 @@ function RankingTab() {
       {/* 내 순위 표시 */}
       {rankingFilter === 'ALL' && (
         <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            paddingHorizontal: 16,
-          }}
+          style={myRankingContainerStyle}
         >
           <RankingItem
             rank={rankingData.myRanking?.rank ?? 0}

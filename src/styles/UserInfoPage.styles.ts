@@ -95,11 +95,17 @@ export const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.4,
     marginBottom: SCREEN_HEIGHT * 0.1,
   },
+  startButtonDisabled: {
+    backgroundColor: Colors.disabled,
+  },
   startButtonText: {
     color: Colors.surface,
     fontSize: Typography.body,
     fontWeight: '700',
     fontFamily: Fonts.JUA,
+  },
+  buttonWrapper: {
+    alignItems: 'center',
   },
   weightContainer: {
     flexDirection: 'row',

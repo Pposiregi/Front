@@ -65,6 +65,9 @@ export const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.4,
     marginBottom: SCREEN_HEIGHT * 0.1,
   },
+  buttonWrapper: {
+    alignItems: 'center',
+  },
   startButtonText: {
     color: Colors.surface,
     fontSize: Typography.body,

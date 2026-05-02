@@ -13,9 +13,6 @@ export default StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 18,
   },
   card: {
     width: '100%',
