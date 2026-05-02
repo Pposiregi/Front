@@ -1,7 +1,5 @@
 import React, { ReactNode } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
   StyleProp,
   StyleSheet,
   ViewStyle,
@@ -57,39 +55,27 @@ export const KeyboardAwareScreen = ({
  * Modal 내부 입력 폼에서 사용하는 키보드 대응 래퍼.
  *
  * Modal은 일반 화면과 달리 부모 navigation 영역의 키보드 회피 처리를 받지 못한다.
- * 따라서 KeyboardAvoidingView로 카드 위치를 보정하고, ScrollView로 작은 화면에서도
- * 하단 입력/버튼까지 직접 스크롤해서 확인할 수 있게 한다.
+ * KeyboardAwareScrollView 하나로 포커스 입력 이동과 작은 화면 스크롤을 처리한다.
  */
 export const KeyboardAwareModalContent = ({
   children,
   contentContainerStyle,
 }: KeyboardAwareModalContentProps) => {
   return (
-    <KeyboardAvoidingView
-      style={styles.modalKeyboardAvoiding}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <KeyboardAwareScrollView
+      enableOnAndroid
+      extraScrollHeight={24}
+      style={styles.modalScroll}
+      contentContainerStyle={[styles.modalScrollContent, contentContainerStyle]}
+      keyboardShouldPersistTaps='handled'
+      showsVerticalScrollIndicator={false}
     >
-      <KeyboardAwareScrollView
-        enableOnAndroid
-        extraScrollHeight={24}
-        style={styles.modalScroll}
-        contentContainerStyle={[
-          styles.modalScrollContent,
-          contentContainerStyle,
-        ]}
-        keyboardShouldPersistTaps='handled'
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </KeyboardAwareScrollView>
-    </KeyboardAvoidingView>
+      {children}
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  modalKeyboardAvoiding: {
-    flex: 1,
-  },
   modalScroll: {
     flex: 1,
     width: '100%',

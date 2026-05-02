@@ -2,12 +2,15 @@ import notifee, {
   AndroidImportance,
   AuthorizationStatus,
 } from '@notifee/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 const CHANNEL_ID = 'running-tracker';
 const NOTI_ID = 'running-notif';
 const SMALL_ICON = 'ic_notification';
 const CHANNEL_NAME = '러닝 트래킹';
+const NOTIFICATION_PERMISSION_REQUESTED_KEY =
+  'runningNotificationPermissionRequested';
 let runningChannelPromise: Promise<string> | null = null;
 
 /** 러닝 알림 채널을 1회만 생성하고 재사용한다. */
@@ -30,6 +33,32 @@ const ensureRunningChannel = () => {
       });
   }
   return runningChannelPromise;
+};
+
+/**
+ * Android 13+ 신규 설치에서 일부 Notifee 버전이 NOT_DETERMINED를 DENIED처럼
+ * 돌려줄 수 있어, 러닝 시작 시에는 앱 내부 요청 이력을 기준으로 1회 권한 요청을 보장한다.
+ */
+const requestRunningNotificationPermissionIfNeeded = async () => {
+  if (Platform.OS !== 'android') return false;
+
+  try {
+    const requested = await AsyncStorage.getItem(
+      NOTIFICATION_PERMISSION_REQUESTED_KEY
+    );
+
+    if (requested !== 'true') {
+      const settings = await notifee.requestPermission();
+      await AsyncStorage.setItem(NOTIFICATION_PERMISSION_REQUESTED_KEY, 'true');
+      return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+    }
+
+    const settings = await notifee.getNotificationSettings();
+    return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+  } catch (error) {
+    console.warn('[RUNNING][NOTIFICATION] 권한 요청 실패', error);
+    return false;
+  }
 };
 
 /** Android 알림 권한이 꺼져 있으면 Notifee foreground notification 호출을 건너뛴다. */
@@ -64,8 +93,8 @@ const displayRunningNotification = async (
       smallIcon: SMALL_ICON,
       onlyAlertOnce: true,
       pressAction: { id: 'default' },
-      showChronometer: options?.showChronometer,
-      timestamp: options?.timestamp,
+      showChronometer: options?.showChronometer ?? false,
+      ...(options?.timestamp ? { timestamp: options.timestamp } : {}),
     },
   });
 };
@@ -75,6 +104,8 @@ export async function startRunningNotification() {
   if (Platform.OS !== 'android') return;
 
   try {
+    if (!(await requestRunningNotificationPermissionIfNeeded())) return;
+
     await displayRunningNotification('운동 시간을 측정하고 있습니다.', {
       showChronometer: true,
       timestamp: Date.now(),
