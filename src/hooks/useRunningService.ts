@@ -12,6 +12,7 @@ const CHANNEL_NAME = '러닝 트래킹';
 const NOTIFICATION_PERMISSION_REQUESTED_KEY =
   'runningNotificationPermissionRequested';
 let runningChannelPromise: Promise<string> | null = null;
+let canDisplayRunningNotificationCache: boolean | null = null;
 
 /** 러닝 알림 채널을 1회만 생성하고 재사용한다. */
 const ensureRunningChannel = () => {
@@ -50,26 +51,18 @@ const requestRunningNotificationPermissionIfNeeded = async () => {
     if (requested !== 'true') {
       const settings = await notifee.requestPermission();
       await AsyncStorage.setItem(NOTIFICATION_PERMISSION_REQUESTED_KEY, 'true');
-      return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+      canDisplayRunningNotificationCache =
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+      return canDisplayRunningNotificationCache;
     }
 
     const settings = await notifee.getNotificationSettings();
-    return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+    canDisplayRunningNotificationCache =
+      settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
+    return canDisplayRunningNotificationCache;
   } catch (error) {
     console.warn('[RUNNING][NOTIFICATION] 권한 요청 실패', error);
-    return false;
-  }
-};
-
-/** Android 알림 권한이 꺼져 있으면 Notifee foreground notification 호출을 건너뛴다. */
-const canDisplayRunningNotification = async () => {
-  if (Platform.OS !== 'android') return false;
-
-  try {
-    const settings = await notifee.getNotificationSettings();
-    return settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
-  } catch (error) {
-    console.warn('[RUNNING][NOTIFICATION] 권한 상태 확인 실패', error);
+    canDisplayRunningNotificationCache = false;
     return false;
   }
 };
@@ -78,7 +71,7 @@ const displayRunningNotification = async (
   body: string,
   options?: { showChronometer?: boolean; timestamp?: number }
 ) => {
-  if (!(await canDisplayRunningNotification())) return;
+  if (!canDisplayRunningNotificationCache) return;
 
   const createdChannelId = await ensureRunningChannel();
 
