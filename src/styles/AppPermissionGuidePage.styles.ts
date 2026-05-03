@@ -88,17 +88,17 @@ export const styles = StyleSheet.create({
   optionalBadgeText: {
     color: Colors.surface,
     fontSize: 11,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   requiredBadgeText: {
     color: Colors.surface,
     fontSize: 11,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   permissionDescription: {
     fontSize: Typography.caption,
     color: Colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     lineHeight: 18,
   },
   buttonContainer: {
@@ -114,14 +114,14 @@ export const styles = StyleSheet.create({
   checkIcon: {
     color: Colors.surface,
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
   checkIconOptional: {
     color: '#FF6347',
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     includeFontPadding: false,
     textAlignVertical: 'center',
   },

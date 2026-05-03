@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Dimensions, Pressable, Image } from 'react-native';
+import { Text, Dimensions, Pressable, Image } from 'react-native';
 import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
 

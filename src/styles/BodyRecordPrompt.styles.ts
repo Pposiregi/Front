@@ -35,7 +35,7 @@ export default StyleSheet.create({
   },
   subtitle: {
     marginTop: 4,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 13,
     color: '#6B7280',
   },
@@ -87,24 +87,24 @@ export default StyleSheet.create({
   fieldInput: {
     minWidth: 64,
     textAlign: 'right',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: 20,
     color: '#6B7280',
     paddingVertical: Platform.select({ ios: 4, android: 0 }),
     paddingHorizontal: 0,
   },
   fieldValue: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 13,
     color: '#4B5563',
   },
   fieldNumber: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: 20,
     color: '#111827',
   },
   fieldUnit: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 12,
     color: '#6B7280',
     marginLeft: 6,
@@ -132,7 +132,7 @@ export default StyleSheet.create({
   aimText: {
     marginTop: 6,
     alignSelf: 'flex-end',
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 10,
     color: '#9CA3AF',
   },
@@ -147,7 +147,7 @@ export default StyleSheet.create({
     marginRight: 6,
   },
   infoText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 13,
     color: '#6B7280',
   },
@@ -167,7 +167,7 @@ export default StyleSheet.create({
     backgroundColor: '#F29E3E',
   },
   primaryText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: '#FFFFFF',
     fontWeight: '600',
@@ -176,7 +176,7 @@ export default StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   secondaryText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: '#6B7280',
   },
@@ -185,7 +185,7 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   skipTodayText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 13,
     color: '#9CA3AF',
     textDecorationLine: 'underline',

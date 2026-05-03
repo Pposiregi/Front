@@ -12,7 +12,7 @@ const formatTotalRunTime = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(safeSeconds / 3600);
   const minutes = Math.floor((safeSeconds % 3600) / 60);
-  return hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+  return hours > 0 ? `${hours} hr ${minutes} min` : `${minutes} min`;
 };
 
 const MainStatCards = ({
@@ -35,7 +35,7 @@ const MainStatCards = ({
           <View style={[styles.metricCard, styles.metricCardPrimary]}>
             <Text style={styles.metricLabel}>걸음 수</Text>
             <Text style={styles.metricValuePrimary}>
-              {`${stepCount.toLocaleString()}보`}
+              {`${stepCount.toLocaleString()} steps`}
             </Text>
           </View>
         </View>
@@ -43,7 +43,7 @@ const MainStatCards = ({
           <View style={styles.metricCard}>
             <Text style={styles.metricLabel}>소비 열량</Text>
             <Text style={styles.metricValue}>
-              {`${estimatedKcal.toLocaleString()}kcal`}
+              {`${estimatedKcal.toLocaleString()} kcal`}
             </Text>
           </View>
         </View>

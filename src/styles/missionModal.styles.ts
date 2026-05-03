@@ -114,7 +114,7 @@ export default StyleSheet.create({
   completeButtonText: {
     fontSize: Typography.body,
     color: Colors.surface,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 
   completeButtonTextDisabled: {
@@ -124,7 +124,7 @@ export default StyleSheet.create({
   missionUIText: {
     fontSize: Typography.body,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: 'bold',
   },
 
@@ -187,13 +187,13 @@ export default StyleSheet.create({
   summaryLabel: {
     fontSize: Typography.body,
     color: Colors.textSecondary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryValue: {
     fontSize: Typography.bodyLarge,
     color: Colors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryValueGroup: {
@@ -204,7 +204,7 @@ export default StyleSheet.create({
     marginTop: 2,
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryDivider: {
@@ -216,7 +216,7 @@ export default StyleSheet.create({
     marginTop: 4,
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     textAlign: 'right',
   },
 });

@@ -66,6 +66,6 @@ export const styles = StyleSheet.create({
   modalKcalText: {
     fontSize: Typography.bodyLarge,
     color: '#555',
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 });

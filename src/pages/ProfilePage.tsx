@@ -344,7 +344,6 @@ function ProfilePage() {
             </Pressable>
           </View>
           <Text style={styles.name}>{nickname || '김돌돌'}</Text>
-          <Text style={styles.caption}>오늘도 반려펫과 함께 건강관리</Text>
         </View>
 
         <View style={styles.sectionHeader}>

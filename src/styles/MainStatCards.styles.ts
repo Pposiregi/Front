@@ -11,24 +11,30 @@ const METRIC_CARD_PRIMARY_MIN_HEIGHT = Math.max(
 );
 const METRIC_CARD_RADIUS = Math.max(Radius.md + 2, Math.round(SCREEN_WIDTH * 0.036));
 const METRIC_CARD_VERTICAL_PADDING = Math.max(
-  Spacing.xs + 1,
-  Math.round(SCREEN_HEIGHT * 0.007)
+  Spacing.sm,
+  Math.round(SCREEN_HEIGHT * 0.009)
 );
 const METRIC_CARD_PRIMARY_VERTICAL_PADDING = Math.max(
-  Spacing.sm,
-  Math.round(SCREEN_HEIGHT * 0.01)
+  Spacing.sm + 2,
+  Math.round(SCREEN_HEIGHT * 0.012)
 );
-const METRIC_LABEL_FONT_SIZE = Math.max(10, Math.round(SCREEN_WIDTH * 0.026));
-const METRIC_LABEL_MARGIN_BOTTOM = Math.max(2, Math.round(SCREEN_HEIGHT * 0.003));
-const METRIC_VALUE_FONT_SIZE = Math.max(16, Math.round(SCREEN_WIDTH * 0.045));
-const METRIC_VALUE_LINE_HEIGHT = Math.max(19, Math.round(SCREEN_WIDTH * 0.052));
+const METRIC_LABEL_FONT_SIZE = Math.max(
+  13,
+  Math.min(15, Math.round(SCREEN_WIDTH * 0.034))
+);
+const METRIC_LABEL_LINE_HEIGHT = Math.round(METRIC_LABEL_FONT_SIZE * 1.25);
+const METRIC_LABEL_MARGIN_BOTTOM = Math.max(4, Math.round(SCREEN_HEIGHT * 0.005));
+const METRIC_VALUE_FONT_SIZE = Math.max(
+  17,
+  Math.min(19, Math.round(SCREEN_WIDTH * 0.046))
+);
+const METRIC_VALUE_LINE_HEIGHT = Math.round(METRIC_VALUE_FONT_SIZE * 1.2);
 const METRIC_VALUE_PRIMARY_FONT_SIZE = Math.max(
   22,
-  Math.round(SCREEN_WIDTH * 0.058)
+  Math.min(24, Math.round(SCREEN_WIDTH * 0.058))
 );
-const METRIC_VALUE_PRIMARY_LINE_HEIGHT = Math.max(
-  26,
-  Math.round(SCREEN_WIDTH * 0.064)
+const METRIC_VALUE_PRIMARY_LINE_HEIGHT = Math.round(
+  METRIC_VALUE_PRIMARY_FONT_SIZE * 1.18
 );
 
 export default StyleSheet.create({
@@ -72,23 +78,27 @@ export default StyleSheet.create({
     paddingVertical: METRIC_CARD_PRIMARY_VERTICAL_PADDING,
   },
   metricLabel: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: METRIC_LABEL_FONT_SIZE,
+    lineHeight: METRIC_LABEL_LINE_HEIGHT,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: 0,
     color: Colors.textSecondary,
     marginBottom: METRIC_LABEL_MARGIN_BOTTOM,
+    includeFontPadding: false,
   },
   metricValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: METRIC_VALUE_FONT_SIZE,
+    fontWeight: '800',
     color: Colors.textPrimary,
     lineHeight: METRIC_VALUE_LINE_HEIGHT,
     includeFontPadding: false,
   },
   metricValuePrimary: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: METRIC_VALUE_PRIMARY_FONT_SIZE,
+    fontWeight: '800',
     color: Colors.textPrimary,
     lineHeight: METRIC_VALUE_PRIMARY_LINE_HEIGHT,
     includeFontPadding: false,

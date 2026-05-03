@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSub: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
     color: Colors.textMuted,
     marginTop: spacing.xxs,
@@ -88,7 +88,7 @@ export const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   subHeaderText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: subHeaderFont,
     color: Colors.textSecondary,
     marginTop: spacing.xs,
@@ -104,12 +104,12 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   summaryDateText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textMuted,
   },
   summaryNotice: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textSecondary,
     textAlign: 'center',
@@ -128,12 +128,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   progressValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.h2,
     color: Colors.textPrimary,
   },
   progressTarget: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textMuted,
     marginTop: spacing.xxs,
@@ -149,12 +149,12 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   heroMetricLabel: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textSecondary,
   },
   heroMetricValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricFont,
     color: Colors.textPrimary,
   },
@@ -164,7 +164,7 @@ export const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   heroComment: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
     color: Colors.textSecondary,
     marginTop: spacing.md,
@@ -184,7 +184,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   badgeText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textPrimary,
   },
@@ -197,18 +197,18 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryLabel: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
   summaryValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.h2,
     color: Colors.textPrimary,
     marginTop: spacing.sm,
   },
   summaryUnit: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textMuted,
     marginTop: spacing.xxs,
@@ -259,7 +259,7 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   segmentedText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
@@ -309,14 +309,14 @@ export const styles = StyleSheet.create({
     lineHeight: 18,
   },
   listSubtitle: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 12,
     color: Colors.textSecondary,
     marginTop: spacing.xxs,
     lineHeight: 16,
   },
   listMeta: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textMuted,
     marginTop: spacing.xxs,
@@ -347,7 +347,7 @@ export const styles = StyleSheet.create({
     borderColor: Colors.divider,
   },
   sessionDeleteText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 16,
     lineHeight: 18,
     color: Colors.textMuted,
@@ -384,7 +384,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   listValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textPrimary,
   },
@@ -398,7 +398,7 @@ export const styles = StyleSheet.create({
   },
   listValueUnit: {
     marginLeft: spacing.xxs,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textSecondary,
   },
@@ -406,19 +406,19 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   dateText: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textPrimary,
     marginBottom: spacing.xxs,
   },
   timeText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 12,
     color: Colors.textSecondary,
     marginRight: spacing.xxl,
   },
   distanceText: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: 16,
     color: Colors.accentStrong,
     marginLeft: 'auto',
@@ -434,7 +434,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: spacing.xl,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
   chartCard: {
     backgroundColor: Colors.surface,
@@ -459,7 +459,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: spacing.lg,
   },
   chartMetaLabel: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
     color: Colors.textMuted,
     marginBottom: spacing.xxs,
@@ -470,7 +470,7 @@ export const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   chartMetaUnit: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 10,
     color: Colors.textMuted,
   },
@@ -497,7 +497,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyCardText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 12,
     color: Colors.textSecondary,
   },
@@ -507,7 +507,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xxl,
   },
   chartEmptyText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 12,
     color: Colors.textMuted,
   },

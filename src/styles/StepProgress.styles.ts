@@ -1,5 +1,6 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Fonts } from './theme';
 
 const CARD_WIDTH = Math.max(
   150,
@@ -28,7 +29,7 @@ export default StyleSheet.create({
     marginBottom: 6,
   },
   title: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.Pretendard,
     fontSize: 16,
     marginBottom: 8,
   },
@@ -39,7 +40,7 @@ export default StyleSheet.create({
     height: 80,
   },
   text: {
-    fontFamily: 'JUA',
+    fontFamily: Fonts.Pretendard,
     marginTop: 4,
     fontSize: 12,
     textAlign: 'right',

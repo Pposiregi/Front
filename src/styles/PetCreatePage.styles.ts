@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     padding: 14,
     marginBottom: Spacing.xl,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   button: {
     backgroundColor: '#FF6347',

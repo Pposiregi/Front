@@ -158,7 +158,7 @@ export default StyleSheet.create({
     marginBottom: MONTH_ROW_MARGIN_BOTTOM,
   },
   calendarMonthLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.bodyLarge,
     color: Colors.textPrimary,
   },
@@ -175,7 +175,7 @@ export default StyleSheet.create({
     textAlign: 'center',
     fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.25)),
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
   weekRow: {
     flexDirection: 'row',
@@ -205,7 +205,7 @@ export default StyleSheet.create({
     marginVertical: DAY_CELL_GAP,
   },
   dayNumber: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.3)),
     color: Colors.textPrimary,
   },
@@ -506,7 +506,7 @@ export default StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   imagePreviewCloseText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.bodySmall,
     fontWeight: '700',
     color: Colors.textPrimary,
@@ -613,12 +613,12 @@ export default StyleSheet.create({
     marginTop: 22,
   },
   modalTotalLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.body,
     color: Colors.textSecondary,
   },
   modalTotalValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.body,
     color: Colors.accentStrong,
     marginLeft: 6,

@@ -64,7 +64,7 @@ export const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: Typography.bodySmall,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: '700',
     color: Colors.success,
   },
@@ -81,13 +81,13 @@ export const styles = StyleSheet.create({
   },
   listHeaderTitle: {
     fontSize: Typography.bodyLarge,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   listHeaderSubtitle: {
     fontSize: Typography.bodySmall,
     marginTop: 4,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   dateRangeButton: {

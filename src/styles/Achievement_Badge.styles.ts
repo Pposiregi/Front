@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
   },
   badgeCount: {
     fontSize: 14,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: '#888',
     backgroundColor: '#f0f0f0',
     paddingHorizontal: 8,

@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
   allCheckboxLabel: {
     marginLeft: Spacing.sm,
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
     fontWeight: '600',
   },
@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     marginLeft: Spacing.sm,
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   requiredBadge: {
@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
   arrowText: {
     fontSize: Typography.body,
     color: Colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   divider: {
     height: 1,

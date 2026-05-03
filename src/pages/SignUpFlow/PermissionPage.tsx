@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
-import { Colors } from '@styles/theme/colors';
+import { Colors, Fonts } from '@styles/theme';
 import { styles } from '@styles/PermissionPage.styles';
 import TermsModal, { SelectedTerms } from '@components/TermsModal';
 import { getTerms, TermsResponse } from '@api/termsApi';
@@ -89,7 +89,7 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
   if (error) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: Colors.textSecondary, fontFamily: 'Roboto', textAlign: 'center' }}>
+        <Text style={{ color: Colors.textSecondary, fontFamily: Fonts.Pretendard, textAlign: 'center' }}>
           약관을 불러오는 데 실패했습니다.{'\n'}잠시 후 다시 시도해주세요.
         </Text>
       </View>

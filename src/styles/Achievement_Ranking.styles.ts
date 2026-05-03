@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
   rankingNumberImage: { width: 50, height: 50, resizeMode: 'contain' },
   rankingNumberText: {
     fontSize: Typography.h1, // 가독성을 위해 살짝 조절
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     textAlign: 'center',
     color: Colors.textPrimary,
   },
@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
   },
   listItemText: {
     fontSize: Typography.bodyLarge,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
   rankingFilterButtonText: {
     fontSize: Typography.bodySmall,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: 'bold',
   },
   rankingFilterButtonActive: {
@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
   noRankingText: {
     fontSize: Typography.h1,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   myRankingHighlight: {
     backgroundColor: Colors.accentSoft,

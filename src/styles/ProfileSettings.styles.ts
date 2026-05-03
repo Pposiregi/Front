@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.sm,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
     fontWeight: '700',
     color: Colors.textMuted,
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.background,
   },
   rowLabel: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 16,
     color: Colors.textPrimary,
   },
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm + 2,
   },
   logoutText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 15,
     color: Colors.textPrimary,
   },
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.errorSoft,
   },
   withdrawText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 15,
     color: Colors.errorText,
   },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     marginTop: Spacing.sm + 2,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 20,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   modalCancelText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textPrimary,
   },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   modalConfirmText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.surface,
   },
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   faqListTitle: {
     flex: 1,
     paddingRight: Spacing.md,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 15,
     color: Colors.textPrimary,
   },
@@ -186,14 +186,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.background,
   },
   faqQuestion: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 15,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
   faqAnswer: {
     marginTop: Spacing.sm,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 21,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accentSoft,
   },
   chipText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: 14,
     color: Colors.textSecondary,
   },

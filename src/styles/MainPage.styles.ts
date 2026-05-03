@@ -106,7 +106,7 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     textAlign: 'center',
     color: Colors.textPrimary,
     fontSize: Typography.h1,
@@ -167,7 +167,7 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   runTimerValue: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.108)),
     color: Colors.textPrimary,
     letterSpacing: 1,
@@ -481,20 +481,20 @@ export default StyleSheet.create({
   runningStatPanelLabel: {
     fontSize: Typography.caption,
     color: Colors.textSecondary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     marginBottom: 2,
   },
 
   runningStatPanelValue: {
     fontSize: Typography.h2,
     color: Colors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   runningStatPanelUnit: {
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     marginTop: 2,
   },
 });

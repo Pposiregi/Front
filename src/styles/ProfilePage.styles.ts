@@ -115,7 +115,7 @@ export default StyleSheet.create({
   },
   caption: {
     marginTop: captionTopSpacing,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: bodyFont,
     color: Colors.textSecondary,
     textAlign: 'center',
@@ -147,7 +147,7 @@ export default StyleSheet.create({
     marginRight: Math.max(Spacing.xs, Math.round(baseUnit * 0.45)),
   },
   recordText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: bodyFont,
     fontWeight: '600',
     color: Colors.textPrimary,
@@ -175,13 +175,13 @@ export default StyleSheet.create({
     ...cardShadow,
   },
   metricLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricLabelFont,
     lineHeight: metricLabelLineHeight,
     color: Colors.textPrimary,
   },
   metricAim: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: smallFont,
     color: Colors.textSecondary,
     marginTop: Math.max(2, Math.round(baseUnit * 0.5)),
@@ -192,19 +192,19 @@ export default StyleSheet.create({
     minWidth: metricRightMinWidth,
   },
   metricValue: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricValueFont,
     lineHeight: metricValueLineHeight,
     color: Colors.textSecondary,
   },
   metricNumber: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricNumberFont,
     lineHeight: Math.max(metricNumberFont, Math.round(metricNumberFont * 1.05)),
     color: Colors.textPrimary,
   },
   metricUnit: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricValueFont,
     lineHeight: metricValueLineHeight,
     color: Colors.textSecondary,

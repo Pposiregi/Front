@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Fonts } from './theme';
 
 const LOGIN_TEXT_COLOR = '#2B2B2B';
 const LOGIN_BACKGROUND_COLOR = '#FFFFFF';
@@ -28,7 +29,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 32,
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
+    fontFamily: Fonts.JUA,
     fontWeight: '800',
     color: LOGIN_TEXT_COLOR,
   },
@@ -37,7 +38,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
+    fontFamily: Fonts.Pretendard,
     color: '#686868',
   },
   kakaoButton: {
@@ -76,7 +77,7 @@ export const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
+    fontFamily: Fonts.Pretendard,
     fontWeight: '800',
     color: LOGIN_TEXT_COLOR,
   },
