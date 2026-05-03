@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: Spacing.xl,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.GowunDodum,
     color: Colors.textPrimary,
   },
   list: {
@@ -87,12 +87,12 @@ export const styles = StyleSheet.create({
   },
   optionalBadgeText: {
     color: Colors.surface,
-    fontSize: 11,
+    fontSize: Typography.caption,
     fontFamily: Fonts.Pretendard,
   },
   requiredBadgeText: {
     color: Colors.surface,
-    fontSize: 11,
+    fontSize: Typography.caption,
     fontFamily: Fonts.Pretendard,
   },
   permissionDescription: {

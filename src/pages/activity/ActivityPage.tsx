@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle, Ellipse } from 'react-native-svg';
 import {
   ChartData,
   DailyActivity,
@@ -105,6 +105,42 @@ const ProgressRing = ({
   );
 };
 
+const PawTitleIcon = ({ color }: { color: string }) => (
+  <Svg width={22} height={22} viewBox='0 0 22 22' fill='none'>
+    <Circle cx={6.2} cy={6.6} r={2.4} fill={color} />
+    <Circle cx={11} cy={5.2} r={2.4} fill={color} />
+    <Circle cx={15.8} cy={6.6} r={2.4} fill={color} />
+    <Ellipse
+      cx={11}
+      cy={13.6}
+      rx={5}
+      ry={4}
+      fill={color}
+    />
+  </Svg>
+);
+
+const SectionTitle = ({
+  children,
+  iconTone = 'default',
+}: {
+  children: React.ReactNode;
+  iconTone?: 'accent' | 'default';
+}) => (
+  <View style={styles.sectionTitleContent}>
+    <View style={styles.sectionTitleIcon}>
+      <PawTitleIcon
+        color={
+          iconTone === 'accent'
+            ? activityTheme.colors.accentStrong
+            : activityTheme.colors.textPrimary
+        }
+      />
+    </View>
+    <Text style={styles.sectionTitle}>{children}</Text>
+  </View>
+);
+
 /**
  * 활동 기록 메인 화면.
  * - 오늘 요약, 최근 7일, 이달 기록(일별/활동별) 제공
@@ -136,7 +172,7 @@ function ActivityPage() {
   const contentPadding = activityTheme.spacing.xl;
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
   const chartHeight = Math.round(SCREEN_HEIGHT * 0.2);
-  const chartTopInset = Math.round(chartPadding * 0.6);
+  const chartTopInset = Math.round(chartPadding * 0.85);
   const scrollContentStyle = useMemo(
     () => [
       styles.contentContainer,
@@ -159,40 +195,36 @@ function ActivityPage() {
 
   const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
 
-  const normalizedMonthlyDaily = useMemo(
-    () => {
-      const byDate = new Map<string, MonthlyDailySessionSummary>();
+  const normalizedMonthlyDaily = useMemo(() => {
+    const byDate = new Map<string, MonthlyDailySessionSummary>();
 
-      monthlyActivities.forEach((session) => {
-        if (!session.startTime) return;
-        // 서버가 timezone 없는 UTC 문자열을 줄 수 있어 GPS 전용 파서로 일자를 맞춘다.
-        const dayKey = formatDateKey(parseGpsDateTime(session.startTime));
-        const totalDistanceMeters = Number(session.totalDistance) || 0;
+    monthlyActivities.forEach((session) => {
+      if (!session.startTime) return;
+      // 서버가 timezone 없는 UTC 문자열을 줄 수 있어 GPS 전용 파서로 일자를 맞춘다.
+      const dayKey = formatDateKey(parseGpsDateTime(session.startTime));
+      const totalDistanceMeters = Number(session.totalDistance) || 0;
 
-        const prev = byDate.get(dayKey);
-        if (!prev) {
-          byDate.set(dayKey, {
-            date: dayKey,
-            totalDistanceMeters,
-            sessionCount: 1,
-          });
-          return;
-        }
-
+      const prev = byDate.get(dayKey);
+      if (!prev) {
         byDate.set(dayKey, {
           date: dayKey,
-          totalDistanceMeters: prev.totalDistanceMeters + totalDistanceMeters,
-          sessionCount: prev.sessionCount + 1,
+          totalDistanceMeters,
+          sessionCount: 1,
         });
-      });
+        return;
+      }
 
-      return [...byDate.values()].sort(
-        (a, b) =>
-          parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
-      );
-    },
-    [monthlyActivities]
-  );
+      byDate.set(dayKey, {
+        date: dayKey,
+        totalDistanceMeters: prev.totalDistanceMeters + totalDistanceMeters,
+        sessionCount: prev.sessionCount + 1,
+      });
+    });
+
+    return [...byDate.values()].sort(
+      (a, b) => parseDateKey(b.date).getTime() - parseDateKey(a.date).getTime()
+    );
+  }, [monthlyActivities]);
 
   const weeklyStepStats = useMemo(() => {
     if (normalizedWeeklySteps.length === 0) {
@@ -463,7 +495,7 @@ function ActivityPage() {
     calculateWeeklyChart();
   }, [calculateWeeklyChart]);
 
-  const headerTitle = '러닝';
+  const headerTitle = '러닝 기록';
   const headerSubtitle = useMemo(
     () => `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`,
     [currentMonth]
@@ -529,15 +561,15 @@ function ActivityPage() {
         return '목표 달성! 펫 표정이 바뀐 것 같아요.';
       }
       if (stepsValue <= 0) {
-        return '오늘의 첫 걸음을 시작해볼까요?';
+        return '오늘의 첫 러닝을 시작해봐요!';
       }
       return `오늘은 목표까지 ${Math.max(
         0,
         remainingSteps
-      ).toLocaleString()}걸음 남았어요.`;
+      ).toLocaleString()} step 남았어요.`;
     }
     if (stepsValue <= 0) {
-      return '오늘의 첫 걸음을 시작해볼까요?';
+      return '오늘의 첫 러닝을 시작해봐요!';
     }
     return '오늘도 잘 걷고 있어요.';
   }, [remainingSteps, stepsValue, targetSteps]);
@@ -611,12 +643,10 @@ function ActivityPage() {
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.summaryNotice}>
-          오늘 러닝한 내용에 대해서만 집계돼요! (그냥 걸은 건 말구요!)
-        </Text>
+        <Text style={styles.summaryNotice}>러닝에 대해서만 집계돼요!</Text>
       </View>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>오늘 하루 요약</Text>
+        <SectionTitle iconTone='accent'>오늘은</SectionTitle>
       </View>
       <View style={styles.summaryCard}>
         <View style={styles.summaryMetaRow}>
@@ -635,11 +665,7 @@ function ActivityPage() {
               <Text style={styles.progressValue}>
                 {stepsValue.toLocaleString()}
               </Text>
-              <Text style={styles.progressTarget}>
-                {targetSteps > 0
-                  ? `/ ${targetSteps.toLocaleString()} 걸음`
-                  : '목표 미설정'}
-              </Text>
+              <Text style={styles.progressTarget}>step</Text>
             </View>
           </View>
           <View style={styles.heroMetrics}>
@@ -662,13 +688,13 @@ function ActivityPage() {
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>최근 7일</Text>
+        <SectionTitle>이번 주는</SectionTitle>
       </View>
       <View style={styles.chartCard}>
         {chartData.labels.length === 0 || !hasWeeklySteps ? (
           <View style={styles.chartEmpty}>
             <Text style={styles.chartEmptyText}>
-              이번 주 걸음 기록이 없어요.
+              이번 주 step 기록이 없어요.
             </Text>
           </View>
         ) : (
@@ -678,7 +704,7 @@ function ActivityPage() {
                 <Text style={styles.chartMetaLabel}>주간 평균</Text>
                 <Text style={styles.chartMetaValue}>
                   {weeklyStepStats.average.toLocaleString()}
-                  <Text style={styles.chartMetaUnit}> 걸음</Text>
+                  <Text style={styles.chartMetaUnit}> step</Text>
                 </Text>
               </View>
               <View style={styles.chartMetaDivider} />
@@ -686,7 +712,7 @@ function ActivityPage() {
                 <Text style={styles.chartMetaLabel}>최고</Text>
                 <Text style={styles.chartMetaValue}>
                   {weeklyStepStats.max.toLocaleString()}
-                  <Text style={styles.chartMetaUnit}> 걸음</Text>
+                  <Text style={styles.chartMetaUnit}> step</Text>
                 </Text>
               </View>
             </View>
@@ -715,8 +741,10 @@ function ActivityPage() {
         )}
       </View>
 
-      <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionTitle}>이달 기록</Text>
+      <View style={styles.sectionHeaderTight}>
+        <SectionTitle>이번 달은</SectionTitle>
+      </View>
+      <View style={styles.monthlyControlRow}>
         <View style={styles.segmentedControl}>
           <Pressable
             onPress={() => setListTab('daily')}

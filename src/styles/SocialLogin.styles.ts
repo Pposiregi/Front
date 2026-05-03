@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',
-    fontFamily: Fonts.Pretendard,
+    fontFamily: Fonts.GowunDodum,
     color: '#686868',
   },
   kakaoButton: {
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    fontFamily: Fonts.Pretendard,
+    fontFamily: Fonts.JUA,
     fontWeight: '800',
     color: LOGIN_TEXT_COLOR,
   },

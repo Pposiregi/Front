@@ -446,7 +446,7 @@ export default StyleSheet.create({
   },
   modalMealRowCalories: {
     marginTop: 4,
-    fontSize: Math.max(11, Math.round(SCREEN_WIDTH * 0.028)),
+    fontSize: Math.max(Typography.caption, Math.round(SCREEN_WIDTH * 0.03)),
     color: Colors.textMuted,
   },
   modalMealRowImage: {

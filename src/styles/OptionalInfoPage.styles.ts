@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     fontSize: Typography.bodyLarge,
     fontWeight: 'thin',
     marginBottom: Spacing.sm,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.GowunDodum,
     color: Colors.textSecondary,
   },
   label: {

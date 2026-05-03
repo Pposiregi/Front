@@ -17,8 +17,22 @@ const cardRadius = Math.max(Radius.md + 2, Math.round(deviceWidth * 0.04));
 const chartRadius = Math.max(Radius.sm + 2, Math.round(deviceWidth * 0.03));
 const headerFont = Math.max(Typography.h1, Math.round(deviceWidth * 0.06));
 const subHeaderFont = Math.max(Typography.bodySmall, Math.round(deviceWidth * 0.035));
-const metaFont = Math.max(Typography.caption - 1, Math.round(deviceWidth * 0.028));
+const metaFont = Math.max(Typography.caption, Math.round(deviceWidth * 0.03));
 const metricFont = Math.max(Typography.body, Math.round(deviceWidth * 0.042));
+const statNumberFont = Math.max(
+  Typography.h2,
+  Math.min(24, Math.round(deviceWidth * 0.056))
+);
+const weeklyStatNumberFont = Math.max(
+  Typography.bodyLarge,
+  Math.min(20, Math.round(deviceWidth * 0.048))
+);
+const statUnitFont = Math.max(
+  Typography.caption,
+  Math.min(14, Math.round(deviceWidth * 0.034))
+);
+const sectionTitleFont = Typography.h1;
+const sectionTitleLineHeight = Math.round(sectionTitleFont * 1.16);
 
 const cardShadow = {
   ...Shadows.soft,
@@ -129,12 +143,15 @@ export const styles = StyleSheet.create({
   },
   progressValue: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Typography.h2,
+    fontSize: statNumberFont,
+    lineHeight: Math.round(statNumberFont * 1.16),
+    fontWeight: '800',
     color: Colors.textPrimary,
   },
   progressTarget: {
     fontFamily: Fonts.Pretendard,
-    fontSize: metaFont,
+    fontSize: statUnitFont,
+    lineHeight: Math.round(statUnitFont * 1.25),
     color: Colors.textMuted,
     marginTop: spacing.xxs,
   },
@@ -155,7 +172,9 @@ export const styles = StyleSheet.create({
   },
   heroMetricValue: {
     fontFamily: Fonts.Pretendard,
-    fontSize: metricFont,
+    fontSize: statNumberFont,
+    lineHeight: Math.round(statNumberFont * 1.16),
+    fontWeight: '800',
     color: Colors.textPrimary,
   },
   heroMetricDivider: {
@@ -219,19 +238,39 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.divider,
   },
   sectionHeader: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
+    minHeight: Math.max(34, sectionTitleLineHeight),
+    marginTop: Spacing.xxl,
+    marginBottom: Spacing.md,
+    justifyContent: 'center',
   },
-  sectionHeaderRow: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
+  sectionHeaderTight: {
+    minHeight: Math.max(34, sectionTitleLineHeight),
+    marginTop: Spacing.xxl,
+    marginBottom: Spacing.md,
+    justifyContent: 'center',
+  },
+  monthlyControlRow: {
+    marginTop: 0,
+    marginBottom: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+  },
+  sectionTitleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionTitleIcon: {
+    width: 26,
+    height: 26,
+    marginRight: Spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionTitle: {
     fontFamily: Fonts.JUA,
-    fontSize: 18,
+    fontSize: sectionTitleFont,
+    lineHeight: sectionTitleLineHeight,
     color: Colors.textPrimary,
     marginRight: spacing.md,
   },
@@ -244,14 +283,14 @@ export const styles = StyleSheet.create({
     borderColor: Colors.divider,
   },
   segmentedButton: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xxs,
+    paddingHorizontal: spacing.md,
     borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: Math.max(64, Math.round(deviceWidth * 0.18)),
+    minWidth: Math.max(58, Math.round(deviceWidth * 0.16)),
   },
   segmentedButtonActive: {
     backgroundColor: Colors.surface,
@@ -264,7 +303,8 @@ export const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   segmentedTextActive: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.accentStrong,
   },
   itemContainer: {
@@ -281,7 +321,8 @@ export const styles = StyleSheet.create({
     position: 'relative',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    marginVertical: spacing.sm,
+    marginTop: 0,
+    marginBottom: spacing.sm,
     backgroundColor: Colors.surface,
     borderRadius: cardRadius,
     flexDirection: 'row',
@@ -303,17 +344,18 @@ export const styles = StyleSheet.create({
     paddingRight: spacing.md,
   },
   listTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: 14,
+    fontFamily: Fonts.Pretendard,
+    fontSize: 15,
+    fontWeight: '700',
     color: Colors.textPrimary,
-    lineHeight: 18,
+    lineHeight: 20,
   },
   listSubtitle: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
     marginTop: spacing.xxs,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   listMeta: {
     fontFamily: Fonts.Pretendard,
@@ -413,7 +455,7 @@ export const styles = StyleSheet.create({
   },
   timeText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
     marginRight: spacing.xxl,
   },
@@ -426,7 +468,8 @@ export const styles = StyleSheet.create({
   detailLink: {
     fontSize: 16,
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     marginLeft: spacing.sm,
     lineHeight: 16,
   },
@@ -465,13 +508,17 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.xxs,
   },
   chartMetaValue: {
-    fontFamily: Fonts.JUA,
-    fontSize: 15,
+    fontFamily: Fonts.Pretendard,
+    fontSize: weeklyStatNumberFont,
+    lineHeight: Math.round(weeklyStatNumberFont * 1.18),
+    fontWeight: '800',
     color: Colors.textPrimary,
   },
   chartMetaUnit: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 10,
+    fontSize: statUnitFont,
+    lineHeight: Math.round(statUnitFont * 1.25),
+    fontWeight: '600',
     color: Colors.textMuted,
   },
   lineChartStyle: {
@@ -498,7 +545,7 @@ export const styles = StyleSheet.create({
   },
   emptyCardText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
   chartEmpty: {
@@ -508,7 +555,7 @@ export const styles = StyleSheet.create({
   },
   chartEmptyText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: Typography.caption,
     color: Colors.textMuted,
   },
 });

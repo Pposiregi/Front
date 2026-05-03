@@ -106,7 +106,7 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: Fonts.Pretendard,
+    fontFamily: Fonts.JUA,
     textAlign: 'center',
     color: Colors.textPrimary,
     fontSize: Typography.h1,

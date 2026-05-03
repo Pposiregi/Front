@@ -6,5 +6,5 @@ export const Typography = {
   bodyLarge: 18, // 강조하고픈 본문
   body: 16, // 본문
   bodySmall: 14,
-  caption: 12, // 설명
+  caption: 13, // 설명
 };

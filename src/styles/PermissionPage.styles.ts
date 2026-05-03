@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     fontWeight: 'thin',
     marginBottom: Spacing.lg,
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.GowunDodum,
     color: Colors.textPrimary,
   },
   checkboxContainer: {

@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     fontSize: Typography.bodyLarge,
     marginTop: Spacing.xl,
     color: Colors.textSecondary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.GowunDodum,
   },
   petContainer: {
     flexDirection: 'row',

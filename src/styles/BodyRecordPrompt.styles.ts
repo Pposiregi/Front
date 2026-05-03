@@ -72,7 +72,8 @@ export default StyleSheet.create({
   },
   fieldLabel: {
     fontFamily: Fonts.JUA,
-    fontSize: 15,
+    fontSize: 16,
+    lineHeight: 20,
     color: '#111827',
   },
   fieldRight: {
@@ -88,7 +89,9 @@ export default StyleSheet.create({
     minWidth: 64,
     textAlign: 'right',
     fontFamily: Fonts.Pretendard,
-    fontSize: 20,
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
     color: '#6B7280',
     paddingVertical: Platform.select({ ios: 4, android: 0 }),
     paddingHorizontal: 0,
@@ -100,14 +103,17 @@ export default StyleSheet.create({
   },
   fieldNumber: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 20,
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
     color: '#111827',
   },
   fieldUnit: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: 18,
     color: '#6B7280',
-    marginLeft: 6,
+    marginLeft: 5,
   },
   progressTrack: {
     width: '100%',
@@ -133,7 +139,8 @@ export default StyleSheet.create({
     marginTop: 6,
     alignSelf: 'flex-end',
     fontFamily: Fonts.Pretendard,
-    fontSize: 10,
+    fontSize: 13,
+    lineHeight: 17,
     color: '#9CA3AF',
   },
   infoRow: {

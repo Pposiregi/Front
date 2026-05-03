@@ -42,7 +42,7 @@ export default StyleSheet.create({
   text: {
     fontFamily: Fonts.Pretendard,
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'right',
   },
   readyCard: {

@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
   },
   mapRelocatingText: {
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textPrimary,
     fontFamily: Fonts.Pretendard,
   },
@@ -92,7 +92,7 @@ export const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.chipText,
   },
   sectionTitle: {
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
   },
   specSubValue: {
     marginTop: 2,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textMuted,
     fontFamily: Fonts.Pretendard,
   },
