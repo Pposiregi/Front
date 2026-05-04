@@ -23,6 +23,9 @@ export const Colors = {
   info: '#FFB86B',
   infoSoft: '#FFF6EA',
   infoStrong: '#FFA94D',
+  mealFocus: '#FFF2E2',
+  mealFocusSoft: '#FFF8F0',
+  mealFocusText: '#D97706',
 
   dataWeight: '#2563EB',
   dataBodyFat: '#7C3AED',

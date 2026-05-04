@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Pressable,
@@ -49,6 +49,27 @@ const formatDailyLabel = (dateKey: string) => {
   const weekday = WEEKDAY_LABELS[parsed.getDay()] ?? '';
   return `${month}/${day} (${weekday})`;
 };
+
+const getWeekDateKeys = (baseDate: Date) => {
+  const startOfWeek = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate() - baseDate.getDay()
+  );
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + index);
+    return formatDateKey(date);
+  });
+};
+
+const getInitialActivityMonth = () =>
+  new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+const isSameMonth = (left: Date, right: Date) =>
+  left.getFullYear() === right.getFullYear() &&
+  left.getMonth() === right.getMonth();
 
 type MonthlyDailySessionSummary = {
   date: string;
@@ -141,13 +162,10 @@ const SectionTitle = ({
  * - 오늘 요약, 최근 7일, 이달 기록(일별/활동별) 제공
  */
 function ActivityPage() {
-  const isFocused = useIsFocused();
   const { contentBottomPadding } = useSafeBottomSpacing();
   const [loading, setLoading] = useState<boolean>(true);
   const today = useMemo(() => formatDateKey(new Date()), []);
-  const [currentMonth, setCurrentMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-  );
+  const [currentMonth, setCurrentMonth] = useState(getInitialActivityMonth);
   const [monthlyActivities, setMonthlyActivities] = useState<GPS_SESSION[]>([]);
   const [dailyActivity, setDailyActivity] = useState<DailyActivity | null>(
     null
@@ -168,6 +186,14 @@ function ActivityPage() {
   const chartWidth = SCREEN_WIDTH - contentPadding * 2 - chartPadding * 2;
   const chartHeight = Math.round(SCREEN_HEIGHT * 0.2);
   const chartTopInset = Math.round(chartPadding * 0.85);
+  const selectedMonthKey = useMemo(
+    () =>
+      `${currentMonth.getFullYear()}-${String(
+        currentMonth.getMonth() + 1
+      ).padStart(2, '0')}`,
+    [currentMonth]
+  );
+  const currentWeekDateKeys = useMemo(() => getWeekDateKeys(new Date()), []);
   const scrollContentStyle = useMemo(
     () => [
       styles.contentContainer,
@@ -178,14 +204,22 @@ function ActivityPage() {
   );
 
   const normalizedWeeklySteps = useMemo(
-    () =>
-      weeklySteps
-        .map((item) => ({
-          date: item.date ?? '',
-          step: Number(item.step) || 0,
-        }))
-        .filter((item) => item.date),
-    [weeklySteps]
+    () => {
+      const stepsByDate = new Map<string, number>();
+
+      weeklySteps.forEach((item) => {
+        if (!item.date) return;
+        const dateKey = item.date.slice(0, 10);
+        const prev = stepsByDate.get(dateKey) ?? 0;
+        stepsByDate.set(dateKey, prev + (Number(item.step) || 0));
+      });
+
+      return currentWeekDateKeys.map((date) => ({
+        date,
+        step: stepsByDate.get(date) ?? 0,
+      }));
+    },
+    [currentWeekDateKeys, weeklySteps]
   );
 
   const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
@@ -279,6 +313,8 @@ function ActivityPage() {
    */
   const fetchMonthlySessions = useCallback(async (date: Date) => {
     try {
+      setMonthlyActivities([]);
+      setHiddenSessionIds(new Set());
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const data = await getMonthlySessions(year, month);
@@ -315,9 +351,13 @@ function ActivityPage() {
    * 월 이동 핸들러.
    * - 미래 월로는 이동하지 않는다.
    */
-  const handleChangeMonth = (offset: number) => {
-    setCurrentMonth((prev) => {
-      const next = new Date(prev.getFullYear(), prev.getMonth() + offset, 1);
+  const handleChangeMonth = useCallback(
+    (offset: number) => {
+      const next = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + offset,
+        1
+      );
 
       // 현재 월이거나 미래 월일 경우 (오른쪽 화살표 사용 X)
       const todayDate = new Date();
@@ -327,11 +367,14 @@ function ActivityPage() {
           (next.getFullYear() === todayDate.getFullYear() &&
             next.getMonth() > todayDate.getMonth()))
       ) {
-        return prev;
+        return;
       }
-      return next;
-    });
-  };
+
+      setCurrentMonth(next);
+      fetchMonthlyBundle(next);
+    },
+    [currentMonth, fetchMonthlyBundle]
+  );
 
   /**
    * 오늘의 활동 요약
@@ -471,25 +514,34 @@ function ActivityPage() {
     });
   }, [normalizedWeeklySteps, toRgba]);
 
-  useEffect(() => {
-    if (!isFocused) return;
-    fetchMonthlyBundle(currentMonth);
-  }, [currentMonth, fetchMonthlyBundle, isFocused]);
+  useFocusEffect(
+    useCallback(() => {
+      const initialMonth = getInitialActivityMonth();
 
-  useEffect(() => {
-    if (!isFocused) return;
-    fetchWeeklySteps();
-    fetchDailySummary();
-    fetchUserProfile();
-  }, [fetchDailySummary, fetchUserProfile, fetchWeeklySteps, isFocused]);
+      setCurrentMonth((prev) =>
+        isSameMonth(prev, initialMonth) ? prev : initialMonth
+      );
+      setListTab('daily');
+      setHiddenSessionIds(new Set());
+      fetchMonthlyBundle(initialMonth);
+      fetchWeeklySteps();
+      fetchDailySummary();
+      fetchUserProfile();
+    }, [
+      fetchDailySummary,
+      fetchMonthlyBundle,
+      fetchUserProfile,
+      fetchWeeklySteps,
+    ])
+  );
 
   useEffect(() => {
     calculateWeeklyChart();
   }, [calculateWeeklyChart]);
 
-  const headerTitle = '러닝 기록';
-  const headerSubtitle = useMemo(
-    () => `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`,
+  const headerTitle = '통계';
+  const monthlySectionTitle = useMemo(
+    () => `${currentMonth.getMonth() + 1}월의 러닝들`,
     [currentMonth]
   );
 
@@ -602,43 +654,11 @@ function ActivityPage() {
       }
     >
       <View style={styles.topSection}>
-        <View style={styles.monthHeaderContainer}>
-          <TouchableOpacity
-            onPress={() => handleChangeMonth(-1)}
-            style={styles.arrowButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Text style={styles.arrowText}>{'<'}</Text>
-          </TouchableOpacity>
-
-          <View style={styles.headerTextWrapper}>
-            <Text style={styles.header}>{headerTitle}</Text>
-            <Text style={styles.headerSub}>{headerSubtitle}</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => handleChangeMonth(1)}
-            style={[
-              styles.arrowButton,
-              isNextDisabled && styles.arrowButtonDisabled,
-            ]}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            disabled={isNextDisabled}
-          >
-            <Text
-              style={[
-                styles.arrowText,
-                isNextDisabled && styles.arrowTextDisabled,
-              ]}
-            >
-              {'>'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.summaryNotice}></Text>
+        <Text style={styles.header}>{headerTitle}</Text>
+        <Text style={styles.summaryNotice}>우리가 얼마나 걷고 달렸을까요?</Text>
       </View>
       <View style={styles.sectionHeader}>
-        <SectionTitle iconTone='accent'>오늘의 러닝 기록</SectionTitle>
+        <SectionTitle iconTone='accent'>오늘의 러닝</SectionTitle>
       </View>
       <View style={styles.summaryCard}>
         <ActivityCardSurface />
@@ -681,7 +701,7 @@ function ActivityPage() {
       </View>
 
       <View style={styles.sectionHeader}>
-        <SectionTitle>이번 주는</SectionTitle>
+        <SectionTitle>이번 주 걸음 수</SectionTitle>
       </View>
       <View style={styles.chartCard}>
         <ActivityCardSurface />
@@ -744,8 +764,10 @@ function ActivityPage() {
         )}
       </View>
 
-      <View style={styles.sectionHeaderRow}>
-        <SectionTitle>이번 달은</SectionTitle>
+      <View style={styles.monthlySectionHeader}>
+        <SectionTitle>{monthlySectionTitle}</SectionTitle>
+      </View>
+      <View style={styles.monthlyControlsRow}>
         <View style={styles.segmentedControl}>
           <Pressable
             onPress={() => setListTab('daily')}
@@ -780,6 +802,37 @@ function ActivityPage() {
             </Text>
           </Pressable>
         </View>
+        <View style={styles.monthSwitcher}>
+          <TouchableOpacity
+            onPress={() => handleChangeMonth(-1)}
+            style={styles.monthSwitchButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole='button'
+            accessibilityLabel='이전 달 러닝 보기'
+          >
+            <Text style={styles.monthSwitchText}>{'<'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleChangeMonth(1)}
+            style={[
+              styles.monthSwitchButton,
+              isNextDisabled && styles.arrowButtonDisabled,
+            ]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            disabled={isNextDisabled}
+            accessibilityRole='button'
+            accessibilityLabel='다음 달 러닝 보기'
+          >
+            <Text
+              style={[
+                styles.monthSwitchText,
+                isNextDisabled && styles.arrowTextDisabled,
+              ]}
+            >
+              {'>'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {/* 러닝별에서 숨긴 항목이 있을 때만 전체 기록 복구 액션을 보여준다. */}
       {listTab === 'sessions' && hasHiddenSessions ? (
@@ -803,7 +856,7 @@ function ActivityPage() {
           style={styles.loadingIndicator}
         />
       ) : listTab === 'daily' ? (
-        <View key='monthly-daily-list'>
+        <View key={`${selectedMonthKey}-monthly-daily-list`}>
           {showEmptyDaily ? (
             <View style={styles.emptyCard}>
               <ActivityCardSurface />
@@ -853,7 +906,7 @@ function ActivityPage() {
           )}
         </View>
       ) : (
-        <View key='monthly-session-list'>
+        <View key={`${selectedMonthKey}-monthly-session-list`}>
           {showEmptySessions ? (
             <View style={styles.emptyCard}>
               <ActivityCardSurface />

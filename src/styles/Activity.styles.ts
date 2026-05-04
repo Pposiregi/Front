@@ -82,16 +82,7 @@ export const styles = StyleSheet.create({
   },
   topSection: {
     marginBottom: spacing.lg,
-  },
-  monthHeaderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  headerTextWrapper: {
-    alignItems: 'center',
-    flex: 1,
   },
   header: {
     fontFamily: Fonts.Pretendard,
@@ -272,13 +263,41 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     justifyContent: 'center',
   },
-  sectionHeaderRow: {
+  monthlySectionHeader: {
     minHeight: Math.max(34, sectionTitleLineHeight),
     marginTop: Spacing.xxl,
+    marginBottom: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  monthlyControlsRow: {
     marginBottom: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  monthSwitcher: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  monthSwitchButton: {
+    width: 34,
+    height: 34,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: runningColors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: runningColors.border,
+  },
+  monthSwitchText: {
+    fontSize: Typography.bodyLarge,
+    color: runningColors.textPrimary,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
+    lineHeight: 22,
   },
   sectionTitleContent: {
     flexDirection: 'row',

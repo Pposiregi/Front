@@ -104,6 +104,7 @@ const createTabBarIcon =
  */
 const getTabScreenOptions = (routeName: TabIconKey) => ({
   headerShown: false,
+  popToTopOnBlur: true,
   tabBarItemStyle: styles.tabBarItem,
   tabBarIcon: createTabBarIcon(routeName),
   tabBarShowLabel: false,

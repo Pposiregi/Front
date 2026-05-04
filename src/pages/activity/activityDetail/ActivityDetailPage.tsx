@@ -280,7 +280,7 @@ const ActivityDetailPage = () => {
 
   const chipStepOrCalorie =
     stepCountValue > 0
-      ? `${stepCountValue.toLocaleString()} 걸음`
+      ? `${stepCountValue.toLocaleString()} step`
       : `${burnCaloriesValue.toLocaleString()} kcal`;
 
   return (
@@ -353,7 +353,7 @@ const ActivityDetailPage = () => {
             <Text style={styles.specValue}>{formattedDuration}</Text>
           </View>
           <View style={styles.specRow}>
-            <Text style={styles.specLabel}>평균 페이스</Text>
+            <Text style={styles.specLabel}>페이스</Text>
             <View style={styles.specValueGroup}>
               <Text style={styles.specValue}>
                 {formatPaceFromKmh(avgSpeedKmhValue)}
@@ -366,13 +366,13 @@ const ActivityDetailPage = () => {
             </View>
           </View>
           <View style={styles.specRow}>
-            <Text style={styles.specLabel}>걸음수</Text>
+            <Text style={styles.specLabel}>걸음 수</Text>
             <Text style={styles.specValue}>
-              {stepCountValue.toLocaleString()} 걸음
+              {stepCountValue.toLocaleString()} step
             </Text>
           </View>
           <View style={[styles.specRow, styles.specRowLast]}>
-            <Text style={styles.specLabel}>소모 칼로리</Text>
+            <Text style={styles.specLabel}>소비 열량</Text>
             <Text style={styles.specValue}>
               {burnCaloriesValue.toLocaleString()} kcal
             </Text>

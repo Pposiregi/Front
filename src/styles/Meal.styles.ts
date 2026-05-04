@@ -179,20 +179,20 @@ export default StyleSheet.create({
     color: Colors.textMuted,
   },
   selectedDayBackground: {
-    borderColor: Colors.info,
-    borderWidth: 2,
-    backgroundColor: Colors.infoSoft,
+    borderColor: 'transparent',
+    backgroundColor: Colors.mealFocus,
   },
   todayDayOutline: {
-    borderColor: Colors.accentStrong,
-    borderWidth: 2,
-    backgroundColor: Colors.accentSoft,
+    borderColor: 'transparent',
+    backgroundColor: Colors.mealFocusSoft,
   },
   selectedDayNumber: {
-    color: Colors.info,
+    color: Colors.mealFocusText,
+    fontWeight: '700',
   },
   todayDayNumber: {
-    color: Colors.accentStrong,
+    color: Colors.mealFocusText,
+    fontWeight: '700',
   },
   dayPreviewPlaceholder: {
     width: STACK_ITEM_SIZE,
@@ -374,8 +374,8 @@ export default StyleSheet.create({
     ...baseShadow,
   },
   modalMealRowEditing: {
-    borderColor: Colors.infoStrong,
-    backgroundColor: Colors.infoSoft,
+    borderColor: 'transparent',
+    backgroundColor: Colors.mealFocusSoft,
   },
   modalMealControls: {
     flexDirection: 'row',
