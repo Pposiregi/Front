@@ -337,7 +337,7 @@ export const styles = StyleSheet.create({
     minWidth: layoutScale(62, 58, 68),
   },
   segmentedButtonActive: {
-    backgroundColor: runningColors.surface,
+    backgroundColor: runningColors.orange,
     borderColor: runningColors.orange,
   },
   segmentedText: {
@@ -348,7 +348,7 @@ export const styles = StyleSheet.create({
   segmentedTextActive: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    color: runningColors.orange,
+    color: runningColors.white,
   },
   itemContainer: {
     padding: spacing.lg,

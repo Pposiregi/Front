@@ -14,7 +14,7 @@ import {
 } from './theme';
 
 const CONTENT_HORIZONTAL_PADDING = screenPadding;
-const CALENDAR_HORIZONTAL_PADDING = layoutScale(10, Spacing.sm, Spacing.md);
+const CALENDAR_HORIZONTAL_PADDING = layoutScale(4, 2, Spacing.xs);
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
 const CALENDAR_OUTER_GUTTER = layoutScale(6, 4, 8);
 const CALENDAR_CONTAINER_EXPAND = Math.max(
@@ -23,24 +23,26 @@ const CALENDAR_CONTAINER_EXPAND = Math.max(
 );
 const CALENDAR_AVAILABLE_WIDTH =
   SCREEN_WIDTH - CALENDAR_OUTER_GUTTER * 2 - CALENDAR_HORIZONTAL_PADDING * 2;
-const DAY_CELL_GAP_RATIO = 0.045;
+const DAY_CELL_GAP_RATIO = 0.03;
 const GRID_SIZE = Math.min(
-  52,
+  46,
   Math.floor(CALENDAR_AVAILABLE_WIDTH / (7 + DAY_CELL_GAP_RATIO * 14))
 ); // 요일 7개 기준, gap 비율을 유지해 폭 맞추기
 const DAY_CELL_GAP = Math.max(1, Math.round(GRID_SIZE * DAY_CELL_GAP_RATIO));
-const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
-const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
-const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
-const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
-const CONTENT_TOP_PADDING = layoutScale(14, Spacing.md, Spacing.lg);
+const GRID_PADDING_V = Math.max(2, Math.round(GRID_SIZE * 0.05));
+const GRID_PADDING_H = Math.max(2, Math.round(GRID_SIZE * 0.06));
+const GRID_GAP = Math.max(20, Math.round(GRID_SIZE * 0.44));
+const CONTENT_TOP_PADDING = screenPadding;
 const CONTENT_BOTTOM_PADDING = bottomContentPadding;
-const HEADER_BUTTON_SIZE = layoutScale(38, 36, 42);
+const HEADER_BUTTON_SIZE = layoutScale(34, 32, 38);
 const HEADER_BUTTON_RADIUS = Math.round(HEADER_BUTTON_SIZE / 2);
-const HEADER_SECTION_SPACING = layoutScale(24, Spacing.xxl, 28);
+const TOP_SECTION_SPACING = Spacing.xxl;
+const HEADER_SECTION_SPACING = Spacing.md;
+const MONTH_TITLE_FONT = Typography.h1;
+const MONTH_TITLE_LINE_HEIGHT = Math.round(MONTH_TITLE_FONT * 1.16);
 const CALENDAR_RADIUS = cardRadius;
-const CALENDAR_VERTICAL_PADDING = layoutScale(14, Spacing.md, Spacing.lg);
-const MONTH_ROW_MARGIN_BOTTOM = layoutScale(14, Spacing.md, Spacing.lg);
+const CALENDAR_VERTICAL_PADDING = layoutScale(4, Spacing.xs, Spacing.sm);
+const MONTH_ROW_MARGIN_BOTTOM = layoutScale(2, 0, Spacing.xs);
 const MODAL_CARD_SIZE = layoutScale(104, 90, 120);
 const MODAL_CARD_RADIUS = Math.round(MODAL_CARD_SIZE * 0.22);
 const MODAL_BUTTON_SIZE = layoutScale(32, 28, 36);
@@ -63,10 +65,12 @@ const MODAL_LIST_TOP_MARGIN = layoutScale(4, Spacing.xs, Spacing.sm);
 const STACK_IMAGE_BORDER = Colors.surface;
 const baseShadow = Shadows.surfaceRaised;
 
-const STACK_HEIGHT = Math.round(GRID_SIZE * 0.7);
-const STACK_ITEM_SIZE = Math.round(GRID_SIZE * 0.55);
+const DAY_CELL_HEIGHT = Math.round(GRID_SIZE * 1.25);
+const STACK_HEIGHT = Math.round(GRID_SIZE * 0.75);
+const STACK_ITEM_SIZE = Math.round(GRID_SIZE * 0.64);
 const STACK_ITEM_OFFSET = (STACK_HEIGHT - STACK_ITEM_SIZE) / 2;
-const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.3);
+const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.24);
+const ADD_PLACEHOLDER_SIZE = Math.round(STACK_ITEM_SIZE * 0.82);
 
 export default StyleSheet.create({
   container: {
@@ -75,14 +79,51 @@ export default StyleSheet.create({
   },
   content: {
     flexGrow: 1,
+    justifyContent: 'flex-start',
     paddingHorizontal: CONTENT_HORIZONTAL_PADDING,
     paddingTop: CONTENT_TOP_PADDING,
     paddingBottom: CONTENT_BOTTOM_PADDING,
   },
-  header: {
+  topSection: {
+    marginBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  pageTitle: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.screenTitle,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  pageSubtitle: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    color: Colors.textMuted,
+    marginTop: Spacing.xxs,
+  },
+  monthSectionHeader: {
+    minHeight: Math.max(34, MONTH_TITLE_LINE_HEIGHT),
+    marginTop: TOP_SECTION_SPACING,
+    marginBottom: HEADER_SECTION_SPACING,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  monthTitleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monthTitleIcon: {
+    width: 26,
+    height: 26,
+    marginRight: Spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
   headerButton: {
     width: HEADER_BUTTON_SIZE,
@@ -90,19 +131,21 @@ export default StyleSheet.create({
     borderRadius: HEADER_BUTTON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.divider,
   },
   headerButtonLabel: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Typography.sectionTitle,
+    fontSize: Typography.bodyLarge,
     fontWeight: '700',
     color: Colors.textPrimary,
-    textShadowColor: Colors.shadowSoft,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    lineHeight: 22,
   },
   headerTitle: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Typography.screenTitle,
+    fontSize: MONTH_TITLE_FONT,
+    lineHeight: MONTH_TITLE_LINE_HEIGHT,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
@@ -110,12 +153,11 @@ export default StyleSheet.create({
     marginBottom: HEADER_SECTION_SPACING,
   },
   calendarContainer: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderRadius: CALENDAR_RADIUS,
     paddingVertical: CALENDAR_VERTICAL_PADDING,
     paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
     marginHorizontal: -CALENDAR_CONTAINER_EXPAND,
-    ...baseShadow,
   },
   calendarMonthRow: {
     flexDirection: 'row',
@@ -140,8 +182,9 @@ export default StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.25)),
-    color: Colors.textMuted,
+    color: Colors.textPrimary,
     fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
   weekRow: {
     flexDirection: 'row',
@@ -155,18 +198,16 @@ export default StyleSheet.create({
   },
   dayEmptySlot: {
     width: GRID_SIZE,
-    height: GRID_SIZE,
+    height: DAY_CELL_HEIGHT,
   },
   dayInner: {
     width: GRID_SIZE,
-    borderRadius: GRID_RADIUS,
+    height: DAY_CELL_HEIGHT,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: GRID_PADDING_V,
     paddingHorizontal: GRID_PADDING_H,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-    backgroundColor: Colors.surface,
+    backgroundColor: 'transparent',
     marginHorizontal: DAY_CELL_GAP,
     marginVertical: DAY_CELL_GAP,
   },
@@ -179,41 +220,90 @@ export default StyleSheet.create({
     color: Colors.textMuted,
   },
   selectedDayBackground: {
-    borderColor: 'transparent',
-    backgroundColor: Colors.mealFocus,
+    backgroundColor: 'transparent',
   },
   todayDayOutline: {
-    borderColor: 'transparent',
-    backgroundColor: Colors.mealFocusSoft,
+    backgroundColor: 'transparent',
   },
   selectedDayNumber: {
-    color: Colors.mealFocusText,
+    color: Colors.textPrimary,
     fontWeight: '700',
   },
   todayDayNumber: {
-    color: Colors.mealFocusText,
+    minWidth: layoutScale(34, 32, 38),
+    overflow: 'hidden',
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    textAlign: 'center',
+    backgroundColor: Colors.accentStrong,
+    color: Colors.surface,
+    fontFamily: Fonts.JUA,
     fontWeight: '700',
   },
+  futureDayInner: {
+    opacity: 0.68,
+  },
+  futureDayNumber: {
+    color: Colors.textSecondary,
+  },
   dayPreviewPlaceholder: {
-    width: STACK_ITEM_SIZE,
-    height: STACK_ITEM_SIZE,
-    borderRadius: STACK_ITEM_RADIUS,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-    backgroundColor: Colors.background,
+    width: ADD_PLACEHOLDER_SIZE,
+    height: ADD_PLACEHOLDER_SIZE,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.accentStrong,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   dayPreviewPlaceholderText: {
-    fontSize: Typography.bodySmall,
-    color: Colors.divider,
+    fontSize: Typography.bodyLarge,
+    fontWeight: '800',
+    color: Colors.surface,
+  },
+  futureDayPreviewSpace: {
+    width: STACK_ITEM_SIZE,
+    height: STACK_ITEM_SIZE,
+    backgroundColor: 'transparent',
+  },
+  mealStatsBar: {
+    position: 'absolute',
+    left: Spacing.md,
+    right: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: layoutScale(16, Spacing.md, Spacing.lg),
+    paddingVertical: layoutScale(10, Spacing.sm, Spacing.md),
+    borderRadius: Radius.xl,
+    backgroundColor: Colors.accentStrong,
+  },
+  mealStatsItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  mealStatsItemWide: {
+    flex: 1.45,
+    alignItems: 'center',
+  },
+  mealStatsLabel: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    fontWeight: '700',
+    color: Colors.surfaceOverlaySolid,
+  },
+  mealStatsValue: {
+    marginTop: layoutScale(3, 2, 4),
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.sectionTitle,
+    fontWeight: '800',
+    color: Colors.surface,
   },
   sectionSpacing: {
-    marginBottom: HEADER_SECTION_SPACING,
+    marginBottom: Spacing.xs,
   },
   calendarHelperText: {
-    marginTop: HEADER_SECTION_SPACING,
+    marginTop: Spacing.xs,
     textAlign: 'center',
     color: Colors.textSecondary,
     fontSize: Typography.bodySmall,
@@ -253,7 +343,7 @@ export default StyleSheet.create({
   },
   modalHeaderSection: {
     alignItems: 'center',
-    marginBottom: MODAL_HEADER_MARGIN_BOTTOM,
+    marginBottom: Spacing.md,
   },
   modalTitle: {
     fontFamily: Fonts.Pretendard,
@@ -267,16 +357,14 @@ export default StyleSheet.create({
     color: Colors.textMuted,
   },
   modalFutureNoticeBox: {
-    marginTop: Spacing.sm,
     width: '100%',
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: layoutScale(10, 10, 12),
-    paddingHorizontal: screenPadding,
+    alignItems: 'flex-start',
+    paddingVertical: layoutScale(12, 12, 14),
+    paddingHorizontal: Spacing.lg,
     borderRadius: MODAL_NOTICE_RADIUS,
-    borderWidth: 1,
-    borderColor: Colors.accentStrong,
-    backgroundColor: Colors.accentSoft,
+    backgroundColor: Colors.mealFocusSoft,
+    marginBottom: MODAL_HEADER_MARGIN_BOTTOM,
   },
   modalFutureNoticeIconWrap: {
     width: MODAL_NOTICE_ICON_SIZE,
@@ -284,12 +372,12 @@ export default StyleSheet.create({
     borderRadius: MODAL_NOTICE_ICON_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.accentStrong,
+    backgroundColor: Colors.mealFocus,
     marginRight: layoutScale(10, Spacing.md - 2, Spacing.lg),
   },
   modalFutureNoticeIcon: {
     fontFamily: Fonts.Pretendard,
-    color: Colors.surface,
+    color: Colors.mealFocusText,
     fontSize: Typography.caption,
     lineHeight: 16,
   },
@@ -300,7 +388,7 @@ export default StyleSheet.create({
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
     fontSize: Typography.bodySmall,
-    color: Colors.accentStrong,
+    color: Colors.mealFocusText,
   },
   modalFutureNoticeText: {
     marginTop: 1,
@@ -378,9 +466,10 @@ export default StyleSheet.create({
     backgroundColor: Colors.mealFocusSoft,
   },
   modalMealControls: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    marginRight: layoutScale(8, 8, 10),
+    justifyContent: 'center',
+    marginLeft: layoutScale(8, 8, 10),
   },
   modalMealRemoveButton: {
     width: MODAL_BUTTON_SIZE,
@@ -390,7 +479,7 @@ export default StyleSheet.create({
     borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: layoutScale(8, 8, 10),
+    marginTop: layoutScale(5, 5, 6),
   },
   modalMealRemoveButtonDisabled: {
     opacity: 0.5,
@@ -407,15 +496,16 @@ export default StyleSheet.create({
   },
   modalMealRowContent: {
     flex: 1,
+    justifyContent: 'center',
   },
   modalMealRowName: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    fontSize: Typography.bodySmall,
+    fontSize: Typography.body,
     color: Colors.textPrimary,
   },
   modalMealRowCalories: {
-    marginTop: 4,
+    marginTop: 3,
     fontSize: Typography.caption,
     color: Colors.textMuted,
   },
@@ -423,7 +513,11 @@ export default StyleSheet.create({
     width: MODAL_ROW_IMAGE,
     height: MODAL_ROW_IMAGE,
     borderRadius: Math.round(MODAL_ROW_IMAGE * 0.35),
-    marginRight: layoutScale(8, 8, 10),
+  },
+  modalMealRightContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: layoutScale(12, 12, 14),
   },
   modalMealEditButton: {
     width: MODAL_BUTTON_SIZE,
@@ -433,7 +527,7 @@ export default StyleSheet.create({
     borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: layoutScale(6, 6, 8),
+    marginLeft: 0,
     backgroundColor: Colors.surface,
   },
   modalMealEditIcon: {
@@ -445,14 +539,6 @@ export default StyleSheet.create({
     fontWeight: '700',
     fontSize: Typography.caption,
     color: Colors.infoStrong,
-  },
-  modalMealDragHandle: {
-    width: 22,
-    alignItems: 'center',
-  },
-  modalMealDragLabel: {
-    fontSize: Typography.bodyLarge,
-    color: Colors.textMuted,
   },
   imagePreviewContainer: {
     flex: 1,
@@ -606,7 +692,12 @@ export default StyleSheet.create({
     ...baseShadow,
   },
   modalPrimaryButtonDisabled: {
-    opacity: 0.6,
+    backgroundColor: Colors.divider,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  modalPrimaryButtonLabelDisabled: {
+    color: Colors.textMuted,
   },
   modalPrimaryButtonLabel: {
     fontFamily: Fonts.Pretendard,
@@ -628,15 +719,28 @@ export default StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden', // 셀 프레임 바깥으로 이미지가 넘치지 않도록 제한
+    borderRadius: STACK_ITEM_RADIUS,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  imageStackThumb: {
+    backgroundColor: 'transparent',
+  },
+  emptyStackThumb: {
+    backgroundColor: 'transparent',
+  },
+  futureStackThumb: {
+    backgroundColor: 'transparent',
   },
   stackImage: {
     position: 'absolute',
     width: STACK_ITEM_SIZE,
     height: STACK_ITEM_SIZE,
     borderRadius: STACK_ITEM_RADIUS,
-    borderWidth: 2, // 겹침 경계 또렷하게
+    borderWidth: 0,
     borderColor: STACK_IMAGE_BORDER,
     top: STACK_ITEM_OFFSET,
+    left: '50%',
+    marginLeft: -STACK_ITEM_SIZE / 2,
   },
 });
