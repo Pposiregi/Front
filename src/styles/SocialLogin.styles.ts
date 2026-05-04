@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Typography } from './theme';
 
 const LOGIN_APP_ICON_SIZE = Math.min(SCREEN_WIDTH * 0.32, 128);
 
@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   mainText: {
-    fontSize: 24,
+    fontSize: Typography.screenTitle,
     lineHeight: 32,
     textAlign: 'center',
     fontFamily: Fonts.JUA,
@@ -33,10 +33,10 @@ export const styles = StyleSheet.create({
   },
   subText: {
     marginTop: 10,
-    fontSize: 15,
+    fontSize: Typography.label,
     lineHeight: 22,
     textAlign: 'center',
-    fontFamily: Fonts.GowunDodum,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textSecondary,
   },
   kakaoButton: {
@@ -75,8 +75,9 @@ export const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
-    fontWeight: '800',
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
+    fontSize: Typography.action,
     color: Colors.textPrimary,
   },
   loadingContainer: {

@@ -135,9 +135,10 @@ export default StyleSheet.create({
     marginBottom: sectionBottomSpacing,
   },
   sectionTitle: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: sectionTitleFont,
     lineHeight: sectionTitleLineHeight,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   recordButton: {
@@ -152,9 +153,9 @@ export default StyleSheet.create({
     marginRight: Math.max(Spacing.xs, Math.round(baseUnit * 0.45)),
   },
   recordText: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: bodyFont,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   metricCard: {

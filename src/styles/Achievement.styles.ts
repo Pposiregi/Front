@@ -26,8 +26,9 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.textPrimary,
   },
   tabText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textMuted,
   },
   activeTabText: {
@@ -59,12 +60,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitleText: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 5,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
   modalKcalText: {
-    fontSize: Typography.bodyLarge,
+    fontSize: Typography.body,
     color: Colors.textSecondary,
     fontFamily: Fonts.Pretendard,
   },

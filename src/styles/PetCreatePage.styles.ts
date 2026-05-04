@@ -13,16 +13,17 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     fontWeight: '800',
     color: Colors.textPrimary,
     fontFamily: Fonts.JUA,
   },
   subtitle: {
-    fontSize: Typography.bodyLarge,
+    fontSize: Typography.body,
     marginTop: Spacing.xl,
     color: Colors.textSecondary,
-    fontFamily: Fonts.GowunDodum,
+    fontFamily: Fonts.Pretendard,
+    lineHeight: 23,
   },
   petContainer: {
     flexDirection: 'row',
@@ -78,6 +79,7 @@ export const styles = StyleSheet.create({
   buttonText: {
     color: Colors.surface,
     fontWeight: '700',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
   },
 });

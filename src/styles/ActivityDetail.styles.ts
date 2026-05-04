@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Typography } from './theme';
 
 const colors = {
   background: Colors.background,
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: Typography.action,
     color: colors.textSecondary,
     fontFamily: Fonts.Pretendard,
   },
@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
   },
   mapRelocatingText: {
     marginLeft: 8,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: colors.textPrimary,
     fontFamily: Fonts.Pretendard,
   },
@@ -92,13 +92,14 @@ export const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: colors.chipText,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     marginBottom: 12,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: colors.textPrimary,
   },
   specCard: {
@@ -117,12 +118,12 @@ export const styles = StyleSheet.create({
     borderBottomColor: colors.divider,
   },
   specLabel: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: colors.textSecondary,
     fontFamily: Fonts.Pretendard,
   },
   specValue: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: colors.textPrimary,
     fontFamily: Fonts.Pretendard,
   },
@@ -131,7 +132,7 @@ export const styles = StyleSheet.create({
   },
   specSubValue: {
     marginTop: 2,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: colors.textMuted,
     fontFamily: Fonts.Pretendard,
   },
@@ -143,7 +144,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: Typography.label,
     color: colors.textSecondary,
     fontFamily: Fonts.Pretendard,
   },

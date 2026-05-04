@@ -11,19 +11,20 @@ export const styles = StyleSheet.create({
     paddingTop: SCREEN_HEIGHT * 0.04,
   },
   title: {
-    fontSize: Typography.h2,
+    fontSize: Typography.screenTitle,
     fontWeight: '800',
     marginVertical: Spacing.md,
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   subtitle: {
     fontSize: Typography.body,
-    fontWeight: 'thin',
+    fontWeight: '400',
+    lineHeight: 23,
     marginBottom: Spacing.lg,
     textAlign: 'center',
-    fontFamily: Fonts.GowunDodum,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   checkboxContainer: {
@@ -93,7 +94,8 @@ export const styles = StyleSheet.create({
   },
   startButtonText: {
     color: Colors.surface,
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
 });

@@ -16,7 +16,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { logout as kakaoLogout } from '@react-native-seoul/kakao-login';
 import styles from '@styles/ProfileSettings.styles';
-import { Colors, Fonts } from '@styles/theme';
+import { Colors, Fonts, Typography } from '@styles/theme';
 import { useAppDispatch } from '@store/index';
 import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
@@ -754,7 +754,7 @@ const devStyles = StyleSheet.create({
   },
   text: {
     color: Colors.accent,
-    fontSize: 13,
+    fontSize: Typography.caption,
     fontFamily: Fonts.Pretendard,
   },
 });

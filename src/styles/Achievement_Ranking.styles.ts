@@ -103,8 +103,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   myRankingText: {
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     textAlign: 'center',
     color: Colors.surface,
   },

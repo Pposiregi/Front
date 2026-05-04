@@ -10,10 +10,10 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   title: {
-    fontSize: Typography.h2,
+    fontSize: Typography.screenTitle,
     fontWeight: '800',
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     marginBottom: Spacing.sm,
     color: Colors.textPrimary,
   },
@@ -22,19 +22,19 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: Spacing.xl,
-    fontFamily: Fonts.GowunDodum,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   list: {
     flex: 1,
   },
   sectionLabel: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     fontWeight: '700',
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
     marginTop: Spacing.xs,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
   permissionItem: {
     flexDirection: 'row',
@@ -62,9 +62,9 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   permissionTitle: {
-    fontSize: 15,
+    fontSize: Typography.label,
     fontWeight: '700',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   requiredBadge: {
@@ -134,8 +134,9 @@ export const styles = StyleSheet.create({
   },
   requiredButtonText: {
     color: Colors.surface,
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
@@ -150,8 +151,9 @@ export const styles = StyleSheet.create({
   },
   optionalButtonText: {
     color: Colors.accentStrong,
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
@@ -173,7 +175,8 @@ export const styles = StyleSheet.create({
   },
   nextButtonText: {
     color: Colors.surface,
-    fontSize: Typography.bodyLarge,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
 });

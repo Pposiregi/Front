@@ -31,8 +31,9 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   headerTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h1,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.screenTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
     paddingHorizontal: Spacing.sm,
   },
@@ -63,14 +64,14 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 16,
+    fontSize: Typography.action,
     color: Colors.textPrimary,
   },
   rowMuted: {
     color: Colors.textMuted,
   },
   arrow: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     color: Colors.accentStrong,
   },
   actionArea: {
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 15,
+    fontSize: Typography.label,
     color: Colors.textPrimary,
   },
   withdrawButton: {
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
   },
   withdrawText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 15,
+    fontSize: Typography.label,
     color: Colors.errorText,
   },
   modalBackdrop: {
@@ -118,14 +119,15 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
   },
   modalTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: 18,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.cardTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   modalBody: {
     marginTop: Spacing.sm + 2,
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
   },
   modalCancelText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.textPrimary,
   },
   modalConfirm: {
@@ -156,7 +158,7 @@ const styles = StyleSheet.create({
   },
   modalConfirmText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.surface,
   },
   faqList: {
@@ -176,7 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: Spacing.md,
     fontFamily: Fonts.Pretendard,
-    fontSize: 15,
+    fontSize: Typography.label,
     color: Colors.textPrimary,
   },
   faqDetail: {
@@ -187,14 +189,14 @@ const styles = StyleSheet.create({
   },
   faqQuestion: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 15,
+    fontSize: Typography.label,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
   faqAnswer: {
     marginTop: Spacing.sm,
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.textSecondary,
     lineHeight: 21,
   },
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm + 2,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
-    fontSize: 15,
+    fontSize: Typography.label,
     color: Colors.textPrimary,
   },
   chip: {
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.textSecondary,
   },
   chipTextSelected: {

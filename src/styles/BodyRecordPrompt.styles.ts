@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Typography } from './theme';
 
 const cardShadow = {
   shadowColor: Colors.shadow,
@@ -29,14 +29,15 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   dateLabel: {
-    fontFamily: Fonts.JUA,
-    fontSize: 18,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.cardTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   subtitle: {
     marginTop: 4,
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
   badge: {
@@ -49,7 +50,7 @@ export default StyleSheet.create({
     ...cardShadow,
   },
   badgeIcon: {
-    fontSize: 22,
+    fontSize: Typography.sectionTitle,
   },
   field: {
     backgroundColor: Colors.surface,
@@ -71,8 +72,9 @@ export default StyleSheet.create({
     gap: 10,
   },
   fieldLabel: {
-    fontFamily: Fonts.JUA,
-    fontSize: 16,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     lineHeight: 20,
     color: Colors.textPrimary,
   },
@@ -89,7 +91,7 @@ export default StyleSheet.create({
     minWidth: 64,
     textAlign: 'right',
     fontFamily: Fonts.Pretendard,
-    fontSize: 17,
+    fontSize: Typography.bodyLarge,
     lineHeight: 22,
     fontWeight: '700',
     color: Colors.textSecondary,
@@ -98,19 +100,19 @@ export default StyleSheet.create({
   },
   fieldValue: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
   fieldNumber: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 17,
+    fontSize: Typography.bodyLarge,
     lineHeight: 22,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
   fieldUnit: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     lineHeight: 18,
     color: Colors.textSecondary,
     marginLeft: 5,
@@ -139,7 +141,7 @@ export default StyleSheet.create({
     marginTop: 6,
     alignSelf: 'flex-end',
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     lineHeight: 17,
     color: Colors.textMuted,
   },
@@ -150,12 +152,12 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   infoIcon: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     marginRight: 6,
   },
   infoText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: Colors.textSecondary,
   },
   buttonRow: {
@@ -175,7 +177,7 @@ export default StyleSheet.create({
   },
   primaryText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.surface,
     fontWeight: '600',
   },
@@ -184,7 +186,7 @@ export default StyleSheet.create({
   },
   secondaryText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: Colors.textSecondary,
   },
   skipToday: {
@@ -193,7 +195,7 @@ export default StyleSheet.create({
   },
   skipTodayText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: Colors.textMuted,
     textDecorationLine: 'underline',
   },

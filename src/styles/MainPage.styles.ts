@@ -315,8 +315,8 @@ export default StyleSheet.create({
     borderColor: Colors.accent,
   },
   startText: {
-    fontFamily: Fonts.JUA,
-    fontWeight: 'bold',
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: START_BUTTON_FONT,
     color: Colors.textSecondary,
   },
@@ -431,9 +431,10 @@ export default StyleSheet.create({
   },
 
   petOnboardingTitle: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     fontWeight: '700',
     marginBottom: 20,
+    fontFamily: Fonts.Pretendard,
   },
 
   petTypeRow: {

@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   closeButtonText: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     color: Colors.textPrimary,
     fontFamily: Fonts.Pretendard,
   },

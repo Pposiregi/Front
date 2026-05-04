@@ -128,16 +128,18 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   headerButtonLabel: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.sectionTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
     textShadowColor: Colors.shadowSoft,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   headerTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h1,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.screenTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   headerSpacing: {
@@ -290,8 +292,9 @@ export default StyleSheet.create({
     marginBottom: MODAL_HEADER_MARGIN_BOTTOM,
   },
   modalTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h1,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.screenTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   modalSubtitle: {
@@ -321,7 +324,7 @@ export default StyleSheet.create({
     marginRight: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.025)),
   },
   modalFutureNoticeIcon: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: Colors.surface,
     fontSize: Typography.caption,
     lineHeight: 16,
@@ -330,7 +333,8 @@ export default StyleSheet.create({
     flex: 1,
   },
   modalFutureNoticeTitle: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Typography.bodySmall,
     color: Colors.accentStrong,
   },
@@ -428,7 +432,8 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalMealRemoveLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Math.max(Typography.body, Math.round(SCREEN_WIDTH * 0.042)),
     color: Colors.textMuted,
   },
@@ -440,7 +445,8 @@ export default StyleSheet.create({
     flex: 1,
   },
   modalMealRowName: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Math.max(Typography.bodySmall, Math.round(SCREEN_WIDTH * 0.036)),
     color: Colors.textPrimary,
   },
@@ -471,7 +477,8 @@ export default StyleSheet.create({
     height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
   },
   modalMealEditLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
     color: Colors.infoStrong,
   },
@@ -531,7 +538,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   modalAddIconLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Typography.bodyLarge,
     color: Colors.accentStrong,
   },
@@ -541,7 +549,7 @@ export default StyleSheet.create({
   },
   modalAddInput: {
     marginLeft: 12,
-    fontSize: 13,
+    fontSize: Typography.caption,
     color: Colors.textPrimary,
     paddingVertical: 0,
   },
@@ -598,12 +606,14 @@ export default StyleSheet.create({
     opacity: 0.5,
   },
   modalEditCancelLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.textMuted,
     fontSize: Typography.bodySmall,
   },
   modalEditSubmitLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.surface,
     fontSize: Typography.bodySmall,
   },
@@ -635,7 +645,8 @@ export default StyleSheet.create({
     opacity: 0.6,
   },
   modalPrimaryButtonLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: Typography.body,
     color: Colors.surface,
   },

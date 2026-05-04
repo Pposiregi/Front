@@ -104,8 +104,9 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: headerFont,
+    fontWeight: '700',
     color: runningColors.textPrimary,
     textAlign: 'center',
   },
@@ -123,9 +124,10 @@ export const styles = StyleSheet.create({
     opacity: 0.4,
   },
   arrowText: {
-    fontSize: Typography.h2,
+    fontSize: Typography.sectionTitle,
     color: runningColors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
   arrowTextDisabled: {
     color: runningColors.textMuted,
@@ -300,9 +302,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionTitle: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: sectionTitleFont,
     lineHeight: sectionTitleLineHeight,
+    fontWeight: '700',
     color: runningColors.textPrimary,
     marginRight: spacing.md,
   },
@@ -377,7 +380,7 @@ export const styles = StyleSheet.create({
   },
   listTitle: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 15,
+    fontSize: Typography.label,
     fontWeight: '700',
     color: runningColors.textPrimary,
     lineHeight: 20,
@@ -422,7 +425,7 @@ export const styles = StyleSheet.create({
   },
   sessionDeleteText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 16,
+    fontSize: Typography.action,
     lineHeight: 18,
     color: runningColors.textMuted,
   },
@@ -447,8 +450,9 @@ export const styles = StyleSheet.create({
     opacity: 0.75,
   },
   sessionReloadText: {
-    fontFamily: Fonts.JUA,
-    fontSize: 14,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.bodySmall,
+    fontWeight: '700',
     color: runningColors.white,
     lineHeight: 18,
   },
@@ -459,14 +463,14 @@ export const styles = StyleSheet.create({
   },
   listValue: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: runningColors.textPrimary,
   },
   listValueAccent: {
     color: runningColors.orange,
   },
   listValueNumber: {
-    fontSize: 15,
+    fontSize: Typography.label,
     letterSpacing: 0.2,
     fontVariant: ['tabular-nums'],
   },
@@ -481,7 +485,7 @@ export const styles = StyleSheet.create({
   },
   dateText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: runningColors.textPrimary,
     marginBottom: spacing.xxs,
   },
@@ -493,12 +497,12 @@ export const styles = StyleSheet.create({
   },
   distanceText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: 16,
+    fontSize: Typography.action,
     color: runningColors.orange,
     marginLeft: 'auto',
   },
   detailLink: {
-    fontSize: 16,
+    fontSize: Typography.action,
     color: runningColors.textMuted,
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
@@ -506,7 +510,7 @@ export const styles = StyleSheet.create({
     lineHeight: 16,
   },
   indexText: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     fontWeight: 'bold',
     marginRight: spacing.xl,
     fontFamily: Fonts.Pretendard,
@@ -590,8 +594,9 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   emptyCardTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: 16,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: runningColors.textPrimary,
     marginBottom: spacing.sm,
   },

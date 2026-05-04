@@ -14,8 +14,9 @@ export default StyleSheet.create({
     borderTopRightRadius: 16,
   },
   title: {
-    fontSize: Typography.h2,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.sectionTitle,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     marginBottom: 16,
     color: Colors.textPrimary,
   },
@@ -44,8 +45,9 @@ export default StyleSheet.create({
     padding: 10,
   },
   cancelText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   saveBtn: {
@@ -54,8 +56,9 @@ export default StyleSheet.create({
     borderRadius: 8,
   },
   saveText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.surface,
   },
   galleryBtn: {
@@ -68,13 +71,15 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   galleryBtnText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   sectionLabel: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.body,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.label,
+    fontWeight: '700',
     color: Colors.textSecondary,
     marginBottom: 8,
     marginTop: 4,
@@ -100,8 +105,9 @@ export default StyleSheet.create({
     width: '85%',
   },
   confirmTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.sectionTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
     marginBottom: 16,
   },

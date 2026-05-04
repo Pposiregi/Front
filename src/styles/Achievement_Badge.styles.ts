@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Typography } from './theme';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 5;
@@ -37,12 +37,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeTitle: {
-    fontSize: 20,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.sectionTitle,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   badgeCount: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     fontFamily: Fonts.Pretendard,
     color: Colors.textMuted,
     backgroundColor: Colors.background,

@@ -21,9 +21,10 @@ export default StyleSheet.create({
   },
 
   missionTitle: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 12,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
 
@@ -44,8 +45,9 @@ export default StyleSheet.create({
   },
 
   tabText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.body,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
 
@@ -88,8 +90,9 @@ export default StyleSheet.create({
   },
 
   missionUITextTitle: {
-    fontSize: Typography.h2,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.sectionTitle,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
 
@@ -154,8 +157,9 @@ export default StyleSheet.create({
 
   missionUIExitText: {
     color: Colors.surface,
-    fontSize: Typography.h2,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
 
   summaryBox: {
@@ -166,7 +170,7 @@ export default StyleSheet.create({
   },
 
   summaryTitle: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 12,
     fontFamily: Fonts.JUA,
     color: Colors.textPrimary,
