@@ -130,10 +130,10 @@ export default StyleSheet.create({
     borderRadius: 10,
   },
   weightProgressBar: {
-    backgroundColor: Colors.infoStrong,
+    backgroundColor: Colors.dataWeight,
   },
   fatProgressBar: {
-    backgroundColor: Colors.accentStrong,
+    backgroundColor: Colors.dataBodyFat,
   },
   aimText: {
     marginTop: 6,

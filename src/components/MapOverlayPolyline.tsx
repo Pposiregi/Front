@@ -95,7 +95,7 @@ export const MapOverlayPolyline = ({
     >
       <SvgPolyline
         points={polylinePoints}
-        stroke={Colors.infoStrong}
+        stroke={Colors.dataRoute}
         strokeWidth={4}
         strokeLinecap='round'
         strokeLinejoin='round'

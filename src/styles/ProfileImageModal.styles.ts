@@ -32,7 +32,7 @@ export default StyleSheet.create({
   },
   selected: {
     borderWidth: 3,
-    borderColor: Colors.infoStrong,
+    borderColor: Colors.accentStrong,
   },
   footer: {
     flexDirection: 'row',
@@ -50,7 +50,7 @@ export default StyleSheet.create({
   },
   saveBtn: {
     padding: 10,
-    backgroundColor: Colors.infoStrong,
+    backgroundColor: Colors.accentStrong,
     borderRadius: 8,
   },
   saveText: {

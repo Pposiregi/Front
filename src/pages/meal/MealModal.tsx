@@ -21,7 +21,7 @@ import type { MealModalProps } from './MealModal.types';
 import { KeyboardAwareModalContent } from '@components/KeyboardAwareScreen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const MODAL_LOADING_COLOR = Colors.infoStrong;
+const MODAL_LOADING_COLOR = Colors.accentStrong;
 const MODAL_MUTED_LOADING_COLOR = Colors.textMuted;
 
 const getPreviewableImageSource = (source: ImageSourcePropType) => {

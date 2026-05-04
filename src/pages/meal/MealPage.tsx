@@ -41,7 +41,7 @@ import { isZeroSizedMealImage, validateImageAsset } from '@utils/imageUtil';
 
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
-const HEADER_ICON_COLOR = Colors.infoStrong;
+const HEADER_ICON_COLOR = Colors.accentStrong;
 
 /* 2026.04.13 KKR] Image 리사이즈 기준치*/
 const MAX_IMAGE_DIMENSION = 1600;

@@ -34,8 +34,8 @@ import ProfileImageModal from './ProfileImageModal';
 const FALLBACK_HEIGHT = 0;
 const FALLBACK_WEIGHT = 0;
 const FALLBACK_BODY_FAT = 0;
-const WEIGHT_COLOR = Colors.infoStrong;
-const BODY_FAT_COLOR = Colors.accentStrong;
+const WEIGHT_COLOR = Colors.dataWeight;
+const BODY_FAT_COLOR = Colors.dataBodyFat;
 
 /** hex 색상을 chart-kit 호환 rgba 문자열로 변환한다. */
 const hexToRgba = (hex: string, opacity = 1) => {
@@ -284,7 +284,7 @@ function ProfilePage() {
     backgroundGradientFrom: Colors.surface,
     backgroundGradientTo: Colors.surface,
     decimalPlaces: 1,
-    color: (opacity = 1) => hexToRgba(Colors.accentStrong, opacity),
+    color: (opacity = 1) => hexToRgba(Colors.dataWeight, opacity),
     labelColor: (opacity = 1) => hexToRgba(Colors.textSecondary, opacity),
     propsForBackgroundLines: {
       stroke: Colors.divider,

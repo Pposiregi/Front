@@ -13,16 +13,20 @@ export const Colors = {
 
   divider: '#E5E7EB',
 
-  accent: '#FEC288',
-  accentSoft: '#FFEFE0',
-  accentStrong: '#FF9F43',
+  accent: '#FDBA74',
+  accentSoft: '#FFF4EA',
+  accentStrong: '#F97316',
   accentDeep: '#C2410C',
 
   disabled: '#ccc',
 
-  info: '#1D7ED8',
-  infoSoft: '#EAF3FF',
-  infoStrong: '#5F6BEA',
+  info: '#EA580C',
+  infoSoft: '#FFF7ED',
+  infoStrong: '#F97316',
+
+  dataWeight: '#2563EB',
+  dataBodyFat: '#7C3AED',
+  dataRoute: '#2563EB',
 
   success: '#4CAF50',
 

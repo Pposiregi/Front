@@ -225,7 +225,7 @@ export default StyleSheet.create({
   progressBar: {
     height: progressHeight,
     borderRadius: progressRadius,
-    backgroundColor: Colors.infoStrong,
+    backgroundColor: Colors.dataWeight,
   },
   chartHeader: {
     marginTop: sectionTopSpacing,
