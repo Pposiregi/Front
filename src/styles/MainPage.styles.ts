@@ -1,81 +1,71 @@
 import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
+import {
+  bottomContentPadding,
+  cardRadius,
+  Colors,
+  Fonts,
+  layoutScale,
+  Radius,
+  screenPadding,
+  Shadows,
+  Spacing,
+  Typography,
+} from './theme';
 
 // 화면 크기 기반 반응형 사이즈 계산
-const BOTTOM_NAV_HEIGHT = Math.max(56, Math.round(SCREEN_HEIGHT * 0.075));
+const BOTTOM_NAV_HEIGHT = layoutScale(64, 56, 76);
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
-  80,
-  Math.min(120, SCREEN_HEIGHT * 0.1)
+  layoutScale(82, 76, 96),
+  Math.min(layoutScale(112, 96, 124), SCREEN_HEIGHT * 0.1)
 );
-const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
-const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));
+const TOKKI_PADDING_V = layoutScale(14, 12, 18);
+const TOKKI_PADDING_H = screenPadding;
 const CONTAINER_TOP_PADDING = Platform.select({
-  ios: Math.max(34, Math.round(SCREEN_HEIGHT * 0.05)),
-  android: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
-  default: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
+  ios: layoutScale(40, 34, 52),
+  android: layoutScale(24, 20, 32),
+  default: layoutScale(24, 20, 32),
 });
 const START_BUTTON_SIZE = Math.max(
-  66,
-  Math.min(82, Math.round(SCREEN_WIDTH * 0.205))
+  layoutScale(68, 64, 72),
+  Math.min(layoutScale(82, 76, 88), Math.round(SCREEN_WIDTH * 0.205))
 );
 const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
-const START_BUTTON_FONT = Math.max(16, Math.round(SCREEN_WIDTH * 0.045));
-const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
+const START_BUTTON_FONT = layoutScale(17, 16, 19);
+const CONTENT_MARGIN_BOTTOM = layoutScale(16, 12, 22);
 const START_BUTTON_BASE_BOTTOM = Math.max(
   Math.round(BOTTOM_NAV_HEIGHT * 0.66),
-  BOTTOM_NAV_HEIGHT - Math.max(14, Math.round(SCREEN_HEIGHT * 0.025))
+  BOTTOM_NAV_HEIGHT - layoutScale(16, 14, 22)
 );
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
 const PET_BOTTOM_FROM_START =
   START_BUTTON_BASE_BOTTOM +
   START_BUTTON_ESTIMATED_HEIGHT +
-  Math.max(6, Math.round(SCREEN_HEIGHT * 0.01));
-const MISSION_BUTTON_TOP = Math.max(96, Math.round(SCREEN_HEIGHT * 0.125));
-const MESSAGE_MARGIN_TOP = Math.max(4, Math.round(SCREEN_HEIGHT * 0.006));
-const MESSAGE_ROW_TOP = Math.max(112, Math.round(SCREEN_HEIGHT * 0.15));
-const RUN_HUD_TOP = Math.max(28, Math.round(SCREEN_HEIGHT * 0.05));
-const RUN_HUD_MIN_HEIGHT = Math.max(58, Math.round(SCREEN_HEIGHT * 0.07));
-const RUN_HUD_HORIZONTAL_PADDING = Math.max(
-  Spacing.lg,
-  Math.round(SCREEN_WIDTH * 0.045)
-);
-const RUN_HUD_VERTICAL_PADDING = Math.max(
-  Spacing.sm - 2,
-  Math.round(SCREEN_HEIGHT * 0.007)
-);
-const TIMER_LINE_HEIGHT = Math.max(42, Math.round(SCREEN_WIDTH * 0.112));
-const START_ICON_SIZE = Math.max(50, Math.round(SCREEN_WIDTH * 0.14));
+  layoutScale(8, 6, 12);
+const MISSION_BUTTON_TOP = layoutScale(104, 96, 124);
+const MESSAGE_MARGIN_TOP = layoutScale(5, 4, 8);
+const MESSAGE_ROW_TOP = layoutScale(124, 112, 148);
+const RUN_HUD_TOP = layoutScale(36, 28, 46);
+const RUN_HUD_MIN_HEIGHT = layoutScale(62, 58, 72);
+const RUN_HUD_HORIZONTAL_PADDING = screenPadding;
+const RUN_HUD_VERTICAL_PADDING = layoutScale(7, 6, 9);
+const TIMER_LINE_HEIGHT = layoutScale(44, 42, 50);
+const START_ICON_SIZE = layoutScale(54, 50, 60);
 const DEV_BUTTON_STACK_BOTTOM =
-  BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006));
-const DEV_BUTTON_HORIZONTAL_PADDING = Math.max(
-  10,
-  Math.round(SCREEN_WIDTH * 0.028)
-);
-const DEV_BUTTON_VERTICAL_PADDING = Math.max(
-  6,
-  Math.round(SCREEN_HEIGHT * 0.008)
-);
-const RUN_LOCK_NOTICE_RIGHT = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const RUN_LOCK_NOTICE_VERTICAL_PADDING = Math.max(
-  7,
-  Math.round(SCREEN_HEIGHT * 0.009)
-);
+  BOTTOM_NAV_HEIGHT + layoutScale(4, 2, 6);
+const DEV_BUTTON_HORIZONTAL_PADDING = layoutScale(11, 10, 14);
+const DEV_BUTTON_VERTICAL_PADDING = layoutScale(7, 6, 9);
+const RUN_LOCK_NOTICE_RIGHT = screenPadding;
+const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = layoutScale(13, Spacing.md, 16);
+const RUN_LOCK_NOTICE_VERTICAL_PADDING = layoutScale(8, 7, 10);
 const MISSION_BUTTON_SIZE = Math.max(
-  44,
-  Math.min(52, Math.round(SCREEN_WIDTH * 0.12))
+  layoutScale(44, 42, 48),
+  Math.min(layoutScale(52, 48, 56), Math.round(SCREEN_WIDTH * 0.12))
 );
 const MISSION_BUTTON_PADDING = Math.max(
   Spacing.sm,
-  Math.round(MISSION_BUTTON_SIZE * 0.17)
+  layoutScale(Math.round(MISSION_BUTTON_SIZE * 0.17), 8, 10)
 );
 const MISSION_ICON_SIZE = Math.max(28, Math.round(MISSION_BUTTON_SIZE * 0.65));
 
@@ -98,7 +88,7 @@ export default StyleSheet.create({
     elevation: 1,
   },
   progressRow: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: screenPadding,
   },
   missionCard: {
     marginRight: Spacing.md,
@@ -124,7 +114,7 @@ export default StyleSheet.create({
   },
   devButtonGroup: {
     position: 'absolute',
-    left: Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.035)),
+    left: screenPadding,
     bottom: DEV_BUTTON_STACK_BOTTOM,
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -136,13 +126,13 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: TOKKI_PADDING_V,
-    paddingBottom: TOKKI_PADDING_V,
+    paddingBottom: bottomContentPadding,
     paddingHorizontal: TOKKI_PADDING_H,
   },
   mapContainer: {
     flex: 1,
     width: '100%',
-    borderRadius: Radius.lg,
+    borderRadius: cardRadius,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
   },
@@ -168,7 +158,7 @@ export default StyleSheet.create({
   },
   runTimerValue: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.108)),
+    fontSize: layoutScale(Typography.timer, Typography.timer, 46),
     color: Colors.textPrimary,
     letterSpacing: 1,
     lineHeight: TIMER_LINE_HEIGHT,
@@ -201,19 +191,16 @@ export default StyleSheet.create({
   },
   fatButton: {
     position: 'absolute',
-    bottom: Math.max(
-      Spacing.sm,
-      BOTTOM_NAV_HEIGHT - Math.round(SCREEN_HEIGHT * 0.02)
-    ),
+    bottom: Math.max(Spacing.sm, BOTTOM_NAV_HEIGHT - layoutScale(16, 12, 20)),
     left: '50%',
-    marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
+    marginLeft: layoutScale(96, 90, 112),
     backgroundColor: Colors.devButton,
     paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
     paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
     borderRadius: Radius.md,
   },
   devPbfPanel: {
-    minWidth: Math.max(156, Math.round(SCREEN_WIDTH * 0.34)),
+    minWidth: layoutScale(164, 156, 184),
     paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
     paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
     borderRadius: Radius.md,
@@ -234,7 +221,7 @@ export default StyleSheet.create({
     fontWeight: '700',
   },
   devPbfResetButton: {
-    paddingHorizontal: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
+    paddingHorizontal: layoutScale(8, 8, 10),
     paddingVertical: 4,
     borderRadius: Radius.sm,
     backgroundColor: Colors.accentSoft,
@@ -392,7 +379,7 @@ export default StyleSheet.create({
   missionButton: {
     position: 'absolute',
     top: MISSION_BUTTON_TOP,
-    right: Math.max(Spacing.md + 2, Math.round(SCREEN_WIDTH * 0.04)),
+    right: screenPadding,
     width: MISSION_BUTTON_SIZE,
     height: MISSION_BUTTON_SIZE,
     padding: MISSION_BUTTON_PADDING,
@@ -425,8 +412,8 @@ export default StyleSheet.create({
   petOnboardingCard: {
     width: '80%',
     backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: cardRadius,
+    padding: screenPadding,
     alignItems: 'center',
   },
 
@@ -454,17 +441,17 @@ export default StyleSheet.create({
     backgroundColor: Colors.devButton,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: Radius.md,
   },
 
   runningStatPanel: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.accentSoft,
-    borderRadius: 12,
+    borderRadius: cardRadius,
     borderWidth: 1,
     borderColor: Colors.accent,
-    marginHorizontal: 12,
+    marginHorizontal: screenPadding,
     paddingVertical: 12,
   },
 

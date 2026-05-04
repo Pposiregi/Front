@@ -1,20 +1,22 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
+import { StyleSheet } from 'react-native';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import {
+  bottomContentPadding,
+  cardRadius,
+  Colors,
+  Fonts,
+  layoutScale,
+  Radius,
+  screenPadding,
+  Shadows,
+  Spacing,
+  Typography,
+} from './theme';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CONTENT_HORIZONTAL_PADDING = Math.max(
-  Spacing.xxl,
-  Math.round(SCREEN_WIDTH * 0.06)
-);
-const CALENDAR_HORIZONTAL_PADDING = Math.max(
-  Spacing.sm,
-  Math.round(SCREEN_WIDTH * 0.02)
-);
+const CONTENT_HORIZONTAL_PADDING = screenPadding;
+const CALENDAR_HORIZONTAL_PADDING = layoutScale(10, Spacing.sm, Spacing.md);
 const CALENDAR_OUTER_GUTTER_RATIO = 0.02;
-const CALENDAR_OUTER_GUTTER = Math.max(
-  4,
-  Math.round(SCREEN_WIDTH * CALENDAR_OUTER_GUTTER_RATIO)
-);
+const CALENDAR_OUTER_GUTTER = layoutScale(6, 4, 8);
 const CALENDAR_CONTAINER_EXPAND = Math.max(
   0,
   CONTENT_HORIZONTAL_PADDING - CALENDAR_OUTER_GUTTER
@@ -31,36 +33,18 @@ const GRID_RADIUS = Math.round(GRID_SIZE * 0.28);
 const GRID_PADDING_V = Math.max(6, Math.round(GRID_SIZE * 0.2));
 const GRID_PADDING_H = Math.max(4, Math.round(GRID_SIZE * 0.15));
 const GRID_GAP = Math.max(8, Math.round(GRID_SIZE * 0.24));
-const CONTENT_TOP_PADDING = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_HEIGHT * 0.015)
-);
-const CONTENT_BOTTOM_PADDING = Math.max(40, Math.round(SCREEN_HEIGHT * 0.05));
-const HEADER_BUTTON_SIZE = Math.max(36, Math.round(SCREEN_WIDTH * 0.09));
+const CONTENT_TOP_PADDING = layoutScale(14, Spacing.md, Spacing.lg);
+const CONTENT_BOTTOM_PADDING = bottomContentPadding;
+const HEADER_BUTTON_SIZE = layoutScale(38, 36, 42);
 const HEADER_BUTTON_RADIUS = Math.round(HEADER_BUTTON_SIZE / 2);
-const HEADER_SECTION_SPACING = Math.max(
-  Spacing.xxl,
-  Math.round(SCREEN_WIDTH * 0.06)
-);
-const CALENDAR_RADIUS = Math.max(28, Math.round(SCREEN_WIDTH * 0.07));
-const CALENDAR_VERTICAL_PADDING = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const MONTH_ROW_MARGIN_BOTTOM = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const MODAL_CARD_SIZE = Math.round(
-  Math.min(120, Math.max(90, SCREEN_WIDTH * 0.26))
-);
+const HEADER_SECTION_SPACING = layoutScale(24, Spacing.xxl, 28);
+const CALENDAR_RADIUS = cardRadius;
+const CALENDAR_VERTICAL_PADDING = layoutScale(14, Spacing.md, Spacing.lg);
+const MONTH_ROW_MARGIN_BOTTOM = layoutScale(14, Spacing.md, Spacing.lg);
+const MODAL_CARD_SIZE = layoutScale(104, 90, 120);
 const MODAL_CARD_RADIUS = Math.round(MODAL_CARD_SIZE * 0.22);
-const MODAL_BUTTON_SIZE = Math.round(
-  Math.min(36, Math.max(28, SCREEN_WIDTH * 0.08))
-);
-const MODAL_ROW_IMAGE = Math.round(
-  Math.min(56, Math.max(44, SCREEN_WIDTH * 0.12))
-);
+const MODAL_BUTTON_SIZE = layoutScale(32, 28, 36);
+const MODAL_ROW_IMAGE = layoutScale(48, 44, 56);
 const MODAL_ROW_RADIUS = Math.round(MODAL_BUTTON_SIZE * 0.7);
 const MODAL_MAX_HEIGHT = Math.round(SCREEN_HEIGHT * 0.88);
 const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
@@ -68,26 +52,14 @@ const MODAL_MEAL_LIST_MAX_HEIGHT = Math.max(
   Math.min(280, Math.round(SCREEN_HEIGHT * 0.33))
 );
 
-const MODAL_CONTENT_RADIUS = Math.max(32, Math.round(SCREEN_WIDTH * 0.08));
-const MODAL_CONTENT_VERTICAL_PADDING = Math.max(
-  26,
-  Math.round(SCREEN_HEIGHT * 0.032)
-);
-const MODAL_CONTENT_HORIZONTAL_PADDING = Math.max(
-  Spacing.xxl,
-  Math.round(SCREEN_WIDTH * 0.06)
-);
-const MODAL_HEADER_MARGIN_BOTTOM = Math.max(
-  18,
-  Math.round(SCREEN_HEIGHT * 0.022)
-);
-const MODAL_NOTICE_RADIUS = Math.max(14, Math.round(SCREEN_WIDTH * 0.035));
-const MODAL_NOTICE_ICON_SIZE = Math.max(24, Math.round(SCREEN_WIDTH * 0.06));
+const MODAL_CONTENT_RADIUS = cardRadius + layoutScale(8, 6, 10);
+const MODAL_CONTENT_VERTICAL_PADDING = layoutScale(28, 26, 34);
+const MODAL_CONTENT_HORIZONTAL_PADDING = screenPadding;
+const MODAL_HEADER_MARGIN_BOTTOM = layoutScale(20, 18, 24);
+const MODAL_NOTICE_RADIUS = Radius.lg;
+const MODAL_NOTICE_ICON_SIZE = layoutScale(24, 24, 28);
 const MODAL_NOTICE_ICON_RADIUS = Math.round(MODAL_NOTICE_ICON_SIZE / 2);
-const MODAL_LIST_TOP_MARGIN = Math.max(
-  Spacing.xs,
-  Math.round(SCREEN_WIDTH * 0.01)
-);
+const MODAL_LIST_TOP_MARGIN = layoutScale(4, Spacing.xs, Spacing.sm);
 const STACK_IMAGE_BORDER = Colors.surface;
 const STACK_IMAGE_SHADOW = Colors.shadow;
 
@@ -255,7 +227,7 @@ export default StyleSheet.create({
     fontSize: Typography.bodySmall,
   },
   calendarErrorText: {
-    marginTop: Math.max(Spacing.lg, Math.round(SCREEN_HEIGHT * 0.02)),
+    marginTop: layoutScale(18, Spacing.lg, Spacing.xl),
     textAlign: 'center',
     color: Colors.error,
     fontSize: Typography.bodySmall,
@@ -277,7 +249,7 @@ export default StyleSheet.create({
   mealModalKeyboardContent: {
     width: '100%',
     paddingHorizontal: 0,
-    paddingVertical: Math.max(16, Math.round(SCREEN_HEIGHT * 0.02)),
+    paddingVertical: layoutScale(18, 16, 22),
   },
   modalContent: {
     backgroundColor: Colors.surface,
@@ -298,8 +270,8 @@ export default StyleSheet.create({
     color: Colors.textPrimary,
   },
   modalSubtitle: {
-    marginTop: Math.max(4, Math.round(SCREEN_WIDTH * 0.012)),
-    fontSize: Math.max(Typography.caption, Math.round(SCREEN_WIDTH * 0.034)),
+    marginTop: layoutScale(4, 4, 6),
+    fontSize: Typography.caption,
     color: Colors.textMuted,
   },
   modalFutureNoticeBox: {
@@ -307,8 +279,8 @@ export default StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Math.max(10, Math.round(SCREEN_HEIGHT * 0.012)),
-    paddingHorizontal: Spacing.md,
+    paddingVertical: layoutScale(10, 10, 12),
+    paddingHorizontal: screenPadding,
     borderRadius: MODAL_NOTICE_RADIUS,
     borderWidth: 1,
     borderColor: Colors.accentStrong,
@@ -321,7 +293,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.accentStrong,
-    marginRight: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.025)),
+    marginRight: layoutScale(10, Spacing.md - 2, Spacing.lg),
   },
   modalFutureNoticeIcon: {
     fontFamily: Fonts.Pretendard,
@@ -344,12 +316,12 @@ export default StyleSheet.create({
     color: Colors.textSecondary,
   },
   modalPhotoRowScroll: {
-    marginBottom: Math.max(14, Math.round(SCREEN_WIDTH * 0.05)),
+    marginBottom: layoutScale(18, 14, 22),
   },
   modalPhotoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Math.max(2, Math.round(SCREEN_WIDTH * 0.01)),
+    paddingHorizontal: layoutScale(4, 2, 6),
   },
   modalPhotoCard: {
     width: MODAL_CARD_SIZE,
@@ -357,7 +329,7 @@ export default StyleSheet.create({
     borderRadius: MODAL_CARD_RADIUS,
     overflow: 'hidden',
     backgroundColor: Colors.infoSoft,
-    marginHorizontal: Math.max(6, Math.round(SCREEN_WIDTH * 0.018)),
+    marginHorizontal: layoutScale(7, 6, 9),
     position: 'relative',
   },
   modalPhotoImage: {
@@ -380,7 +352,7 @@ export default StyleSheet.create({
     paddingBottom: 4,
   },
   modalMealLoadingContainer: {
-    minHeight: Math.max(80, Math.round(SCREEN_WIDTH * 0.23)),
+    minHeight: layoutScale(88, 80, 96),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -402,9 +374,9 @@ export default StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: MODAL_ROW_RADIUS,
-    paddingVertical: Math.max(12, Math.round(SCREEN_WIDTH * 0.03)),
-    paddingHorizontal: Math.max(14, Math.round(SCREEN_WIDTH * 0.036)),
-    marginBottom: Math.max(10, Math.round(SCREEN_WIDTH * 0.025)),
+    paddingVertical: layoutScale(12, 12, 14),
+    paddingHorizontal: screenPadding,
+    marginBottom: layoutScale(10, 10, 12),
     borderWidth: 1,
     borderColor: Colors.divider,
     ...baseShadow,
@@ -416,7 +388,7 @@ export default StyleSheet.create({
   modalMealControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
+    marginRight: layoutScale(8, 8, 10),
   },
   modalMealRemoveButton: {
     width: MODAL_BUTTON_SIZE,
@@ -426,7 +398,7 @@ export default StyleSheet.create({
     borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
+    marginRight: layoutScale(8, 8, 10),
   },
   modalMealRemoveButtonDisabled: {
     opacity: 0.5,
@@ -434,12 +406,12 @@ export default StyleSheet.create({
   modalMealRemoveLabel: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    fontSize: Math.max(Typography.body, Math.round(SCREEN_WIDTH * 0.042)),
+    fontSize: Typography.body,
     color: Colors.textMuted,
   },
   modalMealRemoveIcon: {
-    width: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
-    height: Math.max(18, Math.round(SCREEN_WIDTH * 0.053)),
+    width: layoutScale(20, 18, 22),
+    height: layoutScale(20, 18, 22),
   },
   modalMealRowContent: {
     flex: 1,
@@ -447,19 +419,19 @@ export default StyleSheet.create({
   modalMealRowName: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    fontSize: Math.max(Typography.bodySmall, Math.round(SCREEN_WIDTH * 0.036)),
+    fontSize: Typography.bodySmall,
     color: Colors.textPrimary,
   },
   modalMealRowCalories: {
     marginTop: 4,
-    fontSize: Math.max(Typography.caption, Math.round(SCREEN_WIDTH * 0.03)),
+    fontSize: Typography.caption,
     color: Colors.textMuted,
   },
   modalMealRowImage: {
     width: MODAL_ROW_IMAGE,
     height: MODAL_ROW_IMAGE,
     borderRadius: Math.round(MODAL_ROW_IMAGE * 0.35),
-    marginRight: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
+    marginRight: layoutScale(8, 8, 10),
   },
   modalMealEditButton: {
     width: MODAL_BUTTON_SIZE,
@@ -469,17 +441,17 @@ export default StyleSheet.create({
     borderColor: Colors.divider,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: Math.max(6, Math.round(SCREEN_WIDTH * 0.015)),
+    marginLeft: layoutScale(6, 6, 8),
     backgroundColor: Colors.surface,
   },
   modalMealEditIcon: {
-    width: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
-    height: Math.max(22, Math.round(SCREEN_WIDTH * 0.063)),
+    width: layoutScale(24, 22, 26),
+    height: layoutScale(24, 22, 26),
   },
   modalMealEditLabel: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    fontSize: Math.max(13, Math.round(SCREEN_WIDTH * 0.032)),
+    fontSize: Typography.caption,
     color: Colors.infoStrong,
   },
   modalMealDragHandle: {
@@ -494,7 +466,7 @@ export default StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: screenPadding,
     paddingVertical: Spacing.xxl,
   },
   imagePreviewBackdrop: {
@@ -507,7 +479,7 @@ export default StyleSheet.create({
   },
   imagePreviewCloseButton: {
     marginTop: Spacing.xl,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: screenPadding,
     paddingVertical: Spacing.sm + 2,
     borderRadius: Radius.md,
     backgroundColor: Colors.surface,
@@ -521,16 +493,16 @@ export default StyleSheet.create({
   modalAddRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 18,
+    marginTop: layoutScale(18, 16, 20),
+    paddingHorizontal: screenPadding,
+    paddingVertical: layoutScale(12, 12, 14),
+    borderRadius: cardRadius,
     backgroundColor: Colors.infoSoft,
   },
   modalAddIcon: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: Colors.divider,
     backgroundColor: Colors.surface,
@@ -562,7 +534,7 @@ export default StyleSheet.create({
   modalCameraButton: {
     width: 40,
     height: 40,
-    borderRadius: 16,
+    borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.divider,
     backgroundColor: Colors.surface,
@@ -578,7 +550,7 @@ export default StyleSheet.create({
     color: Colors.textMuted,
   },
   modalEditRow: {
-    marginTop: 18,
+    marginTop: layoutScale(18, 16, 20),
     backgroundColor: Colors.infoSoft,
   },
   modalEditActions: {
@@ -589,8 +561,8 @@ export default StyleSheet.create({
   modalEditButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
-    borderRadius: 16,
+    paddingVertical: layoutScale(12, 12, 14),
+    borderRadius: Radius.lg,
   },
   modalEditCancel: {
     marginRight: 8,

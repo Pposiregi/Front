@@ -1,39 +1,36 @@
-import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
+import { StyleSheet } from 'react-native';
+import {
+  bottomContentPadding,
+  cardRadius,
+  Colors,
+  Fonts,
+  layoutScale,
+  Radius,
+  screenPadding,
+  Shadows,
+  Spacing,
+  Typography,
+} from './theme';
 
-const { width: deviceWidth } = Dimensions.get('window');
 const spacing = {
-  xxs: Math.max(Spacing.xxs, Math.round(deviceWidth * 0.005)),
-  xs: Math.max(Spacing.xs, Math.round(deviceWidth * 0.01)),
-  sm: Math.max(Spacing.sm - 2, Math.round(deviceWidth * 0.015)),
-  md: Math.max(Spacing.sm, Math.round(deviceWidth * 0.02)),
-  lg: Math.max(Spacing.md, Math.round(deviceWidth * 0.03)),
-  xl: Math.max(Spacing.lg, Math.round(deviceWidth * 0.04)),
-  xxl: Math.max(Spacing.xl, Math.round(deviceWidth * 0.05)),
+  xxs: layoutScale(Spacing.xxs, Spacing.xxs, Spacing.xs),
+  xs: layoutScale(Spacing.xs, Spacing.xs, Spacing.sm),
+  sm: layoutScale(Spacing.sm, Spacing.sm - 2, Spacing.md),
+  md: layoutScale(Spacing.md, Spacing.sm, Spacing.lg),
+  lg: layoutScale(Spacing.lg, Spacing.md, Spacing.xl),
+  xl: screenPadding,
+  xxl: layoutScale(Spacing.xxl, Spacing.xl, Spacing.xxl + 4),
 };
-const contentPadding = spacing.xl;
+const contentPadding = screenPadding;
 const chartPadding = spacing.lg;
-const cardRadius = Math.max(Radius.md + 2, Math.round(deviceWidth * 0.04));
-const chartRadius = Math.max(Radius.sm + 2, Math.round(deviceWidth * 0.03));
-const headerFont = Math.max(Typography.h1, Math.round(deviceWidth * 0.06));
-const subHeaderFont = Math.max(
-  Typography.bodySmall,
-  Math.round(deviceWidth * 0.035)
-);
-const metaFont = Math.max(Typography.caption, Math.round(deviceWidth * 0.03));
-const metricFont = Math.max(Typography.body, Math.round(deviceWidth * 0.042));
-const statNumberFont = Math.max(
-  Typography.h2,
-  Math.min(24, Math.round(deviceWidth * 0.056))
-);
-const weeklyStatNumberFont = Math.max(
-  Typography.bodyLarge,
-  Math.min(20, Math.round(deviceWidth * 0.048))
-);
-const statUnitFont = Math.max(
-  Typography.caption,
-  Math.min(14, Math.round(deviceWidth * 0.034))
-);
+const chartRadius = layoutScale(14, Radius.md, Radius.lg);
+const headerFont = Typography.screenTitle;
+const subHeaderFont = Typography.bodySmall;
+const metaFont = Typography.caption;
+const metricFont = Typography.body;
+const statNumberFont = layoutScale(Typography.h2, Typography.h2, 24);
+const weeklyStatNumberFont = layoutScale(Typography.bodyLarge, 17, 20);
+const statUnitFont = layoutScale(Typography.caption, Typography.caption, 14);
 const sectionTitleFont = Typography.h1;
 const sectionTitleLineHeight = Math.round(sectionTitleFont * 1.16);
 const runningColors = {
@@ -88,7 +85,7 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: contentPadding,
-    paddingBottom: spacing.xxl * 2,
+    paddingBottom: bottomContentPadding,
   },
   topSection: {
     marginBottom: spacing.lg,
@@ -325,7 +322,7 @@ export const styles = StyleSheet.create({
     borderColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: Math.max(58, Math.round(deviceWidth * 0.16)),
+    minWidth: layoutScale(62, 58, 68),
   },
   segmentedButtonActive: {
     backgroundColor: runningColors.surface,
@@ -368,8 +365,8 @@ export const styles = StyleSheet.create({
     ...cardShadow,
   },
   listMarker: {
-    width: Math.max(10, Math.round(deviceWidth * 0.03)),
-    height: Math.max(10, Math.round(deviceWidth * 0.03)),
+    width: layoutScale(10, 10, 12),
+    height: layoutScale(10, 10, 12),
     borderRadius: Radius.pill,
     backgroundColor: runningColors.orange,
     marginRight: spacing.md,
@@ -399,7 +396,7 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xxs,
   },
   listRight: {
-    minWidth: Math.max(92, Math.round(deviceWidth * 0.24)),
+    minWidth: layoutScale(96, 92, 108),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
