@@ -48,14 +48,7 @@ const runningColors = {
   white: Colors.surface,
 };
 
-const cardShadow = {
-  ...Shadows.soft,
-  shadowColor: Colors.shadow,
-  shadowOpacity: 0.045,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 1,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export const activityTheme = {
   colors: {

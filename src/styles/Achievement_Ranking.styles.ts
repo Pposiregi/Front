@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 4,
+    ...Shadows.surfaceRaised,
     minHeight: 70,
   },
   listItemText: {

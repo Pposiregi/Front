@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -31,11 +31,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     borderLeftWidth: 6,
     borderLeftColor: Colors.success, // STEP이면 초록, MEAL이면 주황으로 런타임에 바꿔서 적용 가능
-    shadowColor: Colors.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    ...Shadows.surfaceRaised,
   },
   iconCircle: {
     width: 40,

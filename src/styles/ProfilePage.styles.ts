@@ -59,13 +59,7 @@ const metricValueFont = Math.max(
 );
 const metricValueLineHeight = Math.round(metricValueFont * 1.35);
 
-const cardShadow = {
-  ...Shadows.soft,
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.07,
-  shadowRadius: 12,
-  elevation: 4,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export default StyleSheet.create({
   container: {

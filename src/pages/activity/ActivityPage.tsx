@@ -635,10 +635,10 @@ function ActivityPage() {
             </Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.summaryNotice}>러닝에 대해서만 집계돼요!</Text>
+        <Text style={styles.summaryNotice}></Text>
       </View>
       <View style={styles.sectionHeader}>
-        <SectionTitle iconTone='accent'>오늘은</SectionTitle>
+        <SectionTitle iconTone='accent'>오늘의 러닝 기록</SectionTitle>
       </View>
       <View style={styles.summaryCard}>
         <ActivityCardSurface />

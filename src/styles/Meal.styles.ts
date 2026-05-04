@@ -61,15 +61,7 @@ const MODAL_NOTICE_ICON_SIZE = layoutScale(24, 24, 28);
 const MODAL_NOTICE_ICON_RADIUS = Math.round(MODAL_NOTICE_ICON_SIZE / 2);
 const MODAL_LIST_TOP_MARGIN = layoutScale(4, Spacing.xs, Spacing.sm);
 const STACK_IMAGE_BORDER = Colors.surface;
-const STACK_IMAGE_SHADOW = Colors.shadow;
-
-const baseShadow = {
-  ...Shadows.soft,
-  shadowOpacity: 0.08,
-  shadowOffset: { width: 0, height: 6 },
-  shadowRadius: 12,
-  elevation: 4,
-};
+const baseShadow = Shadows.surfaceRaised;
 
 const STACK_HEIGHT = Math.round(GRID_SIZE * 0.7);
 const STACK_ITEM_SIZE = Math.round(GRID_SIZE * 0.55);
@@ -645,10 +637,6 @@ export default StyleSheet.create({
     borderRadius: STACK_ITEM_RADIUS,
     borderWidth: 2, // 겹침 경계 또렷하게
     borderColor: STACK_IMAGE_BORDER,
-    shadowColor: STACK_IMAGE_SHADOW,
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
     top: STACK_ITEM_OFFSET,
   },
 });

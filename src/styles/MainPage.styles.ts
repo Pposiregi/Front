@@ -85,7 +85,7 @@ export default StyleSheet.create({
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
     zIndex: 1,
-    elevation: 1,
+    ...Shadows.surfaceFlat,
   },
   progressRow: {
     paddingHorizontal: screenPadding,
@@ -121,6 +121,20 @@ export default StyleSheet.create({
     gap: Spacing.sm,
     zIndex: 12,
   },
+  devToggleButton: {
+    backgroundColor: Colors.surfaceOverlaySolid,
+    paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
+    paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
+    ...Shadows.surfaceRaised,
+  },
+  devToggleText: {
+    color: Colors.textSecondary,
+    fontSize: Typography.caption,
+    fontWeight: '700',
+  },
   mainBackground: {
     flex: 1,
     justifyContent: 'space-between',
@@ -152,7 +166,7 @@ export default StyleSheet.create({
     paddingVertical: RUN_HUD_VERTICAL_PADDING,
     borderRadius: 0,
     backgroundColor: Colors.surfaceOverlay,
-    ...Shadows.soft,
+    ...Shadows.surfaceRaised,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -185,8 +199,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...Platform.select({
-      ios: Shadows.medium,
-      android: { elevation: 0 },
+      ios: Shadows.floatingAction,
+      android: Shadows.surfaceFlat,
     }),
   },
   fatButton: {
@@ -287,7 +301,7 @@ export default StyleSheet.create({
     backgroundColor: Colors.surfaceOverlaySolid,
     overflow: 'hidden',
     ...Platform.select({
-      android: Shadows.medium,
+      android: Shadows.floatingAction,
     }),
   },
   runningLockNotice: {
@@ -387,7 +401,7 @@ export default StyleSheet.create({
     borderRadius: Radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.accent,
+    ...Shadows.floatingAction,
     zIndex: 10,
   },
   missionIcon: {

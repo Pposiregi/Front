@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 const colors = {
   background: Colors.background,
@@ -11,16 +11,9 @@ const colors = {
   divider: Colors.divider,
   chipBackground: Colors.devButton,
   chipText: Colors.surface,
-  shadow: Colors.shadow,
 };
 
-const cardShadow = {
-  shadowColor: colors.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 3,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export const styles = StyleSheet.create({
   container: {
@@ -72,11 +65,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: Colors.surfaceOverlaySolid,
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    ...Shadows.surfaceRaised,
   },
   mapRelocatingText: {
     marginLeft: 8,

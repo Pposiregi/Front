@@ -166,6 +166,7 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
+  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   // __DEV__에서만 쓰는 체형 미세조정 프리뷰 값이다. null이면 실제 사용자 PBF를 따른다.
   const [devPreviewPbf, setDevPreviewPbf] = useState<number | null>(null);
   const [devPbfBarWidth, setDevPbfBarWidth] = useState(0);
@@ -575,6 +576,10 @@ export const MainPage = () => {
       );
     }
   }, [addSteps]);
+
+  const handleToggleDevTools = useCallback(() => {
+    setIsDevToolsOpen((prev) => !prev);
+  }, []);
 
   const handleForceEnd = useCallback(async () => {
     try {
@@ -1180,86 +1185,101 @@ export const MainPage = () => {
               estimatedKcal={estimatedKcal}
             />
           )}
-          <View style={styles.devButtonGroup}>
-            {__DEV__ && (
+          {__DEV__ && (
+            <View style={styles.devButtonGroup}>
               <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={handleDevAddSteps}
-                accessibilityLabel='Health Connect 걸음 +1000'
-                disabled={healthWriting}
+                style={styles.devToggleButton}
+                onPress={handleToggleDevTools}
+                accessibilityRole='button'
+                accessibilityLabel={
+                  isDevToolsOpen ? '개발 도구 닫기' : '개발 도구 열기'
+                }
               >
-                <Text style={styles.devHealthButtonText}>+1000</Text>
+                <Text style={styles.devToggleText}>[DEV]</Text>
               </TouchableOpacity>
-            )}
-            {__DEV__ && (
-              <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={resetSync}
-                accessibilityLabel='걸음 동기화 초기화'
-              >
-                <Text style={styles.devHealthButtonText}>RESET</Text>
-              </TouchableOpacity>
-            )}
-            {__DEV__ && (
-              <View style={styles.devPbfPanel}>
-                <View style={styles.devPbfHeader}>
-                  <Text style={styles.devPbfTitle}>
-                    TEST PBF {effectivePbf}
-                  </Text>
+
+              {isDevToolsOpen && (
+                <>
                   <TouchableOpacity
-                    style={styles.devPbfResetButton}
-                    onPress={handleClearDevPreviewPbf}
-                    accessibilityRole='button'
-                    accessibilityLabel='체형 테스트 pbf 초기화'
+                    style={styles.devHealthButton}
+                    onPress={handleDevAddSteps}
+                    accessibilityLabel='Health Connect 걸음 +1000'
+                    disabled={healthWriting}
                   >
-                    <Text style={styles.devPbfResetText}>LIVE</Text>
-                  </TouchableOpacity>
-                </View>
-                <Pressable
-                  style={styles.devPbfBar}
-                  onLayout={(event) => {
-                    setDevPbfBarWidth(event.nativeEvent.layout.width);
-                  }}
-                  onPress={(event) => {
-                    handlePressDevPbfBar(event.nativeEvent.locationX);
-                  }}
-                  accessibilityRole='adjustable'
-                  accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
-                >
-                  <View
-                    style={[
-                      styles.devPbfBarFill,
-                      { width: `${devPbfProgress * 100}%` },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.devPbfBarThumb,
-                      { left: `${devPbfProgress * 100}%` },
-                    ]}
-                  />
-                </Pressable>
-                <View style={styles.devPbfScaleRow}>
-                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
-                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
-                </View>
-                <View style={styles.devPbfControls}>
-                  <TouchableOpacity
-                    style={styles.devPbfAdjustButton}
-                    onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
-                  >
-                    <Text style={styles.devPbfAdjustText}>-1</Text>
+                    <Text style={styles.devHealthButtonText}>+1000</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.devPbfAdjustButton}
-                    onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
+                    style={styles.devHealthButton}
+                    onPress={resetSync}
+                    accessibilityLabel='걸음 동기화 초기화'
                   >
-                    <Text style={styles.devPbfAdjustText}>+1</Text>
+                    <Text style={styles.devHealthButtonText}>RESET</Text>
                   </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
+                  <View style={styles.devPbfPanel}>
+                    <View style={styles.devPbfHeader}>
+                      <Text style={styles.devPbfTitle}>
+                        TEST PBF {effectivePbf}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.devPbfResetButton}
+                        onPress={handleClearDevPreviewPbf}
+                        accessibilityRole='button'
+                        accessibilityLabel='체형 테스트 pbf 초기화'
+                      >
+                        <Text style={styles.devPbfResetText}>LIVE</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Pressable
+                      style={styles.devPbfBar}
+                      onLayout={(event) => {
+                        setDevPbfBarWidth(event.nativeEvent.layout.width);
+                      }}
+                      onPress={(event) => {
+                        handlePressDevPbfBar(event.nativeEvent.locationX);
+                      }}
+                      accessibilityRole='adjustable'
+                      accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
+                    >
+                      <View
+                        style={[
+                          styles.devPbfBarFill,
+                          { width: `${devPbfProgress * 100}%` },
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.devPbfBarThumb,
+                          { left: `${devPbfProgress * 100}%` },
+                        ]}
+                      />
+                    </Pressable>
+                    <View style={styles.devPbfScaleRow}>
+                      <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
+                      <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
+                    </View>
+                    <View style={styles.devPbfControls}>
+                      <TouchableOpacity
+                        style={styles.devPbfAdjustButton}
+                        onPress={() =>
+                          handleAdjustDevPreviewPbf(-DEV_PBF_STEP)
+                        }
+                      >
+                        <Text style={styles.devPbfAdjustText}>-1</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.devPbfAdjustButton}
+                        onPress={() =>
+                          handleAdjustDevPreviewPbf(DEV_PBF_STEP)
+                        }
+                      >
+                        <Text style={styles.devPbfAdjustText}>+1</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              )}
+            </View>
+          )}
         </ImageBackground>
       )}
       {/* Start / End Button */}

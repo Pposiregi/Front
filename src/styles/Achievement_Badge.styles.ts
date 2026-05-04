@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 5;
@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.divider,
     marginBottom: 5,
-    elevation: 3,
+    ...Shadows.surfaceRaised,
     marginHorizontal: CARD_MARGIN,
   },
   sectionHeader: {

@@ -1,13 +1,7 @@
 import { Platform, StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
-const cardShadow = {
-  shadowColor: Colors.shadow,
-  shadowOffset: { width: 0, height: 8 },
-  shadowOpacity: 0.12,
-  shadowRadius: 12,
-  elevation: 6,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export default StyleSheet.create({
   backdrop: {
@@ -60,10 +54,7 @@ export default StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     marginBottom: 10,
-    ...Platform.select({
-      ios: cardShadow,
-      android: { ...cardShadow, elevation: 2 },
-    }),
+    ...Shadows.surfaceFlat,
   },
   fieldHeader: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 const CARD_WIDTH = Math.max(
   150,
@@ -49,7 +49,6 @@ export default StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.accent,
     backgroundColor: Colors.accentSoft,
-    shadowOpacity: 0.15,
-    elevation: 6,
+    ...Shadows.surfaceRaised,
   },
 });
