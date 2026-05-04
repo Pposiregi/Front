@@ -14,6 +14,7 @@ import { ItemModal } from './ItemModal';
 import { getBadges, getUserBadges } from '@api/badgeApi';
 import { badgeImages } from '@shared/constants/badgeImages';
 import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
+import { Colors } from '@styles/theme';
 
 interface BadgeUI extends Badge {
   unlocked: boolean;
@@ -119,7 +120,7 @@ function BadgeTab() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#111827' />
+        <ActivityIndicator size='large' color={Colors.textPrimary} />
       </View>
     );
   }

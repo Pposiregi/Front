@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   startButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
     padding: 15,
     borderRadius: Radius.sm,
     marginTop: Spacing.xxl,

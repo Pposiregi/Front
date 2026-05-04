@@ -1,17 +1,17 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Fonts } from './theme';
+import { Colors, Fonts } from './theme';
 
 const colors = {
-  background: '#F3F4F6',
-  surface: '#FFFFFF',
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  divider: '#E5E7EB',
-  chipBackground: 'rgba(17, 24, 39, 0.75)',
-  chipText: '#FFFFFF',
-  shadow: '#000000',
+  background: Colors.background,
+  surface: Colors.surface,
+  textPrimary: Colors.textPrimary,
+  textSecondary: Colors.textSecondary,
+  textMuted: Colors.textMuted,
+  divider: Colors.divider,
+  chipBackground: Colors.devButton,
+  chipText: Colors.surface,
+  shadow: Colors.shadow,
 };
 
 const cardShadow = {
@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: Colors.surfaceOverlay,
   },
   mapRelocatingCard: {
     flexDirection: 'row',
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: Colors.surfaceOverlaySolid,
     shadowColor: colors.shadow,
     shadowOpacity: 0.1,
     shadowRadius: 10,

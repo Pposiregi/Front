@@ -416,7 +416,7 @@ export default StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
@@ -424,7 +424,7 @@ export default StyleSheet.create({
 
   petOnboardingCard: {
     width: '80%',
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
@@ -445,12 +445,12 @@ export default StyleSheet.create({
   petTypeButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: Colors.background,
     borderRadius: 10,
   },
 
   petOnboardingStart: {
-    backgroundColor: '#111827',
+    backgroundColor: Colors.devButton,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

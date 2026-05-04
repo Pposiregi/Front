@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { styles } from '@styles/UserInfoPage.styles';
+import { Colors } from '@styles/theme';
 import {
   containsBannedWord,
   isValidDate,
@@ -153,7 +154,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
           style={styles.textInput}
           onChangeText={onChangeNickName}
           placeholder='사용할 닉네임을 입력하세요.'
-          placeholderTextColor='#666'
+          placeholderTextColor={Colors.textMuted}
           ref={nameRef}
           returnKeyType='next'
           onSubmitEditing={() => yearRef.current?.focus()}
@@ -166,7 +167,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             style={styles.textInputBirth}
             onChangeText={onChangeYear}
             placeholder='YYYY'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             ref={yearRef}
             onSubmitEditing={() => monthRef.current?.focus()}
             keyboardType='number-pad'
@@ -176,7 +177,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             style={styles.textInputBirth}
             onChangeText={onChangeMonth}
             placeholder='MM'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             ref={monthRef}
             onSubmitEditing={() => dayRef.current?.focus()}
             keyboardType='number-pad'
@@ -186,7 +187,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             style={styles.textInputBirth}
             onChangeText={onChangeDay}
             placeholder='DD'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             ref={dayRef}
             keyboardType='number-pad'
             maxLength={2}
@@ -226,7 +227,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             style={styles.weightInput}
             onChangeText={onChangeWeight}
             placeholder='체중 입력'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='number-pad'
             ref={weightRef}
             maxLength={3}
@@ -237,7 +238,7 @@ const UserInfoPage: React.FC<UserInfoProps> = ({ onNext }) => {
             style={styles.weightInput}
             onChangeText={onChangeHeight}
             placeholder='키 입력'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='number-pad'
             maxLength={3}
             ref={heightref}

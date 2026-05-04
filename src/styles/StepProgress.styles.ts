@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Fonts } from './theme';
+import { Colors, Fonts } from './theme';
 
 const CARD_WIDTH = Math.max(
   150,
@@ -13,14 +13,14 @@ const CARD_HEIGHT = Math.max(
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: Colors.background,
     padding: 12,
     borderRadius: 12,
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: Colors.divider,
   },
   titleRow: {
     flexDirection: 'row',
@@ -47,8 +47,8 @@ export default StyleSheet.create({
   },
   readyCard: {
     borderWidth: 2,
-    borderColor: '#FEC288',
-    backgroundColor: '#ffefe0',
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accentSoft,
     shadowOpacity: 0.15,
     elevation: 6,
   },

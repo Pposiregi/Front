@@ -26,6 +26,8 @@ export const Colors = {
 
   success: '#4CAF50',
 
+  kakao: '#FDDC3F',
+
   error: '#D9534F',
   errorSoft: '#FEE2E2',
   errorText: '#991B1B',

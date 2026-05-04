@@ -22,6 +22,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
+import { Colors } from '@styles/theme';
 import { getSocialLogin } from '@api/socialLoginApi';
 import { getUser } from '@api/mainApi';
 import { logLogin } from '@utils/analytics';
@@ -229,7 +230,7 @@ const SocialLoginPage = () => {
       {loading ? (
         // loading이 true일 때 로딩 스피너를 보여줍니다.
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size='large' color='#000000' />
+          <ActivityIndicator size='large' color={Colors.textPrimary} />
         </View>
       ) : (
         // loading이 false일 때 버튼들을 보여줍니다.

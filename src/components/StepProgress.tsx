@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, Dimensions, Pressable, Image } from 'react-native';
 import styles from '@styles/StepProgress.styles';
 import * as Progress from 'react-native-progress';
+import { Colors } from '@styles/theme';
 
 type Props = {
   title: string;
@@ -50,7 +51,7 @@ export const StepProgress = ({
       <Progress.Bar
         progress={progress}
         width={barWidth}
-        color={isReadyToComplete ? '#FEC288' : '#cf8b8b'}
+        color={isReadyToComplete ? Colors.accent : Colors.error}
       />
       {isReadyToComplete && !isCompleted && (
         <Image

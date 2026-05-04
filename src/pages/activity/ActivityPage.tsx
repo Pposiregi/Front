@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart } from 'react-native-chart-kit';
 import Svg, { Circle, Ellipse } from 'react-native-svg';
 import {
   ChartData,
@@ -18,6 +18,7 @@ import {
   GPS_SESSION,
   WeeklyStepItem,
 } from '../../types/activity';
+import ActivityCardSurface from './ActivityCardSurface';
 import SessionItem from './SessionItem';
 import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
@@ -110,13 +111,7 @@ const PawTitleIcon = ({ color }: { color: string }) => (
     <Circle cx={6.2} cy={6.6} r={2.4} fill={color} />
     <Circle cx={11} cy={5.2} r={2.4} fill={color} />
     <Circle cx={15.8} cy={6.6} r={2.4} fill={color} />
-    <Ellipse
-      cx={11}
-      cy={13.6}
-      rx={5}
-      ry={4}
-      fill={color}
-    />
+    <Ellipse cx={11} cy={13.6} rx={5} ry={4} fill={color} />
   </Svg>
 );
 
@@ -262,8 +257,8 @@ function ActivityPage() {
     () => ({
       backgroundGradientFrom: activityTheme.colors.surface,
       backgroundGradientTo: activityTheme.colors.surface,
-      backgroundGradientFromOpacity: 1,
-      backgroundGradientToOpacity: 1,
+      backgroundGradientFromOpacity: 0,
+      backgroundGradientToOpacity: 0,
       decimalPlaces: 0,
       color: (opacity = 1) => toRgba(activityTheme.colors.accent, opacity),
       labelColor: (opacity = 1) =>
@@ -272,27 +267,12 @@ function ActivityPage() {
         stroke: activityTheme.colors.divider,
         strokeDasharray: '0',
       },
-      propsForDots: {
-        r: '4',
-        strokeWidth: '2',
-        stroke: activityTheme.colors.surface,
-      },
+      barPercentage: 0.58,
+      barRadius: 5,
       useShadowColorFromDataset: false,
     }),
     [toRgba]
   );
-
-  /**
-   * Y축 레이블을 보기 좋은 값(천 단위)으로 보정한다.
-   */
-  const formatStepLabel = useCallback((value: string) => {
-    const numeric = Number(value);
-    if (!Number.isFinite(numeric)) {
-      return value;
-    }
-    const rounded = Math.round(numeric / 1000) * 1000;
-    return Math.max(0, rounded).toLocaleString();
-  }, []);
 
   /**
    * 월간 GPS 세션 리스트
@@ -473,11 +453,23 @@ function ActivityPage() {
       item.date.substring(5).replace('-', '/')
     );
     const dataValues = normalizedWeeklySteps.map((item) => item.step);
+    const maxValue = Math.max(...dataValues);
     setChartData({
       labels,
-      datasets: [{ data: dataValues, strokeWidth: 3 }],
+      datasets: [
+        {
+          data: dataValues,
+          colors: dataValues.map(
+            (value) =>
+              (opacity = 1) =>
+                value === maxValue && value > 0
+                  ? toRgba(activityTheme.colors.accent, opacity)
+                  : toRgba(activityTheme.colors.divider, opacity)
+          ),
+        },
+      ],
     });
-  }, [normalizedWeeklySteps]);
+  }, [normalizedWeeklySteps, toRgba]);
 
   useEffect(() => {
     if (!isFocused) return;
@@ -649,6 +641,7 @@ function ActivityPage() {
         <SectionTitle iconTone='accent'>오늘은</SectionTitle>
       </View>
       <View style={styles.summaryCard}>
+        <ActivityCardSurface />
         <View style={styles.summaryMetaRow}>
           <Text style={styles.summaryDateText}>{todayLabel}</Text>
         </View>
@@ -677,7 +670,7 @@ function ActivityPage() {
             </View>
             <View style={styles.heroMetricDivider} />
             <View style={styles.heroMetricRow}>
-              <Text style={styles.heroMetricLabel}>칼로리</Text>
+              <Text style={styles.heroMetricLabel}>소비 열량</Text>
               <Text style={styles.heroMetricValue}>
                 {burnValue.toLocaleString()} kcal
               </Text>
@@ -691,6 +684,7 @@ function ActivityPage() {
         <SectionTitle>이번 주는</SectionTitle>
       </View>
       <View style={styles.chartCard}>
+        <ActivityCardSurface />
         {chartData.labels.length === 0 || !hasWeeklySteps ? (
           <View style={styles.chartEmpty}>
             <Text style={styles.chartEmptyText}>
@@ -707,16 +701,26 @@ function ActivityPage() {
                   <Text style={styles.chartMetaUnit}> step</Text>
                 </Text>
               </View>
-              <View style={styles.chartMetaDivider} />
-              <View style={styles.chartMetaItem}>
-                <Text style={styles.chartMetaLabel}>최고</Text>
-                <Text style={styles.chartMetaValue}>
+              <View style={[styles.chartMetaItem, styles.chartMetaItemAccent]}>
+                <Text
+                  style={[styles.chartMetaLabel, styles.chartMetaLabelAccent]}
+                >
+                  최고
+                </Text>
+                <Text
+                  style={[styles.chartMetaValue, styles.chartMetaValueAccent]}
+                >
                   {weeklyStepStats.max.toLocaleString()}
-                  <Text style={styles.chartMetaUnit}> step</Text>
+                  <Text
+                    style={[styles.chartMetaUnit, styles.chartMetaUnitAccent]}
+                  >
+                    {' '}
+                    step
+                  </Text>
                 </Text>
               </View>
             </View>
-            <LineChart
+            <BarChart
               data={chartData}
               width={chartWidth}
               height={chartHeight}
@@ -725,15 +729,14 @@ function ActivityPage() {
               withVerticalLabels={true}
               withHorizontalLabels={true}
               withInnerLines
-              withOuterLines={false}
-              withShadow={false}
               fromZero
               segments={4}
-              formatYLabel={formatStepLabel}
+              showBarTops={false}
+              withCustomBarColorFromData
+              flatColor
               chartConfig={chartConfig}
-              bezier
               style={StyleSheet.flatten([
-                styles.lineChartStyle,
+                styles.barChartStyle,
                 { marginTop: chartTopInset, paddingBottom: 1 },
               ])}
             />
@@ -741,10 +744,8 @@ function ActivityPage() {
         )}
       </View>
 
-      <View style={styles.sectionHeaderTight}>
+      <View style={styles.sectionHeaderRow}>
         <SectionTitle>이번 달은</SectionTitle>
-      </View>
-      <View style={styles.monthlyControlRow}>
         <View style={styles.segmentedControl}>
           <Pressable
             onPress={() => setListTab('daily')}
@@ -805,6 +806,7 @@ function ActivityPage() {
         <View key='monthly-daily-list'>
           {showEmptyDaily ? (
             <View style={styles.emptyCard}>
+              <ActivityCardSurface />
               <Text style={styles.emptyCardTitle}>
                 이달의 일별 기록이 없어요.
               </Text>
@@ -819,6 +821,7 @@ function ActivityPage() {
               );
               return (
                 <View key={item.date} style={styles.listCard}>
+                  <ActivityCardSurface />
                   <View style={styles.listMarker} />
                   <View style={styles.listTextColumn}>
                     <Text style={styles.listTitle}>
@@ -853,6 +856,7 @@ function ActivityPage() {
         <View key='monthly-session-list'>
           {showEmptySessions ? (
             <View style={styles.emptyCard}>
+              <ActivityCardSurface />
               <Text style={styles.emptyCardTitle}>
                 이달의 러닝기록이 없어요.
               </Text>

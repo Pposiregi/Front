@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   },
   requiredInfo: {
     fontSize: Typography.bodySmall,
-    color: '#FF6347',
+    color: Colors.accentStrong,
     marginBottom: SCREEN_HEIGHT * 0.04,
     fontFamily: Fonts.JUA,
   },
@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   startButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
     padding: 15,
     borderRadius: Radius.sm,
     marginTop: SCREEN_HEIGHT * 0.05,

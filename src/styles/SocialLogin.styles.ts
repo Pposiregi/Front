@@ -1,9 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Fonts } from './theme';
+import { Colors, Fonts } from './theme';
 
-const LOGIN_TEXT_COLOR = '#2B2B2B';
-const LOGIN_BACKGROUND_COLOR = '#FFFFFF';
 const LOGIN_APP_ICON_SIZE = Math.min(SCREEN_WIDTH * 0.32, 128);
 
 export const styles = StyleSheet.create({
@@ -12,7 +10,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 100,
-    backgroundColor: LOGIN_BACKGROUND_COLOR,
+    backgroundColor: Colors.surface,
   },
   loginIntro: {
     width: SCREEN_WIDTH * 0.7,
@@ -31,7 +29,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Fonts.JUA,
     fontWeight: '800',
-    color: LOGIN_TEXT_COLOR,
+    color: Colors.textPrimary,
   },
   subText: {
     marginTop: 10,
@@ -39,10 +37,10 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'center',
     fontFamily: Fonts.GowunDodum,
-    color: '#686868',
+    color: Colors.textSecondary,
   },
   kakaoButton: {
-    backgroundColor: '#FDDC3F',
+    backgroundColor: Colors.kakao,
     borderRadius: 40,
     borderWidth: 1,
     width: SCREEN_WIDTH * 0.7,
@@ -59,7 +57,7 @@ export const styles = StyleSheet.create({
     marginRight: 22,
   },
   googleButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: 40,
     borderWidth: 1,
     width: SCREEN_WIDTH * 0.7,
@@ -79,12 +77,12 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Fonts.JUA,
     fontWeight: '800',
-    color: LOGIN_TEXT_COLOR,
+    color: Colors.textPrimary,
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: LOGIN_BACKGROUND_COLOR,
+    backgroundColor: Colors.surface,
   },
 });

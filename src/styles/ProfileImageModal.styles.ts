@@ -4,7 +4,7 @@ import { Colors, Fonts, Typography } from './theme';
 export default StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: Colors.overlaySoft,
     justifyContent: 'flex-end',
   },
   container: {
@@ -50,7 +50,7 @@ export default StyleSheet.create({
   },
   saveBtn: {
     padding: 10,
-    backgroundColor: '#4F46E5',
+    backgroundColor: Colors.infoStrong,
     borderRadius: 8,
   },
   saveText: {
@@ -86,7 +86,7 @@ export default StyleSheet.create({
   },
   confirmBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },

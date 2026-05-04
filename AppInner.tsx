@@ -48,6 +48,7 @@ import {
 } from '@utils/pushTokenStorage';
 import PetCreatePage from '@pages/SignUpFlow/PetCreatePage';
 import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
+import { Colors } from '@styles/theme';
 
 export type LoggedInParamList = {
   Activity: undefined;
@@ -479,7 +480,7 @@ function AppInner() {
     console.log('>>> Rendering loading indicator');
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#000000' />
+        <ActivityIndicator size='large' color={Colors.textPrimary} />
       </View>
     );
   }
@@ -576,7 +577,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
   },
   tabIcon: {
     width: 38,
@@ -585,13 +586,13 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     paddingTop: 10,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderTopWidth: 0.5,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: Colors.divider,
   },
   tabBarLocked: {
-    backgroundColor: '#D1D5DB',
-    borderTopColor: '#9CA3AF',
+    backgroundColor: Colors.divider,
+    borderTopColor: Colors.textMuted,
   },
   tabBarItem: {
     justifyContent: 'center',

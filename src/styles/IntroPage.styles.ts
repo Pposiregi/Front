@@ -37,6 +37,6 @@ export const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
   },
 });

@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selected: {
-    borderColor: '#FF6347',
+    borderColor: Colors.accentStrong,
     borderWidth: 2,
   },
   emoji: {
@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.Pretendard,
   },
   button: {
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
     padding: 18,
     borderRadius: 14,
     alignItems: 'center',

@@ -1,8 +1,8 @@
 import { Platform, StyleSheet } from 'react-native';
-import { Fonts } from './theme';
+import { Colors, Fonts } from './theme';
 
 const cardShadow = {
-  shadowColor: '#000',
+  shadowColor: Colors.shadow,
   shadowOffset: { width: 0, height: 8 },
   shadowOpacity: 0.12,
   shadowRadius: 12,
@@ -12,11 +12,11 @@ const cardShadow = {
 export default StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.overlaySoft,
   },
   card: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: 18,
     paddingVertical: 16,
     paddingHorizontal: 16,
@@ -31,19 +31,19 @@ export default StyleSheet.create({
   dateLabel: {
     fontFamily: Fonts.JUA,
     fontSize: 18,
-    color: '#111827',
+    color: Colors.textPrimary,
   },
   subtitle: {
     marginTop: 4,
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
-    color: '#6B7280',
+    color: Colors.textSecondary,
   },
   badge: {
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#FBBF77',
+    backgroundColor: Colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
     ...cardShadow,
@@ -52,10 +52,10 @@ export default StyleSheet.create({
     fontSize: 22,
   },
   field: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.divider,
     paddingHorizontal: 14,
     paddingVertical: 10,
     marginBottom: 10,
@@ -74,7 +74,7 @@ export default StyleSheet.create({
     fontFamily: Fonts.JUA,
     fontSize: 16,
     lineHeight: 20,
-    color: '#111827',
+    color: Colors.textPrimary,
   },
   fieldRight: {
     alignItems: 'flex-end',
@@ -92,48 +92,48 @@ export default StyleSheet.create({
     fontSize: 17,
     lineHeight: 22,
     fontWeight: '700',
-    color: '#6B7280',
+    color: Colors.textSecondary,
     paddingVertical: Platform.select({ ios: 4, android: 0 }),
     paddingHorizontal: 0,
   },
   fieldValue: {
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
-    color: '#4B5563',
+    color: Colors.textSecondary,
   },
   fieldNumber: {
     fontFamily: Fonts.Pretendard,
     fontSize: 17,
     lineHeight: 22,
     fontWeight: '700',
-    color: '#111827',
+    color: Colors.textPrimary,
   },
   fieldUnit: {
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
     lineHeight: 18,
-    color: '#6B7280',
+    color: Colors.textSecondary,
     marginLeft: 5,
   },
   progressTrack: {
     width: '100%',
     height: 8,
     borderRadius: 10,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.divider,
     marginTop: 8,
   },
   progressTrackFat: {
-    backgroundColor: '#EAE8FD',
+    backgroundColor: Colors.accentSoft,
   },
   progressBar: {
     height: 8,
     borderRadius: 10,
   },
   weightProgressBar: {
-    backgroundColor: '#7385F5',
+    backgroundColor: Colors.infoStrong,
   },
   fatProgressBar: {
-    backgroundColor: '#7B5EF7',
+    backgroundColor: Colors.accentStrong,
   },
   aimText: {
     marginTop: 6,
@@ -141,7 +141,7 @@ export default StyleSheet.create({
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
     lineHeight: 17,
-    color: '#9CA3AF',
+    color: Colors.textMuted,
   },
   infoRow: {
     flexDirection: 'row',
@@ -156,7 +156,7 @@ export default StyleSheet.create({
   infoText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
-    color: '#6B7280',
+    color: Colors.textSecondary,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -171,21 +171,21 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   primaryButton: {
-    backgroundColor: '#F29E3E',
+    backgroundColor: Colors.accentStrong,
   },
   primaryText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: Colors.surface,
     fontWeight: '600',
   },
   secondaryButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: Colors.background,
   },
   secondaryText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 14,
-    color: '#6B7280',
+    color: Colors.textSecondary,
   },
   skipToday: {
     marginTop: 12,
@@ -194,7 +194,7 @@ export default StyleSheet.create({
   skipTodayText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 13,
-    color: '#9CA3AF',
+    color: Colors.textMuted,
     textDecorationLine: 'underline',
   },
   buttonDisabled: {

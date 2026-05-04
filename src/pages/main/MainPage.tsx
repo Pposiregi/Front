@@ -30,6 +30,7 @@ import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN í™”ë
 import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
 import runLegSwirl from '@assets/pet/etc/swirl.png';
 import { SCREEN_WIDTH } from '@styles/dimensions';
+import { Colors } from '@styles/theme';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
@@ -917,7 +918,7 @@ export const MainPage = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#111827' />
+        <ActivityIndicator size='large' color={Colors.textPrimary} />
       </View>
     );
   }

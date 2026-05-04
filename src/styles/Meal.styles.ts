@@ -492,7 +492,7 @@ export default StyleSheet.create({
   },
   imagePreviewBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.88)',
+    backgroundColor: Colors.overlayDark,
   },
   imagePreview: {
     width: '100%',

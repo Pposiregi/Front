@@ -101,11 +101,11 @@ export const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#00000088',
+    backgroundColor: Colors.overlayDark,
   },
   modalContent: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
   },
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
   modalButton: {
     padding: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: Colors.disabled,
     borderRadius: 8,
     marginBottom: 12,
   },

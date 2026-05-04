@@ -16,7 +16,10 @@ const chartPadding = spacing.lg;
 const cardRadius = Math.max(Radius.md + 2, Math.round(deviceWidth * 0.04));
 const chartRadius = Math.max(Radius.sm + 2, Math.round(deviceWidth * 0.03));
 const headerFont = Math.max(Typography.h1, Math.round(deviceWidth * 0.06));
-const subHeaderFont = Math.max(Typography.bodySmall, Math.round(deviceWidth * 0.035));
+const subHeaderFont = Math.max(
+  Typography.bodySmall,
+  Math.round(deviceWidth * 0.035)
+);
 const metaFont = Math.max(Typography.caption, Math.round(deviceWidth * 0.03));
 const metricFont = Math.max(Typography.body, Math.round(deviceWidth * 0.042));
 const statNumberFont = Math.max(
@@ -33,17 +36,43 @@ const statUnitFont = Math.max(
 );
 const sectionTitleFont = Typography.h1;
 const sectionTitleLineHeight = Math.round(sectionTitleFont * 1.16);
+const runningColors = {
+  background: Colors.background,
+  surface: Colors.surface,
+  surfaceHigh: Colors.surface,
+  surfaceSoft: Colors.background,
+  textPrimary: Colors.textPrimary,
+  textSecondary: Colors.textSecondary,
+  textMuted: Colors.textMuted,
+  divider: Colors.divider,
+  border: Colors.divider,
+  orange: Colors.accentStrong,
+  orangeStrong: Colors.accentStrong,
+  white: Colors.surface,
+};
 
 const cardShadow = {
   ...Shadows.soft,
-  shadowOpacity: 0.07,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 4,
+  shadowColor: Colors.shadow,
+  shadowOpacity: 0.045,
+  shadowRadius: 10,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 1,
 };
 
 export const activityTheme = {
-  colors: Colors,
+  colors: {
+    ...Colors,
+    background: runningColors.background,
+    surface: runningColors.surface,
+    textPrimary: runningColors.textPrimary,
+    textSecondary: runningColors.textSecondary,
+    textMuted: runningColors.textMuted,
+    divider: runningColors.divider,
+    accent: runningColors.orange,
+    accentStrong: runningColors.orange,
+    accentDeep: runningColors.orangeStrong,
+  },
   spacing,
   radius: {
     card: cardRadius,
@@ -55,7 +84,7 @@ export const activityTheme = {
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: runningColors.background,
   },
   contentContainer: {
     padding: contentPadding,
@@ -77,13 +106,13 @@ export const styles = StyleSheet.create({
   header: {
     fontFamily: Fonts.JUA,
     fontSize: headerFont,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     textAlign: 'center',
   },
   headerSub: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
     marginTop: spacing.xxs,
   },
   arrowButton: {
@@ -95,23 +124,31 @@ export const styles = StyleSheet.create({
   },
   arrowText: {
     fontSize: Typography.h2,
-    color: Colors.textSecondary,
+    color: runningColors.textPrimary,
     fontFamily: Fonts.JUA,
   },
   arrowTextDisabled: {
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
   },
   subHeaderText: {
     fontFamily: Fonts.Pretendard,
     fontSize: subHeaderFont,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
     marginTop: spacing.xs,
   },
   summaryCard: {
-    backgroundColor: Colors.surface,
+    position: 'relative',
+    backgroundColor: runningColors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: runningColors.border,
     ...cardShadow,
+  },
+  cardSurfaceLayer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: runningColors.surface,
   },
   summaryMetaRow: {
     alignItems: 'flex-end',
@@ -120,12 +157,12 @@ export const styles = StyleSheet.create({
   summaryDateText: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
   },
   summaryNotice: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.md,
   },
@@ -146,13 +183,13 @@ export const styles = StyleSheet.create({
     fontSize: statNumberFont,
     lineHeight: Math.round(statNumberFont * 1.16),
     fontWeight: '800',
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
   },
   progressTarget: {
     fontFamily: Fonts.Pretendard,
     fontSize: statUnitFont,
     lineHeight: Math.round(statUnitFont * 1.25),
-    color: Colors.textMuted,
+    color: runningColors.orange,
     marginTop: spacing.xxs,
   },
   heroMetrics: {
@@ -168,24 +205,24 @@ export const styles = StyleSheet.create({
   heroMetricLabel: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
   },
   heroMetricValue: {
     fontFamily: Fonts.Pretendard,
     fontSize: statNumberFont,
     lineHeight: Math.round(statNumberFont * 1.16),
     fontWeight: '800',
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
   },
   heroMetricDivider: {
     height: 1,
-    backgroundColor: Colors.divider,
+    backgroundColor: runningColors.divider,
     alignSelf: 'stretch',
   },
   heroComment: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
     marginTop: spacing.md,
   },
   badge: {
@@ -194,18 +231,18 @@ export const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   badgeSuccess: {
-    backgroundColor: Colors.badgeSuccess,
+    backgroundColor: runningColors.orange,
   },
   badgeProgress: {
-    backgroundColor: Colors.badgeProgress,
+    backgroundColor: runningColors.surfaceSoft,
   },
   badgeMuted: {
-    backgroundColor: Colors.background,
+    backgroundColor: runningColors.surfaceSoft,
   },
   badgeText: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -218,24 +255,24 @@ export const styles = StyleSheet.create({
   summaryLabel: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
   },
   summaryValue: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.h2,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     marginTop: spacing.sm,
   },
   summaryUnit: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
     marginTop: spacing.xxs,
   },
   summaryDivider: {
     width: 1,
     height: 46,
-    backgroundColor: Colors.divider,
+    backgroundColor: runningColors.divider,
   },
   sectionHeader: {
     minHeight: Math.max(34, sectionTitleLineHeight),
@@ -243,18 +280,13 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     justifyContent: 'center',
   },
-  sectionHeaderTight: {
+  sectionHeaderRow: {
     minHeight: Math.max(34, sectionTitleLineHeight),
     marginTop: Spacing.xxl,
     marginBottom: Spacing.md,
-    justifyContent: 'center',
-  },
-  monthlyControlRow: {
-    marginTop: 0,
-    marginBottom: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
   },
   sectionTitleContent: {
     flexDirection: 'row',
@@ -271,16 +303,16 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.JUA,
     fontSize: sectionTitleFont,
     lineHeight: sectionTitleLineHeight,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     marginRight: spacing.md,
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: runningColors.surfaceSoft,
     borderRadius: Radius.pill,
     padding: spacing.xxs,
     borderWidth: 1,
-    borderColor: Colors.divider,
+    borderColor: runningColors.border,
   },
   segmentedButton: {
     paddingVertical: spacing.xxs,
@@ -293,24 +325,23 @@ export const styles = StyleSheet.create({
     minWidth: Math.max(58, Math.round(deviceWidth * 0.16)),
   },
   segmentedButtonActive: {
-    backgroundColor: Colors.surface,
-    borderColor: Colors.accentStrong,
-    ...cardShadow,
+    backgroundColor: runningColors.surface,
+    borderColor: runningColors.orange,
   },
   segmentedText: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
   },
   segmentedTextActive: {
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
-    color: Colors.accentStrong,
+    color: runningColors.orange,
   },
   itemContainer: {
     padding: spacing.lg,
     marginVertical: spacing.xs,
-    backgroundColor: Colors.surface,
+    backgroundColor: runningColors.surface,
     borderRadius: cardRadius,
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -323,20 +354,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     marginTop: 0,
     marginBottom: spacing.sm,
-    backgroundColor: Colors.surface,
+    backgroundColor: runningColors.surface,
     borderRadius: cardRadius,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.divider,
+    borderColor: runningColors.border,
     ...cardShadow,
   },
   listMarker: {
     width: Math.max(10, Math.round(deviceWidth * 0.03)),
     height: Math.max(10, Math.round(deviceWidth * 0.03)),
     borderRadius: Radius.pill,
-    backgroundColor: Colors.accentStrong,
+    backgroundColor: runningColors.orange,
     marginRight: spacing.md,
   },
   listTextColumn: {
@@ -347,20 +379,20 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.Pretendard,
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     lineHeight: 20,
   },
   listSubtitle: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
     marginTop: spacing.xxs,
     lineHeight: 18,
   },
   listMeta: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
     marginTop: spacing.xxs,
   },
   listRight: {
@@ -384,15 +416,15 @@ export const styles = StyleSheet.create({
     borderRadius: Radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: runningColors.surfaceSoft,
     borderWidth: 1,
-    borderColor: Colors.divider,
+    borderColor: runningColors.border,
   },
   sessionDeleteText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 16,
     lineHeight: 18,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
   },
   sessionReloadRow: {
     // 숨긴 항목 복구 버튼은 러닝별 탭의 보조 액션으로 카드 목록 바로 위에 둔다.
@@ -405,9 +437,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     borderRadius: Radius.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: runningColors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.accentStrong,
+    borderColor: runningColors.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -417,7 +449,7 @@ export const styles = StyleSheet.create({
   sessionReloadText: {
     fontFamily: Fonts.JUA,
     fontSize: 14,
-    color: Colors.accentStrong,
+    color: runningColors.white,
     lineHeight: 18,
   },
   listDistanceRow: {
@@ -428,10 +460,10 @@ export const styles = StyleSheet.create({
   listValue: {
     fontFamily: Fonts.Pretendard,
     fontSize: 14,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
   },
   listValueAccent: {
-    color: Colors.accentStrong,
+    color: runningColors.orange,
   },
   listValueNumber: {
     fontSize: 15,
@@ -442,7 +474,7 @@ export const styles = StyleSheet.create({
     marginLeft: spacing.xxs,
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
   },
   sessionTextColumn: {
     flexDirection: 'column',
@@ -450,24 +482,24 @@ export const styles = StyleSheet.create({
   dateText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 14,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     marginBottom: spacing.xxs,
   },
   timeText: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
     marginRight: spacing.xxl,
   },
   distanceText: {
     fontFamily: Fonts.Pretendard,
     fontSize: 16,
-    color: Colors.accentStrong,
+    color: runningColors.orange,
     marginLeft: 'auto',
   },
   detailLink: {
     fontSize: 16,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
     marginLeft: spacing.sm,
@@ -478,75 +510,95 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: spacing.xl,
     fontFamily: Fonts.Pretendard,
+    color: runningColors.textPrimary,
   },
   chartCard: {
-    backgroundColor: Colors.surface,
+    position: 'relative',
+    backgroundColor: runningColors.surface,
     borderRadius: cardRadius,
     paddingVertical: chartPadding,
     paddingHorizontal: chartPadding,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: runningColors.border,
     ...cardShadow,
   },
   chartMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xs,
+    marginHorizontal: spacing.xs,
+    marginBottom: spacing.xs,
   },
   chartMetaItem: {
     flex: 1,
+    minHeight: 78,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: runningColors.surfaceSoft,
+    justifyContent: 'space-between',
   },
-  chartMetaDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: Colors.divider,
-    marginHorizontal: spacing.lg,
+  chartMetaItemAccent: {
+    marginLeft: spacing.md,
+    backgroundColor: runningColors.orange,
   },
   chartMetaLabel: {
     fontFamily: Fonts.Pretendard,
     fontSize: metaFont,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
     marginBottom: spacing.xxs,
+  },
+  chartMetaLabelAccent: {
+    color: Colors.surfaceOverlayStrong,
   },
   chartMetaValue: {
     fontFamily: Fonts.Pretendard,
     fontSize: weeklyStatNumberFont,
     lineHeight: Math.round(weeklyStatNumberFont * 1.18),
     fontWeight: '800',
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
+  },
+  chartMetaValueAccent: {
+    color: runningColors.white,
   },
   chartMetaUnit: {
     fontFamily: Fonts.Pretendard,
     fontSize: statUnitFont,
     lineHeight: Math.round(statUnitFont * 1.25),
     fontWeight: '600',
-    color: Colors.textMuted,
+    color: runningColors.orange,
   },
-  lineChartStyle: {
+  chartMetaUnitAccent: {
+    color: Colors.surfaceOverlaySolid,
+  },
+  barChartStyle: {
     borderRadius: chartRadius,
     alignSelf: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: 'transparent',
   },
   loadingIndicator: {
     marginTop: spacing.xxl,
   },
   emptyCard: {
-    backgroundColor: Colors.surface,
+    position: 'relative',
+    backgroundColor: runningColors.surface,
     borderRadius: cardRadius,
     padding: spacing.xl,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.divider,
+    borderColor: runningColors.border,
     ...cardShadow,
   },
   emptyCardTitle: {
     fontFamily: Fonts.JUA,
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: runningColors.textPrimary,
     marginBottom: spacing.sm,
   },
   emptyCardText: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: runningColors.textSecondary,
   },
   chartEmpty: {
     alignItems: 'center',
@@ -556,6 +608,6 @@ export const styles = StyleSheet.create({
   chartEmptyText: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.caption,
-    color: Colors.textMuted,
+    color: runningColors.textMuted,
   },
 });

@@ -11,6 +11,7 @@ import { parseGpsDateTime } from '@utils/dateUtil';
 import { getSessionDetail } from '@api/activityApi';
 import { mock_gps_log, mockSessionMetadata } from './mock';
 import useActivityDetailMap from '@hooks/useActivityDetailMap';
+import { Colors } from '@styles/theme';
 
 const MAP_HEIGHT = SCREEN_HEIGHT * 0.36;
 const MAP_WIDTH = SCREEN_WIDTH - 40;
@@ -230,7 +231,7 @@ const ActivityDetailPage = () => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size='large' color='#007aff' />
+        <ActivityIndicator size='large' color={Colors.info} />
         <Text style={styles.loadingText}>활동 기록을 불러오는 중...</Text>
       </View>
     );
@@ -314,7 +315,7 @@ const ActivityDetailPage = () => {
           {isMapRelocating ? (
             <View style={styles.mapRelocatingOverlay}>
               <View style={styles.mapRelocatingCard}>
-                <ActivityIndicator size='small' color='#2563EB' />
+                <ActivityIndicator size='small' color={Colors.info} />
                 <Text style={styles.mapRelocatingText}>지도를 불러오는 중...</Text>
               </View>
             </View>

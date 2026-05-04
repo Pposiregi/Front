@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   // 모달
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
   },
   modalKcalText: {
     fontSize: Typography.bodyLarge,
-    color: '#555',
+    color: Colors.textSecondary,
     fontFamily: Fonts.Pretendard,
   },
 });

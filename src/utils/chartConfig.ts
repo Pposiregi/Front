@@ -1,14 +1,16 @@
 // 그래프 설정
+import { Colors } from '@styles/theme';
+
 const chartConfig = {
-  backgroundGradientFrom: '#fff',
-  backgroundGradientTo: '#fff',
+  backgroundGradientFrom: Colors.surface,
+  backgroundGradientTo: Colors.surface,
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(0, 150, 136, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  color: () => Colors.success,
+  labelColor: () => Colors.textPrimary,
 
   // 배경 그리드 라인
   propsForBackgroundLines: {
-    stroke: '#F0F0F0',
+    stroke: Colors.divider,
     strokeDasharray: '4, 4', // 점선으로 유지
     strokeWidth: 1,
   },
