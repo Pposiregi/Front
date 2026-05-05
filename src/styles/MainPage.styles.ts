@@ -27,23 +27,25 @@ const CONTAINER_TOP_PADDING = Platform.select({
   default: layoutScale(24, 20, 32),
 });
 const START_BUTTON_SIZE = Math.max(
-  layoutScale(68, 64, 72),
-  Math.min(layoutScale(82, 76, 88), Math.round(SCREEN_WIDTH * 0.205))
+  layoutScale(52, 49, 58),
+  Math.min(layoutScale(64, 58, 70), Math.round(SCREEN_WIDTH * 0.165))
 );
 const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
 const START_BUTTON_FONT = layoutScale(17, 16, 19);
 const CONTENT_MARGIN_BOTTOM = layoutScale(16, 12, 22);
-const START_BUTTON_BASE_BOTTOM = Math.max(
-  Math.round(BOTTOM_NAV_HEIGHT * 0.66),
-  BOTTOM_NAV_HEIGHT - layoutScale(16, 14, 22)
-);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
-const PET_BOTTOM_FROM_START =
-  START_BUTTON_BASE_BOTTOM +
-  START_BUTTON_ESTIMATED_HEIGHT +
-  layoutScale(8, 6, 12);
-const MISSION_BUTTON_TOP = layoutScale(104, 96, 124);
+const PET_BOTTOM_FROM_START = layoutScale(150, 132, 178);
+const PET_RENDER_SIZE = 480;
+const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
+const PET_FOOT_RENDER_OFFSET = PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO;
+const PET_SHADOW_VERTICAL_OVERLAP = layoutScale(42, 38, 48);
+const PET_SHADOW_BOTTOM =
+  PET_BOTTOM_FROM_START + PET_FOOT_RENDER_OFFSET - PET_SHADOW_VERTICAL_OVERLAP;
+const START_BUTTON_HEAD_OFFSET = Math.round(PET_RENDER_SIZE * 0.62);
+const START_BUTTON_BASE_BOTTOM =
+  PET_BOTTOM_FROM_START + START_BUTTON_HEAD_OFFSET;
+const MISSION_BUTTON_TOP = -layoutScale(10, 8, 12);
 const MESSAGE_MARGIN_TOP = layoutScale(5, 4, 8);
 const MESSAGE_ROW_TOP = layoutScale(124, 112, 148);
 const RUN_HUD_TOP = layoutScale(36, 28, 46);
@@ -52,8 +54,7 @@ const RUN_HUD_HORIZONTAL_PADDING = screenPadding;
 const RUN_HUD_VERTICAL_PADDING = layoutScale(7, 6, 9);
 const TIMER_LINE_HEIGHT = layoutScale(44, 42, 50);
 const START_ICON_SIZE = layoutScale(54, 50, 60);
-const DEV_BUTTON_STACK_BOTTOM =
-  BOTTOM_NAV_HEIGHT + layoutScale(4, 2, 6);
+const DEV_BUTTON_STACK_TOP = layoutScale(10, 8, 14);
 const DEV_BUTTON_HORIZONTAL_PADDING = layoutScale(11, 10, 14);
 const DEV_BUTTON_VERTICAL_PADDING = layoutScale(7, 6, 9);
 const RUN_LOCK_NOTICE_RIGHT = screenPadding;
@@ -81,11 +82,13 @@ export default StyleSheet.create({
     backgroundColor: Colors.background,
     paddingTop: CONTAINER_TOP_PADDING,
   },
+  mainFullBackground: {
+    ...StyleSheet.absoluteFillObject,
+  },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
     marginBottom: CONTENT_MARGIN_BOTTOM,
     zIndex: 1,
-    ...Shadows.surfaceFlat,
   },
   progressRow: {
     paddingHorizontal: screenPadding,
@@ -115,7 +118,7 @@ export default StyleSheet.create({
   devButtonGroup: {
     position: 'absolute',
     left: screenPadding,
-    bottom: DEV_BUTTON_STACK_BOTTOM,
+    top: DEV_BUTTON_STACK_TOP,
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: Spacing.sm,
@@ -142,6 +145,19 @@ export default StyleSheet.create({
     paddingTop: TOKKI_PADDING_V,
     paddingBottom: bottomContentPadding,
     paddingHorizontal: TOKKI_PADDING_H,
+    backgroundColor: 'transparent',
+    overflow: 'visible',
+    zIndex: 2,
+  },
+  mainPetShadow: {
+    position: 'absolute',
+    bottom: PET_SHADOW_BOTTOM,
+    alignSelf: 'center',
+    width: layoutScale(118, 104, 136),
+    height: layoutScale(24, 20, 28),
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(31, 41, 55, 0.42)',
+    zIndex: 3,
   },
   mapContainer: {
     flex: 1,
@@ -202,6 +218,7 @@ export default StyleSheet.create({
       ios: Shadows.floatingAction,
       android: Shadows.surfaceFlat,
     }),
+    zIndex: 9,
   },
   fatButton: {
     position: 'absolute',
@@ -341,6 +358,7 @@ export default StyleSheet.create({
     bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
+    zIndex: 4,
   },
   petImage: {
     alignSelf: 'center',
@@ -402,7 +420,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...Shadows.floatingAction,
-    zIndex: 10,
+    zIndex: 30,
+    elevation: 30,
   },
   missionIcon: {
     width: MISSION_ICON_SIZE,

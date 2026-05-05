@@ -47,11 +47,17 @@ export const StepProgress = ({
       disabled={disabled}
       style={[styles.card, isReadyToComplete && styles.readyCard]}
     >
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, isReadyToComplete && styles.readyTitle]}>
+        {title}
+      </Text>
       <Progress.Bar
         progress={progress}
         width={barWidth}
-        color={isReadyToComplete ? Colors.accent : Colors.error}
+        color={isReadyToComplete ? Colors.surface : Colors.accentStrong}
+        unfilledColor={
+          isReadyToComplete ? Colors.surfaceOverlaySolid : Colors.divider
+        }
+        borderColor='transparent'
       />
       {isReadyToComplete && !isCompleted && (
         <Image
@@ -59,7 +65,9 @@ export const StepProgress = ({
           style={styles.completeHint}
         />
       )}
-      <Text style={styles.text}>{`${current} / ${goal}${unit ?? ''}`}</Text>
+      <Text style={[styles.text, isReadyToComplete && styles.readyText]}>
+        {`${current} / ${goal}${unit ?? ''}`}
+      </Text>
     </Pressable>
   );
 };

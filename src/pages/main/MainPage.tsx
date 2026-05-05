@@ -26,7 +26,7 @@ import { StepProgress } from '@components/StepProgress';
 import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
-import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
+import mainBackGround from '@assets/images/mainBackGround_gym.png';
 import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
 import runLegSwirl from '@assets/pet/etc/swirl.png';
 import { SCREEN_WIDTH } from '@styles/dimensions';
@@ -138,6 +138,7 @@ export const MainPage = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const petShadowBreath = useRef(new Animated.Value(0)).current;
 
   /**
    * 미션 데이터/모달 상태.
@@ -313,6 +314,36 @@ export const MainPage = () => {
       dispatch(userSlice.actions.setRunningActive(false));
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isTracking) {
+      petShadowBreath.stopAnimation();
+      petShadowBreath.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(petShadowBreath, {
+          toValue: 1,
+          duration: 1300,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(petShadowBreath, {
+          toValue: 0,
+          duration: 1300,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [isTracking, petShadowBreath]);
 
   useEffect(() => {
     if (!isTracking) {
@@ -949,6 +980,18 @@ export const MainPage = () => {
     inputRange: [0, 0.5, 1],
     outputRange: [0.92, 1.08, 0.92],
   });
+  const petShadowScaleX = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.08],
+  });
+  const petShadowScaleY = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.92],
+  });
+  const petShadowOpacity = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.34, 0.22],
+  });
   return (
     <View style={styles.container}>
       {/*
@@ -969,6 +1012,13 @@ export const MainPage = () => {
           </Animated.Text>
         </View>
       )}
+      {!isTracking ? (
+        <ImageBackground
+          source={mainBackGround}
+          style={styles.mainFullBackground}
+          resizeMode='cover'
+        />
+      ) : null}
       {/*
         런닝 중: 페이스/걸음수/시간 스탯 패널
         평시: 미션 진행 상황을 가로 스크롤로 표시
@@ -1116,12 +1166,20 @@ export const MainPage = () => {
           </View>
         </View>
       ) : (
-        // 배경 이미지 & 펫 이미지와 함께 메시지 표시
-        <ImageBackground
-          source={mainBackGround}
-          style={styles.mainBackground}
-          resizeMode='cover'
-        >
+        <View style={styles.mainBackground}>
+          <Animated.View
+            pointerEvents='none'
+            style={[
+              styles.mainPetShadow,
+              {
+                opacity: petShadowOpacity,
+                transform: [
+                  { scaleX: petShadowScaleX },
+                  { scaleY: petShadowScaleY },
+                ],
+              },
+            ]}
+          />
           {/* 오른쪽 상단 미션 버튼 */}
           <TouchableOpacity
             onPress={handleOpenMission}
@@ -1181,8 +1239,8 @@ export const MainPage = () => {
           {!isTracking && (
             <MainStatCards
               stepCount={displayedSteps}
-              totalRunSec={todayTotalRunSec}
               estimatedKcal={estimatedKcal}
+              onStartRun={handleToggleTracking}
             />
           )}
           {__DEV__ && (
@@ -1280,27 +1338,20 @@ export const MainPage = () => {
               )}
             </View>
           )}
-        </ImageBackground>
-      )}
-      {/* Start / End Button */}
-      <TouchableOpacity
-        style={styles.startButton}
-        accessibilityRole='button'
-        accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
-        onPress={handleToggleTracking}
-      >
-        <View style={styles.startButtonInner}>
-          {isTracking ? (
-            <Text style={styles.startText}>END</Text>
-          ) : (
-            <Image
-              source={require('@assets/images/Icon_colored/fb_run_2.png')}
-              style={styles.startIcon}
-              resizeMode='contain'
-            />
-          )}
         </View>
-      </TouchableOpacity>
+      )}
+      {isTracking ? (
+        <TouchableOpacity
+          style={styles.startButton}
+          accessibilityRole='button'
+          accessibilityLabel='러닝 종료'
+          onPress={handleToggleTracking}
+        >
+          <View style={styles.startButtonInner}>
+            <Text style={styles.startText}>END</Text>
+          </View>
+        </TouchableOpacity>
+      ) : null}
       <BodyRecordPrompt
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}

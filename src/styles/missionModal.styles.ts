@@ -91,8 +91,7 @@ export default StyleSheet.create({
 
   missionUITextTitle: {
     fontSize: Typography.sectionTitle,
-    fontFamily: Fonts.Pretendard,
-    fontWeight: '700',
+    fontFamily: Fonts.JUA,
     color: Colors.textPrimary,
   },
 

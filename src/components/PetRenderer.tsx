@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   Animated,
+  type ImageStyle,
   type ImageSourcePropType,
   StyleProp,
   StyleSheet,
@@ -24,6 +25,7 @@ type Props = {
     mouth?: ImageSourcePropType;
   };
   style?: StyleProp<ViewStyle>;
+  partStyle?: StyleProp<ImageStyle>;
   testID?: string;
 };
 
@@ -44,6 +46,7 @@ export const PetRenderer = ({
   partTransforms,
   expressionOverlays,
   style,
+  partStyle,
   testID = 'pet-renderer',
 }: Props) => {
   const warnedMissingFilesKeyRef = React.useRef<string>('');
@@ -111,6 +114,7 @@ export const PetRenderer = ({
               styles.layer,
               { zIndex: part.zIndex },
               transform ? { transform } : null,
+              partStyle,
             ]}
             resizeMode='contain'
             fadeDuration={0}
@@ -126,6 +130,7 @@ export const PetRenderer = ({
             styles.layer,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
+            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -140,6 +145,7 @@ export const PetRenderer = ({
             styles.layer,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
+            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -154,6 +160,7 @@ export const PetRenderer = ({
             styles.layer,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
+            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -168,6 +175,7 @@ export const PetRenderer = ({
             styles.layer,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
+            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}

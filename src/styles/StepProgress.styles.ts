@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Shadows, Typography } from './theme';
+import { Colors, Fonts, Radius, Shadows, Typography } from './theme';
 
 const CARD_WIDTH = Math.max(
   150,
@@ -13,14 +13,16 @@ const CARD_HEIGHT = Math.max(
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: Colors.background,
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: Radius.lg,
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginRight: 10,
     borderWidth: 1,
     borderColor: Colors.divider,
+    ...Shadows.surfaceFlat,
   },
   titleRow: {
     flexDirection: 'row',
@@ -29,8 +31,9 @@ export default StyleSheet.create({
     marginBottom: 6,
   },
   title: {
-    fontFamily: Fonts.Pretendard,
+    fontFamily: Fonts.JUA,
     fontSize: Typography.action,
+    color: Colors.textPrimary,
     marginBottom: 8,
   },
   completeHint: {
@@ -43,12 +46,18 @@ export default StyleSheet.create({
     fontFamily: Fonts.Pretendard,
     marginTop: 4,
     fontSize: Typography.caption,
+    fontWeight: '700',
     textAlign: 'right',
+    color: Colors.accentStrong,
   },
   readyCard: {
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accentSoft,
-    ...Shadows.surfaceRaised,
+    backgroundColor: Colors.accentStrong,
+    borderColor: Colors.accentStrong,
+  },
+  readyTitle: {
+    color: Colors.surface,
+  },
+  readyText: {
+    color: Colors.surface,
   },
 });

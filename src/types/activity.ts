@@ -27,6 +27,7 @@ export type DailyActivity = {
   steps: number;
   distanceKm: number;
   burnCalories: number;
+  runningSeconds?: number;
 };
 
 /**

@@ -71,6 +71,20 @@ const isSameMonth = (left: Date, right: Date) =>
   left.getFullYear() === right.getFullYear() &&
   left.getMonth() === right.getMonth();
 
+const formatRunningSeconds = (seconds: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const remainSeconds = safeSeconds % 60;
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`;
+  }
+  if (minutes > 0) {
+    return `${minutes}min`;
+  }
+  return `${remainSeconds}s`;
+};
+
 type MonthlyDailySessionSummary = {
   date: string;
   totalDistanceMeters: number;
@@ -397,6 +411,7 @@ function ActivityPage() {
           steps: 0,
           distanceKm: 0,
           burnCalories: 0,
+          runningSeconds: 0,
         });
         return;
       }
@@ -406,6 +421,7 @@ function ActivityPage() {
         steps: 0,
         distanceKm: 0,
         burnCalories: 0,
+        runningSeconds: 0,
       };
 
       // 세션 상세는 서로 독립적이므로 병렬 조회하고, 일부 실패해도 가능한 값은 합산한다.
@@ -423,6 +439,16 @@ function ActivityPage() {
             0,
             Number(detail.burnCalories) || 0
           );
+          const startDate = parseGpsDateTime(detail.startTime);
+          const endDate = detail.endTime
+            ? parseGpsDateTime(detail.endTime)
+            : startDate;
+          aggregated.runningSeconds =
+            (aggregated.runningSeconds ?? 0) +
+            Math.max(
+              0,
+              Math.floor((endDate.getTime() - startDate.getTime()) / 1000)
+            );
           return;
         }
 
@@ -589,6 +615,8 @@ function ActivityPage() {
   // 일일 요약은 km 응답을 받아 공통 규칙(1000m 미만 m, 이상 km)으로 표시한다.
   const distanceLabel = formatDistanceFromKm(distanceValue);
   const burnValue = dailyActivity?.burnCalories ?? 0;
+  const runningSecondsValue = dailyActivity?.runningSeconds ?? 0;
+  const runningTimeLabel = formatRunningSeconds(runningSecondsValue);
   const targetSteps = userProfile?.targetStepCount ?? 0;
 
   const progressValue =
@@ -687,6 +715,11 @@ function ActivityPage() {
               <Text style={styles.heroMetricValue}>
                 {distanceLabel.value} {distanceLabel.unit}
               </Text>
+            </View>
+            <View style={styles.heroMetricDivider} />
+            <View style={styles.heroMetricRow}>
+              <Text style={styles.heroMetricLabel}>러닝 시간</Text>
+              <Text style={styles.heroMetricValue}>{runningTimeLabel}</Text>
             </View>
             <View style={styles.heroMetricDivider} />
             <View style={styles.heroMetricRow}>
