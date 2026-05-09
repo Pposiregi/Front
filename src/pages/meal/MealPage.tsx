@@ -1250,8 +1250,18 @@ function MealPage() {
 
           {/* 요일 헤더 */}
           <View style={styles.weekHeaderRow}>
-            {WEEKDAYS.map((weekday) => (
-              <Text key={weekday} style={styles.weekDayLabel}>
+            {WEEKDAYS.map((weekday, weekdayIndex) => (
+              <Text
+                key={weekday}
+                style={[
+                  styles.weekDayLabel,
+                  weekdayIndex === 5 ? styles.weekDaySaturday : null,
+                  weekdayIndex === 6 ? styles.weekDaySunday : null,
+                  weekdayIndex === WEEKDAYS.length - 1
+                    ? styles.weekDayLabelLast
+                    : null,
+                ]}
+              >
                 {weekday}
               </Text>
             ))}
@@ -1263,7 +1273,7 @@ function MealPage() {
               key={`week-${weekIndex}`}
               style={[
                 styles.weekRow,
-                weekIndex === weeks.length - 1 ? { marginBottom: 0 } : null,
+                weekIndex === weeks.length - 1 ? styles.weekRowLast : null,
               ]}
             >
               {week.map((cell, cellIdx) => {
@@ -1274,9 +1284,17 @@ function MealPage() {
                 );
                 const isSelected =
                   cell.dateKey === selectedDateKey && !isFutureCell;
+                const isSaturday = cellIdx === 5;
+                const isSunday = cellIdx === 6;
 
                 return (
-                  <View key={`${cell.key}-${cellIdx}`} style={styles.dayCell}>
+                  <View
+                    key={`${cell.key}-${cellIdx}`}
+                    style={[
+                      styles.dayCell,
+                      cellIdx === week.length - 1 ? styles.dayCellLast : null,
+                    ]}
+                  >
                     {/* 날짜가 있는 셀인지 확인, 있을 경우에만 눌러서 모달 열기 가능 */}
                     {showDay ? (
                       <TouchableOpacity
@@ -1297,6 +1315,12 @@ function MealPage() {
                             styles.dayNumber,
                             cell.isCurrentMonth ? null : styles.dayNumberMuted,
                             isFutureCell ? styles.futureDayNumber : null,
+                            cell.isCurrentMonth && !isToday && isSaturday
+                              ? styles.saturdayDayNumber
+                              : null,
+                            cell.isCurrentMonth && !isToday && isSunday
+                              ? styles.sundayDayNumber
+                              : null,
                             isSelected ? styles.selectedDayNumber : null,
                             !isSelected && isToday
                               ? styles.todayDayNumber

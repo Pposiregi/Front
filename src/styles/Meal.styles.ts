@@ -71,6 +71,9 @@ const STACK_ITEM_SIZE = Math.round(GRID_SIZE * 0.64);
 const STACK_ITEM_OFFSET = (STACK_HEIGHT - STACK_ITEM_SIZE) / 2;
 const STACK_ITEM_RADIUS = Math.round(STACK_ITEM_SIZE * 0.24);
 const ADD_PLACEHOLDER_SIZE = Math.round(STACK_ITEM_SIZE * 0.82);
+const CALENDAR_GRID_LINE = 'rgba(148, 163, 184, 0.28)';
+const CALENDAR_SATURDAY = '#2563EB';
+const CALENDAR_SUNDAY = '#DC2626';
 
 export default StyleSheet.create({
   container: {
@@ -176,25 +179,50 @@ export default StyleSheet.create({
   weekHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: GRID_GAP,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: CALENDAR_GRID_LINE,
   },
   weekDayLabel: {
     flex: 1,
     textAlign: 'center',
+    paddingVertical: Math.max(6, Math.round(GRID_SIZE * 0.16)),
     fontSize: Math.max(Typography.caption, Math.round(GRID_SIZE * 0.25)),
     color: Colors.textPrimary,
     fontFamily: Fonts.Pretendard,
     fontWeight: '700',
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: CALENDAR_GRID_LINE,
+  },
+  weekDayLabelLast: {
+    borderRightWidth: 0,
+  },
+  weekDaySaturday: {
+    color: CALENDAR_SATURDAY,
+  },
+  weekDaySunday: {
+    color: CALENDAR_SUNDAY,
   },
   weekRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    marginBottom: GRID_GAP,
+    minHeight: DAY_CELL_HEIGHT + GRID_GAP,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: CALENDAR_GRID_LINE,
+  },
+  weekRowLast: {
+    borderBottomWidth: 0,
   },
   dayCell: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+    paddingTop: Math.round(GRID_GAP * 0.28),
+    paddingBottom: Math.round(GRID_GAP * 0.28),
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: CALENDAR_GRID_LINE,
+  },
+  dayCellLast: {
+    borderRightWidth: 0,
   },
   dayEmptySlot: {
     width: GRID_SIZE,
@@ -218,6 +246,12 @@ export default StyleSheet.create({
   },
   dayNumberMuted: {
     color: Colors.textMuted,
+  },
+  saturdayDayNumber: {
+    color: CALENDAR_SATURDAY,
+  },
+  sundayDayNumber: {
+    color: CALENDAR_SUNDAY,
   },
   selectedDayBackground: {
     backgroundColor: 'transparent',
