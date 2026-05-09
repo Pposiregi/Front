@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 import { Colors, Fonts, Typography } from './theme';
 
-const LOGIN_APP_ICON_SIZE = Math.min(SCREEN_WIDTH * 0.32, 128);
+const LOGIN_APP_ICON_SIZE = 128;
 
 export const styles = StyleSheet.create({
   container: {

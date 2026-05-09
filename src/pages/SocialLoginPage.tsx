@@ -26,9 +26,10 @@ import { Colors } from '@styles/theme';
 import { getSocialLogin } from '@api/socialLoginApi';
 import { getUser } from '@api/mainApi';
 import { logLogin } from '@utils/analytics';
+import { DEV_PET_ID, DEV_USER_ID } from '@env';
 
 // 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
-const BYPASS_SOCIAL_LOGIN = false;
+const BYPASS_SOCIAL_LOGIN = true;
 const LOGIN_APP_ICON = require('../../app_icon.png');
 
 const SocialLoginPage = () => {
@@ -99,14 +100,25 @@ const SocialLoginPage = () => {
         // DEV 버전 전용, 소셜 로그인 임시 무시
         if (BYPASS_SOCIAL_LOGIN) {
           const mockToken = 'dev-bypass-token';
+          const mockUserId = Number(DEV_USER_ID) || 1;
+          const mockPetId = Number(DEV_PET_ID) || 1;
           await EncryptedStorage.setItem('serverAccessToken', mockToken);
+          await AsyncStorage.setItem('petId', String(mockPetId));
           dispatch(
             userSlice.actions.setAuth({
               accessToken: mockToken,
               platform,
             })
           );
-          dispatch(userSlice.actions.setSignUpInProgress(false)); // 회원가입 과정 스킵
+          dispatch(
+            userSlice.actions.setUser({
+              userId: mockUserId,
+              nickname: 'DEV',
+              gender: null,
+            })
+          );
+          dispatch(userSlice.actions.setPet(mockPetId));
+          dispatch(userSlice.actions.setSignUpInProgress(false));
           console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
           return;
         }
@@ -114,8 +126,8 @@ const SocialLoginPage = () => {
 
       console.log('>>> firstLoginCheck request', {
         platform,
-        idToken: idToken,
-        accessToken: accessToken,
+        hasIdToken: Boolean(idToken),
+        hasAccessToken: Boolean(accessToken),
       });
 
       const result = await getSocialLogin({
@@ -182,9 +194,14 @@ const SocialLoginPage = () => {
         status: err?.response?.status,
         data: err?.response?.data,
         message: err?.message,
-        raw: err,
       });
-      Alert.alert('로그인 실패', '서버 통신에 오류가 발생했습니다.');
+      const status = err?.response?.status;
+      Alert.alert(
+        '로그인 실패',
+        status === 503
+          ? '현재 로그인 서버가 일시적으로 응답하지 않습니다.\n잠시 후 다시 시도해주세요.'
+          : '서버 통신에 오류가 발생했습니다.'
+      );
     }
   };
 

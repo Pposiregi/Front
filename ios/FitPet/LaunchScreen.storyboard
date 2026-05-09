@@ -16,11 +16,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="AppIcon" translatesAutoresizingMaskIntoConstraints="NO" id="app-icon-view">
-                                <rect key="frame" x="139.5" y="245" width="96" height="96"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="SplashIcon" translatesAutoresizingMaskIntoConstraints="NO" id="app-icon-view">
+                                <rect key="frame" x="123.5" y="229" width="128" height="128"/>
                             </imageView>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="@pposiregi" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="slimpet-label">
-                                <rect key="frame" x="0.0" y="357" width="375" height="20"/>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="@pposiregy" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="12" translatesAutoresizingMaskIntoConstraints="NO" id="slimpet-label">
+                                <rect key="frame" x="0.0" y="599" width="375" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <color key="textColor" red="0.541176471" green="0.541176471" blue="0.541176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -30,9 +30,9 @@
                         <constraints>
                             <constraint firstItem="app-icon-view" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="app-icon-center-x"/>
                             <constraint firstItem="app-icon-view" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-40" id="app-icon-center-y"/>
-                            <constraint firstItem="app-icon-view" firstAttribute="width" constant="96" id="app-icon-width"/>
-                            <constraint firstItem="app-icon-view" firstAttribute="height" constant="96" id="app-icon-height"/>
-                            <constraint firstItem="slimpet-label" firstAttribute="top" secondItem="app-icon-view" secondAttribute="bottom" constant="16" id="slimpet-top"/>
+                            <constraint firstItem="app-icon-view" firstAttribute="width" constant="128" id="app-icon-width"/>
+                            <constraint firstItem="app-icon-view" firstAttribute="height" constant="128" id="app-icon-height"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="slimpet-label" secondAttribute="bottom" constant="44" id="slimpet-bottom"/>
                             <constraint firstItem="slimpet-label" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="slimpet-center-x"/>
                             <constraint firstItem="slimpet-label" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="slimpet-leading"/>
                             <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="slimpet-label" secondAttribute="trailing" id="slimpet-trailing"/>
@@ -46,6 +46,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="AppIcon" width="1024" height="1024"/>
+        <image name="SplashIcon" width="1500" height="1500"/>
     </resources>
 </document>
