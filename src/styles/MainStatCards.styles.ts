@@ -45,6 +45,8 @@ export default StyleSheet.create({
     left: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.03)),
     right: Math.max(Spacing.md - 2, Math.round(SCREEN_WIDTH * 0.03)),
     bottom: METRIC_LAYER_BOTTOM,
+    zIndex: 20,
+    elevation: 20,
   },
   metricGrid: {
     flexDirection: 'row',

@@ -53,6 +53,47 @@ const redactHeaders = (headers: unknown) => {
   return redacted;
 };
 
+const redactData = (payload: unknown) => {
+  const redactObject = (value: unknown): unknown => {
+    if (!value || typeof value !== 'object') {
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(redactObject);
+    }
+
+    const redacted = { ...(value as Record<string, unknown>) };
+    const sensitiveKeys = [
+      'accessToken',
+      'idToken',
+      'refreshToken',
+      'serverAccessToken',
+      'token',
+    ];
+
+    Object.keys(redacted).forEach((key) => {
+      if (sensitiveKeys.includes(key)) {
+        redacted[key] = '***';
+        return;
+      }
+      redacted[key] = redactObject(redacted[key]);
+    });
+
+    return redacted;
+  };
+
+  if (typeof payload === 'string') {
+    try {
+      return redactObject(JSON.parse(payload));
+    } catch {
+      return payload;
+    }
+  }
+
+  return redactObject(payload);
+};
+
 /**
  * 요청 인터셉터.
  * - accessToken 자동 부착
@@ -69,7 +110,9 @@ apiClient.interceptors.request.use(async (config) => {
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${accessToken}`;
       if (__DEV__) {
-        console.log('>>> [JWT] accesstoken: ' + accessToken);
+        console.log(
+          `>>> [JWT] accessToken attached (${accessToken.slice(0, 12)}...)`
+        );
       }
     }
   }
@@ -144,7 +187,7 @@ apiClient.interceptors.response.use(
         url,
         method,
         params: config?.params,
-        data: config?.data,
+        data: redactData(config?.data),
         headers: redactHeaders(config?.headers),
       };
       const responseInfo = { status, data };

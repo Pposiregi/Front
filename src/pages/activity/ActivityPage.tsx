@@ -217,24 +217,21 @@ function ActivityPage() {
     [contentBottomPadding]
   );
 
-  const normalizedWeeklySteps = useMemo(
-    () => {
-      const stepsByDate = new Map<string, number>();
+  const normalizedWeeklySteps = useMemo(() => {
+    const stepsByDate = new Map<string, number>();
 
-      weeklySteps.forEach((item) => {
-        if (!item.date) return;
-        const dateKey = item.date.slice(0, 10);
-        const prev = stepsByDate.get(dateKey) ?? 0;
-        stepsByDate.set(dateKey, prev + (Number(item.step) || 0));
-      });
+    weeklySteps.forEach((item) => {
+      if (!item.date) return;
+      const dateKey = item.date.slice(0, 10);
+      const prev = stepsByDate.get(dateKey) ?? 0;
+      stepsByDate.set(dateKey, prev + (Number(item.step) || 0));
+    });
 
-      return currentWeekDateKeys.map((date) => ({
-        date,
-        step: stepsByDate.get(date) ?? 0,
-      }));
-    },
-    [currentWeekDateKeys, weeklySteps]
-  );
+    return currentWeekDateKeys.map((date) => ({
+      date,
+      step: stepsByDate.get(date) ?? 0,
+    }));
+  }, [currentWeekDateKeys, weeklySteps]);
 
   const hasWeeklySteps = normalizedWeeklySteps.some((item) => item.step > 0);
 
@@ -567,7 +564,7 @@ function ActivityPage() {
 
   const headerTitle = '통계';
   const monthlySectionTitle = useMemo(
-    () => `${currentMonth.getMonth() + 1}월의 러닝들`,
+    () => `${currentMonth.getMonth() + 1}월의 러닝`,
     [currentMonth]
   );
 

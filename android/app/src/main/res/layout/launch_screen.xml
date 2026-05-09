@@ -18,8 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="SlimPet"
-        android:textColor="#2B2B2B"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:text="@pposiregi"
+        android:textColor="#8A8A8A"
+        android:textSize="16sp" />
 </LinearLayout>
