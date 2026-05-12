@@ -100,6 +100,7 @@ import { getMissionsActive } from '@api/missionApi';
 import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
+import { mockActiveMissions } from './mockMission';
 import MainStatCards from './MainStatCards';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
@@ -144,7 +145,7 @@ export const MainPage = () => {
    * 미션 데이터/모달 상태.
    */
   const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
-    []
+    mockActiveMissions.missions
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [trans, setTrans] = useState(false); // 미션 완료 트리거
@@ -462,7 +463,7 @@ export const MainPage = () => {
       setCurrentPbf(null);
       return 'missing';
     } catch (err: any) {
-      console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
+      console.log('[BodyPrompt] 오늘 기록 조회 실패', err);
       // 서버/네트워크 오류 시에는 이미 기록한 사용자가 다시 입력하지 않도록 프롬프트를 닫는다.
       setShowBodyPrompt(false);
       return 'failed';
@@ -488,7 +489,7 @@ export const MainPage = () => {
         }
         setShowBodyPrompt(true);
       } catch (err) {
-        console.error('[BodyPrompt] 상태 로딩 실패', err);
+        console.log('[BodyPrompt] 상태 로딩 실패', err);
         setShowBodyPrompt(false);
       }
     };
@@ -746,7 +747,7 @@ export const MainPage = () => {
     try {
       await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
     } catch (err) {
-      console.error('[BodyPrompt] 스킵 상태 저장 실패', err);
+      console.log('[BodyPrompt] 스킵 상태 저장 실패', err);
     }
   }, []);
 
@@ -768,7 +769,7 @@ export const MainPage = () => {
         setShowBodyPrompt(false);
         Alert.alert('기록 완료', '오늘의 몸 기록을 저장했어요.');
       } catch (err) {
-        console.error('[BodyPrompt] 기록 저장 실패', err);
+        console.log('[BodyPrompt] 기록 저장 실패', err);
         Alert.alert('저장 실패', '몸 기록 저장 중 문제가 발생했어요.');
       } finally {
         setSavingBodyHistory(false);
@@ -851,7 +852,7 @@ export const MainPage = () => {
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
     } catch (err) {
-      console.error('미션 업데이트 실패', err);
+      console.log('미션 업데이트 실패', err);
     }
   }, []);
   /**
@@ -912,6 +913,7 @@ export const MainPage = () => {
           goal: m.goalValue,
           unit:
             m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+          category: m.category,
           isReadyToComplete,
           missionCheckId: m.missionCheckId,
         };
@@ -1073,12 +1075,20 @@ export const MainPage = () => {
                 data={progressMissions}
                 horizontal
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <StepProgress
                     title={item.title}
                     current={item.current}
                     goal={item.goal}
                     unit={item.unit}
+                    category={item.category}
+                    tone={
+                      index % 3 === 0
+                        ? 'lime'
+                        : index % 3 === 1
+                        ? 'violet'
+                        : 'orange'
+                    }
                     isReadyToComplete={item.isReadyToComplete}
                     onPress={() => {
                       if (!item.isReadyToComplete) return;

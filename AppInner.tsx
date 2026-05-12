@@ -94,7 +94,12 @@ const createTabBarIcon =
     return (
       <Image
         source={focused ? icon.focused : icon.unfocused}
-        style={[styles.tabIcon, icon.style]}
+        style={[
+          styles.tabIcon,
+          !focused && styles.tabIconInactive,
+          focused && routeName === 'Main' && styles.tabIconMainActive,
+          icon.style,
+        ]}
       />
     );
   };
@@ -174,7 +179,7 @@ const runWithRetry = async <T,>(
       return await task();
     } catch (err) {
       if (__DEV__) {
-        console.error(
+        console.log(
           `>>> [FCM][PushToken] ${label} 실패 (시도 ${attempt}/${attempts})`,
           err
         );
@@ -418,7 +423,7 @@ function AppInner() {
         // 전송 실패 시 재시도한다.
         await runWithRetry('POST /devices/push-token', send);
       } catch (err) {
-        console.error('>>> [FCM][PushToken] POST 실패', err);
+        console.log('>>> [FCM][PushToken] POST 실패', err);
       }
     };
 
@@ -470,7 +475,7 @@ function AppInner() {
         // 전송 실패 시 재시도한다.
         await runWithRetry('PATCH /devices/push-token', send);
       } catch (err) {
-        console.error('>>> [FCM][PushToken] PATCH 실패', err);
+        console.log('>>> [FCM][PushToken] PATCH 실패', err);
       }
     });
 
@@ -584,6 +589,16 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     resizeMode: 'contain',
+  },
+  tabIconInactive: {
+    tintColor: '#B8B8B8',
+    opacity: 0.9,
+  },
+  tabIconMainActive: {
+    shadowColor: Colors.shadowAccent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.16,
+    shadowRadius: 4,
   },
   tabBar: {
     paddingTop: 10,

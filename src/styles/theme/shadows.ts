@@ -16,12 +16,12 @@ const surfaceFlat = Platform.select({
 const surfaceRaised = Platform.select({
   ios: {
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 12,
   },
   android: {
-    elevation: 1,
+    elevation: 2,
   },
   default: {},
 });
@@ -29,12 +29,12 @@ const surfaceRaised = Platform.select({
 const floatingAction = Platform.select({
   ios: {
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
   },
   android: {
-    elevation: 3,
+    elevation: 4,
   },
   default: {},
 });

@@ -192,7 +192,7 @@ apiClient.interceptors.response.use(
       };
       const responseInfo = { status, data };
 
-      console.error(
+      console.warn(
         `>>> [API][${method}] ${url} ${status ?? ''}`.trim(),
         toLogString({ request: requestInfo, response: responseInfo })
       );

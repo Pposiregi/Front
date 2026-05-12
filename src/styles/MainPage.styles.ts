@@ -16,15 +16,15 @@ import {
 // 화면 크기 기반 반응형 사이즈 계산
 const BOTTOM_NAV_HEIGHT = layoutScale(64, 56, 76);
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
-  layoutScale(82, 76, 96),
-  Math.min(layoutScale(112, 96, 124), SCREEN_HEIGHT * 0.1)
+  layoutScale(72, 68, 78),
+  Math.min(layoutScale(82, 76, 88), SCREEN_HEIGHT * 0.078)
 );
 const TOKKI_PADDING_V = layoutScale(14, 12, 18);
 const TOKKI_PADDING_H = screenPadding;
 const CONTAINER_TOP_PADDING = Platform.select({
-  ios: layoutScale(40, 34, 52),
-  android: layoutScale(24, 20, 32),
-  default: layoutScale(24, 20, 32),
+  ios: layoutScale(32, 28, 42),
+  android: layoutScale(14, 10, 22),
+  default: layoutScale(18, 14, 26),
 });
 const START_BUTTON_SIZE = Math.max(
   layoutScale(52, 49, 58),
@@ -35,7 +35,7 @@ const START_BUTTON_FONT = layoutScale(17, 16, 19);
 const CONTENT_MARGIN_BOTTOM = layoutScale(16, 12, 22);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
-const PET_BOTTOM_FROM_START = layoutScale(150, 132, 178);
+const PET_BOTTOM_FROM_START = layoutScale(206, 188, 232);
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const PET_FOOT_RENDER_OFFSET = PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO;
@@ -45,7 +45,7 @@ const PET_SHADOW_BOTTOM =
 const START_BUTTON_HEAD_OFFSET = Math.round(PET_RENDER_SIZE * 0.62);
 const START_BUTTON_BASE_BOTTOM =
   PET_BOTTOM_FROM_START + START_BUTTON_HEAD_OFFSET;
-const MISSION_BUTTON_TOP = -layoutScale(10, 8, 12);
+const MISSION_BUTTON_TOP = layoutScale(22, 18, 30);
 const MESSAGE_MARGIN_TOP = layoutScale(5, 4, 8);
 const MESSAGE_ROW_TOP = layoutScale(124, 112, 148);
 const RUN_HUD_TOP = layoutScale(36, 28, 46);
@@ -61,8 +61,8 @@ const RUN_LOCK_NOTICE_RIGHT = screenPadding;
 const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = layoutScale(13, Spacing.md, 16);
 const RUN_LOCK_NOTICE_VERTICAL_PADDING = layoutScale(8, 7, 10);
 const MISSION_BUTTON_SIZE = Math.max(
-  layoutScale(44, 42, 48),
-  Math.min(layoutScale(52, 48, 56), Math.round(SCREEN_WIDTH * 0.12))
+  layoutScale(48, 44, 52),
+  Math.min(layoutScale(58, 54, 62), Math.round(SCREEN_WIDTH * 0.135))
 );
 const MISSION_BUTTON_PADDING = Math.max(
   Spacing.sm,
@@ -84,14 +84,19 @@ export default StyleSheet.create({
   },
   mainFullBackground: {
     ...StyleSheet.absoluteFillObject,
+    opacity: 0.6,
   },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
-    marginBottom: CONTENT_MARGIN_BOTTOM,
+    marginBottom: layoutScale(10, 8, 14),
+    marginHorizontal: 0,
+    paddingVertical: Spacing.xs,
+    backgroundColor: 'transparent',
     zIndex: 1,
   },
   progressRow: {
     paddingHorizontal: screenPadding,
+    alignItems: 'center',
   },
   missionCard: {
     marginRight: Spacing.md,
@@ -415,11 +420,12 @@ export default StyleSheet.create({
     width: MISSION_BUTTON_SIZE,
     height: MISSION_BUTTON_SIZE,
     padding: MISSION_BUTTON_PADDING,
-    backgroundColor: Colors.accentStrong,
-    borderRadius: Radius.sm,
+    backgroundColor: 'rgba(255, 169, 77, 0.22)',
+    borderRadius: Radius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.floatingAction,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 169, 77, 0.28)',
     zIndex: 30,
     elevation: 30,
   },

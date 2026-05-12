@@ -2,31 +2,21 @@ import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
 import { Colors, Fonts, layoutScale, Radius, Shadows, Spacing } from './theme';
 
-const METRIC_LAYER_BOTTOM = layoutScale(18, 16, 24);
-const METRIC_GRID_GAP = Math.max(Spacing.sm, Math.round(SCREEN_WIDTH * 0.022));
-const METRIC_CARD_MIN_HEIGHT = Math.max(48, Math.round(SCREEN_HEIGHT * 0.06));
-const METRIC_CARD_PRIMARY_MIN_HEIGHT = Math.max(
-  64,
-  Math.round(SCREEN_HEIGHT * 0.078)
-);
+const METRIC_LAYER_BOTTOM = layoutScale(26, 22, 32);
+const METRIC_GRID_GAP = 0;
+const METRIC_CARD_MIN_HEIGHT = Math.max(84, Math.round(SCREEN_HEIGHT * 0.082));
+const METRIC_CARD_PRIMARY_MIN_HEIGHT = METRIC_CARD_MIN_HEIGHT;
 const METRIC_CARD_RADIUS = Math.max(Radius.md + 2, Math.round(SCREEN_WIDTH * 0.036));
 const METRIC_CARD_VERTICAL_PADDING = Math.max(
   Spacing.sm,
   Math.round(SCREEN_HEIGHT * 0.009)
 );
-const METRIC_CARD_PRIMARY_VERTICAL_PADDING = Math.max(
-  Spacing.sm + 2,
-  Math.round(SCREEN_HEIGHT * 0.012)
-);
-const METRIC_LABEL_FONT_SIZE = Math.max(
-  13,
-  Math.min(15, Math.round(SCREEN_WIDTH * 0.034))
-);
+const METRIC_CARD_PRIMARY_VERTICAL_PADDING = METRIC_CARD_VERTICAL_PADDING;
+const METRIC_LABEL_FONT_SIZE = Math.max(12, Math.min(14, Math.round(SCREEN_WIDTH * 0.032)));
 const METRIC_LABEL_LINE_HEIGHT = Math.round(METRIC_LABEL_FONT_SIZE * 1.25);
-const METRIC_LABEL_MARGIN_BOTTOM = Math.max(4, Math.round(SCREEN_HEIGHT * 0.005));
 const METRIC_VALUE_FONT_SIZE = Math.max(
-  17,
-  Math.min(19, Math.round(SCREEN_WIDTH * 0.046))
+  21,
+  Math.min(24, Math.round(SCREEN_WIDTH * 0.054))
 );
 const METRIC_VALUE_LINE_HEIGHT = Math.round(METRIC_VALUE_FONT_SIZE * 1.2);
 const METRIC_VALUE_PRIMARY_FONT_SIZE = Math.max(
@@ -36,8 +26,8 @@ const METRIC_VALUE_PRIMARY_FONT_SIZE = Math.max(
 const METRIC_VALUE_PRIMARY_LINE_HEIGHT = Math.round(
   METRIC_VALUE_PRIMARY_FONT_SIZE * 1.18
 );
-const METRIC_RUN_ICON_SIZE = layoutScale(48, 44, 56);
-const METRIC_RUN_ICON_WRAP_SIZE = layoutScale(44, 40, 50);
+const METRIC_RUN_ICON_SIZE = layoutScale(54, 50, 62);
+const METRIC_RUN_ICON_WRAP_SIZE = layoutScale(48, 44, 54);
 
 export default StyleSheet.create({
   metricLayer: {
@@ -51,8 +41,14 @@ export default StyleSheet.create({
   metricGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'stretch',
     gap: METRIC_GRID_GAP,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
+    overflow: 'hidden',
+    ...Shadows.surfaceRaised,
   },
   metricCardShell: {
     flex: 1,
@@ -60,16 +56,16 @@ export default StyleSheet.create({
     borderRadius: METRIC_CARD_RADIUS,
   },
   metricCardShellPrimary: {
-    flex: 1.18,
+    flex: 1,
     minHeight: METRIC_CARD_PRIMARY_MIN_HEIGHT,
   },
   metricCard: {
     flex: 1,
     minHeight: METRIC_CARD_MIN_HEIGHT,
-    backgroundColor: Colors.surfaceOverlayStrong,
-    borderRadius: METRIC_CARD_RADIUS,
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorderOverlay,
+    backgroundColor: 'rgba(224, 231, 255, 0.24)',
+    borderRadius: 0,
+    borderWidth: 0,
+    borderColor: 'transparent',
     paddingHorizontal: Spacing.sm,
     paddingVertical: METRIC_CARD_VERTICAL_PADDING,
     alignItems: 'center',
@@ -80,8 +76,37 @@ export default StyleSheet.create({
     flex: 1,
     minHeight: METRIC_CARD_PRIMARY_MIN_HEIGHT,
     paddingVertical: METRIC_CARD_PRIMARY_VERTICAL_PADDING,
-    backgroundColor: Colors.surfaceOverlaySolid,
-    borderColor: Colors.surfaceBorderOverlay,
+    backgroundColor: 'rgba(255, 246, 234, 0.44)',
+    borderColor: 'transparent',
+    gap: 3,
+  },
+  metricCardKcal: {
+    backgroundColor: 'rgba(255, 242, 226, 0.34)',
+    borderColor: 'transparent',
+  },
+  metricDivider: {
+    width: 1,
+    alignSelf: 'center',
+    height: '56%',
+    backgroundColor: 'rgba(107, 114, 128, 0.14)',
+  },
+  metricLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginBottom: 7,
+  },
+  metricSmallIcon: {
+    fontSize: 12,
+    lineHeight: 14,
+    opacity: 0.72,
+  },
+  metricStepIcon: {
+    color: Colors.dataWeight,
+  },
+  metricKcalIcon: {
+    color: Colors.accentDeep,
   },
   metricLabel: {
     fontFamily: Fonts.Pretendard,
@@ -90,7 +115,6 @@ export default StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0,
     color: Colors.textSecondary,
-    marginBottom: METRIC_LABEL_MARGIN_BOTTOM,
     includeFontPadding: false,
   },
   metricValue: {
@@ -100,6 +124,46 @@ export default StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: METRIC_VALUE_LINE_HEIGHT,
     includeFontPadding: false,
+  },
+  metricUnit: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Math.max(11, Math.min(13, Math.round(SCREEN_WIDTH * 0.03))),
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    includeFontPadding: false,
+  },
+  metricGoalRow: {
+    width: '100%',
+    marginTop: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  metricGoalText: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    includeFontPadding: false,
+  },
+  metricMiniTrack: {
+    width: Math.max(32, Math.round(SCREEN_WIDTH * 0.085)),
+    height: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(107, 114, 128, 0.14)',
+    overflow: 'hidden',
+  },
+  metricMiniFill: {
+    height: '100%',
+    borderRadius: Radius.pill,
+  },
+  metricMiniFillStep: {
+    backgroundColor: 'rgba(37, 99, 235, 0.72)',
+  },
+  metricMiniFillKcal: {
+    backgroundColor: 'rgba(220, 38, 38, 0.68)',
   },
   metricValuePrimary: {
     fontFamily: Fonts.Pretendard,

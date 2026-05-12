@@ -7,12 +7,7 @@ import {
   View,
 } from 'react-native';
 import React, { useState } from 'react';
-import {
-  login,
-  getProfile as getKakaoProfile,
-  shippingAddresses as getKakaoShippingAddresses,
-  serviceTerms as getKakaoServiceTerms,
-} from '@react-native-seoul/kakao-login';
+import { login } from '@react-native-seoul/kakao-login';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAppDispatch } from '../store';
 import userSlice from '../slices/user';
@@ -26,11 +21,10 @@ import { Colors } from '@styles/theme';
 import { getSocialLogin } from '@api/socialLoginApi';
 import { getUser } from '@api/mainApi';
 import { logLogin } from '@utils/analytics';
-import { DEV_PET_ID, DEV_USER_ID } from '@env';
+import { API_BASE_URL } from '@env';
 
-// 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
-const BYPASS_SOCIAL_LOGIN = true;
 const LOGIN_APP_ICON = require('../../app_icon.png');
+type SocialPlatform = 'kakao' | 'google';
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -93,37 +87,9 @@ const SocialLoginPage = () => {
   }: {
     idToken: string;
     accessToken: string;
-    platform: 'kakao' | 'google';
+    platform: SocialPlatform;
   }) => {
     try {
-      if (__DEV__) {
-        // DEV 버전 전용, 소셜 로그인 임시 무시
-        if (BYPASS_SOCIAL_LOGIN) {
-          const mockToken = 'dev-bypass-token';
-          const mockUserId = Number(DEV_USER_ID) || 1;
-          const mockPetId = Number(DEV_PET_ID) || 1;
-          await EncryptedStorage.setItem('serverAccessToken', mockToken);
-          await AsyncStorage.setItem('petId', String(mockPetId));
-          dispatch(
-            userSlice.actions.setAuth({
-              accessToken: mockToken,
-              platform,
-            })
-          );
-          dispatch(
-            userSlice.actions.setUser({
-              userId: mockUserId,
-              nickname: 'DEV',
-              gender: null,
-            })
-          );
-          dispatch(userSlice.actions.setPet(mockPetId));
-          dispatch(userSlice.actions.setSignUpInProgress(false));
-          console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
-          return;
-        }
-      }
-
       console.log('>>> firstLoginCheck request', {
         platform,
         hasIdToken: Boolean(idToken),
@@ -190,6 +156,7 @@ const SocialLoginPage = () => {
         await logLogin(platform);
       }
     } catch (err: any) {
+      console.error('>>> API BASE URL: ' + API_BASE_URL);
       console.error('>>> firstLoginCheck error', {
         status: err?.response?.status,
         data: err?.response?.data,
@@ -256,8 +223,7 @@ const SocialLoginPage = () => {
             <Image source={LOGIN_APP_ICON} style={styles.appIcon} />
             <Text style={styles.mainText}>나와 함께 건강해지는 펫</Text>
             <Text style={styles.subText}>
-              내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금
-              만나요!
+              내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금 만나요!
             </Text>
           </View>
           <Pressable style={styles.kakaoButton} onPress={handleReset}>

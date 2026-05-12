@@ -31,6 +31,11 @@ export const Colors = {
   dataBodyFat: '#7C3AED',
   dataRoute: '#2563EB',
 
+  pointRed: '#DC2626',
+  pointRedSoft: '#FEE2E2',
+  pointGreen: '#16A34A',
+  pointGreenSoft: '#DCFCE7',
+
   success: '#4CAF50',
 
   kakao: '#FDDC3F',

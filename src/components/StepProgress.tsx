@@ -1,7 +1,6 @@
 import React from 'react';
-import { Text, Dimensions, Pressable, Image } from 'react-native';
+import { Text, Dimensions, Pressable, Image, View } from 'react-native';
 import styles from '@styles/StepProgress.styles';
-import * as Progress from 'react-native-progress';
 import { Colors } from '@styles/theme';
 
 type Props = {
@@ -9,6 +8,8 @@ type Props = {
   current: number;
   goal: number;
   unit?: string;
+  category?: 'STEP' | 'MEAL';
+  tone?: 'lime' | 'violet' | 'orange';
   isCompleted?: boolean;
   isReadyToComplete?: boolean;
   onPress?: () => void;
@@ -27,17 +28,24 @@ export const StepProgress = ({
   current,
   goal,
   unit,
+  category,
+  tone = 'lime',
   isCompleted,
   isReadyToComplete,
   onPress,
 }: Props) => {
-  const progress = goal > 0 ? current / goal : 0;
+  const progress = goal > 0 ? Math.min(current / goal, 1) : 0;
+  const toneColor = {
+    lime: 'rgba(22, 163, 74, 0.82)',
+    violet: 'rgba(37, 99, 235, 0.82)',
+    orange: 'rgba(220, 38, 38, 0.78)',
+  }[tone];
   const { width: SCREEN_WIDTH } = Dimensions.get('window');
   const cardWidth = Math.max(
-    150,
-    Math.min(220, Math.round(SCREEN_WIDTH * 0.4))
+    128,
+    Math.min(138, Math.round(SCREEN_WIDTH * 0.345))
   );
-  const barWidth = Math.max(100, cardWidth - 20); // padding 고려
+  const barWidth = Math.max(104, cardWidth - 24); // padding 고려
 
   const disabled = !isReadyToComplete;
 
@@ -47,27 +55,53 @@ export const StepProgress = ({
       disabled={disabled}
       style={[styles.card, isReadyToComplete && styles.readyCard]}
     >
-      <Text style={[styles.title, isReadyToComplete && styles.readyTitle]}>
-        {title}
-      </Text>
-      <Progress.Bar
-        progress={progress}
-        width={barWidth}
-        color={isReadyToComplete ? Colors.surface : Colors.accentStrong}
-        unfilledColor={
-          isReadyToComplete ? Colors.surfaceOverlaySolid : Colors.divider
-        }
-        borderColor='transparent'
-      />
+      <View style={styles.titleRow}>
+        <Text style={styles.cardIcon}>{category === 'MEAL' ? '✎' : '👟'}</Text>
+        <Text
+          numberOfLines={1}
+          style={[styles.title, isReadyToComplete && styles.readyTitle]}
+        >
+          {title}
+        </Text>
+      </View>
+      <View
+        style={[
+          styles.progressTrack,
+          { width: barWidth },
+          isReadyToComplete && styles.readyProgressTrack,
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              width: `${progress * 100}%`,
+              backgroundColor: isReadyToComplete ? Colors.surface : toneColor,
+            },
+          ]}
+        >
+          <View style={styles.progressFillGloss} />
+        </View>
+      </View>
       {isReadyToComplete && !isCompleted && (
         <Image
           source={require('../assets/images/paw_stamp.png')}
           style={styles.completeHint}
         />
       )}
-      <Text style={[styles.text, isReadyToComplete && styles.readyText]}>
-        {`${current} / ${goal}${unit ?? ''}`}
-      </Text>
+      <View style={styles.valueRow}>
+        <Text
+          style={[
+            styles.currentValue,
+            { color: isReadyToComplete ? Colors.accentDeep : toneColor },
+          ]}
+        >
+          {current.toLocaleString()}
+        </Text>
+        <Text style={[styles.goalValue, isReadyToComplete && styles.readyText]}>
+          {` / ${goal.toLocaleString()}${unit ?? ''}`}
+        </Text>
+      </View>
     </Pressable>
   );
 };

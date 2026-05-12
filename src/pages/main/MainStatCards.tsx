@@ -13,17 +13,43 @@ const MainStatCards = ({
   estimatedKcal,
   onStartRun,
 }: MainStatCardsProps) => {
+  const stepGoal = 3000;
+  const kcalGoal = 250;
+  const stepProgress = Math.min(stepCount / stepGoal, 1);
+  const kcalProgress = Math.min(estimatedKcal / kcalGoal, 1);
+
   return (
     <View style={styles.metricLayer}>
       <View style={styles.metricGrid}>
         <View style={styles.metricCardShell}>
           <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>걸음 수</Text>
+            <View style={styles.metricLabelRow}>
+              <Text style={[styles.metricSmallIcon, styles.metricStepIcon]}>
+                👟
+              </Text>
+              <Text style={styles.metricLabel}>오늘 걸음 수</Text>
+            </View>
             <Text style={styles.metricValue}>
-              {`${stepCount.toLocaleString()} steps`}
+              {stepCount.toLocaleString()}
+              <Text style={styles.metricUnit}> 걸음</Text>
             </Text>
+            <View style={styles.metricGoalRow}>
+              <Text style={styles.metricGoalText}>
+                {`목표의 ${Math.round(stepProgress * 100)}%`}
+              </Text>
+              <View style={styles.metricMiniTrack}>
+                <View
+                  style={[
+                    styles.metricMiniFill,
+                    styles.metricMiniFillStep,
+                    { width: `${stepProgress * 100}%` },
+                  ]}
+                />
+              </View>
+            </View>
           </View>
         </View>
+        <View style={styles.metricDivider} />
         <View style={[styles.metricCardShell, styles.metricCardShellPrimary]}>
           <TouchableOpacity
             style={[styles.metricCard, styles.metricCardPrimary]}
@@ -41,12 +67,33 @@ const MainStatCards = ({
             </View>
           </TouchableOpacity>
         </View>
+        <View style={styles.metricDivider} />
         <View style={styles.metricCardShell}>
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>소비 열량</Text>
+          <View style={[styles.metricCard, styles.metricCardKcal]}>
+            <View style={styles.metricLabelRow}>
+              <Text style={[styles.metricSmallIcon, styles.metricKcalIcon]}>
+                🔥
+              </Text>
+              <Text style={styles.metricLabel}>소비 열량</Text>
+            </View>
             <Text style={styles.metricValue}>
-              {`${estimatedKcal.toLocaleString()} kcal`}
+              {estimatedKcal.toLocaleString()}
+              <Text style={styles.metricUnit}> kcal</Text>
             </Text>
+            <View style={styles.metricGoalRow}>
+              <Text style={styles.metricGoalText}>
+                {`목표의 ${Math.round(kcalProgress * 100)}%`}
+              </Text>
+              <View style={styles.metricMiniTrack}>
+                <View
+                  style={[
+                    styles.metricMiniFill,
+                    styles.metricMiniFillKcal,
+                    { width: `${kcalProgress * 100}%` },
+                  ]}
+                />
+              </View>
+            </View>
           </View>
         </View>
       </View>
