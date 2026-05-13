@@ -70,6 +70,7 @@ export default StyleSheet.create({
     paddingVertical: METRIC_CARD_VERTICAL_PADDING,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 2,
     overflow: 'hidden',
   },
   metricCardPrimary: {
@@ -95,7 +96,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    marginBottom: 7,
+    marginBottom: 9,
   },
   metricSmallIcon: {
     fontSize: 12,
@@ -131,39 +132,6 @@ export default StyleSheet.create({
     fontWeight: '700',
     color: Colors.textSecondary,
     includeFontPadding: false,
-  },
-  metricGoalRow: {
-    width: '100%',
-    marginTop: 7,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  metricGoalText: {
-    fontFamily: Fonts.Pretendard,
-    fontSize: 10,
-    lineHeight: 12,
-    fontWeight: '700',
-    color: Colors.textSecondary,
-    includeFontPadding: false,
-  },
-  metricMiniTrack: {
-    width: Math.max(32, Math.round(SCREEN_WIDTH * 0.085)),
-    height: 4,
-    borderRadius: Radius.pill,
-    backgroundColor: 'rgba(107, 114, 128, 0.14)',
-    overflow: 'hidden',
-  },
-  metricMiniFill: {
-    height: '100%',
-    borderRadius: Radius.pill,
-  },
-  metricMiniFillStep: {
-    backgroundColor: 'rgba(37, 99, 235, 0.72)',
-  },
-  metricMiniFillKcal: {
-    backgroundColor: 'rgba(220, 38, 38, 0.68)',
   },
   metricValuePrimary: {
     fontFamily: Fonts.Pretendard,

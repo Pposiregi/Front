@@ -178,7 +178,6 @@ export const MainPage = () => {
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
   const dispatch = useAppDispatch();
-  const [targetStepGoal, setTargetStepGoal] = useState<number | null>(null);
   useEffect(() => {
     /** 사용자 기본 정보와 petType 캐시를 메인 진입 시 동기화한다. */
     const fetchUser = async () => {
@@ -188,7 +187,6 @@ export const MainPage = () => {
         if (data.userId == null || data.nickname == null) {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
-        setTargetStepGoal(data.targetStepCount);
         if (!data.pet) {
           await AsyncStorage.removeItem('petId');
           dispatch(userSlice.actions.setPet(null));
@@ -1250,7 +1248,6 @@ export const MainPage = () => {
             <MainStatCards
               stepCount={displayedSteps}
               estimatedKcal={estimatedKcal}
-              stepGoal={targetStepGoal}
               onStartRun={handleToggleTracking}
             />
           )}

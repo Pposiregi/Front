@@ -32,9 +32,7 @@ const START_BUTTON_SIZE = Math.max(
 );
 const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
 const START_BUTTON_FONT = layoutScale(17, 16, 19);
-const CONTENT_MARGIN_BOTTOM = layoutScale(16, 12, 22);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
-const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
 const PET_BOTTOM_FROM_START = layoutScale(206, 188, 232);
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
@@ -420,14 +418,15 @@ export default StyleSheet.create({
     width: MISSION_BUTTON_SIZE,
     height: MISSION_BUTTON_SIZE,
     padding: MISSION_BUTTON_PADDING,
-    backgroundColor: 'rgba(255, 169, 77, 0.22)',
-    borderRadius: Radius.lg,
+    backgroundColor: Colors.surfaceOverlaySolid,
+    borderRadius: Radius.pill,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 169, 77, 0.28)',
+    borderColor: Colors.divider,
     zIndex: 30,
     elevation: 30,
+    ...Shadows.floatingAction,
   },
   missionIcon: {
     width: MISSION_ICON_SIZE,
