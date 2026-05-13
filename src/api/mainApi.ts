@@ -52,10 +52,18 @@ export const getUser = async (): Promise<getUserResponse> => {
     return data;
   } catch (error) {
     if ((error as Error)?.message === GET_USER_TIMEOUT_ERROR) {
-      console.warn(
-        `[MainApi] users 응답이 ${GET_USER_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
+      if (__DEV__) {
+        console.warn(
+          `[MainApi] users 응답이 ${GET_USER_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
+        );
+        return MOCK_USER_RESPONSE;
+      }
+
+      console.error(
+        `[MainApi] users 응답이 ${GET_USER_TIMEOUT_MS}ms 동안 없어 요청을 중단합니다.`,
+        error
       );
-      return MOCK_USER_RESPONSE;
+      throw error;
     }
 
     console.error('[MainApi] users 요청 실패', error);

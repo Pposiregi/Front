@@ -32,10 +32,18 @@ export const getMissionsActive = async (): Promise<MissionActiveResponse> => {
     return data;
   } catch (error) {
     if ((error as Error)?.message === MISSION_ACTIVE_TIMEOUT_ERROR) {
-      console.warn(
-        `[MissionApi] active missions 응답이 ${MISSION_ACTIVE_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
+      if (__DEV__) {
+        console.warn(
+          `[MissionApi] active missions 응답이 ${MISSION_ACTIVE_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
+        );
+        return mockActiveMissions;
+      }
+
+      console.error(
+        `[MissionApi] active missions 응답이 ${MISSION_ACTIVE_TIMEOUT_MS}ms 동안 없어 요청을 중단합니다.`,
+        error
       );
-      return mockActiveMissions;
+      throw error;
     }
 
     console.error('[MissionApi] active missions 요청 실패', error);
