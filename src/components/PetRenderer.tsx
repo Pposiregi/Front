@@ -112,9 +112,9 @@ export const PetRenderer = ({
             source={part.asset}
             style={[
               styles.layer,
+              partStyle,
               { zIndex: part.zIndex },
               transform ? { transform } : null,
-              partStyle,
             ]}
             resizeMode='contain'
             fadeDuration={0}
@@ -128,9 +128,9 @@ export const PetRenderer = ({
           source={expressionOverlays.baseFace}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
-            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -143,9 +143,9 @@ export const PetRenderer = ({
           source={expressionOverlays.eyebrows}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
-            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -158,9 +158,9 @@ export const PetRenderer = ({
           source={expressionOverlays.eyes}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
-            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}
@@ -173,9 +173,9 @@ export const PetRenderer = ({
           source={expressionOverlays.mouth}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
-            partStyle,
           ]}
           resizeMode='contain'
           fadeDuration={0}

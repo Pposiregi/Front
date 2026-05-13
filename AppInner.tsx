@@ -423,7 +423,7 @@ function AppInner() {
         // 전송 실패 시 재시도한다.
         await runWithRetry('POST /devices/push-token', send);
       } catch (err) {
-        console.log('>>> [FCM][PushToken] POST 실패', err);
+        console.error('>>> [FCM][PushToken] POST 실패', err);
       }
     };
 
@@ -475,7 +475,7 @@ function AppInner() {
         // 전송 실패 시 재시도한다.
         await runWithRetry('PATCH /devices/push-token', send);
       } catch (err) {
-        console.log('>>> [FCM][PushToken] PATCH 실패', err);
+        console.error('>>> [FCM][PushToken] PATCH 실패', err);
       }
     });
 
