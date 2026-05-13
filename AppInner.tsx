@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   tabIconInactive: {
-    tintColor: '#B8B8B8',
+    tintColor: Colors.textMuted,
     opacity: 0.9,
   },
   tabIconMainActive: {

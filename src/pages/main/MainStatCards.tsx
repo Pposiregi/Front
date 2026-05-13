@@ -2,21 +2,30 @@ import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import styles from '@styles/MainStatCards.styles';
 
+const DEFAULT_STEP_GOAL = 3000;
+const DEFAULT_KCAL_GOAL = 250;
+
 type MainStatCardsProps = {
   stepCount: number;
   estimatedKcal: number;
+  stepGoal?: number | null;
+  kcalGoal?: number | null;
   onStartRun: () => void;
 };
 
 const MainStatCards = ({
   stepCount,
   estimatedKcal,
+  stepGoal = DEFAULT_STEP_GOAL,
+  kcalGoal = DEFAULT_KCAL_GOAL,
   onStartRun,
 }: MainStatCardsProps) => {
-  const stepGoal = 3000;
-  const kcalGoal = 250;
-  const stepProgress = Math.min(stepCount / stepGoal, 1);
-  const kcalProgress = Math.min(estimatedKcal / kcalGoal, 1);
+  const effectiveStepGoal =
+    stepGoal != null && stepGoal > 0 ? stepGoal : DEFAULT_STEP_GOAL;
+  const effectiveKcalGoal =
+    kcalGoal != null && kcalGoal > 0 ? kcalGoal : DEFAULT_KCAL_GOAL;
+  const stepProgress = Math.min(stepCount / effectiveStepGoal, 1);
+  const kcalProgress = Math.min(estimatedKcal / effectiveKcalGoal, 1);
 
   return (
     <View style={styles.metricLayer}>

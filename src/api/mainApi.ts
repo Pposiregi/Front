@@ -6,6 +6,7 @@ import {
 } from 'types/main';
 
 const GET_USER_TIMEOUT_MS = 5000;
+const GET_USER_TIMEOUT_ERROR = 'GET_USER_TIMEOUT';
 
 const MOCK_USER_RESPONSE: getUserResponse = {
   userId: 1,
@@ -34,7 +35,7 @@ const MOCK_USER_RESPONSE: getUserResponse = {
 
 const timeoutAfter = <T>(ms: number): Promise<T> =>
   new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('GET_USER_TIMEOUT')), ms);
+    setTimeout(() => reject(new Error(GET_USER_TIMEOUT_ERROR)), ms);
   });
 
 /**
@@ -50,15 +51,15 @@ export const getUser = async (): Promise<getUserResponse> => {
     ]);
     return data;
   } catch (error) {
-    if ((error as Error)?.message === 'GET_USER_TIMEOUT') {
+    if ((error as Error)?.message === GET_USER_TIMEOUT_ERROR) {
       console.warn(
         `[MainApi] users 응답이 ${GET_USER_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
       );
       return MOCK_USER_RESPONSE;
     }
 
-    console.warn('[MainApi] users 요청 실패로 mock 데이터를 사용합니다.', error);
-    return MOCK_USER_RESPONSE;
+    console.error('[MainApi] users 요청 실패', error);
+    throw error;
   }
 };
 

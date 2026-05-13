@@ -7,10 +7,11 @@ import {
 import { mockActiveMissions } from '@pages/main/mockMission';
 
 const MISSION_ACTIVE_TIMEOUT_MS = 5000;
+const MISSION_ACTIVE_TIMEOUT_ERROR = 'MISSIONS_ACTIVE_TIMEOUT';
 
 const timeoutAfter = <T>(ms: number): Promise<T> =>
   new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('MISSIONS_ACTIVE_TIMEOUT')), ms);
+    setTimeout(() => reject(new Error(MISSION_ACTIVE_TIMEOUT_ERROR)), ms);
   });
 
 export const getMissionHistory = async (): Promise<MissionHistoryResponse> => {
@@ -30,11 +31,15 @@ export const getMissionsActive = async (): Promise<MissionActiveResponse> => {
     ]);
     return data;
   } catch (error) {
-    console.warn(
-      `[MissionApi] active missions 응답 실패 또는 ${MISSION_ACTIVE_TIMEOUT_MS}ms 초과로 mock 데이터를 사용합니다.`,
-      error
-    );
-    return mockActiveMissions;
+    if ((error as Error)?.message === MISSION_ACTIVE_TIMEOUT_ERROR) {
+      console.warn(
+        `[MissionApi] active missions 응답이 ${MISSION_ACTIVE_TIMEOUT_MS}ms 동안 없어 mock 데이터를 사용합니다.`
+      );
+      return mockActiveMissions;
+    }
+
+    console.error('[MissionApi] active missions 요청 실패', error);
+    throw error;
   }
 };
 

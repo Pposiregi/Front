@@ -178,6 +178,7 @@ export const MainPage = () => {
   const mainPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].main;
   const runPetTemplateId = PET_TEMPLATE_ID_BY_TYPE[selectedPetType].run;
   const dispatch = useAppDispatch();
+  const [targetStepGoal, setTargetStepGoal] = useState<number | null>(null);
   useEffect(() => {
     /** 사용자 기본 정보와 petType 캐시를 메인 진입 시 동기화한다. */
     const fetchUser = async () => {
@@ -187,6 +188,7 @@ export const MainPage = () => {
         if (data.userId == null || data.nickname == null) {
           throw new Error('유저 정보가 올바르지 않습니다.');
         }
+        setTargetStepGoal(data.targetStepCount);
         if (!data.pet) {
           await AsyncStorage.removeItem('petId');
           dispatch(userSlice.actions.setPet(null));
@@ -233,7 +235,7 @@ export const MainPage = () => {
           console.warn('[MainPage] petType 로드 실패', storageError);
         }
       } catch (e) {
-        console.log('유저 정보 로드 실패', e);
+        console.error('유저 정보 로드 실패', e);
       } finally {
         setIsLoading(false);
       }
@@ -257,7 +259,7 @@ export const MainPage = () => {
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
-  const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
+  const [, setTodayRunAccumulatedSec] = useState(0);
 
   // 최근 3개 trackPoint의 speed(m/s) 평균으로 현재 페이스 계산
   const livePaceMinPerKm = useMemo(() => {
@@ -463,7 +465,7 @@ export const MainPage = () => {
       setCurrentPbf(null);
       return 'missing';
     } catch (err: any) {
-      console.log('[BodyPrompt] 오늘 기록 조회 실패', err);
+      console.error('[BodyPrompt] 오늘 기록 조회 실패', err);
       // 서버/네트워크 오류 시에는 이미 기록한 사용자가 다시 입력하지 않도록 프롬프트를 닫는다.
       setShowBodyPrompt(false);
       return 'failed';
@@ -489,7 +491,7 @@ export const MainPage = () => {
         }
         setShowBodyPrompt(true);
       } catch (err) {
-        console.log('[BodyPrompt] 상태 로딩 실패', err);
+        console.error('[BodyPrompt] 상태 로딩 실패', err);
         setShowBodyPrompt(false);
       }
     };
@@ -747,7 +749,7 @@ export const MainPage = () => {
     try {
       await AsyncStorage.setItem(BODY_PROMPT_SKIP_KEY, todayKey);
     } catch (err) {
-      console.log('[BodyPrompt] 스킵 상태 저장 실패', err);
+      console.error('[BodyPrompt] 스킵 상태 저장 실패', err);
     }
   }, []);
 
@@ -769,7 +771,7 @@ export const MainPage = () => {
         setShowBodyPrompt(false);
         Alert.alert('기록 완료', '오늘의 몸 기록을 저장했어요.');
       } catch (err) {
-        console.log('[BodyPrompt] 기록 저장 실패', err);
+        console.error('[BodyPrompt] 기록 저장 실패', err);
         Alert.alert('저장 실패', '몸 기록 저장 중 문제가 발생했어요.');
       } finally {
         setSavingBodyHistory(false);
@@ -852,7 +854,7 @@ export const MainPage = () => {
       const activeMission = await getMissionsActive();
       setMissionApiItems(activeMission.missions);
     } catch (err) {
-      console.log('미션 업데이트 실패', err);
+      console.error('미션 업데이트 실패', err);
     }
   }, []);
   /**
@@ -966,8 +968,6 @@ export const MainPage = () => {
    * - 권한 거부/불러오기 실패 시 기본값으로 대체
    */
   const displayedSteps = healthSteps ?? 8954;
-  const todayTotalRunSec =
-    todayRunAccumulatedSec + (isTracking ? runningElapsedSec : 0);
   const estimatedKcal = Math.round(displayedSteps * KCAL_PER_STEP);
   const runPetRenderSize = Math.round(PET_RENDER_SIZE * RUN_PET_SCALE);
   const runBgTranslateX = runBgProgress.interpolate({
@@ -1250,6 +1250,7 @@ export const MainPage = () => {
             <MainStatCards
               stepCount={displayedSteps}
               estimatedKcal={estimatedKcal}
+              stepGoal={targetStepGoal}
               onStartRun={handleToggleTracking}
             />
           )}
