@@ -1,0 +1,63 @@
+package com.slimpet
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.facebook.react.ReactActivity
+import com.facebook.react.ReactActivityDelegate
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
+import com.facebook.react.defaults.DefaultReactActivityDelegate
+import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
+import org.devio.rn.splashscreen.SplashScreen
+
+class MainActivity : ReactActivity() {
+  companion object {
+    private const val REQUEST_POST_NOTIFICATIONS = 1011
+  }
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    SplashScreen.show(this)
+    super.onCreate(savedInstanceState)
+
+    // Health Connect 권한 콜백을 연결 (패키지명: com.google.android.apps.healthdata)
+    HealthConnectPermissionDelegate.setPermissionDelegate(this, "com.google.android.apps.healthdata")
+
+    
+    // Push
+    requestNotificationPermissionIfNeeded()
+  }
+  /**
+   * Returns the name of the main component registered from JavaScript. This is used to schedule
+   * rendering of the component.
+   */
+  override fun getMainComponentName(): String = "FitPet"
+
+  /**
+   * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
+   * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
+   */
+  override fun createReactActivityDelegate(): ReactActivityDelegate =
+      DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
+
+  /**
+   * 알림 권한 요청 (Android 13+)
+   */
+  private fun requestNotificationPermissionIfNeeded() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      val permission = Manifest.permission.POST_NOTIFICATIONS
+      val alreadyGranted =
+          ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+      if (!alreadyGranted) {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(permission),
+            REQUEST_POST_NOTIFICATIONS
+        )
+      }
+    }
+  }
+}

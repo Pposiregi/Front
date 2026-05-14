@@ -121,7 +121,10 @@ apiClient.interceptors.response.use(
         await EncryptedStorage.setItem('serverAccessToken', newAccessToken);
         if (__DEV__) {
           console.log(
-            `>>> [AUTH] refresh success, token updated (${newAccessToken.slice(0, 12)}...)`
+            `>>> [AUTH] refresh success, token updated (${newAccessToken.slice(
+              0,
+              12
+            )}...)`
           );
         }
         // 원본 요청에 새 토큰 주입
