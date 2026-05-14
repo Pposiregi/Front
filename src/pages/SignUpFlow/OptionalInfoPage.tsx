@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { styles } from '@styles/OptionalInfoPage.styles';
+import { Colors } from '@styles/theme';
 import {
   isValidPbf,
   isValidTargetStep,
@@ -81,7 +82,7 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
           <TextInput
             style={styles.textInputFlex}
             placeholder='목표 체중을 입력하세요.'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='numeric'
             onChangeText={setTargetWeight}
             ref={targetWeightRef}
@@ -94,7 +95,7 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
           <TextInput
             style={styles.textInputFlex}
             placeholder='목표 걸음을 입력하세요.'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='numeric'
             onChangeText={setTargetStep}
             ref={targetWalkRef}
@@ -107,7 +108,7 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
           <TextInput
             style={styles.textInputFlex}
             placeholder='현재 체지방률을 입력하세요.'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='numeric'
             onChangeText={setcurrentPbf}
             ref={pbfRef}
@@ -120,7 +121,7 @@ const OptionalInfoPage: React.FC<OptionalInfoProps> = ({ onFinish }) => {
           <TextInput
             style={styles.textInputFlex}
             placeholder='목표 체지방률을 입력하세요.'
-            placeholderTextColor='#666'
+            placeholderTextColor={Colors.textMuted}
             keyboardType='numeric'
             onChangeText={setTargetPbf}
             ref={targetPbfRef}

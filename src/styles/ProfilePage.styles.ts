@@ -8,19 +8,17 @@ const avatarSize = Math.max(80, Math.round(deviceWidth * 0.24));
 const gearSize = Math.max(28, Math.round(deviceWidth * 0.09));
 const cardRadius = Math.max(12, Math.round(deviceWidth * 0.04));
 const cardPadding = Math.max(12, Math.round(deviceWidth * 0.04));
-const headerFont = Math.max(
-  Typography.bodyLarge,
-  Math.round(deviceWidth * 0.05)
-);
+const sectionTitleFont = Typography.h1;
+const sectionTitleLineHeight = Math.round(sectionTitleFont * 1.16);
 const bodyFont = Math.max(Typography.caption, Math.round(deviceWidth * 0.034));
 const smallFont = Math.max(
-  Typography.caption - 1,
+  Typography.caption,
   Math.round(deviceWidth * 0.03)
 );
 const titleFont = Math.max(Typography.h2, Math.round(deviceWidth * 0.053));
 const metricNumberFont = Math.max(
-  Typography.body,
-  Math.round(deviceWidth * 0.05)
+  Typography.bodyLarge,
+  Math.min(20, Math.round(deviceWidth * 0.046))
 );
 const chartRadius = Math.max(10, Math.round(deviceWidth * 0.03));
 const chartPadding = Math.max(10, Math.round(deviceWidth * 0.035));
@@ -32,12 +30,12 @@ const topPadding = Math.max(Spacing.lg, Math.round(deviceWidth * 0.036));
 const headerBottomSpacing = Math.max(Spacing.md, Math.round(baseUnit * 1.5));
 const titleTopSpacing = Math.max(Spacing.sm, Math.round(baseUnit * 0.95));
 const captionTopSpacing = Math.max(Spacing.xs, Math.round(baseUnit * 0.45));
-const sectionTopSpacing = Math.max(Spacing.xl, Math.round(baseUnit * 2.1));
-const sectionBottomSpacing = Math.max(Spacing.sm, Math.round(baseUnit * 0.85));
+const sectionTopSpacing = Spacing.xxl;
+const sectionBottomSpacing = Spacing.md;
 const cardBottomSpacing = Math.max(Spacing.sm, Math.round(baseUnit * 0.95));
 const progressTopSpacing = Math.max(Spacing.sm, Math.round(baseUnit * 1.1));
 const metricCardVerticalPadding = Math.max(12, Math.round(cardPadding * 0.9));
-const sectionHeaderMinHeight = Math.max(38, Math.round(deviceWidth * 0.1));
+const sectionHeaderMinHeight = Math.max(34, sectionTitleLineHeight);
 const captionLineHeight = Math.max(bodyFont + 4, Math.round(bodyFont * 1.35));
 const recordButtonHorizontalPadding = Math.max(8, Math.round(baseUnit * 0.95));
 const recordButtonVerticalPadding = Math.max(4, Math.round(baseUnit * 0.45));
@@ -50,18 +48,18 @@ const chartCardBottomPadding = Math.max(
   Math.round(chartPadding * 1.2)
 );
 const metricRightMinWidth = Math.max(110, Math.round(deviceWidth * 0.29));
-const metricLabelFont = Math.max(10, Math.round(baseUnit * 1.1));
-const metricLabelLineHeight = Math.max(12, Math.round(baseUnit * 1.4));
-const metricValueFont = Math.max(10, Math.round(baseUnit * 1.1));
-const metricValueLineHeight = Math.max(13, Math.round(baseUnit * 1.5));
+const metricLabelFont = Math.max(
+  Typography.bodySmall,
+  Math.min(15, Math.round(deviceWidth * 0.038))
+);
+const metricLabelLineHeight = Math.round(metricLabelFont * 1.35);
+const metricValueFont = Math.max(
+  Typography.caption,
+  Math.min(14, Math.round(deviceWidth * 0.034))
+);
+const metricValueLineHeight = Math.round(metricValueFont * 1.35);
 
-const cardShadow = {
-  ...Shadows.soft,
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.07,
-  shadowRadius: 12,
-  elevation: 4,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export default StyleSheet.create({
   container: {
@@ -115,7 +113,7 @@ export default StyleSheet.create({
   },
   caption: {
     marginTop: captionTopSpacing,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: bodyFont,
     color: Colors.textSecondary,
     textAlign: 'center',
@@ -131,8 +129,10 @@ export default StyleSheet.create({
     marginBottom: sectionBottomSpacing,
   },
   sectionTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: headerFont,
+    fontFamily: Fonts.Pretendard,
+    fontSize: sectionTitleFont,
+    lineHeight: sectionTitleLineHeight,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   recordButton: {
@@ -147,9 +147,9 @@ export default StyleSheet.create({
     marginRight: Math.max(Spacing.xs, Math.round(baseUnit * 0.45)),
   },
   recordText: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: bodyFont,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   metricCard: {
@@ -175,13 +175,14 @@ export default StyleSheet.create({
     ...cardShadow,
   },
   metricLabel: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricLabelFont,
     lineHeight: metricLabelLineHeight,
+    fontWeight: '600',
     color: Colors.textPrimary,
   },
   metricAim: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: smallFont,
     color: Colors.textSecondary,
     marginTop: Math.max(2, Math.round(baseUnit * 0.5)),
@@ -192,19 +193,19 @@ export default StyleSheet.create({
     minWidth: metricRightMinWidth,
   },
   metricValue: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricValueFont,
     lineHeight: metricValueLineHeight,
     color: Colors.textSecondary,
   },
   metricNumber: {
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricNumberFont,
     lineHeight: Math.max(metricNumberFont, Math.round(metricNumberFont * 1.05)),
     color: Colors.textPrimary,
   },
   metricUnit: {
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontSize: metricValueFont,
     lineHeight: metricValueLineHeight,
     color: Colors.textSecondary,
@@ -219,7 +220,7 @@ export default StyleSheet.create({
   progressBar: {
     height: progressHeight,
     borderRadius: progressRadius,
-    backgroundColor: Colors.infoStrong,
+    backgroundColor: Colors.dataWeight,
   },
   chartHeader: {
     marginTop: sectionTopSpacing,

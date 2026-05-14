@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import Svg, { Polyline as SvgPolyline } from 'react-native-svg';
 import type { LatLng, MapRegion } from '@shared/types/location';
+import { Colors } from '@styles/theme';
 
 /**
  * 지도 위에 표시할 폴리라인 컴포넌트 props.
@@ -94,7 +95,7 @@ export const MapOverlayPolyline = ({
     >
       <SvgPolyline
         points={polylinePoints}
-        stroke='#7450FF'
+        stroke={Colors.dataRoute}
         strokeWidth={4}
         strokeLinecap='round'
         strokeLinejoin='round'

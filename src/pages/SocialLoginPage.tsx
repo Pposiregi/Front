@@ -7,12 +7,7 @@ import {
   View,
 } from 'react-native';
 import React, { useState } from 'react';
-import {
-  login,
-  getProfile as getKakaoProfile,
-  shippingAddresses as getKakaoShippingAddresses,
-  serviceTerms as getKakaoServiceTerms,
-} from '@react-native-seoul/kakao-login';
+import { login } from '@react-native-seoul/kakao-login';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAppDispatch } from '../store';
 import userSlice from '../slices/user';
@@ -22,13 +17,14 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../../AppInner';
 import { styles } from '@styles/SocialLogin.styles';
+import { Colors } from '@styles/theme';
 import { getSocialLogin } from '@api/socialLoginApi';
 import { getUser } from '@api/mainApi';
 import { logLogin } from '@utils/analytics';
+import { API_BASE_URL } from '@env';
 
-// 임시 우회 플래그: 백엔드 장애 시 로컬에서 로그인 성공 처리
-const BYPASS_SOCIAL_LOGIN = false;
 const LOGIN_APP_ICON = require('../../app_icon.png');
+type SocialPlatform = 'kakao' | 'google';
 
 const SocialLoginPage = () => {
   const dispatch = useAppDispatch();
@@ -91,30 +87,13 @@ const SocialLoginPage = () => {
   }: {
     idToken: string;
     accessToken: string;
-    platform: 'kakao' | 'google';
+    platform: SocialPlatform;
   }) => {
     try {
-      if (__DEV__) {
-        // DEV 버전 전용, 소셜 로그인 임시 무시
-        if (BYPASS_SOCIAL_LOGIN) {
-          const mockToken = 'dev-bypass-token';
-          await EncryptedStorage.setItem('serverAccessToken', mockToken);
-          dispatch(
-            userSlice.actions.setAuth({
-              accessToken: mockToken,
-              platform,
-            })
-          );
-          dispatch(userSlice.actions.setSignUpInProgress(false)); // 회원가입 과정 스킵
-          console.log('백엔드 우회: 로컬에서 로그인 처리 완료');
-          return;
-        }
-      }
-
       console.log('>>> firstLoginCheck request', {
         platform,
-        idToken: idToken,
-        accessToken: accessToken,
+        hasIdToken: Boolean(idToken),
+        hasAccessToken: Boolean(accessToken),
       });
 
       const result = await getSocialLogin({
@@ -177,13 +156,19 @@ const SocialLoginPage = () => {
         await logLogin(platform);
       }
     } catch (err: any) {
+      console.error('>>> API BASE URL: ' + API_BASE_URL);
       console.error('>>> firstLoginCheck error', {
         status: err?.response?.status,
         data: err?.response?.data,
         message: err?.message,
-        raw: err,
       });
-      Alert.alert('로그인 실패', '서버 통신에 오류가 발생했습니다.');
+      const status = err?.response?.status;
+      Alert.alert(
+        '로그인 실패',
+        status === 503
+          ? '현재 로그인 서버가 일시적으로 응답하지 않습니다.\n잠시 후 다시 시도해주세요.'
+          : '서버 통신에 오류가 발생했습니다.'
+      );
     }
   };
 
@@ -229,7 +214,7 @@ const SocialLoginPage = () => {
       {loading ? (
         // loading이 true일 때 로딩 스피너를 보여줍니다.
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size='large' color='#000000' />
+          <ActivityIndicator size='large' color={Colors.textPrimary} />
         </View>
       ) : (
         // loading이 false일 때 버튼들을 보여줍니다.
@@ -238,8 +223,7 @@ const SocialLoginPage = () => {
             <Image source={LOGIN_APP_ICON} style={styles.appIcon} />
             <Text style={styles.mainText}>나와 함께 건강해지는 펫</Text>
             <Text style={styles.subText}>
-              내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금
-              만나요!
+              내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금 만나요!
             </Text>
           </View>
           <Pressable style={styles.kakaoButton} onPress={handleReset}>

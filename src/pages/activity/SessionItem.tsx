@@ -13,6 +13,7 @@ import type {
   ActivityDetailNavigationProp,
   GPS_SESSION,
 } from '../../types/activity';
+import ActivityCardSurface from './ActivityCardSurface';
 
 type SessionItemProps = {
   session: GPS_SESSION;
@@ -110,6 +111,7 @@ function SessionItem({ session, onDelete }: SessionItemProps) {
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.listCard}>
+      <ActivityCardSurface />
       {/* 삭제 액션은 카드 콘텐츠를 밀지 않도록 우상단에 독립 배치한다. */}
       {onDelete ? (
         <TouchableOpacity

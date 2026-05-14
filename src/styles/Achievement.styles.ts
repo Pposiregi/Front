@@ -26,8 +26,9 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.textPrimary,
   },
   tabText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textMuted,
   },
   activeTabText: {
@@ -37,7 +38,7 @@ export const styles = StyleSheet.create({
   // 모달
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -59,13 +60,14 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitleText: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 5,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
   modalKcalText: {
-    fontSize: Typography.bodyLarge,
-    color: '#555',
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontSize: Typography.body,
+    color: Colors.textSecondary,
+    fontFamily: Fonts.Pretendard,
   },
 });

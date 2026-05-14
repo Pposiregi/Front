@@ -10,6 +10,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import styles from '@styles/BodyRecordPrompt.styles';
+import { Colors } from '@styles/theme';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { KeyboardAwareModalContent } from '@components/KeyboardAwareScreen';
 
@@ -153,7 +154,7 @@ const BodyRecordPrompt = ({
                     value={heightInput}
                     onChangeText={setHeightInput}
                     placeholder='0'
-                    placeholderTextColor='#9CA3AF'
+                    placeholderTextColor={Colors.textMuted}
                     selectTextOnFocus
                   />
                   <Text style={styles.fieldUnit}>cm</Text>
@@ -171,7 +172,7 @@ const BodyRecordPrompt = ({
                     value={weightInput}
                     onChangeText={setWeightInput}
                     placeholder='0'
-                    placeholderTextColor='#9CA3AF'
+                    placeholderTextColor={Colors.textMuted}
                     selectTextOnFocus
                   />
                   <Text style={styles.fieldUnit}>kg</Text>
@@ -195,7 +196,7 @@ const BodyRecordPrompt = ({
                     value={bodyFatInput}
                     onChangeText={setBodyFatInput}
                     placeholder='0'
-                    placeholderTextColor='#9CA3AF'
+                    placeholderTextColor={Colors.textMuted}
                     selectTextOnFocus
                   />
                   <Text style={styles.fieldUnit}>%</Text>

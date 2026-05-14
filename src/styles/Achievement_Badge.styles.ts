@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 5;
@@ -24,9 +24,9 @@ export const styles = StyleSheet.create({
     padding: CARD_PADDING,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: Colors.divider,
     marginBottom: 5,
-    elevation: 3,
+    ...Shadows.surfaceRaised,
     marginHorizontal: CARD_MARGIN,
   },
   sectionHeader: {
@@ -37,15 +37,16 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeTitle: {
-    fontSize: 20,
-    fontFamily: Fonts.JUA,
-    color: '#333',
+    fontSize: Typography.sectionTitle,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   badgeCount: {
-    fontSize: 14,
-    fontFamily: Fonts.JUA,
-    color: '#888',
-    backgroundColor: '#f0f0f0',
+    fontSize: Typography.bodySmall,
+    fontFamily: Fonts.Pretendard,
+    color: Colors.textMuted,
+    backgroundColor: Colors.background,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,

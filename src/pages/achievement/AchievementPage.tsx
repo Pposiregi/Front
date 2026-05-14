@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
+import { Colors } from '@styles/theme';
 
 import RankingTab from './RankingTab';
 import MissionTab from './MissionTab';
@@ -55,7 +56,7 @@ function AchievementPage() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#eee' }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <TabHeader />
       <View style={{ flex: 1 }}>{renderActiveScreen()}</View>
     </View>

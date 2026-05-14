@@ -21,9 +21,10 @@ export default StyleSheet.create({
   },
 
   missionTitle: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 12,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
 
@@ -44,8 +45,9 @@ export default StyleSheet.create({
   },
 
   tabText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.body,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
 
@@ -88,7 +90,7 @@ export default StyleSheet.create({
   },
 
   missionUITextTitle: {
-    fontSize: Typography.h2,
+    fontSize: Typography.sectionTitle,
     fontFamily: Fonts.JUA,
     color: Colors.textPrimary,
   },
@@ -114,7 +116,7 @@ export default StyleSheet.create({
   completeButtonText: {
     fontSize: Typography.body,
     color: Colors.surface,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 
   completeButtonTextDisabled: {
@@ -124,7 +126,7 @@ export default StyleSheet.create({
   missionUIText: {
     fontSize: Typography.body,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: 'bold',
   },
 
@@ -154,8 +156,9 @@ export default StyleSheet.create({
 
   missionUIExitText: {
     color: Colors.surface,
-    fontSize: Typography.h2,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
 
   summaryBox: {
@@ -166,7 +169,7 @@ export default StyleSheet.create({
   },
 
   summaryTitle: {
-    fontSize: Typography.h1,
+    fontSize: Typography.screenTitle,
     marginBottom: 12,
     fontFamily: Fonts.JUA,
     color: Colors.textPrimary,
@@ -187,13 +190,13 @@ export default StyleSheet.create({
   summaryLabel: {
     fontSize: Typography.body,
     color: Colors.textSecondary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryValue: {
     fontSize: Typography.bodyLarge,
     color: Colors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryValueGroup: {
@@ -204,7 +207,7 @@ export default StyleSheet.create({
     marginTop: 2,
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 
   summaryDivider: {
@@ -216,7 +219,7 @@ export default StyleSheet.create({
     marginTop: 4,
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     textAlign: 'right',
   },
 });

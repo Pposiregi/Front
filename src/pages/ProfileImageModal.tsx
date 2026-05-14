@@ -29,6 +29,7 @@ import { uploadPhoto } from '@api/uploadPhoto';
 import { getUser } from '@api/mainApi';
 import { validateImageAsset } from '@utils/imageUtil';
 import type { ProfileImageHistoryItem } from 'types/profile';
+import { Colors } from '@styles/theme';
 
 type Props = {
   visible: boolean;
@@ -251,7 +252,7 @@ export default function ProfileImageModal({
                 disabled={uploading}
               >
                 {uploading ? (
-                  <ActivityIndicator color='#fff' />
+                  <ActivityIndicator color={Colors.surface} />
                 ) : (
                   <Text style={styles.saveText}>사용하기</Text>
                 )}
@@ -344,7 +345,7 @@ export default function ProfileImageModal({
                 disabled={uploading}
               >
                 {uploading ? (
-                  <ActivityIndicator color='#fff' />
+                  <ActivityIndicator color={Colors.surface} />
                 ) : (
                   <Text style={styles.saveText}>저장</Text>
                 )}

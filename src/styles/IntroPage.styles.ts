@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     fontFamily: Fonts.JUA,
     color: Colors.textPrimary,
-    fontSize: Typography.bodyLarge,
+    fontSize: Typography.cardTitle,
   },
   dotContainer: {
     flexDirection: 'row',
@@ -37,6 +37,6 @@ export const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
   },
 });

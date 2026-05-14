@@ -13,18 +13,32 @@ export const Colors = {
 
   divider: '#E5E7EB',
 
-  accent: '#FEC288',
-  accentSoft: '#FFEFE0',
-  accentStrong: '#FF9F43',
-  accentDeep: '#C2410C',
+  accent: '#FFC98B',
+  accentSoft: '#FFF6EA',
+  accentStrong: '#FFA94D',
+  accentDeep: '#E67E22',
 
   disabled: '#ccc',
 
-  info: '#1D7ED8',
-  infoSoft: '#EAF3FF',
-  infoStrong: '#5F6BEA',
+  info: '#FFB86B',
+  infoSoft: '#FFF6EA',
+  infoStrong: '#FFA94D',
+  mealFocus: '#FFF2E2',
+  mealFocusSoft: '#FFF8F0',
+  mealFocusText: '#D97706',
+
+  dataWeight: '#2563EB',
+  dataBodyFat: '#7C3AED',
+  dataRoute: '#2563EB',
+
+  pointRed: '#DC2626',
+  pointRedSoft: '#FEE2E2',
+  pointGreen: '#16A34A',
+  pointGreenSoft: '#DCFCE7',
 
   success: '#4CAF50',
+
+  kakao: '#FDDC3F',
 
   error: '#D9534F',
   errorSoft: '#FEE2E2',
@@ -37,7 +51,7 @@ export const Colors = {
   overlaySoft: 'rgba(0,0,0,0.3)',
   shadowSoft: 'rgba(0, 0, 0, 0.2)',
   shadow: '#000',
-  shadowAccent: '#7A2E2E',
+  shadowAccent: '#D9822B',
 
   devButton: '#1F2937',
 };
