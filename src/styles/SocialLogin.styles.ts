@@ -1,9 +1,8 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Colors, Fonts, Typography } from './theme';
 
-const LOGIN_TEXT_COLOR = '#2B2B2B';
-const LOGIN_BACKGROUND_COLOR = '#FFFFFF';
-const LOGIN_APP_ICON_SIZE = Math.min(SCREEN_WIDTH * 0.32, 128);
+const LOGIN_APP_ICON_SIZE = 128;
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,7 +10,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 100,
-    backgroundColor: LOGIN_BACKGROUND_COLOR,
+    backgroundColor: Colors.surface,
   },
   loginIntro: {
     width: SCREEN_WIDTH * 0.7,
@@ -25,23 +24,23 @@ export const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   mainText: {
-    fontSize: 24,
+    fontSize: Typography.screenTitle,
     lineHeight: 32,
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
+    fontFamily: Fonts.JUA,
     fontWeight: '800',
-    color: LOGIN_TEXT_COLOR,
+    color: Colors.textPrimary,
   },
   subText: {
     marginTop: 10,
-    fontSize: 15,
+    fontSize: Typography.label,
     lineHeight: 22,
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
-    color: '#686868',
+    fontFamily: Fonts.Pretendard,
+    color: Colors.textSecondary,
   },
   kakaoButton: {
-    backgroundColor: '#FDDC3F',
+    backgroundColor: Colors.kakao,
     borderRadius: 40,
     borderWidth: 1,
     width: SCREEN_WIDTH * 0.7,
@@ -58,7 +57,7 @@ export const styles = StyleSheet.create({
     marginRight: 22,
   },
   googleButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     borderRadius: 40,
     borderWidth: 1,
     width: SCREEN_WIDTH * 0.7,
@@ -76,14 +75,15 @@ export const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    fontFamily: 'GowunDodum',
-    fontWeight: '800',
-    color: LOGIN_TEXT_COLOR,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
+    fontSize: Typography.action,
+    color: Colors.textPrimary,
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: LOGIN_BACKGROUND_COLOR,
+    backgroundColor: Colors.surface,
   },
 });

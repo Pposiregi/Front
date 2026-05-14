@@ -1,31 +1,32 @@
 import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Fonts } from './theme';
+import {
+  cardRadius,
+  Colors,
+  Fonts,
+  screenPadding,
+  Shadows,
+  Spacing,
+  Typography,
+} from './theme';
 
 const colors = {
-  background: '#F3F4F6',
-  surface: '#FFFFFF',
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  divider: '#E5E7EB',
-  chipBackground: 'rgba(17, 24, 39, 0.75)',
-  chipText: '#FFFFFF',
-  shadow: '#000000',
+  background: Colors.background,
+  surface: Colors.surface,
+  textPrimary: Colors.textPrimary,
+  textSecondary: Colors.textSecondary,
+  textMuted: Colors.textMuted,
+  divider: Colors.divider,
 };
 
-const cardShadow = {
-  shadowColor: colors.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 3,
-};
+const cardShadow = Shadows.surfaceRaised;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: screenPadding,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xxl,
     backgroundColor: colors.background,
   },
   centerContainer: {
@@ -35,17 +36,17 @@ export const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: Typography.action,
     color: colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   mapFrame: {
     height: SCREEN_HEIGHT * 0.36,
-    width: SCREEN_WIDTH - 40,
-    borderRadius: 18,
+    width: SCREEN_WIDTH - screenPadding * 2,
+    borderRadius: cardRadius,
     backgroundColor: colors.surface,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: Spacing.xxl,
     ...cardShadow,
   },
   map: {
@@ -63,7 +64,7 @@ export const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: Colors.surfaceOverlay,
   },
   mapRelocatingCard: {
     flexDirection: 'row',
@@ -71,69 +72,74 @@ export const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    backgroundColor: Colors.surfaceOverlaySolid,
+    ...Shadows.surfaceRaised,
   },
   mapRelocatingText: {
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: Typography.caption,
     color: colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   chip: {
-    backgroundColor: colors.chipBackground,
+    backgroundColor: Colors.surfaceOverlaySolid,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
   },
   chipText: {
-    fontFamily: Fonts.Roboto_VariableFont,
-    fontSize: 12,
-    color: colors.chipText,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    fontWeight: '700',
+    color: colors.textPrimary,
   },
   sectionTitle: {
-    fontSize: 18,
-    marginBottom: 12,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.h1,
+    lineHeight: Math.round(Typography.h1 * 1.16),
+    fontWeight: '700',
     color: colors.textPrimary,
+    marginBottom: Spacing.md,
   },
   specCard: {
     backgroundColor: colors.surface,
-    borderRadius: 18,
+    borderRadius: cardRadius,
+    borderWidth: 1,
+    borderColor: colors.divider,
     paddingVertical: 6,
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
     ...cardShadow,
   },
   specRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
   specLabel: {
-    fontSize: 14,
+    fontSize: Typography.bodySmall,
     color: colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '600',
   },
   specValue: {
-    fontSize: 14,
+    fontSize: Typography.cardTitle,
     color: colors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
   specValueGroup: {
     alignItems: 'flex-end',
   },
   specSubValue: {
     marginTop: 2,
-    fontSize: 12,
+    fontSize: Typography.bodySmall,
     color: colors.textMuted,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   specRowLast: {
     borderBottomWidth: 0,
@@ -143,8 +149,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: Typography.label,
     color: colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
 });

@@ -1,81 +1,70 @@
 import { StyleSheet, Platform } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
-import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
+import {
+  bottomContentPadding,
+  cardRadius,
+  Colors,
+  Fonts,
+  layoutScale,
+  Radius,
+  screenPadding,
+  Shadows,
+  Spacing,
+  Typography,
+} from './theme';
 
 // 화면 크기 기반 반응형 사이즈 계산
-const BOTTOM_NAV_HEIGHT = Math.max(56, Math.round(SCREEN_HEIGHT * 0.075));
+const BOTTOM_NAV_HEIGHT = layoutScale(64, 56, 76);
 const PROGRESS_CONTAINER_HEIGHT = Math.max(
-  80,
-  Math.min(120, SCREEN_HEIGHT * 0.1)
+  layoutScale(72, 68, 78),
+  Math.min(layoutScale(82, 76, 88), SCREEN_HEIGHT * 0.078)
 );
-const TOKKI_PADDING_V = Math.max(12, Math.round(SCREEN_HEIGHT * 0.02));
-const TOKKI_PADDING_H = Math.max(12, Math.round(SCREEN_WIDTH * 0.04));
+const TOKKI_PADDING_V = layoutScale(14, 12, 18);
+const TOKKI_PADDING_H = screenPadding;
 const CONTAINER_TOP_PADDING = Platform.select({
-  ios: Math.max(34, Math.round(SCREEN_HEIGHT * 0.05)),
-  android: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
-  default: Math.max(20, Math.round(SCREEN_HEIGHT * 0.03)),
+  ios: layoutScale(32, 28, 42),
+  android: layoutScale(14, 10, 22),
+  default: layoutScale(18, 14, 26),
 });
 const START_BUTTON_SIZE = Math.max(
-  66,
-  Math.min(82, Math.round(SCREEN_WIDTH * 0.205))
+  layoutScale(52, 49, 58),
+  Math.min(layoutScale(64, 58, 70), Math.round(SCREEN_WIDTH * 0.165))
 );
 const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
-const START_BUTTON_FONT = Math.max(16, Math.round(SCREEN_WIDTH * 0.045));
-const CONTENT_MARGIN_BOTTOM = Math.max(12, Math.round(SCREEN_HEIGHT * 0.025));
-const START_BUTTON_BASE_BOTTOM = Math.max(
-  Math.round(BOTTOM_NAV_HEIGHT * 0.66),
-  BOTTOM_NAV_HEIGHT - Math.max(14, Math.round(SCREEN_HEIGHT * 0.025))
-);
+const START_BUTTON_FONT = layoutScale(17, 16, 19);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
-const START_BUTTON_ESTIMATED_HEIGHT = START_BUTTON_SIZE;
-const PET_BOTTOM_FROM_START =
-  START_BUTTON_BASE_BOTTOM +
-  START_BUTTON_ESTIMATED_HEIGHT +
-  Math.max(6, Math.round(SCREEN_HEIGHT * 0.01));
-const MISSION_BUTTON_TOP = Math.max(96, Math.round(SCREEN_HEIGHT * 0.125));
-const MESSAGE_MARGIN_TOP = Math.max(4, Math.round(SCREEN_HEIGHT * 0.006));
-const MESSAGE_ROW_TOP = Math.max(112, Math.round(SCREEN_HEIGHT * 0.15));
-const RUN_HUD_TOP = Math.max(28, Math.round(SCREEN_HEIGHT * 0.05));
-const RUN_HUD_MIN_HEIGHT = Math.max(58, Math.round(SCREEN_HEIGHT * 0.07));
-const RUN_HUD_HORIZONTAL_PADDING = Math.max(
-  Spacing.lg,
-  Math.round(SCREEN_WIDTH * 0.045)
-);
-const RUN_HUD_VERTICAL_PADDING = Math.max(
-  Spacing.sm - 2,
-  Math.round(SCREEN_HEIGHT * 0.007)
-);
-const TIMER_LINE_HEIGHT = Math.max(42, Math.round(SCREEN_WIDTH * 0.112));
-const START_ICON_SIZE = Math.max(50, Math.round(SCREEN_WIDTH * 0.14));
-const DEV_BUTTON_STACK_BOTTOM =
-  BOTTOM_NAV_HEIGHT + Math.max(2, Math.round(SCREEN_HEIGHT * 0.006));
-const DEV_BUTTON_HORIZONTAL_PADDING = Math.max(
-  10,
-  Math.round(SCREEN_WIDTH * 0.028)
-);
-const DEV_BUTTON_VERTICAL_PADDING = Math.max(
-  6,
-  Math.round(SCREEN_HEIGHT * 0.008)
-);
-const RUN_LOCK_NOTICE_RIGHT = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = Math.max(
-  Spacing.md,
-  Math.round(SCREEN_WIDTH * 0.03)
-);
-const RUN_LOCK_NOTICE_VERTICAL_PADDING = Math.max(
-  7,
-  Math.round(SCREEN_HEIGHT * 0.009)
-);
+const PET_BOTTOM_FROM_START = layoutScale(206, 188, 232);
+const PET_RENDER_SIZE = 480;
+const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
+const PET_FOOT_RENDER_OFFSET = PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO;
+const PET_SHADOW_VERTICAL_OVERLAP = layoutScale(42, 38, 48);
+const PET_SHADOW_BOTTOM =
+  PET_BOTTOM_FROM_START + PET_FOOT_RENDER_OFFSET - PET_SHADOW_VERTICAL_OVERLAP;
+const START_BUTTON_HEAD_OFFSET = Math.round(PET_RENDER_SIZE * 0.62);
+const START_BUTTON_BASE_BOTTOM =
+  PET_BOTTOM_FROM_START + START_BUTTON_HEAD_OFFSET;
+const MISSION_BUTTON_TOP = layoutScale(22, 18, 30);
+const MESSAGE_MARGIN_TOP = layoutScale(5, 4, 8);
+const MESSAGE_ROW_TOP = layoutScale(124, 112, 148);
+const RUN_HUD_TOP = layoutScale(36, 28, 46);
+const RUN_HUD_MIN_HEIGHT = layoutScale(62, 58, 72);
+const RUN_HUD_HORIZONTAL_PADDING = screenPadding;
+const RUN_HUD_VERTICAL_PADDING = layoutScale(7, 6, 9);
+const TIMER_LINE_HEIGHT = layoutScale(44, 42, 50);
+const START_ICON_SIZE = layoutScale(54, 50, 60);
+const DEV_BUTTON_STACK_TOP = layoutScale(10, 8, 14);
+const DEV_BUTTON_HORIZONTAL_PADDING = layoutScale(11, 10, 14);
+const DEV_BUTTON_VERTICAL_PADDING = layoutScale(7, 6, 9);
+const RUN_LOCK_NOTICE_RIGHT = screenPadding;
+const RUN_LOCK_NOTICE_HORIZONTAL_PADDING = layoutScale(13, Spacing.md, 16);
+const RUN_LOCK_NOTICE_VERTICAL_PADDING = layoutScale(8, 7, 10);
 const MISSION_BUTTON_SIZE = Math.max(
-  44,
-  Math.min(52, Math.round(SCREEN_WIDTH * 0.12))
+  layoutScale(48, 44, 52),
+  Math.min(layoutScale(58, 54, 62), Math.round(SCREEN_WIDTH * 0.135))
 );
 const MISSION_BUTTON_PADDING = Math.max(
   Spacing.sm,
-  Math.round(MISSION_BUTTON_SIZE * 0.17)
+  layoutScale(Math.round(MISSION_BUTTON_SIZE * 0.17), 8, 10)
 );
 const MISSION_ICON_SIZE = Math.max(28, Math.round(MISSION_BUTTON_SIZE * 0.65));
 
@@ -91,14 +80,21 @@ export default StyleSheet.create({
     backgroundColor: Colors.background,
     paddingTop: CONTAINER_TOP_PADDING,
   },
+  mainFullBackground: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.6,
+  },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
-    marginBottom: CONTENT_MARGIN_BOTTOM,
+    marginBottom: layoutScale(10, 8, 14),
+    marginHorizontal: 0,
+    paddingVertical: Spacing.xs,
+    backgroundColor: 'transparent',
     zIndex: 1,
-    elevation: 1,
   },
   progressRow: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: screenPadding,
+    alignItems: 'center',
   },
   missionCard: {
     marginRight: Spacing.md,
@@ -106,7 +102,7 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.JUA,
     textAlign: 'center',
     color: Colors.textPrimary,
     fontSize: Typography.h1,
@@ -124,25 +120,52 @@ export default StyleSheet.create({
   },
   devButtonGroup: {
     position: 'absolute',
-    left: Math.max(Spacing.md, Math.round(SCREEN_WIDTH * 0.035)),
-    bottom: DEV_BUTTON_STACK_BOTTOM,
+    left: screenPadding,
+    top: DEV_BUTTON_STACK_TOP,
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: Spacing.sm,
     zIndex: 12,
+  },
+  devToggleButton: {
+    backgroundColor: Colors.surfaceOverlaySolid,
+    paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
+    paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
+    ...Shadows.surfaceRaised,
+  },
+  devToggleText: {
+    color: Colors.textSecondary,
+    fontSize: Typography.caption,
+    fontWeight: '700',
   },
   mainBackground: {
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: TOKKI_PADDING_V,
-    paddingBottom: TOKKI_PADDING_V,
+    paddingBottom: bottomContentPadding,
     paddingHorizontal: TOKKI_PADDING_H,
+    backgroundColor: 'transparent',
+    overflow: 'visible',
+    zIndex: 2,
+  },
+  mainPetShadow: {
+    position: 'absolute',
+    bottom: PET_SHADOW_BOTTOM,
+    alignSelf: 'center',
+    width: layoutScale(118, 104, 136),
+    height: layoutScale(24, 20, 28),
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(31, 41, 55, 0.42)',
+    zIndex: 3,
   },
   mapContainer: {
     flex: 1,
     width: '100%',
-    borderRadius: Radius.lg,
+    borderRadius: cardRadius,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
   },
@@ -162,13 +185,13 @@ export default StyleSheet.create({
     paddingVertical: RUN_HUD_VERTICAL_PADDING,
     borderRadius: 0,
     backgroundColor: Colors.surfaceOverlay,
-    ...Shadows.soft,
+    ...Shadows.surfaceRaised,
     justifyContent: 'center',
     alignItems: 'center',
   },
   runTimerValue: {
-    fontFamily: Fonts.JUA,
-    fontSize: Math.max(Typography.timer, Math.round(SCREEN_WIDTH * 0.108)),
+    fontFamily: Fonts.Pretendard,
+    fontSize: layoutScale(Typography.timer, Typography.timer, 46),
     color: Colors.textPrimary,
     letterSpacing: 1,
     lineHeight: TIMER_LINE_HEIGHT,
@@ -195,25 +218,23 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...Platform.select({
-      ios: Shadows.medium,
-      android: { elevation: 0 },
+      ios: Shadows.floatingAction,
+      android: Shadows.surfaceFlat,
     }),
+    zIndex: 9,
   },
   fatButton: {
     position: 'absolute',
-    bottom: Math.max(
-      Spacing.sm,
-      BOTTOM_NAV_HEIGHT - Math.round(SCREEN_HEIGHT * 0.02)
-    ),
+    bottom: Math.max(Spacing.sm, BOTTOM_NAV_HEIGHT - layoutScale(16, 12, 20)),
     left: '50%',
-    marginLeft: Math.max(90, Math.round(SCREEN_WIDTH * 0.24)),
+    marginLeft: layoutScale(96, 90, 112),
     backgroundColor: Colors.devButton,
     paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
     paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
     borderRadius: Radius.md,
   },
   devPbfPanel: {
-    minWidth: Math.max(156, Math.round(SCREEN_WIDTH * 0.34)),
+    minWidth: layoutScale(164, 156, 184),
     paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
     paddingVertical: DEV_BUTTON_VERTICAL_PADDING,
     borderRadius: Radius.md,
@@ -234,7 +255,7 @@ export default StyleSheet.create({
     fontWeight: '700',
   },
   devPbfResetButton: {
-    paddingHorizontal: Math.max(8, Math.round(SCREEN_WIDTH * 0.02)),
+    paddingHorizontal: layoutScale(8, 8, 10),
     paddingVertical: 4,
     borderRadius: Radius.sm,
     backgroundColor: Colors.accentSoft,
@@ -300,7 +321,7 @@ export default StyleSheet.create({
     backgroundColor: Colors.surfaceOverlaySolid,
     overflow: 'hidden',
     ...Platform.select({
-      android: Shadows.medium,
+      android: Shadows.floatingAction,
     }),
   },
   runningLockNotice: {
@@ -315,8 +336,8 @@ export default StyleSheet.create({
     borderColor: Colors.accent,
   },
   startText: {
-    fontFamily: Fonts.JUA,
-    fontWeight: 'bold',
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     fontSize: START_BUTTON_FONT,
     color: Colors.textSecondary,
   },
@@ -340,6 +361,7 @@ export default StyleSheet.create({
     bottom: PET_BOTTOM_FROM_START,
     alignSelf: 'center',
     resizeMode: 'contain',
+    zIndex: 4,
   },
   petImage: {
     alignSelf: 'center',
@@ -392,16 +414,19 @@ export default StyleSheet.create({
   missionButton: {
     position: 'absolute',
     top: MISSION_BUTTON_TOP,
-    right: Math.max(Spacing.md + 2, Math.round(SCREEN_WIDTH * 0.04)),
+    right: screenPadding,
     width: MISSION_BUTTON_SIZE,
     height: MISSION_BUTTON_SIZE,
     padding: MISSION_BUTTON_PADDING,
-    backgroundColor: Colors.accentStrong,
-    borderRadius: Radius.sm,
+    backgroundColor: Colors.surfaceOverlaySolid,
+    borderRadius: Radius.pill,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.accent,
-    zIndex: 10,
+    borderWidth: 1,
+    borderColor: Colors.divider,
+    zIndex: 30,
+    elevation: 30,
+    ...Shadows.floatingAction,
   },
   missionIcon: {
     width: MISSION_ICON_SIZE,
@@ -416,7 +441,7 @@ export default StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
@@ -424,16 +449,17 @@ export default StyleSheet.create({
 
   petOnboardingCard: {
     width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: Colors.surface,
+    borderRadius: cardRadius,
+    padding: screenPadding,
     alignItems: 'center',
   },
 
   petOnboardingTitle: {
-    fontSize: 18,
+    fontSize: Typography.cardTitle,
     fontWeight: '700',
     marginBottom: 20,
+    fontFamily: Fonts.Pretendard,
   },
 
   petTypeRow: {
@@ -445,25 +471,25 @@ export default StyleSheet.create({
   petTypeButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: Colors.background,
     borderRadius: 10,
   },
 
   petOnboardingStart: {
-    backgroundColor: '#111827',
+    backgroundColor: Colors.devButton,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: Radius.md,
   },
 
   runningStatPanel: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.accentSoft,
-    borderRadius: 12,
+    borderRadius: cardRadius,
     borderWidth: 1,
     borderColor: Colors.accent,
-    marginHorizontal: 12,
+    marginHorizontal: screenPadding,
     paddingVertical: 12,
   },
 
@@ -481,20 +507,20 @@ export default StyleSheet.create({
   runningStatPanelLabel: {
     fontSize: Typography.caption,
     color: Colors.textSecondary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     marginBottom: 2,
   },
 
   runningStatPanelValue: {
     fontSize: Typography.h2,
     color: Colors.textPrimary,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
   },
 
   runningStatPanelUnit: {
     fontSize: Typography.caption,
     color: Colors.textMuted,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     marginTop: 2,
   },
 });

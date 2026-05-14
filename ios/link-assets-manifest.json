@@ -8,6 +8,10 @@
     {
       "path": "src/assets/fonts/JUA.ttf",
       "sha1": "e9ae3ad795aea36d4b271599072fe6761edefd5a"
+    },
+    {
+      "path": "src/assets/fonts/PretendardVariable.ttf",
+      "sha1": "89b05a2f18c76f8deb577505d48237127ccfc908"
     }
   ]
 }

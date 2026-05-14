@@ -54,8 +54,9 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>GowunDodum.ttf</string>
-		<string>JUA.ttf</string>
-	</array>
+			<string>GowunDodum.ttf</string>
+			<string>JUA.ttf</string>
+			<string>PretendardVariable.ttf</string>
+		</array>
 </dict>
 </plist>

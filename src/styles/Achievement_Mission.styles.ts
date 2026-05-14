@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -31,11 +31,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     borderLeftWidth: 6,
     borderLeftColor: Colors.success, // STEP이면 초록, MEAL이면 주황으로 런타임에 바꿔서 적용 가능
-    shadowColor: Colors.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    ...Shadows.surfaceRaised,
   },
   iconCircle: {
     width: 40,
@@ -64,7 +60,7 @@ export const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: Typography.bodySmall,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: '700',
     color: Colors.success,
   },
@@ -81,13 +77,13 @@ export const styles = StyleSheet.create({
   },
   listHeaderTitle: {
     fontSize: Typography.bodyLarge,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   listHeaderSubtitle: {
     fontSize: Typography.bodySmall,
     marginTop: 4,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   dateRangeButton: {
@@ -101,11 +97,11 @@ export const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#00000088',
+    backgroundColor: Colors.overlayDark,
   },
   modalContent: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
   },
@@ -117,7 +113,7 @@ export const styles = StyleSheet.create({
   modalButton: {
     padding: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: Colors.disabled,
     borderRadius: 8,
     marginBottom: 12,
   },

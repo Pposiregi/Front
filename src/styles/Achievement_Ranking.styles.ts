@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Shadows, Typography } from './theme';
 
 export const styles = StyleSheet.create({
   loadingContainer: {
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
   rankingNumberImage: { width: 50, height: 50, resizeMode: 'contain' },
   rankingNumberText: {
     fontSize: Typography.h1, // 가독성을 위해 살짝 조절
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     textAlign: 'center',
     color: Colors.textPrimary,
   },
@@ -40,12 +40,12 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 4,
+    ...Shadows.surfaceRaised,
     minHeight: 70,
   },
   listItemText: {
     fontSize: Typography.bodyLarge,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
   rankingFilterButtonText: {
     fontSize: Typography.bodySmall,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     fontWeight: 'bold',
   },
   rankingFilterButtonActive: {
@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
   noRankingText: {
     fontSize: Typography.h1,
     color: Colors.textPrimary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   myRankingHighlight: {
     backgroundColor: Colors.accentSoft,
@@ -103,8 +103,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   myRankingText: {
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     textAlign: 'center',
     color: Colors.surface,
   },

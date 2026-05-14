@@ -27,6 +27,7 @@ export type DailyActivity = {
   steps: number;
   distanceKm: number;
   burnCalories: number;
+  runningSeconds?: number;
 };
 
 /**
@@ -43,5 +44,9 @@ export type ActivityDetailNavigationProp = NavigationProp<
 export type ChartData = {
   labels: string[];
   // strokeWidth: 차트 내의 선 두께
-  datasets: { data: number[]; strokeWidth?: number }[];
+  datasets: {
+    data: number[];
+    strokeWidth?: number;
+    colors?: Array<(opacity: number) => string>;
+  }[];
 };

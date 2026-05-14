@@ -1,49 +1,65 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import styles from '@styles/MainStatCards.styles';
 
 type MainStatCardsProps = {
   stepCount: number;
-  totalRunSec: number;
   estimatedKcal: number;
-};
-
-const formatTotalRunTime = (seconds: number) => {
-  const safeSeconds = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(safeSeconds / 3600);
-  const minutes = Math.floor((safeSeconds % 3600) / 60);
-  return hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+  onStartRun: () => void;
 };
 
 const MainStatCards = ({
   stepCount,
-  totalRunSec,
   estimatedKcal,
+  onStartRun,
 }: MainStatCardsProps) => {
   return (
-    <View pointerEvents='none' style={styles.metricLayer}>
+    <View style={styles.metricLayer}>
       <View style={styles.metricGrid}>
         <View style={styles.metricCardShell}>
           <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>러닝 시간</Text>
+            <View style={styles.metricLabelRow}>
+              <Text style={[styles.metricSmallIcon, styles.metricStepIcon]}>
+                👟
+              </Text>
+              <Text style={styles.metricLabel}>오늘 걸음 수</Text>
+            </View>
             <Text style={styles.metricValue}>
-              {formatTotalRunTime(totalRunSec)}
+              {stepCount.toLocaleString()}
+              <Text style={styles.metricUnit}> 걸음</Text>
             </Text>
           </View>
         </View>
+        <View style={styles.metricDivider} />
         <View style={[styles.metricCardShell, styles.metricCardShellPrimary]}>
-          <View style={[styles.metricCard, styles.metricCardPrimary]}>
-            <Text style={styles.metricLabel}>걸음 수</Text>
-            <Text style={styles.metricValuePrimary}>
-              {`${stepCount.toLocaleString()}보`}
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.metricCard, styles.metricCardPrimary]}
+            activeOpacity={0.85}
+            accessibilityRole='button'
+            accessibilityLabel='러닝 시작'
+            onPress={onStartRun}
+          >
+            <View style={styles.metricRunIconWrap}>
+              <Image
+                source={require('@assets/images/Icon_colored/fb_run_2.png')}
+                style={styles.metricRunIcon}
+                resizeMode='contain'
+              />
+            </View>
+          </TouchableOpacity>
         </View>
+        <View style={styles.metricDivider} />
         <View style={styles.metricCardShell}>
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>소비 열량</Text>
+          <View style={[styles.metricCard, styles.metricCardKcal]}>
+            <View style={styles.metricLabelRow}>
+              <Text style={[styles.metricSmallIcon, styles.metricKcalIcon]}>
+                🔥
+              </Text>
+              <Text style={styles.metricLabel}>소비 열량</Text>
+            </View>
             <Text style={styles.metricValue}>
-              {`${estimatedKcal.toLocaleString()}kcal`}
+              {estimatedKcal.toLocaleString()}
+              <Text style={styles.metricUnit}> kcal</Text>
             </Text>
           </View>
         </View>

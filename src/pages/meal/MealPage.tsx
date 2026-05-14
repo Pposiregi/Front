@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Alert,
@@ -22,7 +29,13 @@ import { buildMonthMatrix } from '@hooks/useMealCalendarMatrix';
 import { useSafeBottomSpacing } from '@hooks/useSafeBottomSpacing';
 import MealModal from './MealModal';
 import type { PendingMealImage } from './MealPage.types';
-import { createMeal, deleteMeal, updateMeal } from '@api/mealApi';
+import {
+  createMeal,
+  deleteMeal,
+  getMealDayDetail,
+  normalizeMealDayDetail,
+  updateMeal,
+} from '@api/mealApi';
 import { useMealCalendarPreview } from '@api/hooks/useMealCalendarPreview';
 import { useMealDayDetail } from '@api/hooks/useMealDayDetail';
 import {
@@ -38,10 +51,11 @@ import ImageResizer from '@bam.tech/react-native-image-resizer';
 import { isAxiosError } from 'axios';
 import mealPlaceholderImage from '@assets/images/meal.png';
 import { isZeroSizedMealImage, validateImageAsset } from '@utils/imageUtil';
+import Svg, { Path } from 'react-native-svg';
 
 const MAX_STACK = 2;
 const STACK_OFFSET_X = 8;
-const HEADER_ICON_COLOR = Colors.infoStrong;
+const HEADER_ICON_COLOR = Colors.accentStrong;
 
 /* 2026.04.13 KKR] Image 리사이즈 기준치*/
 const MAX_IMAGE_DIMENSION = 1600;
@@ -70,7 +84,32 @@ const CAMERA_PICKER_OPTIONS: CameraOptions = {
 };
 
 const getDiaryTitle = (date: Date) =>
-  `${date.getFullYear()}년 ${date.getMonth() + 1}월의 식사`;
+  `${date.getFullYear()}. ${date.getMonth() + 1}`;
+
+const MealTitleIcon = ({ color }: { color: string }) => (
+  <Svg width={22} height={22} viewBox='0 0 22 22' fill='none'>
+    <Path
+      d='M7 3v6.2c0 1.5 1.2 2.8 2.7 2.8h.1V19'
+      stroke={color}
+      strokeWidth={2.1}
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    />
+    <Path
+      d='M4.8 3v5.4M9.2 3v5.4'
+      stroke={color}
+      strokeWidth={2.1}
+      strokeLinecap='round'
+    />
+    <Path
+      d='M15.7 3.2c1.5.9 2.5 2.7 2.5 4.8 0 2.4-1.2 4.3-2.9 4.8V19'
+      stroke={color}
+      strokeWidth={2.1}
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    />
+  </Svg>
+);
 
 const getNextSequence = (meals: MealListItem[]) => {
   if (meals.length === 0) return 1;
@@ -325,6 +364,7 @@ const compressPickedImage = async (asset: Asset) => {
  * @returns 식단 일지 페이지를 나타내는 React 요소를 반환함
  */
 function MealPage() {
+  const scrollViewRef = useRef<ScrollView>(null);
   const { contentBottomPadding } = useSafeBottomSpacing();
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => formatDateKey(today), [today]); // YYYY-MM-DD 형식
@@ -355,6 +395,9 @@ function MealPage() {
   const [zeroSizedCalendarImageMap, setZeroSizedCalendarImageMap] = useState<
     Record<string, true>
   >({});
+  const [monthlyAverageKcal, setMonthlyAverageKcal] = useState<number | null>(
+    null
+  );
 
   const {
     previewMap: calendarPreview,
@@ -408,6 +451,40 @@ function MealPage() {
     }
     return selectedMeals.reduce((sum, meal) => sum + meal.kcal, 0);
   }, [selectedDayDetail, selectedMeals]);
+  const monthlyMealStats = useMemo(() => {
+    const recordedDateKeys = Object.values(calendarPreview)
+      .filter((day) => day.count > 0)
+      .map((day) => day.date)
+      .sort();
+    const recordCount = recordedDateKeys.reduce((sum, dateKey) => {
+      return sum + (calendarPreview[dateKey]?.count ?? 0);
+    }, 0);
+    let longestStreak = 0;
+    let currentStreak = 0;
+    let previousDate: Date | null = null;
+
+    recordedDateKeys.forEach((dateKey) => {
+      const date = parseDateKey(dateKey);
+      const isConsecutive =
+        previousDate !== null &&
+        Math.round(
+          (date.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24)
+        ) === 1;
+      currentStreak = isConsecutive ? currentStreak + 1 : 1;
+      longestStreak = Math.max(longestStreak, currentStreak);
+      previousDate = date;
+    });
+
+    return {
+      recordCount,
+      recordedDateKeys,
+      streakDays: longestStreak,
+    };
+  }, [calendarPreview]);
+  const monthlyAverageKcalLabel =
+    monthlyAverageKcal === null
+      ? '-'
+      : `${monthlyAverageKcal.toLocaleString()}kcal`;
 
   const handleCancelEditMeal = useCallback(() => {
     setEditingMealInfo(null);
@@ -455,6 +532,10 @@ function MealPage() {
 
   const handleSelectDate = (dateKey: string | null) => {
     if (!dateKey) return;
+    if (dateKey > todayKey) {
+      Alert.alert('기록 불가', '미래일자에 대해서는 식단을 기입할수 없어요');
+      return;
+    }
     setSelectedDateKey(dateKey);
     setMealModalVisible(true);
   };
@@ -772,6 +853,12 @@ function MealPage() {
     handleCancelEditMeal();
   }, [selectedDateKey, handleCancelEditMeal]);
 
+  useFocusEffect(
+    useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
+
   useEffect(() => {
     let isCancelled = false;
 
@@ -827,6 +914,47 @@ function MealPage() {
       isCancelled = true;
     };
   }, [calendarImageUris]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const { recordedDateKeys } = monthlyMealStats;
+
+    if (recordedDateKeys.length === 0) {
+      setMonthlyAverageKcal(null);
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    setMonthlyAverageKcal(null);
+    Promise.all(
+      recordedDateKeys.map(async (dateKey) => {
+        try {
+          const response = await getMealDayDetail({ day: dateKey });
+          return normalizeMealDayDetail(response).totalKcal;
+        } catch (error) {
+          console.warn('[MealPage] Failed to load monthly kcal summary', {
+            dateKey,
+            error,
+          });
+          return null;
+        }
+      })
+    ).then((dailyKcals) => {
+      if (isCancelled) return;
+      const validKcals = dailyKcals.filter(
+        (value): value is number => typeof value === 'number'
+      );
+      const totalKcal = validKcals.reduce((sum, kcal) => sum + kcal, 0);
+      setMonthlyAverageKcal(
+        validKcals.length > 0 ? Math.round(totalKcal / validKcals.length) : null
+      );
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [monthlyMealStats]);
 
   const markCalendarImageFailed = useCallback((uri: string | null) => {
     if (!uri) return;
@@ -1046,43 +1174,66 @@ function MealPage() {
     () => [
       styles.content,
       // 식단 화면의 달력/기록 하단이 탭바나 시스템 내비게이션 바 아래로 숨지 않게 한다.
-      { paddingBottom: contentBottomPadding },
+      { paddingBottom: contentBottomPadding + 88 },
     ],
     [contentBottomPadding]
   );
+  const floatingStatsStyle = useMemo(
+    () => [styles.mealStatsBar, { bottom: 16 }],
+    []
+  );
   const isFutureDate = selectedDateKey > todayKey;
 
+  const trimmedMealTitle = mealTitle.trim();
+  const trimmedMealCalories = mealCalories.trim();
+  const mealCaloriesValue = Number(trimmedMealCalories);
+  const canSaveNewMeal =
+    trimmedMealTitle.length > 0 &&
+    trimmedMealCalories.length > 0 &&
+    !Number.isNaN(mealCaloriesValue) &&
+    mealCaloriesValue >= 0;
   const disableSaveButton =
-    isSavingMeal ||
-    isMealDetailLoading ||
-    isFutureDate ||
-    mealTitle.trim().length === 0 ||
-    mealCalories.trim().length === 0;
+    isSavingMeal || isMealDetailLoading || isFutureDate || !canSaveNewMeal;
   const disableInputs = isSavingMeal || isMealDetailLoading || isFutureDate;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={scrollContentStyle}>
-        <View style={[styles.header, styles.headerSpacing]}>
-          {/*  TouchableOpacity : 이전 달로 이동 */}
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => handleChangeMonth(-1)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.headerButtonLabel}>{'<'}</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={scrollContentStyle}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topSection}>
+          <Text style={styles.pageTitle}>식단</Text>
+          <Text style={styles.pageSubtitle}>
+            먹는 건 몸에도, 마음에도 중요해요
+          </Text>
+        </View>
 
-          <Text style={styles.headerTitle}>{getDiaryTitle(currentMonth)}</Text>
+        <View style={[styles.monthSectionHeader, styles.headerSpacing]}>
+          <View style={styles.monthTitleContent}>
+            <View style={styles.monthTitleIcon}>
+              <MealTitleIcon color={Colors.accentStrong} />
+            </View>
+            <Text style={styles.headerTitle}>{getDiaryTitle(currentMonth)}</Text>
+          </View>
 
-          {/*  TouchableOpacity : 다음 달로 이동 */}
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => handleChangeMonth(1)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.headerButtonLabel}>{'>'}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => handleChangeMonth(-1)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.headerButtonLabel}>{'<'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => handleChangeMonth(1)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.headerButtonLabel}>{'>'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={[styles.calendarContainer, styles.sectionSpacing]}>
@@ -1099,8 +1250,18 @@ function MealPage() {
 
           {/* 요일 헤더 */}
           <View style={styles.weekHeaderRow}>
-            {WEEKDAYS.map((weekday) => (
-              <Text key={weekday} style={styles.weekDayLabel}>
+            {WEEKDAYS.map((weekday, weekdayIndex) => (
+              <Text
+                key={weekday}
+                style={[
+                  styles.weekDayLabel,
+                  weekdayIndex === 5 ? styles.weekDaySaturday : null,
+                  weekdayIndex === 6 ? styles.weekDaySunday : null,
+                  weekdayIndex === WEEKDAYS.length - 1
+                    ? styles.weekDayLabelLast
+                    : null,
+                ]}
+              >
                 {weekday}
               </Text>
             ))}
@@ -1112,16 +1273,28 @@ function MealPage() {
               key={`week-${weekIndex}`}
               style={[
                 styles.weekRow,
-                weekIndex === weeks.length - 1 ? { marginBottom: 0 } : null,
+                weekIndex === weeks.length - 1 ? styles.weekRowLast : null,
               ]}
             >
               {week.map((cell, cellIdx) => {
-                const isSelected = cell.dateKey === selectedDateKey;
                 const isToday = cell.dateKey === todayKey;
                 const showDay = cell.dateKey;
+                const isFutureCell = Boolean(
+                  cell.dateKey && cell.dateKey > todayKey
+                );
+                const isSelected =
+                  cell.dateKey === selectedDateKey && !isFutureCell;
+                const isSaturday = cellIdx === 5;
+                const isSunday = cellIdx === 6;
 
                 return (
-                  <View key={`${cell.key}-${cellIdx}`} style={styles.dayCell}>
+                  <View
+                    key={`${cell.key}-${cellIdx}`}
+                    style={[
+                      styles.dayCell,
+                      cellIdx === week.length - 1 ? styles.dayCellLast : null,
+                    ]}
+                  >
                     {/* 날짜가 있는 셀인지 확인, 있을 경우에만 눌러서 모달 열기 가능 */}
                     {showDay ? (
                       <TouchableOpacity
@@ -1131,6 +1304,7 @@ function MealPage() {
                           !isSelected && isToday
                             ? styles.todayDayOutline
                             : null,
+                          isFutureCell ? styles.futureDayInner : null,
                         ]}
                         onPress={() => handleSelectDate(cell.dateKey)}
                         activeOpacity={0.8}
@@ -1140,22 +1314,40 @@ function MealPage() {
                           style={[
                             styles.dayNumber,
                             cell.isCurrentMonth ? null : styles.dayNumberMuted,
+                            isFutureCell ? styles.futureDayNumber : null,
+                            cell.isCurrentMonth && !isToday && isSaturday
+                              ? styles.saturdayDayNumber
+                              : null,
+                            cell.isCurrentMonth && !isToday && isSunday
+                              ? styles.sundayDayNumber
+                              : null,
                             isSelected ? styles.selectedDayNumber : null,
                             !isSelected && isToday
                               ? styles.todayDayNumber
                               : null,
                           ]}
                         >
-                          {cell.dayNumber}
+                          {isToday ? '오늘' : cell.dayNumber}
                         </Text>
 
                         {/* 식단 이미지가 있다면, 그 이미지를 겹쳐서 보여줘야한다 */}
-                        <View style={styles.stackThumb}>
+                        <View
+                          style={[
+                            styles.stackThumb,
+                            Array.isArray(cell.previewImage) &&
+                            cell.previewImage.length > 0
+                              ? styles.imageStackThumb
+                              : styles.emptyStackThumb,
+                            isFutureCell && !cell.previewImage
+                              ? styles.futureStackThumb
+                              : null,
+                          ]}
+                        >
                           {Array.isArray(cell.previewImage) &&
                           cell.previewImage.length > 0 ? (
                             cell.previewImage
                               .slice(0, MAX_STACK)
-                              .map((imgSrc, i) => {
+                              .map((imgSrc, i, stackImages) => {
                                 const uri =
                                   typeof imgSrc === 'object' &&
                                   imgSrc !== null &&
@@ -1163,6 +1355,9 @@ function MealPage() {
                                   typeof imgSrc.uri === 'string'
                                     ? imgSrc.uri
                                     : null;
+                                const stackStartOffset =
+                                  -((stackImages.length - 1) * STACK_OFFSET_X) /
+                                  2;
                                 const source: ImageSourcePropType =
                                   uri &&
                                   (zeroSizedCalendarImageMap[uri] ||
@@ -1177,7 +1372,13 @@ function MealPage() {
                                     style={[
                                       styles.stackImage,
                                       {
-                                        left: i * STACK_OFFSET_X,
+                                        transform: [
+                                          {
+                                            translateX:
+                                              stackStartOffset +
+                                              i * STACK_OFFSET_X,
+                                          },
+                                        ],
                                         zIndex: MAX_STACK - i,
                                       }, // 살짝씩 오른쪽으로 가도록
                                     ]}
@@ -1186,6 +1387,8 @@ function MealPage() {
                                   />
                                 );
                               })
+                          ) : isFutureCell ? (
+                            <View style={styles.futureDayPreviewSpace} />
                           ) : (
                             <View style={styles.dayPreviewPlaceholder}>
                               <Text style={styles.dayPreviewPlaceholderText}>
@@ -1204,16 +1407,30 @@ function MealPage() {
             </View>
           ))}
         </View>
-        {/* 할 수 있다면 이미지 넣기 */}
 
         {calendarError ? (
           <Text style={styles.calendarErrorText}>{calendarError}</Text>
-        ) : (
-          <Text style={styles.calendarHelperText}>
-            날짜를 선택해서 식단을 등록해보세요.
-          </Text>
-        )}
+        ) : null}
       </ScrollView>
+
+      <View style={floatingStatsStyle}>
+        <View style={styles.mealStatsItem}>
+          <Text style={styles.mealStatsLabel}>기록개수</Text>
+          <Text style={styles.mealStatsValue}>
+            {monthlyMealStats.recordCount}
+          </Text>
+        </View>
+        <View style={styles.mealStatsItem}>
+          <Text style={styles.mealStatsLabel}>연속일수</Text>
+          <Text style={styles.mealStatsValue}>
+            {monthlyMealStats.streakDays}
+          </Text>
+        </View>
+        <View style={styles.mealStatsItemWide}>
+          <Text style={styles.mealStatsLabel}>평균 섭취칼로리</Text>
+          <Text style={styles.mealStatsValue}>{monthlyAverageKcalLabel}</Text>
+        </View>
+      </View>
 
       {/* 식단 모달 추가 */}
       <MealModal

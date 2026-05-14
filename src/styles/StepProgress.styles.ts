@@ -1,54 +1,101 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from './dimensions';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const CARD_WIDTH = Math.max(
-  150,
-  Math.min(220, Math.round(SCREEN_WIDTH * 0.42))
+  128,
+  Math.min(138, Math.round(SCREEN_WIDTH * 0.345))
 );
 const CARD_HEIGHT = Math.max(
-  80,
-  Math.min(110, Math.round(SCREEN_HEIGHT * 0.08))
+  60,
+  Math.min(68, Math.round(SCREEN_HEIGHT * 0.061))
 );
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 17,
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    marginRight: 10,
+    marginRight: Spacing.sm,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: Colors.surfaceBorderOverlay,
+    overflow: 'hidden',
+    ...Shadows.surfaceRaised,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
+    gap: 4,
+    marginBottom: 5,
+  },
+  cardIcon: {
+    fontSize: 13,
+    lineHeight: 15,
+    opacity: 0.58,
   },
   title: {
-    fontFamily: 'JUA',
-    fontSize: 16,
-    marginBottom: 8,
+    flex: 1,
+    fontFamily: Fonts.JUA,
+    fontSize: Typography.caption,
+    color: Colors.textPrimary,
+  },
+  progressTrack: {
+    height: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(107, 114, 128, 0.18)',
+    overflow: 'hidden',
+  },
+  readyProgressTrack: {
+    backgroundColor: 'rgba(255, 255, 255, 0.36)',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: Radius.pill,
+    overflow: 'hidden',
+  },
+  progressFillGloss: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: '42%',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
   completeHint: {
     position: 'absolute',
-    left: '10%', // 가로 중앙
-    width: 130, // 크기 조절
-    height: 80,
+    right: -8,
+    bottom: -8,
+    width: 96,
+    height: 60,
+    opacity: 0.3,
   },
-  text: {
-    fontFamily: 'JUA',
-    marginTop: 4,
-    fontSize: 12,
-    textAlign: 'right',
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 5,
+  },
+  currentValue: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    fontWeight: '800',
+  },
+  goalValue: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.meta,
+    fontWeight: '800',
+    color: Colors.textSecondary,
   },
   readyCard: {
-    borderWidth: 2,
-    borderColor: '#FEC288',
-    backgroundColor: '#ffefe0',
-    shadowOpacity: 0.15,
-    elevation: 6,
+    backgroundColor: Colors.surfaceOverlaySolid,
+    borderColor: Colors.accent,
+  },
+  readyTitle: {
+    color: Colors.textPrimary,
+  },
+  readyText: {
+    color: Colors.textPrimary,
   },
 });

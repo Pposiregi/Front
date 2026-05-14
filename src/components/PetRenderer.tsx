@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   Animated,
+  type ImageStyle,
   type ImageSourcePropType,
   StyleProp,
   StyleSheet,
@@ -24,6 +25,7 @@ type Props = {
     mouth?: ImageSourcePropType;
   };
   style?: StyleProp<ViewStyle>;
+  partStyle?: StyleProp<ImageStyle>;
   testID?: string;
 };
 
@@ -44,6 +46,7 @@ export const PetRenderer = ({
   partTransforms,
   expressionOverlays,
   style,
+  partStyle,
   testID = 'pet-renderer',
 }: Props) => {
   const warnedMissingFilesKeyRef = React.useRef<string>('');
@@ -109,6 +112,7 @@ export const PetRenderer = ({
             source={part.asset}
             style={[
               styles.layer,
+              partStyle,
               { zIndex: part.zIndex },
               transform ? { transform } : null,
             ]}
@@ -124,6 +128,7 @@ export const PetRenderer = ({
           source={expressionOverlays.baseFace}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
           ]}
@@ -138,6 +143,7 @@ export const PetRenderer = ({
           source={expressionOverlays.eyebrows}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
           ]}
@@ -152,6 +158,7 @@ export const PetRenderer = ({
           source={expressionOverlays.eyes}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
           ]}
@@ -166,6 +173,7 @@ export const PetRenderer = ({
           source={expressionOverlays.mouth}
           style={[
             styles.layer,
+            partStyle,
             styles.expressionLayer,
             expressionTransform ? { transform: expressionTransform } : null,
           ]}

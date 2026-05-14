@@ -2,6 +2,7 @@ import {
   MealCalendarCell,
   MealCalendarPreviewMap,
 } from '@pages/meal/types';
+import mealPlaceholderImage from '@assets/images/meal.png';
 import { formatDateKey } from '@utils/dateUtil';
 
 /**
@@ -44,15 +45,19 @@ export const buildMonthMatrix = (
       continue;
     }
 
-    // 해당 날짜에 사진이 있는 경우, 겹쳐진 사진 미리보기를 출력한다
+    // 해당 날짜에 식단이 있으면 사진 또는 기본 이미지로 미리보기를 출력한다.
     const curDate = new Date(year, month, dayNumber);
     const dateKey = formatDateKey(curDate);
-    const imageUrls = previewMap[dateKey]?.imageUrls ?? [];
+    const dayPreview = previewMap[dateKey];
+    const imageUrls = dayPreview?.imageUrls ?? [];
+    const mealCount = dayPreview?.count ?? 0;
     const previewImage =
       imageUrls.length > 0
         ? imageUrls
             .slice(0, 3)
             .map((uri: string) => ({ uri }))
+        : mealCount > 0
+        ? [mealPlaceholderImage]
         : null;
 
     week.push({

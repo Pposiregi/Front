@@ -11,19 +11,20 @@ export const styles = StyleSheet.create({
     paddingTop: SCREEN_HEIGHT * 0.04,
   },
   title: {
-    fontSize: Typography.h2,
+    fontSize: Typography.screenTitle,
     fontWeight: '800',
     marginVertical: Spacing.md,
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   subtitle: {
     fontSize: Typography.body,
-    fontWeight: 'thin',
+    fontWeight: '400',
+    lineHeight: 23,
     marginBottom: Spacing.lg,
     textAlign: 'center',
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   checkboxContainer: {
@@ -40,7 +41,7 @@ export const styles = StyleSheet.create({
   allCheckboxLabel: {
     marginLeft: Spacing.sm,
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
     fontWeight: '600',
   },
@@ -48,7 +49,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     marginLeft: Spacing.sm,
     fontSize: Typography.body,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
     color: Colors.textPrimary,
   },
   requiredBadge: {
@@ -76,7 +77,7 @@ export const styles = StyleSheet.create({
   arrowText: {
     fontSize: Typography.body,
     color: Colors.textSecondary,
-    fontFamily: Fonts.Roboto_VariableFont,
+    fontFamily: Fonts.Pretendard,
   },
   divider: {
     height: 1,
@@ -84,7 +85,7 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   startButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: Colors.accentStrong,
     padding: 15,
     borderRadius: Radius.sm,
     marginTop: Spacing.xxl,
@@ -93,7 +94,8 @@ export const styles = StyleSheet.create({
   },
   startButtonText: {
     color: Colors.surface,
-    fontSize: Typography.body,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.action,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
   },
 });

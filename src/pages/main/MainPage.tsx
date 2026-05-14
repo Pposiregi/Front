@@ -26,10 +26,11 @@ import { StepProgress } from '@components/StepProgress';
 import { PetRenderer } from '@components/PetRenderer';
 import BodyRecordPrompt from '@components/BodyRecordPrompt';
 import styles from '@styles/MainPage.styles';
-import mainBackGround from '@assets/images/mainBackGround_gym.png'; // MAIN 화면 배경
+import mainBackGround from '@assets/images/mainBackGround_gym.png';
 import mainBackGroundWide from '@assets/images/mainBackground_track_wide.png';
 import runLegSwirl from '@assets/pet/etc/swirl.png';
 import { SCREEN_WIDTH } from '@styles/dimensions';
+import { Colors } from '@styles/theme';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
@@ -99,6 +100,7 @@ import { getMissionsActive } from '@api/missionApi';
 import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
+import { mockActiveMissions } from './mockMission';
 import MainStatCards from './MainStatCards';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
@@ -137,12 +139,13 @@ export const MainPage = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const petShadowBreath = useRef(new Animated.Value(0)).current;
 
   /**
    * 미션 데이터/모달 상태.
    */
   const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
-    []
+    mockActiveMissions.missions
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [trans, setTrans] = useState(false); // 미션 완료 트리거
@@ -165,6 +168,7 @@ export const MainPage = () => {
    */
   const { syncSteps, resetSync } = useStepSync();
   const [isLoading, setIsLoading] = useState(true);
+  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   // __DEV__에서만 쓰는 체형 미세조정 프리뷰 값이다. null이면 실제 사용자 PBF를 따른다.
   const [devPreviewPbf, setDevPreviewPbf] = useState<number | null>(null);
   const [devPbfBarWidth, setDevPbfBarWidth] = useState(0);
@@ -229,7 +233,7 @@ export const MainPage = () => {
           console.warn('[MainPage] petType 로드 실패', storageError);
         }
       } catch (e) {
-        console.log('유저 정보 로드 실패', e);
+        console.error('유저 정보 로드 실패', e);
       } finally {
         setIsLoading(false);
       }
@@ -253,7 +257,7 @@ export const MainPage = () => {
   const [showRunSummaryModal, setShowRunSummaryModal] = useState(false);
   const [endFailureCount, setEndFailureCount] = useState(0);
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
-  const [todayRunAccumulatedSec, setTodayRunAccumulatedSec] = useState(0);
+  const [, setTodayRunAccumulatedSec] = useState(0);
 
   // 최근 3개 trackPoint의 speed(m/s) 평균으로 현재 페이스 계산
   const livePaceMinPerKm = useMemo(() => {
@@ -311,6 +315,36 @@ export const MainPage = () => {
       dispatch(userSlice.actions.setRunningActive(false));
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isTracking) {
+      petShadowBreath.stopAnimation();
+      petShadowBreath.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(petShadowBreath, {
+          toValue: 1,
+          duration: 1300,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(petShadowBreath, {
+          toValue: 0,
+          duration: 1300,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [isTracking, petShadowBreath]);
 
   useEffect(() => {
     if (!isTracking) {
@@ -574,6 +608,10 @@ export const MainPage = () => {
       );
     }
   }, [addSteps]);
+
+  const handleToggleDevTools = useCallback(() => {
+    setIsDevToolsOpen((prev) => !prev);
+  }, []);
 
   const handleForceEnd = useCallback(async () => {
     try {
@@ -875,6 +913,7 @@ export const MainPage = () => {
           goal: m.goalValue,
           unit:
             m.category === 'STEP' ? '보' : m.category === 'MEAL' ? '회' : '장',
+          category: m.category,
           isReadyToComplete,
           missionCheckId: m.missionCheckId,
         };
@@ -917,7 +956,7 @@ export const MainPage = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='#111827' />
+        <ActivityIndicator size='large' color={Colors.textPrimary} />
       </View>
     );
   }
@@ -927,8 +966,6 @@ export const MainPage = () => {
    * - 권한 거부/불러오기 실패 시 기본값으로 대체
    */
   const displayedSteps = healthSteps ?? 8954;
-  const todayTotalRunSec =
-    todayRunAccumulatedSec + (isTracking ? runningElapsedSec : 0);
   const estimatedKcal = Math.round(displayedSteps * KCAL_PER_STEP);
   const runPetRenderSize = Math.round(PET_RENDER_SIZE * RUN_PET_SCALE);
   const runBgTranslateX = runBgProgress.interpolate({
@@ -942,6 +979,18 @@ export const MainPage = () => {
   const runLegSwirlScale = runSwirlProgress.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.92, 1.08, 0.92],
+  });
+  const petShadowScaleX = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.08],
+  });
+  const petShadowScaleY = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.92],
+  });
+  const petShadowOpacity = petShadowBreath.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.34, 0.22],
   });
   return (
     <View style={styles.container}>
@@ -963,6 +1012,13 @@ export const MainPage = () => {
           </Animated.Text>
         </View>
       )}
+      {!isTracking ? (
+        <ImageBackground
+          source={mainBackGround}
+          style={styles.mainFullBackground}
+          resizeMode='cover'
+        />
+      ) : null}
       {/*
         런닝 중: 페이스/걸음수/시간 스탯 패널
         평시: 미션 진행 상황을 가로 스크롤로 표시
@@ -1017,12 +1073,20 @@ export const MainPage = () => {
                 data={progressMissions}
                 horizontal
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <StepProgress
                     title={item.title}
                     current={item.current}
                     goal={item.goal}
                     unit={item.unit}
+                    category={item.category}
+                    tone={
+                      index % 3 === 0
+                        ? 'lime'
+                        : index % 3 === 1
+                        ? 'violet'
+                        : 'orange'
+                    }
                     isReadyToComplete={item.isReadyToComplete}
                     onPress={() => {
                       if (!item.isReadyToComplete) return;
@@ -1110,12 +1174,20 @@ export const MainPage = () => {
           </View>
         </View>
       ) : (
-        // 배경 이미지 & 펫 이미지와 함께 메시지 표시
-        <ImageBackground
-          source={mainBackGround}
-          style={styles.mainBackground}
-          resizeMode='cover'
-        >
+        <View style={styles.mainBackground}>
+          <Animated.View
+            pointerEvents='none'
+            style={[
+              styles.mainPetShadow,
+              {
+                opacity: petShadowOpacity,
+                transform: [
+                  { scaleX: petShadowScaleX },
+                  { scaleY: petShadowScaleY },
+                ],
+              },
+            ]}
+          />
           {/* 오른쪽 상단 미션 버튼 */}
           <TouchableOpacity
             onPress={handleOpenMission}
@@ -1175,111 +1247,119 @@ export const MainPage = () => {
           {!isTracking && (
             <MainStatCards
               stepCount={displayedSteps}
-              totalRunSec={todayTotalRunSec}
               estimatedKcal={estimatedKcal}
+              onStartRun={handleToggleTracking}
             />
           )}
-          <View style={styles.devButtonGroup}>
-            {__DEV__ && (
+          {__DEV__ && (
+            <View style={styles.devButtonGroup}>
               <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={handleDevAddSteps}
-                accessibilityLabel='Health Connect 걸음 +1000'
-                disabled={healthWriting}
+                style={styles.devToggleButton}
+                onPress={handleToggleDevTools}
+                accessibilityRole='button'
+                accessibilityLabel={
+                  isDevToolsOpen ? '개발 도구 닫기' : '개발 도구 열기'
+                }
               >
-                <Text style={styles.devHealthButtonText}>+1000</Text>
+                <Text style={styles.devToggleText}>[DEV]</Text>
               </TouchableOpacity>
-            )}
-            {__DEV__ && (
-              <TouchableOpacity
-                style={styles.devHealthButton}
-                onPress={resetSync}
-                accessibilityLabel='걸음 동기화 초기화'
-              >
-                <Text style={styles.devHealthButtonText}>RESET</Text>
-              </TouchableOpacity>
-            )}
-            {__DEV__ && (
-              <View style={styles.devPbfPanel}>
-                <View style={styles.devPbfHeader}>
-                  <Text style={styles.devPbfTitle}>
-                    TEST PBF {effectivePbf}
-                  </Text>
+
+              {isDevToolsOpen && (
+                <>
                   <TouchableOpacity
-                    style={styles.devPbfResetButton}
-                    onPress={handleClearDevPreviewPbf}
-                    accessibilityRole='button'
-                    accessibilityLabel='체형 테스트 pbf 초기화'
+                    style={styles.devHealthButton}
+                    onPress={handleDevAddSteps}
+                    accessibilityLabel='Health Connect 걸음 +1000'
+                    disabled={healthWriting}
                   >
-                    <Text style={styles.devPbfResetText}>LIVE</Text>
-                  </TouchableOpacity>
-                </View>
-                <Pressable
-                  style={styles.devPbfBar}
-                  onLayout={(event) => {
-                    setDevPbfBarWidth(event.nativeEvent.layout.width);
-                  }}
-                  onPress={(event) => {
-                    handlePressDevPbfBar(event.nativeEvent.locationX);
-                  }}
-                  accessibilityRole='adjustable'
-                  accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
-                >
-                  <View
-                    style={[
-                      styles.devPbfBarFill,
-                      { width: `${devPbfProgress * 100}%` },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.devPbfBarThumb,
-                      { left: `${devPbfProgress * 100}%` },
-                    ]}
-                  />
-                </Pressable>
-                <View style={styles.devPbfScaleRow}>
-                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
-                  <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
-                </View>
-                <View style={styles.devPbfControls}>
-                  <TouchableOpacity
-                    style={styles.devPbfAdjustButton}
-                    onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
-                  >
-                    <Text style={styles.devPbfAdjustText}>-1</Text>
+                    <Text style={styles.devHealthButtonText}>+1000</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.devPbfAdjustButton}
-                    onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
+                    style={styles.devHealthButton}
+                    onPress={resetSync}
+                    accessibilityLabel='걸음 동기화 초기화'
                   >
-                    <Text style={styles.devPbfAdjustText}>+1</Text>
+                    <Text style={styles.devHealthButtonText}>RESET</Text>
                   </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
-        </ImageBackground>
-      )}
-      {/* Start / End Button */}
-      <TouchableOpacity
-        style={styles.startButton}
-        accessibilityRole='button'
-        accessibilityLabel={isTracking ? '러닝 종료' : '러닝 시작'} // 스크린리더
-        onPress={handleToggleTracking}
-      >
-        <View style={styles.startButtonInner}>
-          {isTracking ? (
-            <Text style={styles.startText}>END</Text>
-          ) : (
-            <Image
-              source={require('@assets/images/Icon_colored/fb_run_2.png')}
-              style={styles.startIcon}
-              resizeMode='contain'
-            />
+                  <View style={styles.devPbfPanel}>
+                    <View style={styles.devPbfHeader}>
+                      <Text style={styles.devPbfTitle}>
+                        TEST PBF {effectivePbf}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.devPbfResetButton}
+                        onPress={handleClearDevPreviewPbf}
+                        accessibilityRole='button'
+                        accessibilityLabel='체형 테스트 pbf 초기화'
+                      >
+                        <Text style={styles.devPbfResetText}>LIVE</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Pressable
+                      style={styles.devPbfBar}
+                      onLayout={(event) => {
+                        setDevPbfBarWidth(event.nativeEvent.layout.width);
+                      }}
+                      onPress={(event) => {
+                        handlePressDevPbfBar(event.nativeEvent.locationX);
+                      }}
+                      accessibilityRole='adjustable'
+                      accessibilityLabel={`체형 테스트 pbf ${effectivePbf}`}
+                    >
+                      <View
+                        style={[
+                          styles.devPbfBarFill,
+                          { width: `${devPbfProgress * 100}%` },
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.devPbfBarThumb,
+                          { left: `${devPbfProgress * 100}%` },
+                        ]}
+                      />
+                    </Pressable>
+                    <View style={styles.devPbfScaleRow}>
+                      <Text style={styles.devPbfScaleText}>{DEV_PBF_MIN}</Text>
+                      <Text style={styles.devPbfScaleText}>{DEV_PBF_MAX}</Text>
+                    </View>
+                    <View style={styles.devPbfControls}>
+                      <TouchableOpacity
+                        style={styles.devPbfAdjustButton}
+                        onPress={() =>
+                          handleAdjustDevPreviewPbf(-DEV_PBF_STEP)
+                        }
+                      >
+                        <Text style={styles.devPbfAdjustText}>-1</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.devPbfAdjustButton}
+                        onPress={() =>
+                          handleAdjustDevPreviewPbf(DEV_PBF_STEP)
+                        }
+                      >
+                        <Text style={styles.devPbfAdjustText}>+1</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              )}
+            </View>
           )}
         </View>
-      </TouchableOpacity>
+      )}
+      {isTracking ? (
+        <TouchableOpacity
+          style={styles.startButton}
+          accessibilityRole='button'
+          accessibilityLabel='러닝 종료'
+          onPress={handleToggleTracking}
+        >
+          <View style={styles.startButtonInner}>
+            <Text style={styles.startText}>END</Text>
+          </View>
+        </TouchableOpacity>
+      ) : null}
       <BodyRecordPrompt
         visible={showBodyPrompt}
         dateLabel={bodyPromptDateLabel}

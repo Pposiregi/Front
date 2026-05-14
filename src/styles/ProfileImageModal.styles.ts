@@ -4,7 +4,7 @@ import { Colors, Fonts, Typography } from './theme';
 export default StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: Colors.overlaySoft,
     justifyContent: 'flex-end',
   },
   container: {
@@ -14,8 +14,9 @@ export default StyleSheet.create({
     borderTopRightRadius: 16,
   },
   title: {
-    fontSize: Typography.h2,
-    fontFamily: Fonts.JUA,
+    fontSize: Typography.sectionTitle,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     marginBottom: 16,
     color: Colors.textPrimary,
   },
@@ -32,7 +33,7 @@ export default StyleSheet.create({
   },
   selected: {
     borderWidth: 3,
-    borderColor: Colors.infoStrong,
+    borderColor: Colors.accentStrong,
   },
   footer: {
     flexDirection: 'row',
@@ -44,18 +45,20 @@ export default StyleSheet.create({
     padding: 10,
   },
   cancelText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   saveBtn: {
     padding: 10,
-    backgroundColor: '#4F46E5',
+    backgroundColor: Colors.accentStrong,
     borderRadius: 8,
   },
   saveText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.surface,
   },
   galleryBtn: {
@@ -68,13 +71,15 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   galleryBtnText: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.action,
+    fontWeight: '700',
     color: Colors.textPrimary,
   },
   sectionLabel: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.body,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.label,
+    fontWeight: '700',
     color: Colors.textSecondary,
     marginBottom: 8,
     marginTop: 4,
@@ -86,7 +91,7 @@ export default StyleSheet.create({
   },
   confirmBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -100,8 +105,9 @@ export default StyleSheet.create({
     width: '85%',
   },
   confirmTitle: {
-    fontFamily: Fonts.JUA,
-    fontSize: Typography.h2,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.sectionTitle,
+    fontWeight: '700',
     color: Colors.textPrimary,
     marginBottom: 16,
   },
