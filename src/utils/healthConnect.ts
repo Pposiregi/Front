@@ -25,7 +25,8 @@ export const HEALTH_BACKGROUND_PERMISSION: BackgroundAccessPermission = {
   recordType: 'BackgroundAccessPermission',
 };
 
-export const HEALTH_CONNECT_PROVIDER_PACKAGE = 'com.google.android.apps.healthdata';
+export const HEALTH_CONNECT_PROVIDER_PACKAGE =
+  'com.google.android.apps.healthdata';
 export const HEALTH_CONNECT_INSTALL_URL = `https://play.google.com/store/apps/details?id=${HEALTH_CONNECT_PROVIDER_PACKAGE}`;
 const GRANTED_PERMISSIONS_CACHE_TTL_MS = 60 * 1000;
 
@@ -43,7 +44,9 @@ const statusToState = (status: number): HealthConnectSdkState => {
   if (status === SdkAvailabilityStatus.SDK_AVAILABLE) {
     return 'available';
   }
-  if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
+  if (
+    status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
+  ) {
     return 'provider_update_required';
   }
   return 'unavailable';
@@ -134,9 +137,9 @@ export const hasAllPermissions = (
 };
 
 /** 현재 허용된 Health Connect 권한 목록을 가져온다. */
-export const getCurrentGrantedPermissions = async (
-  options?: { forceRefresh?: boolean }
-) => {
+export const getCurrentGrantedPermissions = async (options?: {
+  forceRefresh?: boolean;
+}) => {
   const forceRefresh = options?.forceRefresh ?? false;
   const now = Date.now();
 
@@ -154,7 +157,8 @@ export const getCurrentGrantedPermissions = async (
 
   grantedPermissionsPromise = (async () => {
     try {
-      const granted = (await getGrantedPermissions()) as GrantedHealthPermission[];
+      const granted =
+        (await getGrantedPermissions()) as GrantedHealthPermission[];
       grantedPermissionsCache = granted;
       grantedPermissionsFetchedAt = Date.now();
       return granted;
@@ -183,8 +187,7 @@ export const getCurrentGrantedPermissions = async (
 /** 백그라운드 접근 특수 권한 보유 여부를 반환한다. */
 export const hasBackgroundPermission = (
   granted: GrantedHealthPermission[]
-): boolean =>
-  hasAllPermissions(granted, [HEALTH_BACKGROUND_PERMISSION]);
+): boolean => hasAllPermissions(granted, [HEALTH_BACKGROUND_PERMISSION]);
 
 /** KST 기준 오늘 00:00부터 현재 시각까지의 구간을 계산한다. */
 export const getStartOfToday = () => {
@@ -213,4 +216,4 @@ export const getStartOfToday = () => {
 export const isAndroid = () => Platform.OS === 'android';
 
 // 오늘 걸음 수 캐시 저장/조회 시 사용하는 키
-export const HEALTH_STEPS_CACHE_KEY = 'fitpet:health:steps:today';
+export const HEALTH_STEPS_CACHE_KEY = 'slimpet:health:steps:today';

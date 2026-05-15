@@ -42,7 +42,7 @@ export type GpsLogResponse = {
 
 /**
  * /gps/end 요청 payload
- * - fitpet_API.json 기준 필수값: sessionId, endTime, stepCount
+ * - slimpet_API.json 기준 필수값: sessionId, endTime, stepCount
  * - burnCalories는 optional
  */
 export type GpsEndRequest = {

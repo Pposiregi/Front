@@ -177,7 +177,7 @@ const AppPermissionGuidePage: React.FC<Props> = ({ onNext, pushAgree }) => {
       } else {
         Alert.alert(
           '권한을 직접 허용해주세요',
-          'Health Connect 앱 → 앱 권한 → FitPet에서 걸음 수 권한을 직접 허용한 뒤 버튼을 다시 눌러주세요.',
+          'Health Connect 앱 → 앱 권한 → SlimPet에서 걸음 수 권한을 직접 허용한 뒤 버튼을 다시 눌러주세요.',
           [{ text: '확인' }]
         );
       }

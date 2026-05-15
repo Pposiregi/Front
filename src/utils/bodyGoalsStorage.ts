@@ -5,7 +5,7 @@ export type BodyGoals = {
   bodyFatAim?: number;
 };
 
-const BODY_GOALS_KEY = 'fitpet:bodyGoals';
+const BODY_GOALS_KEY = 'slimpet:bodyGoals';
 
 // 목표값 로컬 저장소에서 읽기 (잘못된 타입은 무시)
 export const loadBodyGoals = async (): Promise<BodyGoals> => {

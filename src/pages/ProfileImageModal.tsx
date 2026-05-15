@@ -40,7 +40,7 @@ type Props = {
 const SECRET_TAP_REQUIRED = 5;
 const TAP_TIMEOUT = 2000;
 
-const S3_ORIGIN = 'https://fitpet-bucket.s3.ap-northeast-2.amazonaws.com/';
+const S3_ORIGIN = 'https://slimpet-bucket.s3.ap-northeast-2.amazonaws.com/';
 
 const extractImageKey = (s3Url: string): string => {
   if (s3Url.startsWith(S3_ORIGIN)) {

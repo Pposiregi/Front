@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * FCM0PushToken 관리
  */
 
-const LAST_TOKEN_KEY = 'fitpet:fcm:lastToken';
+const LAST_TOKEN_KEY = 'slimpet:fcm:lastToken';
 
 export const getLastSentPushToken = async () => {
   return AsyncStorage.getItem(LAST_TOKEN_KEY);

@@ -10,7 +10,7 @@ const GET_USER_TIMEOUT_ERROR = 'GET_USER_TIMEOUT';
 
 const MOCK_USER_RESPONSE: getUserResponse = {
   userId: 1,
-  email: 'dev@fitpet.local',
+  email: 'dev@slimpet.local',
   nickname: 'DEV',
   petType: 'CAT',
   age: 28,

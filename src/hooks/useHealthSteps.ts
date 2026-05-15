@@ -42,7 +42,7 @@ let stepPermissionPromptedInSession = false;
 
 /** Health Connect 기반 걸음 수 조회/기록과 polling을 관리하는 훅이다. */
 const useHealthSteps = (): HealthStepsState => {
-  const BG_RATIONALE_SHOWN_KEY = 'fitpet:health:bgPermissionRationale';
+  const BG_RATIONALE_SHOWN_KEY = 'slimpet:health:bgPermissionRationale';
   const [steps, setSteps] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [writing, setWriting] = useState(false);

@@ -15,8 +15,8 @@ import type {
   GpsSessionStartResponse,
 } from 'types/gps';
 
-const SESSION_ID_KEY = 'fitpet:gps:sessionId';
-const SESSION_START_KEY = 'fitpet:gps:startTime';
+const SESSION_ID_KEY = 'slimpet:gps:sessionId';
+const SESSION_START_KEY = 'slimpet:gps:startTime';
 const LOG_FLUSH_MAX_ATTEMPTS = 3;
 const END_API_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
