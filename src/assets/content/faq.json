@@ -3,6 +3,6 @@
     "order": 1,
     "id": "steps-not-syncing",
     "question": "걸음수가 연동 안 돼요",
-    "answer": "FitPet은 Health Connect에 저장된 걸음 수를 불러옵니다. Samsung Health를 사용 중이라면 Samsung Health와 Health Connect를 먼저 연결하고, Health Connect에서 slimpet의 걸음 수 읽기 권한을 허용해 주세요.\n\n[설정 방법]\n1. Samsung Health 앱을 열고 우측 상단의 프로필 아이콘을 탭하세요.\n2. '데이터 권한' 메뉴로 들어가세요.\n3. 'slimpet'을 찾아 탭하세요.\n4. '걸음 수' 권한을 켜주세요.\n\n연결 후에도 바로 반영되지 않으면 Samsung Health에서 오늘 걸음 수가 보이는지 확인한 뒤 slimpet을 다시 실행해 주세요."
+    "answer": "SlimPet은 Health Connect에 저장된 걸음 수를 불러옵니다. Samsung Health를 사용 중이라면 Samsung Health와 Health Connect를 먼저 연결하고, Health Connect에서 slimpet의 걸음 수 읽기 권한을 허용해 주세요.\n\n[설정 방법]\n1. Samsung Health 앱을 열고 우측 상단의 프로필 아이콘을 탭하세요.\n2. '데이터 권한' 메뉴로 들어가세요.\n3. 'slimpet'을 찾아 탭하세요.\n4. '걸음 수' 권한을 켜주세요.\n\n연결 후에도 바로 반영되지 않으면 Samsung Health에서 오늘 걸음 수가 보이는지 확인한 뒤 slimpet을 다시 실행해 주세요."
   }
 ]
