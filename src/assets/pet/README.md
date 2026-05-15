@@ -1,4 +1,4 @@
-# FitPet Pet Asset Rules
+# SlimPet Pet Asset Rules
 
 ## Scope
 - This rule set applies to composable pet part PNG files in:

@@ -18,7 +18,7 @@ class PermissionsRationaleActivity: AppCompatActivity() {
     val html = """
       <html><body style="padding:16px;font-size:16px;">
       <h2>Health Connect 권한 안내</h2>
-      <p>Fitpet은 오늘 걸음 수를 백그라운드에서 동기화하기 위해 아래 권한이 필요합니다.</p>
+      <p>SlimPet은 오늘 걸음 수를 백그라운드에서 동기화하기 위해 아래 권한이 필요합니다.</p>
       <ul>
         <li>걸음 수 읽기: 오늘 걸음 집계</li>
         <li>백그라운드 건강 데이터 읽기: 앱이 닫혀도 걸음 동기화 유지</li>

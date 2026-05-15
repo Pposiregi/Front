@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fitpet.local/schemas/pet_template.schema.json",
-  "title": "FitPet Pet Template",
+  "$id": "https://SlimPet.local/schemas/pet_template.schema.json",
+  "title": "SlimPet Pet Template",
   "type": "object",
   "required": ["id", "canvas", "anchors", "parts"],
   "properties": {

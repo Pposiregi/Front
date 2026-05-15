@@ -19,10 +19,10 @@ import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessaging
 
-private const val FCM_TAG = "FitpetFCM"
-private const val FCM_CHANNEL_ID = "fitpet_fcm_default"
-private const val FCM_CHANNEL_NAME = "Fitpet Notifications"
-private const val FCM_CHANNEL_DESC = "Default channel for Fitpet FCM"
+private const val FCM_TAG = "SlimpetFCM"
+private const val FCM_CHANNEL_ID = "slimpet_fcm_default"
+private const val FCM_CHANNEL_NAME = "Slimpet Notifications"
+private const val FCM_CHANNEL_DESC = "Default channel for Slimpet FCM"
 private const val RUNNING_CHANNEL_ID = "running-tracker"
 private const val RUNNING_CHANNEL_NAME = "러닝 트래킹"
 private const val RUNNING_CHANNEL_DESC = "러닝 진행 중 포그라운드 서비스 알림"

@@ -80,16 +80,32 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={Colors.accentStrong} />
+      <View
+        style={[
+          styles.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}
+      >
+        <ActivityIndicator size='large' color={Colors.accentStrong} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: Colors.textSecondary, fontFamily: Fonts.Pretendard, textAlign: 'center' }}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}
+      >
+        <Text
+          style={{
+            color: Colors.textSecondary,
+            fontFamily: Fonts.Pretendard,
+            textAlign: 'center',
+          }}
+        >
           약관을 불러오는 데 실패했습니다.{'\n'}잠시 후 다시 시도해주세요.
         </Text>
       </View>
@@ -99,7 +115,7 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        FitPet과 함께 귀여운 여행을 위한 {'\n'}약관에 대해 안내할게요!
+        slimpet과 함께 귀여운 여행을 위한 {'\n'}약관에 대해 안내할게요!
       </Text>
       <Text style={styles.subtitle}>
         아래 약관에 <Text style={{ color: 'red' }}>동의</Text>하시면 시작됩니다.
@@ -128,7 +144,11 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
               />
             </View>
             <Text style={styles.checkboxLabel}>
-              <Text style={term.isRequired ? styles.requiredBadge : styles.optionalBadge}>
+              <Text
+                style={
+                  term.isRequired ? styles.requiredBadge : styles.optionalBadge
+                }
+              >
                 {term.isRequired ? '[필수] ' : '[선택] '}
               </Text>
               {term.title}
@@ -159,7 +179,10 @@ const PermissionPage: React.FC<PermissionProps> = ({ onNext }) => {
         </Pressable>
       </View>
 
-      <TermsModal terms={selectedTerms} onClose={() => setSelectedTerms(null)} />
+      <TermsModal
+        terms={selectedTerms}
+        onClose={() => setSelectedTerms(null)}
+      />
     </View>
   );
 };

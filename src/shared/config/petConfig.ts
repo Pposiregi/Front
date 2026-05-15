@@ -6,7 +6,7 @@ import type { PetType } from 'types/profile';
  * - MainPage: 화면 포커스 시 로드
  * 공통 상수로 두어 화면 간 키 불일치를 방지한다.
  */
-export const PET_TYPE_STORAGE_KEY = 'fitpet:profile:petType';
+export const PET_TYPE_STORAGE_KEY = 'slimpet:profile:petType';
 
 /**
  * 펫 타입 -> 렌더 템플릿 ID 매핑.

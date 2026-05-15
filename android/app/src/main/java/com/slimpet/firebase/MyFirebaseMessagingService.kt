@@ -11,10 +11,10 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 private const val TAG = "MyFirebaseMessaging"
-private const val CHANNEL_ID = "fitpet_fcm_default"
+private const val CHANNEL_ID = "slimpet_fcm_default"
 
 /**
- * Handles Firebase Cloud Messaging callbacks for Fitpet.
+ * Handles Firebase Cloud Messaging callbacks for Slimpet.
  * - Logs refreshed registration tokens via onNewToken.
  * - Prints incoming message payloads for debugging.
  */
@@ -46,7 +46,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     remoteMessage.notification?.let {
       Log.d(TAG, "Message Notification Body: ${it.body}")
-      showNotification(it.title ?: "FitPet", it.body ?: "")
+      showNotification(it.title ?: "Slimpet", it.body ?: "")
     }
   }
 

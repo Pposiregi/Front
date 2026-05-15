@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "FitPet.app"
-               BlueprintName = "FitPet"
-               ReferencedContainer = "container:FitPet.xcodeproj">
+               BuildableName = "SlimPet.app"
+               BlueprintName = "SlimPet"
+               ReferencedContainer = "container:SlimPet.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "FitPetTests.xctest"
-               BlueprintName = "FitPetTests"
-               ReferencedContainer = "container:FitPet.xcodeproj">
+               BuildableName = "SlimPetetTests.xctest"
+               BlueprintName = "SlimPetetTests"
+               ReferencedContainer = "container:SlimPet.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "FitPet.app"
-            BlueprintName = "FitPet"
-            ReferencedContainer = "container:FitPet.xcodeproj">
+            BuildableName = "SlimPet.app"
+            BlueprintName = "SlimPet"
+            ReferencedContainer = "container:SlimPet.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "FitPet.app"
-            BlueprintName = "FitPet"
-            ReferencedContainer = "container:FitPet.xcodeproj">
+            BuildableName = "SlimPet.app"
+            BlueprintName = "SlimPet"
+            ReferencedContainer = "container:SlimPet.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

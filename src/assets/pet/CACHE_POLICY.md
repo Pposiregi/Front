@@ -1,4 +1,4 @@
-# FitPet Pet Asset Cache Policy
+# SlimPet Pet Asset Cache Policy
 
 ## 목적
 - 동일 펫을 반복 렌더링할 때 템플릿 파싱/에셋 조회를 반복하지 않도록 캐시한다.

@@ -43,13 +43,13 @@ import { logRunningStart, logRunningComplete } from '@utils/analytics';
 /**
  * 오늘 몸 기록 프롬프트 스킵 여부 저장 키.
  */
-const BODY_PROMPT_SKIP_KEY = 'fitpet:bodyPrompt:skipDate';
+const BODY_PROMPT_SKIP_KEY = 'slimpet:bodyPrompt:skipDate';
 const END_FAILURE_FORCE_THRESHOLD = 3;
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 // 런 화면에서는 기본 펫보다 크게 보여 속도감과 가시성을 확보한다.
 const RUN_PET_SCALE = 0.91;
-const DAILY_RUN_SECONDS_KEY_PREFIX = 'fitpet:running:totalSeconds:';
+const DAILY_RUN_SECONDS_KEY_PREFIX = 'slimpet:running:totalSeconds:';
 const KCAL_PER_STEP = 0.04;
 const RUN_BG_TILE_WIDTH = Math.round(SCREEN_WIDTH * 1.8);
 const RUN_BG_LOOP_MS = 8000;
@@ -1326,17 +1326,13 @@ export const MainPage = () => {
                     <View style={styles.devPbfControls}>
                       <TouchableOpacity
                         style={styles.devPbfAdjustButton}
-                        onPress={() =>
-                          handleAdjustDevPreviewPbf(-DEV_PBF_STEP)
-                        }
+                        onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
                       >
                         <Text style={styles.devPbfAdjustText}>-1</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.devPbfAdjustButton}
-                        onPress={() =>
-                          handleAdjustDevPreviewPbf(DEV_PBF_STEP)
-                        }
+                        onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
                       >
                         <Text style={styles.devPbfAdjustText}>+1</Text>
                       </TouchableOpacity>

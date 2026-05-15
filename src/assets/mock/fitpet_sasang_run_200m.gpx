@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="FitPet-GPX"
+<gpx version="1.1" creator="SlimPet-GPX"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.topografix.com/GPX/1/1
                          http://www.topografix.com/GPX/1/1/gpx.xsd">
   <trk>
-    <name>FitPet Sasang 280m Run Adjusted</name>
+    <name>SlimPet Sasang 280m Run Adjusted</name>
     <trkseg>
       <!--
         약 220m 코스를 42초 동안 달리는 모의 데이터.
