@@ -640,18 +640,18 @@ function ActivityPage() {
 
       Alert.alert(
         '러닝 기록 삭제',
-        '러닝 기록이 통계에서 영구삭제돼요! 진행하시겠어요?',
+        '기록이 통계에서 영구삭제 돼요!\n삭제할까요?',
         [
-        { text: '아니오', style: 'cancel' },
-        {
-          text: '예',
-          style: 'destructive',
-          onPress: () => {
-            runDeleteSession(sessionId).catch((error) => {
-              console.warn('[Activity] 예상치 못한 삭제 실패', error);
-            });
+          { text: '아니오', style: 'cancel' },
+          {
+            text: '예',
+            style: 'destructive',
+            onPress: () => {
+              runDeleteSession(sessionId).catch((error) => {
+                console.warn('[Activity] 예상치 못한 삭제 실패', error);
+              });
+            },
           },
-        },
         ]
       );
     },
