@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -16,7 +15,6 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { logout as kakaoLogout } from '@react-native-seoul/kakao-login';
 import styles from '@styles/ProfileSettings.styles';
-import { Colors, Fonts, Typography } from '@styles/theme';
 import { useAppDispatch } from '@store/index';
 import type { RootState } from '@store/reducer';
 import userSlice from '@slices/user';
@@ -314,34 +312,32 @@ const ProfileSettingPage = () => {
 
         <View style={styles.actionArea}>
           <Pressable
-            style={[styles.actionButton, styles.logoutButton]}
+            style={[
+              styles.actionButton,
+              styles.logoutButton,
+              isLoggingOut && styles.actionButtonDisabled,
+            ]}
             onPress={handleLogout}
             disabled={isLoggingOut}
           >
-            <Text style={styles.logoutText}>
+            <Text style={[styles.actionButtonText, styles.logoutText]}>
               {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
             </Text>
           </Pressable>
           <Pressable
-            style={[styles.actionButton, styles.withdrawButton]}
+            style={[
+              styles.actionButton,
+              styles.withdrawButton,
+              isLoggingOut && styles.actionButtonDisabled,
+            ]}
             onPress={handleWithdraw}
             disabled={isLoggingOut}
           >
-            <Text style={styles.withdrawText}>회원탈퇴</Text>
+            <Text style={[styles.actionButtonText, styles.withdrawText]}>
+              회원탈퇴
+            </Text>
           </Pressable>
         </View>
-
-        {__DEV__ && (
-          <Pressable
-            style={devStyles.button}
-            onPress={async () => {
-              await AsyncStorage.setItem('isSignUpInProgress', 'true');
-              dispatch(userSlice.actions.setSignUpInProgress(true));
-            }}
-          >
-            <Text style={devStyles.text}>[DEV] 회원가입 플로우 테스트</Text>
-          </Pressable>
-        )}
       </ScrollView>
 
       <Modal
@@ -743,20 +739,5 @@ const ProfileSettingPage = () => {
     </View>
   );
 };
-
-const devStyles = StyleSheet.create({
-  button: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: Colors.devButton,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  text: {
-    color: Colors.accent,
-    fontSize: Typography.caption,
-    fontFamily: Fonts.Pretendard,
-  },
-});
 
 export default ProfileSettingPage;
