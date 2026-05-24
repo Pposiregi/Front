@@ -19,10 +19,10 @@ const DEFAULT_REGION: MapRegion = {
 
 // 추적 시 카메라가 유지할 확대 수준 (약 400m 너비)
 const TRACKING_REGION_DELTA = 0.004;
-// 위치 샘플 사이 간격이 너무 크면 폴리라인이 안 그려질 수 있어 최소 이동 거리를 낮춘다.
-const WATCH_DISTANCE_FILTER_METERS = 0;
-// GPS가 수십 cm 단위로 튀는 것을 방지하기 위한 최소 거리
-const MIN_POINT_DISTANCE_METERS = 0.1;
+// 장시간 러닝에서 좌표 배열과 렌더링 비용이 과도하게 커지지 않도록 샘플을 절제한다.
+const WATCH_DISTANCE_FILTER_METERS = 5;
+// GPS 튐과 제자리 샘플 누적을 방지하기 위한 최소 이동 거리
+const MIN_POINT_DISTANCE_METERS = 3;
 
 type TrackingState = {
   isTracking: boolean;
@@ -172,13 +172,6 @@ export const useRouteTracking = () => {
           const delta = getDistanceMeters(lastPoint, nextPoint);
           // GPS 소수점 떨림(수십 cm)을 중복 포인트로 추가하지 않도록 필터링한다.
           if (delta < MIN_POINT_DISTANCE_METERS) {
-            if (__DEV__) {
-              console.debug('>>>[RUNNING][RUN] ignore jitter', {
-                latitude,
-                longitude,
-                delta,
-              });
-            }
             lastUpdateRef.current = Date.now();
             return prev;
           }
@@ -192,14 +185,6 @@ export const useRouteTracking = () => {
           latitudeDelta: TRACKING_REGION_DELTA,
           longitudeDelta: TRACKING_REGION_DELTA,
         };
-
-        if (__DEV__) {
-          console.debug('>>>[RUNNING][RUN] push point', {
-            latitude,
-            longitude,
-            nextLength: nextPath.length,
-          });
-        }
 
         lastUpdateRef.current = Date.now();
 
@@ -286,8 +271,8 @@ export const useRouteTracking = () => {
       {
         enableHighAccuracy: true,
         distanceFilter: WATCH_DISTANCE_FILTER_METERS,
-        interval: 2000,
-        fastestInterval: 1000,
+        interval: 5000,
+        fastestInterval: 3000,
         showsBackgroundLocationIndicator: true,
       }
     );
@@ -295,13 +280,10 @@ export const useRouteTracking = () => {
     refreshTimerRef.current = setInterval(() => {
       if (watchIdRef.current === null) return;
       const last = lastUpdateRef.current;
-      if (!last || Date.now() - last > 4000) {
-        if (__DEV__) {
-          console.debug('>>>[RUNNING][RUN] force single location');
-        }
+      if (!last || Date.now() - last > 9000) {
         requestSingleLocation();
       }
-    }, 4000);
+    }, 8000);
 
     return true;
   }, [

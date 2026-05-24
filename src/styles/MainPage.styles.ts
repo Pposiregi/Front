@@ -19,6 +19,19 @@ const PROGRESS_CONTAINER_HEIGHT = Math.max(
   layoutScale(72, 68, 78),
   Math.min(layoutScale(82, 76, 88), SCREEN_HEIGHT * 0.078)
 );
+const MAIN_METRIC_LAYER_BOTTOM = layoutScale(26, 22, 32);
+const MAIN_METRIC_CARD_MIN_HEIGHT = Math.max(
+  84,
+  Math.round(SCREEN_HEIGHT * 0.082)
+);
+const MAIN_METRIC_CARD_RADIUS = Math.max(
+  Radius.md + 2,
+  Math.round(SCREEN_WIDTH * 0.036)
+);
+const MAIN_METRIC_HORIZONTAL_INSET = Math.max(
+  Spacing.md - 2,
+  Math.round(SCREEN_WIDTH * 0.03)
+);
 const TOKKI_PADDING_V = layoutScale(14, 12, 18);
 const TOKKI_PADDING_H = screenPadding;
 const CONTAINER_TOP_PADDING = Platform.select({
@@ -34,6 +47,7 @@ const START_BUTTON_RADIUS = Math.round(START_BUTTON_SIZE / 2);
 const START_BUTTON_FONT = layoutScale(17, 16, 19);
 const RUN_LOCK_NOTICE_BOTTOM = BOTTOM_NAV_HEIGHT + 2;
 const PET_BOTTOM_FROM_START = layoutScale(206, 188, 232);
+const RUNNING_PET_BOTTOM = PET_BOTTOM_FROM_START - layoutScale(86, 76, 100);
 const PET_RENDER_SIZE = 480;
 const PET_FOOT_BOTTOM_OFFSET_RATIO = 0.24;
 const PET_FOOT_RENDER_OFFSET = PET_RENDER_SIZE * PET_FOOT_BOTTOM_OFFSET_RATIO;
@@ -341,6 +355,44 @@ export default StyleSheet.create({
     width: START_ICON_SIZE,
     height: START_ICON_SIZE,
   },
+  runningEndLayer: {
+    position: 'absolute',
+    left: MAIN_METRIC_HORIZONTAL_INSET,
+    right: MAIN_METRIC_HORIZONTAL_INSET,
+    bottom: MAIN_METRIC_LAYER_BOTTOM,
+    zIndex: 20,
+    elevation: 20,
+  },
+  runningEndGrid: {
+    minHeight: MAIN_METRIC_CARD_MIN_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
+    overflow: 'hidden',
+    ...Shadows.surfaceRaised,
+  },
+  runningEndSideSlot: {
+    flex: 1,
+    minHeight: MAIN_METRIC_CARD_MIN_HEIGHT,
+    backgroundColor: 'rgba(224, 231, 255, 0.24)',
+  },
+  runningEndButton: {
+    flex: 1,
+    minHeight: MAIN_METRIC_CARD_MIN_HEIGHT,
+    borderRadius: MAIN_METRIC_CARD_RADIUS,
+    backgroundColor: 'rgba(255, 246, 234, 0.44)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  runningEndText: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: START_BUTTON_FONT,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
   devHealthButton: {
     backgroundColor: Colors.devButton,
     paddingHorizontal: DEV_BUTTON_HORIZONTAL_PADDING,
@@ -371,7 +423,7 @@ export default StyleSheet.create({
   },
   runningPetLayer: {
     position: 'absolute',
-    bottom: PET_BOTTOM_FROM_START,
+    bottom: RUNNING_PET_BOTTOM,
     alignSelf: 'center',
     zIndex: 2,
   },
@@ -482,42 +534,48 @@ export default StyleSheet.create({
   runningStatPanel: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accentSoft,
-    borderRadius: cardRadius,
-    borderWidth: 1,
-    borderColor: Colors.accent,
     marginHorizontal: screenPadding,
-    paddingVertical: 12,
+    gap: Spacing.sm,
   },
 
   runningStatPanelItem: {
     flex: 1,
     alignItems: 'center',
-  },
-
-  runningStatPanelDivider: {
-    width: 1,
-    height: '70%',
-    backgroundColor: Colors.accent,
+    justifyContent: 'center',
+    minHeight: 58,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surfaceOverlaySolid,
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
   },
 
   runningStatPanelLabel: {
     fontSize: Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.textMuted,
     fontFamily: Fonts.Pretendard,
+    fontWeight: '700',
     marginBottom: 2,
   },
 
+  runningStatPanelValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+  },
+
   runningStatPanelValue: {
-    fontSize: Typography.h2,
+    fontSize: Typography.sectionTitle,
     color: Colors.textPrimary,
     fontFamily: Fonts.Pretendard,
+    fontWeight: '800',
   },
 
   runningStatPanelUnit: {
     fontSize: Typography.caption,
     color: Colors.textMuted,
     fontFamily: Fonts.Pretendard,
-    marginTop: 2,
+    marginLeft: 3,
   },
 });

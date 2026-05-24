@@ -1028,33 +1028,36 @@ export const MainPage = () => {
           <View style={styles.runningStatPanel}>
             <View style={styles.runningStatPanelItem}>
               <Text style={styles.runningStatPanelLabel}>페이스</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {livePaceMinPerKm == null
-                  ? "--'--''"
-                  : (() => {
-                      const totalSec = Math.round(livePaceMinPerKm * 60);
-                      const min = Math.floor(totalSec / 60);
-                      const sec = totalSec % 60;
-                      return `${min}'${String(sec).padStart(2, '0')}''`;
-                    })()}
-              </Text>
-              <Text style={styles.runningStatPanelUnit}>min/km</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text style={styles.runningStatPanelValue}>
+                  {livePaceMinPerKm == null
+                    ? "--'--''"
+                    : (() => {
+                        const totalSec = Math.round(livePaceMinPerKm * 60);
+                        const min = Math.floor(totalSec / 60);
+                        const sec = totalSec % 60;
+                        return `${min}'${String(sec).padStart(2, '0')}''`;
+                      })()}
+                </Text>
+                <Text style={styles.runningStatPanelUnit}>min/km</Text>
+              </View>
             </View>
-            <View style={styles.runningStatPanelDivider} />
             <View style={styles.runningStatPanelItem}>
               <Text style={styles.runningStatPanelLabel}>걸음 수</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {liveSteps.toLocaleString()}
-              </Text>
-              <Text style={styles.runningStatPanelUnit}>보</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text style={styles.runningStatPanelValue}>
+                  {liveSteps.toLocaleString()}
+                </Text>
+                <Text style={styles.runningStatPanelUnit}>보</Text>
+              </View>
             </View>
-            <View style={styles.runningStatPanelDivider} />
             <View style={styles.runningStatPanelItem}>
               <Text style={styles.runningStatPanelLabel}>시간</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {formatRunningElapsed(runningElapsedSec)}
-              </Text>
-              <Text style={styles.runningStatPanelUnit}>경과</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text style={styles.runningStatPanelValue}>
+                  {formatRunningElapsed(runningElapsedSec)}
+                </Text>
+              </View>
             </View>
           </View>
         ) : (
@@ -1346,13 +1349,18 @@ export const MainPage = () => {
       )}
       {isTracking ? (
         <TouchableOpacity
-          style={styles.startButton}
+          style={styles.runningEndLayer}
           accessibilityRole='button'
           accessibilityLabel='러닝 종료'
           onPress={handleToggleTracking}
+          activeOpacity={0.85}
         >
-          <View style={styles.startButtonInner}>
-            <Text style={styles.startText}>END</Text>
+          <View style={styles.runningEndGrid}>
+            <View style={styles.runningEndSideSlot} />
+            <View style={styles.runningEndButton}>
+              <Text style={styles.runningEndText}>END</Text>
+            </View>
+            <View style={styles.runningEndSideSlot} />
           </View>
         </TouchableOpacity>
       ) : null}
