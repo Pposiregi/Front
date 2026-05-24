@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -23,6 +24,7 @@ import SessionItem from './SessionItem';
 import { activityTheme, styles } from '@styles/Activity.styles';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '@styles/dimensions';
 import {
+  deleteSession,
   getMonthlySessions,
   getSessionDetail,
   getWeeklySteps,
@@ -192,7 +194,7 @@ function ActivityPage() {
   const [weeklySteps, setWeeklySteps] = useState<WeeklyStepItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [listTab, setListTab] = useState<'daily' | 'sessions'>('daily');
-  const [hiddenSessionIds, setHiddenSessionIds] = useState<Set<number>>(
+  const [deletingSessionIds, setDeletingSessionIds] = useState<Set<number>>(
     () => new Set()
   );
   const chartPadding = activityTheme.spacing.lg;
@@ -325,7 +327,7 @@ function ActivityPage() {
   const fetchMonthlySessions = useCallback(async (date: Date) => {
     try {
       setMonthlyActivities([]);
-      setHiddenSessionIds(new Set());
+      setDeletingSessionIds(new Set());
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const data = await getMonthlySessions(year, month);
@@ -545,7 +547,7 @@ function ActivityPage() {
         isSameMonth(prev, initialMonth) ? prev : initialMonth
       );
       setListTab('daily');
-      setHiddenSessionIds(new Set());
+      setDeletingSessionIds(new Set());
       fetchMonthlyBundle(initialMonth);
       fetchWeeklySteps();
       fetchDailySummary();
@@ -592,20 +594,69 @@ function ActivityPage() {
     }
   }, [currentMonth, fetchDailySummary, fetchMonthlyBundle, fetchWeeklySteps]);
 
-  // 서버 기록은 지우지 않고, 현재 러닝별 목록에서만 임시로 숨긴다.
-  const handleHideSession = useCallback((sessionId: number) => {
-    setHiddenSessionIds((prev) => {
-      const next = new Set(prev);
-      next.add(sessionId);
-      return next;
-    });
-  }, []);
+  const runDeleteSession = useCallback(
+    async (sessionId: number) => {
+      const userId = userProfile?.userId;
+      if (userId == null) {
+        Alert.alert(
+          '러닝 기록 삭제',
+          '사용자 정보를 불러온 뒤 다시 시도해주세요.'
+        );
+        return;
+      }
 
-  // 숨긴 항목을 초기화하고 서버의 현재 월 기록을 다시 받아온다.
-  const handleReloadAllSessions = useCallback(async () => {
-    setHiddenSessionIds(new Set());
-    await fetchMonthlyBundle(currentMonth);
-  }, [currentMonth, fetchMonthlyBundle]);
+      setDeletingSessionIds((prev) => {
+        const next = new Set(prev);
+        next.add(sessionId);
+        return next;
+      });
+
+      try {
+        await deleteSession(sessionId, userId);
+        setMonthlyActivities((prev) =>
+          prev.filter((session) => session.sessionId !== sessionId)
+        );
+        await fetchDailySummary();
+      } catch (error) {
+        console.warn('[Activity] 러닝 기록 삭제 실패', sessionId, error);
+        Alert.alert(
+          '러닝 기록 삭제',
+          '러닝 기록 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        );
+      } finally {
+        setDeletingSessionIds((prev) => {
+          const next = new Set(prev);
+          next.delete(sessionId);
+          return next;
+        });
+      }
+    },
+    [fetchDailySummary, userProfile?.userId]
+  );
+
+  const handleDeleteSession = useCallback(
+    (sessionId: number) => {
+      if (deletingSessionIds.has(sessionId)) return;
+
+      Alert.alert(
+        '러닝 기록 삭제',
+        '러닝 기록이 통계에서 영구삭제돼요! 진행하시겠어요?',
+        [
+        { text: '아니오', style: 'cancel' },
+        {
+          text: '예',
+          style: 'destructive',
+          onPress: () => {
+            runDeleteSession(sessionId).catch((error) => {
+              console.warn('[Activity] 예상치 못한 삭제 실패', error);
+            });
+          },
+        },
+        ]
+      );
+    },
+    [deletingSessionIds, runDeleteSession]
+  );
 
   const stepsValue = dailyActivity?.steps ?? 0;
   const distanceValue = dailyActivity?.distanceKm ?? 0;
@@ -646,16 +697,7 @@ function ActivityPage() {
   const progressSize = Math.max(112, Math.round(SCREEN_WIDTH * 0.28));
   const progressStroke = Math.max(10, Math.round(progressSize * 0.1));
 
-  const visibleMonthlyActivities = useMemo(
-    () =>
-      monthlyActivities.filter(
-        (session) => !hiddenSessionIds.has(session.sessionId)
-      ),
-    [hiddenSessionIds, monthlyActivities]
-  );
-  // 복구 버튼은 사용자가 x로 숨긴 기록이 있을 때만 노출한다.
-  const hasHiddenSessions = hiddenSessionIds.size > 0;
-  const showEmptySessions = !loading && visibleMonthlyActivities.length === 0;
+  const showEmptySessions = !loading && monthlyActivities.length === 0;
   const showEmptyDaily = !loading && normalizedMonthlyDaily.length === 0;
   const isNextDisabled = useMemo(() => {
     const todayDate = new Date();
@@ -864,21 +906,6 @@ function ActivityPage() {
           </TouchableOpacity>
         </View>
       </View>
-      {/* 러닝별에서 숨긴 항목이 있을 때만 전체 기록 복구 액션을 보여준다. */}
-      {listTab === 'sessions' && hasHiddenSessions ? (
-        <View style={styles.sessionReloadRow}>
-          <Pressable
-            accessibilityRole='button'
-            onPress={handleReloadAllSessions}
-            style={({ pressed }) => [
-              styles.sessionReloadButton,
-              pressed && styles.sessionReloadButtonPressed,
-            ]}
-          >
-            <Text style={styles.sessionReloadText}>전체 기록 불러오기</Text>
-          </Pressable>
-        </View>
-      ) : null}
       {loading ? (
         <ActivityIndicator
           size='large'
@@ -948,11 +975,12 @@ function ActivityPage() {
               </Text>
             </View>
           ) : (
-            visibleMonthlyActivities.map((session) => (
+            monthlyActivities.map((session) => (
               <SessionItem
                 key={session.sessionId}
                 session={session}
-                onDelete={handleHideSession}
+                onDelete={handleDeleteSession}
+                deleting={deletingSessionIds.has(session.sessionId)}
               />
             ))
           )}

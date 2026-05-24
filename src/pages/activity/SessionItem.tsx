@@ -18,6 +18,7 @@ import ActivityCardSurface from './ActivityCardSurface';
 type SessionItemProps = {
   session: GPS_SESSION;
   onDelete?: (sessionId: number) => void;
+  deleting?: boolean;
 };
 
 /**
@@ -47,7 +48,7 @@ const formatTime = (date: Date) => {
  * 월간 GPS 세션 리스트 아이템
  * - 클릭 시 상세 화면으로 이동한다.
  */
-function SessionItem({ session, onDelete }: SessionItemProps) {
+function SessionItem({ session, onDelete, deleting = false }: SessionItemProps) {
   const navigation = useNavigation<ActivityDetailNavigationProp>();
 
   const formattedDate = useMemo(() => {
@@ -106,6 +107,7 @@ function SessionItem({ session, onDelete }: SessionItemProps) {
   const handleDeletePress = (event: GestureResponderEvent) => {
     // 카드 전체의 상세 이동 press가 같이 실행되지 않도록 삭제 버튼에서 전파를 막는다.
     event.stopPropagation();
+    if (deleting) return;
     onDelete?.(session.sessionId);
   };
 
@@ -118,7 +120,11 @@ function SessionItem({ session, onDelete }: SessionItemProps) {
           accessibilityRole='button'
           accessibilityLabel='러닝 기록 삭제'
           onPress={handleDeletePress}
-          style={styles.sessionDeleteButton}
+          disabled={deleting}
+          style={[
+            styles.sessionDeleteButton,
+            deleting && styles.sessionDeleteButtonDisabled,
+          ]}
         >
           <Text style={styles.sessionDeleteText}>×</Text>
         </TouchableOpacity>
