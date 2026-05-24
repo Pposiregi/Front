@@ -82,7 +82,8 @@ const MissionCard: React.FC<MissionCardProps> = ({
       </View>
 
       <Text style={styles.missionUIText}>
-        {completeDisplayValue} / {mission.goalValue}{' '}
+        {completeDisplayValue.toLocaleString()} /{' '}
+        {(mission.goalValue ?? 0).toLocaleString()}
         {mission.category === 'STEP'
           ? '보'
           : mission.category === 'MEAL'

@@ -1194,7 +1194,7 @@ export const MainPage = () => {
             style={styles.missionButton}
           >
             <Image
-              source={require('@assets/images/Icon_colored/fb_mission.png')}
+              source={require('@assets/images/Icon_colored/home_mission.png')}
               style={styles.missionIcon}
               resizeMode='contain'
             />
@@ -1261,7 +1261,7 @@ export const MainPage = () => {
                   isDevToolsOpen ? '개발 도구 닫기' : '개발 도구 열기'
                 }
               >
-                <Text style={styles.devToggleText}>[DEV]</Text>
+                <Text style={styles.devToggleText}>와타시 개발전용버튼</Text>
               </TouchableOpacity>
 
               {isDevToolsOpen && (
@@ -1326,17 +1326,13 @@ export const MainPage = () => {
                     <View style={styles.devPbfControls}>
                       <TouchableOpacity
                         style={styles.devPbfAdjustButton}
-                        onPress={() =>
-                          handleAdjustDevPreviewPbf(-DEV_PBF_STEP)
-                        }
+                        onPress={() => handleAdjustDevPreviewPbf(-DEV_PBF_STEP)}
                       >
                         <Text style={styles.devPbfAdjustText}>-1</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.devPbfAdjustButton}
-                        onPress={() =>
-                          handleAdjustDevPreviewPbf(DEV_PBF_STEP)
-                        }
+                        onPress={() => handleAdjustDevPreviewPbf(DEV_PBF_STEP)}
                       >
                         <Text style={styles.devPbfAdjustText}>+1</Text>
                       </TouchableOpacity>

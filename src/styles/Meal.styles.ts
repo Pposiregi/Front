@@ -296,8 +296,10 @@ export default StyleSheet.create({
   },
   dayPreviewPlaceholderText: {
     fontSize: Typography.bodyLarge,
+    lineHeight: Typography.bodyLarge,
     fontWeight: '800',
     color: Colors.surface,
+    transform: [{ translateY: -1 }],
   },
   futureDayPreviewSpace: {
     width: STACK_ITEM_SIZE,

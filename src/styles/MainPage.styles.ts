@@ -62,12 +62,7 @@ const MISSION_BUTTON_SIZE = Math.max(
   layoutScale(48, 44, 52),
   Math.min(layoutScale(58, 54, 62), Math.round(SCREEN_WIDTH * 0.135))
 );
-const MISSION_BUTTON_PADDING = Math.max(
-  Spacing.sm,
-  layoutScale(Math.round(MISSION_BUTTON_SIZE * 0.17), 8, 10)
-);
-const MISSION_ICON_SIZE = Math.max(28, Math.round(MISSION_BUTTON_SIZE * 0.65));
-
+const MISSION_ICON_SIZE = Math.round(MISSION_BUTTON_SIZE * 0.66);
 export default StyleSheet.create({
   loadingContainer: {
     flex: 1,
@@ -82,7 +77,7 @@ export default StyleSheet.create({
   },
   mainFullBackground: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.6,
+    opacity: 0.7,
   },
   progressContainer: {
     height: PROGRESS_CONTAINER_HEIGHT,
@@ -102,10 +97,11 @@ export default StyleSheet.create({
   },
   message: {
     /* 메인 메시지 문구 */
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.GowunDodum,
     textAlign: 'center',
     color: Colors.textPrimary,
     fontSize: Typography.h1,
+    fontWeight: '700',
     marginTop: MESSAGE_MARGIN_TOP,
   },
   messageRow: {
@@ -408,6 +404,7 @@ export default StyleSheet.create({
   emptyMissionText: {
     fontSize: Typography.bodyLarge,
     color: Colors.textPrimary,
+    fontFamily: Fonts.GowunDodum,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -417,16 +414,16 @@ export default StyleSheet.create({
     right: screenPadding,
     width: MISSION_BUTTON_SIZE,
     height: MISSION_BUTTON_SIZE,
-    padding: MISSION_BUTTON_PADDING,
-    backgroundColor: Colors.surfaceOverlaySolid,
+    padding: 0,
+    backgroundColor: Colors.surface,
     borderRadius: Radius.pill,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.divider,
     zIndex: 30,
-    elevation: 30,
-    ...Shadows.floatingAction,
+    elevation: 1,
   },
   missionIcon: {
     width: MISSION_ICON_SIZE,
