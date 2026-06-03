@@ -1,39 +1,64 @@
-import { Dimensions, StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Shadows, Spacing, Typography } from './theme';
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  topSection: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.md,
+    backgroundColor: Colors.background,
+  },
+  pageTitle: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.screenTitle,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  pageSubtitle: {
+    marginTop: Spacing.xxs,
+    marginBottom: Spacing.md,
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
   tabHeaderContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.background,
+    padding: 4,
+    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.divider,
+    ...Shadows.surfaceRaised,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  tabInner: {
+    minHeight: 42,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 10,
   },
-  tabUnderline: {
-    width: 100, // 밑줄 길이 조절
-    height: 2,
-    borderRadius: 1,
+  activeTabButton: {
     backgroundColor: Colors.textPrimary,
   },
   tabText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Typography.action,
+    fontSize: Typography.bodySmall,
     fontWeight: '700',
-    color: Colors.textMuted,
+    color: Colors.textSecondary,
   },
   activeTabText: {
-    color: Colors.textPrimary,
-    marginBottom: 3,
+    color: Colors.surface,
   },
   // 모달
   modalBackground: {

@@ -66,3 +66,15 @@ export const getSessionDetail = async (
   );
   return data;
 };
+
+/**
+ * GPS 세션 삭제
+ */
+export const deleteSession = async (
+  sessionId: string | number,
+  userId: string | number
+): Promise<void> => {
+  await apiClient.delete(`/gps/sessions/${sessionId}`, {
+    params: { userId },
+  });
+};

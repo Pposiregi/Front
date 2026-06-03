@@ -100,7 +100,6 @@ import { getMissionsActive } from '@api/missionApi';
 import { useMissionSSE } from '@hooks/useMissionSSE';
 import { useFocusEffect } from '@react-navigation/native';
 import MissionModal from './missionModal';
-import { mockActiveMissions } from './mockMission';
 import MainStatCards from './MainStatCards';
 import { useStepSync } from '@hooks/useStepSync';
 import { getUser } from '@api/mainApi';
@@ -145,7 +144,7 @@ export const MainPage = () => {
    * 미션 데이터/모달 상태.
    */
   const [missionApiItems, setMissionApiItems] = useState<MissionActiveItem[]>(
-    mockActiveMissions.missions
+    []
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [trans, setTrans] = useState(false); // 미션 완료 트리거
@@ -1023,38 +1022,69 @@ export const MainPage = () => {
         런닝 중: 페이스/걸음수/시간 스탯 패널
         평시: 미션 진행 상황을 가로 스크롤로 표시
       */}
-      <View style={styles.progressContainer}>
+      <View
+        style={[
+          styles.progressContainer,
+          isTracking && styles.runningProgressContainer,
+        ]}
+      >
         {isTracking ? (
           <View style={styles.runningStatPanel}>
             <View style={styles.runningStatPanelItem}>
-              <Text style={styles.runningStatPanelLabel}>페이스</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {livePaceMinPerKm == null
-                  ? "--'--''"
-                  : (() => {
-                      const totalSec = Math.round(livePaceMinPerKm * 60);
-                      const min = Math.floor(totalSec / 60);
-                      const sec = totalSec % 60;
-                      return `${min}'${String(sec).padStart(2, '0')}''`;
-                    })()}
+              <Text style={styles.runningStatPanelLabel} numberOfLines={1}>
+                페이스
               </Text>
-              <Text style={styles.runningStatPanelUnit}>min/km</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text
+                  style={styles.runningStatPanelValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.78}
+                >
+                  {livePaceMinPerKm == null
+                    ? "--'--''"
+                    : (() => {
+                        const totalSec = Math.round(livePaceMinPerKm * 60);
+                        const min = Math.floor(totalSec / 60);
+                        const sec = totalSec % 60;
+                        return `${min}'${String(sec).padStart(2, '0')}''`;
+                      })()}
+                </Text>
+                <Text style={styles.runningStatPanelUnit}>min/km</Text>
+              </View>
             </View>
             <View style={styles.runningStatPanelDivider} />
             <View style={styles.runningStatPanelItem}>
-              <Text style={styles.runningStatPanelLabel}>걸음 수</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {liveSteps.toLocaleString()}
+              <Text style={styles.runningStatPanelLabel} numberOfLines={1}>
+                걸음 수
               </Text>
-              <Text style={styles.runningStatPanelUnit}>보</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text
+                  style={styles.runningStatPanelValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.78}
+                >
+                  {liveSteps.toLocaleString()}
+                </Text>
+                <Text style={styles.runningStatPanelUnit}>보</Text>
+              </View>
             </View>
             <View style={styles.runningStatPanelDivider} />
             <View style={styles.runningStatPanelItem}>
-              <Text style={styles.runningStatPanelLabel}>시간</Text>
-              <Text style={styles.runningStatPanelValue}>
-                {formatRunningElapsed(runningElapsedSec)}
+              <Text style={styles.runningStatPanelLabel} numberOfLines={1}>
+                시간
               </Text>
-              <Text style={styles.runningStatPanelUnit}>경과</Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text
+                  style={styles.runningStatPanelValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.74}
+                >
+                  {formatRunningElapsed(runningElapsedSec)}
+                </Text>
+              </View>
             </View>
           </View>
         ) : (
@@ -1124,13 +1154,6 @@ export const MainPage = () => {
                 />
               ))}
             </Animated.View>
-            <View style={styles.runHud}>
-              <View style={styles.runHudInner}>
-                <Text style={styles.runTimerValue}>
-                  {formatRunningElapsed(runningElapsedSec)}
-                </Text>
-              </View>
-            </View>
             <View
               style={[
                 styles.runningPetLayer,
@@ -1194,7 +1217,7 @@ export const MainPage = () => {
             style={styles.missionButton}
           >
             <Image
-              source={require('@assets/images/Icon_colored/fb_mission.png')}
+              source={require('@assets/images/Icon_colored/home_mission.png')}
               style={styles.missionIcon}
               resizeMode='contain'
             />
@@ -1261,7 +1284,7 @@ export const MainPage = () => {
                   isDevToolsOpen ? '개발 도구 닫기' : '개발 도구 열기'
                 }
               >
-                <Text style={styles.devToggleText}>[DEV]</Text>
+                <Text style={styles.devToggleText}>와타시 개발전용버튼</Text>
               </TouchableOpacity>
 
               {isDevToolsOpen && (
@@ -1346,14 +1369,13 @@ export const MainPage = () => {
       )}
       {isTracking ? (
         <TouchableOpacity
-          style={styles.startButton}
+          style={styles.runningEndButton}
           accessibilityRole='button'
           accessibilityLabel='러닝 종료'
           onPress={handleToggleTracking}
+          activeOpacity={0.85}
         >
-          <View style={styles.startButtonInner}>
-            <Text style={styles.startText}>END</Text>
-          </View>
+          <Text style={styles.runningEndText}>END</Text>
         </TouchableOpacity>
       ) : null}
       <BodyRecordPrompt

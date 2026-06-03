@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Typography } from './theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 /**
  * 미션 UI
@@ -13,42 +13,51 @@ export default StyleSheet.create({
   },
 
   modalBox: {
-    width: '95%',
-    height: '83%',
+    width: '92%',
+    maxHeight: '82%',
     backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: Radius.lg,
+    padding: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.divider,
+    ...Shadows.floatingAction,
   },
 
   missionTitle: {
     fontSize: Typography.screenTitle,
-    marginBottom: 12,
+    marginBottom: Spacing.md,
     fontFamily: Fonts.Pretendard,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.textPrimary,
+    textAlign: 'center',
   },
 
   tabRow: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
+    padding: 4,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.background,
   },
 
   tabButton: {
     flex: 1,
-    paddingVertical: 8,
-    marginHorizontal: 4,
+    minHeight: 38,
+    paddingVertical: Spacing.sm,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radius.sm,
   },
 
   tabButtonActive: {
-    backgroundColor: Colors.accentStrong,
+    backgroundColor: Colors.textPrimary,
   },
 
   tabText: {
     fontFamily: Fonts.Pretendard,
-    fontSize: Typography.action,
+    fontSize: Typography.bodySmall,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: Colors.textSecondary,
   },
 
   tabTextActive: {
@@ -61,38 +70,50 @@ export default StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-
+  missionList: {
+    marginHorizontal: -Spacing.xs,
+  },
+  missionListContent: {
+    paddingHorizontal: Spacing.xs,
+    paddingBottom: Spacing.md,
+  },
   missionUICard: {
-    padding: 12,
-    marginVertical: 6,
-    backgroundColor: Colors.divider,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.surface,
-    borderRadius: 12,
+    borderColor: Colors.divider,
+    borderRadius: Radius.md,
   },
 
   missionUICardReadbyBorder: {
     backgroundColor: Colors.accentSoft,
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    borderRadius: 12,
+    borderColor: Colors.divider,
   },
 
   missionUICardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.md,
   },
 
   missionIcon: {
     fontSize: Typography.h2,
-    marginRight: 8,
+    width: 34,
+    height: 34,
+    marginRight: Spacing.sm,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.infoSoft,
+    textAlign: 'center',
+    lineHeight: 34,
   },
 
   missionUITextTitle: {
     fontSize: Typography.sectionTitle,
-    fontFamily: Fonts.JUA,
+    fontFamily: Fonts.Pretendard,
+    fontWeight: '800',
     color: Colors.textPrimary,
+    flexShrink: 1,
   },
 
   flexEndContainer: {
@@ -101,22 +122,24 @@ export default StyleSheet.create({
   },
 
   completeButton: {
-    backgroundColor: Colors.accent,
-    paddingVertical: 8,
-    minWidth: 60,
-    borderRadius: 6,
+    backgroundColor: Colors.accentStrong,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    minWidth: 58,
+    borderRadius: Radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   completeButtonDisabled: {
-    backgroundColor: Colors.disabled,
+    backgroundColor: Colors.background,
   },
 
   completeButtonText: {
-    fontSize: Typography.body,
+    fontSize: Typography.bodySmall,
     color: Colors.surface,
     fontFamily: Fonts.Pretendard,
+    fontWeight: '800',
   },
 
   completeButtonTextDisabled: {
@@ -125,16 +148,17 @@ export default StyleSheet.create({
 
   missionUIText: {
     fontSize: Typography.body,
-    color: Colors.textPrimary,
+    color: Colors.textSecondary,
     fontFamily: Fonts.Pretendard,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    textAlign: 'right',
   },
 
   progressBarBackground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.surface,
-    marginVertical: 8,
+    backgroundColor: Colors.background,
+    marginTop: Spacing.sm,
     overflow: 'hidden',
   },
 
@@ -145,11 +169,12 @@ export default StyleSheet.create({
   },
 
   missionUIExitButton: {
-    marginTop: 12,
-    alignSelf: 'flex-end',
-    padding: 8,
-    backgroundColor: Colors.accent,
-    borderRadius: 6,
+    marginTop: Spacing.sm,
+    minHeight: 46,
+    alignSelf: 'stretch',
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.textPrimary,
+    borderRadius: Radius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },

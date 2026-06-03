@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '@styles/Achievement.styles';
-import { Colors } from '@styles/theme';
 
 import RankingTab from './RankingTab';
 import MissionTab from './MissionTab';
@@ -11,6 +10,13 @@ type TabType = 'RANKING' | 'MISSION' | 'BADGE';
 
 function AchievementPage() {
   const [activeTab, setActiveTab] = useState<TabType>('RANKING');
+
+  const activeSubtitle =
+    activeTab === 'RANKING'
+      ? '오늘의 걸음 수 순위를 확인해요'
+      : activeTab === 'MISSION'
+      ? '완료한 미션 기록을 모아봐요'
+      : '획득한 뱃지를 한눈에 확인해요';
 
   // ====================
   // 상단 탭 헤더
@@ -24,15 +30,14 @@ function AchievementPage() {
         return (
           <TouchableOpacity
             key={tab}
-            style={styles.tabButton}
+            style={[styles.tabButton, isActive && styles.activeTabButton]}
             onPress={() => setActiveTab(tab as TabType)}
+            accessibilityRole='tab'
+            accessibilityState={{ selected: isActive }}
           >
-            <View style={styles.tabInner}>
-              <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                {label}
-              </Text>
-              {isActive && <View style={styles.tabUnderline} />}
-            </View>
+            <Text style={[styles.tabText, isActive && styles.activeTabText]}>
+              {label}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -56,8 +61,12 @@ function AchievementPage() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <TabHeader />
+    <View style={styles.container}>
+      <View style={styles.topSection}>
+        <Text style={styles.pageTitle}>업적</Text>
+        <Text style={styles.pageSubtitle}>{activeSubtitle}</Text>
+        <TabHeader />
+      </View>
       <View style={{ flex: 1 }}>{renderActiveScreen()}</View>
     </View>
   );

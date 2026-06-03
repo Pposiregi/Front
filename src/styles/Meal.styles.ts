@@ -156,11 +156,15 @@ export default StyleSheet.create({
     marginBottom: HEADER_SECTION_SPACING,
   },
   calendarContainer: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: CALENDAR_RADIUS,
     paddingVertical: CALENDAR_VERTICAL_PADDING,
     paddingHorizontal: CALENDAR_HORIZONTAL_PADDING,
     marginHorizontal: -CALENDAR_CONTAINER_EXPAND,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.divider,
+    ...baseShadow,
   },
   calendarMonthRow: {
     flexDirection: 'row',
@@ -292,8 +296,10 @@ export default StyleSheet.create({
   },
   dayPreviewPlaceholderText: {
     fontSize: Typography.bodyLarge,
+    lineHeight: Typography.bodyLarge,
     fontWeight: '800',
     color: Colors.surface,
+    transform: [{ translateY: -1 }],
   },
   futureDayPreviewSpace: {
     width: STACK_ITEM_SIZE,

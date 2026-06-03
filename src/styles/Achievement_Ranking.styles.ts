@@ -1,11 +1,42 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Shadows, Typography } from './theme';
+import { Colors, Fonts, Shadows, Spacing, Typography } from './theme';
 
 export const styles = StyleSheet.create({
+  rankingScreen: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  rankingBackgroundImage: {
+    opacity: 0.7,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.background,
+  },
+  rankingTopSpacer: {
+    height: 72,
+  },
+  rankingScroll: {
+    flex: 1,
+  },
+  rankingList: {
+    paddingHorizontal: Spacing.md,
+  },
+  rankingListToolbar: {
+    minHeight: 38,
+    marginBottom: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rankingListToolbarLabel: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.caption,
+    fontWeight: '800',
+    color: Colors.textSecondary,
   },
   /**
    * 랭킹
@@ -32,14 +63,16 @@ export const styles = StyleSheet.create({
     marginLeft: 5,
   },
   listItemBox: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceOverlaySolid,
     borderRadius: 16,
     paddingRight: 16,
     paddingLeft: 4,
-    marginBottom: 8,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
     ...Shadows.surfaceRaised,
     minHeight: 70,
   },
@@ -52,15 +85,18 @@ export const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 10,
+    alignSelf: 'center',
   },
   rankingFilterButton: {
-    paddingHorizontal: 12,
+    minWidth: 48,
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    marginHorizontal: 4,
+    marginLeft: 6,
     borderRadius: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.backgroundOverlaySolid,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.surfaceBorderOverlay,
   },
   rankingFilterButtonText: {
     fontSize: Typography.bodySmall,
@@ -87,26 +123,24 @@ export const styles = StyleSheet.create({
   myRankingHighlight: {
     backgroundColor: Colors.accentSoft,
   },
-  myRankingBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
   myRankingFloatingContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
     paddingHorizontal: 16,
   },
-  myRankingText: {
-    fontSize: Typography.action,
+  myRankingTitle: {
+    alignSelf: 'flex-start',
+    marginLeft: 12,
+    marginBottom: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: Colors.surfaceOverlaySolid,
+    color: Colors.textSecondary,
     fontFamily: Fonts.Pretendard,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: Colors.surface,
+    fontSize: Typography.caption,
+    fontWeight: '800',
   },
 });

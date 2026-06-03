@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Animated,
-  Alert,
 } from 'react-native';
 import type { MissionActiveItem } from 'types/mission';
 import styles from '@styles/missionModal.styles';
@@ -31,7 +29,6 @@ const MissionModal: React.FC<MissionModalProps> = ({
   const [activeTab, setActiveTab] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
     'DAILY'
   );
-
   // 탭별 미션 필터링
   const filteredMissions = missions.filter((m) => m.periodType === activeTab);
 
@@ -72,7 +69,11 @@ const MissionModal: React.FC<MissionModalProps> = ({
               </TouchableOpacity>
             ))}
           </View>
-          <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+          <ScrollView
+            style={styles.missionList}
+            contentContainerStyle={styles.missionListContent}
+            showsVerticalScrollIndicator={false}
+          >
             {filteredMissions.length === 0 ? (
               <Text style={styles.emptyMissionText}>미션이 없습니다.</Text>
             ) : (

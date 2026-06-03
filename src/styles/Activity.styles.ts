@@ -432,38 +432,14 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: runningColors.border,
   },
+  sessionDeleteButtonDisabled: {
+    opacity: 0.45,
+  },
   sessionDeleteText: {
     fontFamily: Fonts.Pretendard,
     fontSize: Typography.action,
     lineHeight: 18,
     color: runningColors.textMuted,
-  },
-  sessionReloadRow: {
-    // 숨긴 항목 복구 버튼은 러닝별 탭의 보조 액션으로 카드 목록 바로 위에 둔다.
-    alignItems: 'stretch',
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  sessionReloadButton: {
-    minHeight: 42,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    borderRadius: Radius.md,
-    backgroundColor: runningColors.textPrimary,
-    borderWidth: 1,
-    borderColor: runningColors.textPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sessionReloadButtonPressed: {
-    opacity: 0.75,
-  },
-  sessionReloadText: {
-    fontFamily: Fonts.Pretendard,
-    fontSize: Typography.bodySmall,
-    fontWeight: '700',
-    color: runningColors.white,
-    lineHeight: 18,
   },
   listDistanceRow: {
     flexDirection: 'row',

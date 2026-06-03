@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Colors, Fonts, Radius, Spacing, Typography } from './theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from './theme';
 
 const styles = StyleSheet.create({
   container: {
@@ -76,29 +76,40 @@ const styles = StyleSheet.create({
   },
   actionArea: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
+    gap: Spacing.sm,
   },
   actionButton: {
-    paddingVertical: Spacing.md + 2,
+    minHeight: 52,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    ...Shadows.surfaceRaised,
+  },
+  actionButtonDisabled: {
+    opacity: 0.58,
+  },
+  actionButtonText: {
+    fontFamily: Fonts.Pretendard,
+    fontSize: Typography.label,
+    fontWeight: '800',
+    lineHeight: 20,
   },
   logoutButton: {
-    backgroundColor: Colors.background,
-    marginBottom: Spacing.sm + 2,
+    backgroundColor: Colors.textPrimary,
+    borderColor: Colors.textPrimary,
   },
   logoutText: {
-    fontFamily: Fonts.Pretendard,
-    fontSize: Typography.label,
-    color: Colors.textPrimary,
+    color: Colors.surface,
   },
   withdrawButton: {
-    backgroundColor: Colors.errorSoft,
+    backgroundColor: Colors.surface,
+    borderColor: Colors.errorSoft,
   },
   withdrawText: {
-    fontFamily: Fonts.Pretendard,
-    fontSize: Typography.label,
     color: Colors.errorText,
   },
   modalBackdrop: {
