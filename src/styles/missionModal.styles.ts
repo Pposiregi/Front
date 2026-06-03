@@ -77,15 +77,6 @@ export default StyleSheet.create({
     paddingHorizontal: Spacing.xs,
     paddingBottom: Spacing.md,
   },
-  devMissionNotice: {
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.xs,
-    fontFamily: Fonts.Pretendard,
-    fontSize: Typography.caption,
-    color: Colors.textMuted,
-    textAlign: 'center',
-  },
-
   missionUICard: {
     padding: Spacing.lg,
     marginBottom: Spacing.sm,

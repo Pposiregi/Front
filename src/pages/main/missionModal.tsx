@@ -10,7 +10,6 @@ import type { MissionActiveItem } from 'types/mission';
 import styles from '@styles/missionModal.styles';
 import MissionCard from './missionCard';
 import { postMissionComplete } from '@api/missionApi';
-import { mockActiveMissions } from './mockMission';
 
 interface MissionModalProps {
   visible: boolean;
@@ -30,15 +29,8 @@ const MissionModal: React.FC<MissionModalProps> = ({
   const [activeTab, setActiveTab] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>(
     'DAILY'
   );
-  const showDevMockMissions = __DEV__ && missions.length === 0;
-  const displayMissions = showDevMockMissions
-    ? mockActiveMissions.missions
-    : missions;
-
   // 탭별 미션 필터링
-  const filteredMissions = displayMissions.filter(
-    (m) => m.periodType === activeTab
-  );
+  const filteredMissions = missions.filter((m) => m.periodType === activeTab);
 
   return (
     <Modal
@@ -105,11 +97,6 @@ const MissionModal: React.FC<MissionModalProps> = ({
                 />
               ))
             )}
-            {showDevMockMissions ? (
-              <Text style={styles.devMissionNotice}>
-                *테스트용 미션데이터목록임니다
-              </Text>
-            ) : null}
           </ScrollView>
           <TouchableOpacity
             onPress={onClose}

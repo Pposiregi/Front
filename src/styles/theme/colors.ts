@@ -1,6 +1,7 @@
 /** 앱 전반에서 재사용하는 색상 토큰 모음이다. */
 export const Colors = {
   background: '#F3F4F6',
+  backgroundOverlaySolid: 'rgba(243, 244, 246, 0.88)',
   surface: '#FFFFFF',
   surfaceOverlay: 'rgba(255, 255, 255, 0.72)',
   surfaceOverlayStrong: 'rgba(255, 255, 255, 0.78)',

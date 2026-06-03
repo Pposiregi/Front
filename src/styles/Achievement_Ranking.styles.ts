@@ -93,10 +93,10 @@ export const styles = StyleSheet.create({
     paddingVertical: 6,
     marginLeft: 6,
     borderRadius: 8,
-    backgroundColor: 'rgba(243, 244, 246, 0.88)',
+    backgroundColor: Colors.backgroundOverlaySolid,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.62)',
+    borderColor: Colors.surfaceBorderOverlay,
   },
   rankingFilterButtonText: {
     fontSize: Typography.bodySmall,
