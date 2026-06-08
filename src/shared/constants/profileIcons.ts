@@ -1,5 +1,5 @@
 const S3_BASE =
-  'https://slimpet-bucket.s3.ap-northeast-2.amazonaws.com/profile-presets';
+  'https://fitpet-bucket.s3.ap-northeast-2.amazonaws.com/profile-presets';
 
 export const DEFAULT_PROFILE_URL = `${S3_BASE}/image_01.png`;
 
