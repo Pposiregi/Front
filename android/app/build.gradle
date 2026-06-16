@@ -93,7 +93,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "2.0"
         //카카오 API 키 입력
         manifestPlaceholders = [
             KAKAO_SCHEME: localProps['KAKAO_SCHEME'],
