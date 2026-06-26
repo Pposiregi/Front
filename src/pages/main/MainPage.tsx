@@ -34,6 +34,7 @@ import { Colors } from '@styles/theme';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import { getSibaDogMainTorsoFileByPbf } from '@utils/petMorphUtils';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
@@ -517,6 +518,15 @@ export const MainPage = () => {
     mainPetTemplateId,
     petRenderSize: PET_RENDER_SIZE,
   });
+  const mainPartFileOverrides = useMemo(
+    () =>
+      mainPetTemplateId === 'sibadog_v1'
+        ? {
+            torso: getSibaDogMainTorsoFileByPbf(effectivePbf, userGender),
+          }
+        : undefined,
+    [effectivePbf, mainPetTemplateId, userGender]
+  );
   const {
     expressionOverlays: petExpressionOverlays,
     petPanHandlers,
@@ -1252,6 +1262,7 @@ export const MainPage = () => {
                 size={PET_RENDER_SIZE}
                 templateId={mainPetTemplateId}
                 partTransforms={idlePartTransforms}
+                partFileOverrides={mainPartFileOverrides}
                 expressionOverlays={petExpressionOverlays}
                 style={[
                   styles.petImage,

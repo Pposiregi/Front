@@ -1,4 +1,10 @@
-import { clampPbf, getTorsoScaleByPbf, lerp } from '../src/utils/petMorphUtils';
+import {
+  clampPbf,
+  getSibaDogMainTorsoFileByPbf,
+  getSibaDogTorsoMuscleLevelByPbf,
+  getTorsoScaleByPbf,
+  lerp,
+} from '../src/utils/petMorphUtils';
 import type { PetTemplatePart } from '../src/utils/petTemplate';
 
 describe('petMorphUtils', () => {
@@ -56,5 +62,27 @@ describe('petMorphUtils', () => {
     expect(aboveMax.t).toBe(1);
     expect(aboveMax.scaleX).toBeCloseTo(1.18);
     expect(aboveMax.scaleY).toBeCloseTo(1.05);
+  });
+
+  it('maps pbf to realistic gender-aware siba dog torso levels', () => {
+    expect(getSibaDogTorsoMuscleLevelByPbf(17, 'male')).toBe('lv3');
+    expect(getSibaDogTorsoMuscleLevelByPbf(24, 'male')).toBe('lv2');
+    expect(getSibaDogTorsoMuscleLevelByPbf(25, 'male')).toBe('lv1');
+
+    expect(getSibaDogTorsoMuscleLevelByPbf(24, 'female')).toBe('lv3');
+    expect(getSibaDogTorsoMuscleLevelByPbf(31, 'female')).toBe('lv2');
+    expect(getSibaDogTorsoMuscleLevelByPbf(32, 'female')).toBe('lv1');
+  });
+
+  it('returns the matching siba dog main torso file for the selected level', () => {
+    expect(getSibaDogMainTorsoFileByPbf(35, 'male')).toBe(
+      'sibadog_v1_02_torso_none_lv1.png'
+    );
+    expect(getSibaDogMainTorsoFileByPbf(22, 'male')).toBe(
+      'sibadog_v1_02_torso_none_lv2.png'
+    );
+    expect(getSibaDogMainTorsoFileByPbf(16, 'male')).toBe(
+      'sibadog_v1_02_torso_none_lv3.png'
+    );
   });
 });

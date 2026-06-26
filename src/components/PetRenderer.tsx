@@ -10,14 +10,21 @@ import {
 } from 'react-native';
 import { getPetPartAsset, getPetTemplate } from '@utils/petAssetLoader';
 import { getTemplateAnchorRenderPx } from '@utils/petAnchorUtils';
-import { buildRenderablePetParts, sortPetPartsForRender } from '@utils/petRenderUtils';
-import { buildPivotTransform, type PartTransformInput } from '@utils/petTransformUtils';
+import {
+  buildRenderablePetParts,
+  sortPetPartsForRender,
+} from '@utils/petRenderUtils';
+import {
+  buildPivotTransform,
+  type PartTransformInput,
+} from '@utils/petTransformUtils';
 
 type Props = {
   size: number;
   templateId?: string;
   cacheBustToken?: string;
   partTransforms?: Record<string, PartTransformInput>;
+  partFileOverrides?: Record<string, string>;
   expressionOverlays?: {
     baseFace?: ImageSourcePropType;
     eyes?: ImageSourcePropType;
@@ -44,6 +51,7 @@ export const PetRenderer = ({
   templateId,
   cacheBustToken,
   partTransforms,
+  partFileOverrides,
   expressionOverlays,
   style,
   partStyle,
@@ -65,14 +73,19 @@ export const PetRenderer = ({
    */
   const { renderableParts, missingFiles } = useMemo(() => {
     const sortedParts = sortPetPartsForRender(template.parts);
-    return buildRenderablePetParts(sortedParts, fileName =>
+    const resolvedParts = sortedParts.map((part) => {
+      const overrideFile = partFileOverrides?.[part.key];
+      return overrideFile ? { ...part, file: overrideFile } : part;
+    });
+
+    return buildRenderablePetParts(resolvedParts, (fileName) =>
       getPetPartAsset({
         templateId,
         fileName,
         cacheBustToken,
       })
     );
-  }, [template.parts, templateId, cacheBustToken]);
+  }, [template.parts, templateId, cacheBustToken, partFileOverrides]);
   const missingFilesKey = missingFiles.join('|');
   const faceTransformInput =
     partTransforms?.face ??
@@ -89,22 +102,26 @@ export const PetRenderer = ({
     if (missingFiles.length === 0) return;
     if (warnedMissingFilesKeyRef.current === missingFilesKey) return;
     warnedMissingFilesKeyRef.current = missingFilesKey;
-    console.warn(`[PetRenderer] missing part files skipped: ${missingFiles.join(', ')}`);
+    console.warn(
+      `[PetRenderer] missing part files skipped: ${missingFiles.join(', ')}`
+    );
   }, [missingFiles, missingFilesKey]);
 
   return (
-    <View testID={testID} style={[styles.container, { width: size, height: size }, style]}>
-      {renderableParts.map(part => {
+    <View
+      testID={testID}
+      style={[styles.container, { width: size, height: size }, style]}
+    >
+      {renderableParts.map((part) => {
         const partTransform = partTransforms?.[part.key];
         const pivot = getTemplateAnchorRenderPx(template, part.anchor, size);
-        const transform =
-          partTransform
-            ? buildPivotTransform(
-                pivot ?? { x: size / 2, y: size / 2 },
-                size,
-                partTransform
-              )
-            : undefined;
+        const transform = partTransform
+          ? buildPivotTransform(
+              pivot ?? { x: size / 2, y: size / 2 },
+              size,
+              partTransform
+            )
+          : undefined;
 
         return (
           <Animated.Image

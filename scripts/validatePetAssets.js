@@ -18,6 +18,7 @@ const VALID_DIRECTIONS = new Set([
   'rightUp',
   'rightDown',
 ]);
+const VALID_VARIANTS = new Set(['lv1', 'lv2', 'lv3']);
 
 const errors = [];
 const scannedFiles = [];
@@ -79,11 +80,22 @@ function validateFilename(filePath) {
     return;
   }
 
+  const possibleVariant = tokens[tokens.length - 1];
+  const hasVariant = VALID_VARIANTS.has(possibleVariant);
+  const directionIndex = hasVariant ? tokens.length - 2 : tokens.length - 1;
+
+  if (hasVariant && tokens.length < 6) {
+    errors.push(
+      `${filePath}: invalid filename format. Variant suffix requires {pet}_{version}_{zIndex}_{part}_{direction}_${possibleVariant}.png.`
+    );
+    return;
+  }
+
   const pet = tokens[0];
   const version = tokens[1];
   const zIndex = tokens[2];
-  const part = tokens.slice(3, -1).join('_');
-  const direction = tokens[tokens.length - 1];
+  const part = tokens.slice(3, directionIndex).join('_');
+  const direction = tokens[directionIndex];
 
   if (!/^[a-z0-9]+$/.test(pet)) {
     errors.push(

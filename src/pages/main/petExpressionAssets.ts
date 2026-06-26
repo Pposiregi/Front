@@ -1,10 +1,15 @@
 import type { ImageSourcePropType } from 'react-native';
 import type { PetType } from 'types/profile';
 import bagicCatAmazedEye from '@assets/pet/bagic_cat/faces/bagic_cat_amazedEye.png';
+import bagicCatAmazedEyebrow from '@assets/pet/bagic_cat/faces/bagic_cat_amazedEyebrow.png';
 import bagicCatAmazedMouse from '@assets/pet/bagic_cat/faces/bagic_cat_amazedMouse.png';
 import bagicCatFace from '@assets/pet/bagic_cat/faces/bagic_cat_face.png';
 import bagicCatSadEye from '@assets/pet/bagic_cat/faces/bagic_cat_sadEye.png';
+import bagicCatSadEyebrow from '@assets/pet/bagic_cat/faces/bagic_cat_sadEyebrow.png';
+import bagicCatSadMouse from '@assets/pet/bagic_cat/faces/bagic_cat_sadMouse.png';
 import bagicCatSmailEye from '@assets/pet/bagic_cat/faces/bagic_cat_smailEye.png';
+import bagicCatSmailEyebrow from '@assets/pet/bagic_cat/faces/bagic_cat_smailEyebrow.png';
+import bagicCatSmailMouse from '@assets/pet/bagic_cat/faces/bagic_cat_smailMouse.png';
 import sibaDogAmazedEye from '@assets/pet/siba_dog/faces/siba_dog_amazedEye.png';
 import sibaDogAmazedEyebrow from '@assets/pet/siba_dog/faces/siba_dog_amazedEyebrow.png';
 import sibaDogAmazedMouse from '@assets/pet/siba_dog/faces/siba_dog_amazedMouse.png';
@@ -34,16 +39,20 @@ export const PET_EXPRESSION_ASSETS: Record<
     amazed: {
       baseFace: bagicCatFace,
       eyes: bagicCatAmazedEye,
+      eyebrows: bagicCatAmazedEyebrow,
       mouth: bagicCatAmazedMouse,
     },
     smile: {
       baseFace: bagicCatFace,
       eyes: bagicCatSmailEye,
+      eyebrows: bagicCatSmailEyebrow,
+      mouth: bagicCatSmailMouse,
     },
     sad: {
       baseFace: bagicCatFace,
       eyes: bagicCatSadEye,
-      // 고양이는 sad mouth 전용 자산이 없어 어색한 입 레이어 대신 눈만 교체한다.
+      eyebrows: bagicCatSadEyebrow,
+      mouth: bagicCatSadMouse,
     },
   },
   DOG: {
