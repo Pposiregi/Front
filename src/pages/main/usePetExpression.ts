@@ -9,6 +9,9 @@ import {
 
 const PET_EXPRESSION_RESET_MS = 1200;
 const PET_RUN_COMPLETE_SMILE_MS = PET_EXPRESSION_RESET_MS + 500;
+const PET_MISSION_COMPLETE_EXCITED_MS = PET_EXPRESSION_RESET_MS + 500;
+const PET_RUN_START_TIRED_MS = PET_EXPRESSION_RESET_MS + 300;
+const PET_RUN_FAILURE_DEAD_MS = PET_EXPRESSION_RESET_MS + 800;
 const PET_DRAG_RESET_MS = 700;
 const PET_DRAG_TRIGGER_DISTANCE = 18;
 
@@ -74,6 +77,21 @@ export const usePetExpression = (selectedPetType: PetType | string) => {
     showPetExpression('smile', PET_RUN_COMPLETE_SMILE_MS);
   }, [showPetExpression]);
 
+  // 미션 완료는 성취 피드백으로 신난 표정을 보여준다.
+  const showMissionCompleteExpression = useCallback(() => {
+    showPetExpression('excited', PET_MISSION_COMPLETE_EXCITED_MS);
+  }, [showPetExpression]);
+
+  // 러닝 시작 직후에는 운동을 시작한 느낌의 지친 표정을 짧게 보여준다.
+  const showRunStartExpression = useCallback(() => {
+    showPetExpression('tired', PET_RUN_START_TIRED_MS);
+  }, [showPetExpression]);
+
+  // 러닝 종료 처리 실패처럼 사용자가 다시 시도해야 하는 상황은 뻗은 표정으로 피드백한다.
+  const showRunFailureExpression = useCallback(() => {
+    showPetExpression('dead', PET_RUN_FAILURE_DEAD_MS);
+  }, [showPetExpression]);
+
   // 아래로 끌어당기기 시작하면 즉시 슬픈 표정으로 바꾼다.
   const handlePetDragStart = useCallback(() => {
     clearPetExpressionReset();
@@ -129,7 +147,10 @@ export const usePetExpression = (selectedPetType: PetType | string) => {
     expressionOverlays,
     petPanHandlers: petPanResponder.panHandlers,
     resetPetExpression,
+    showMissionCompleteExpression,
     showPetPressExpression,
     showRunCompleteExpression,
+    showRunFailureExpression,
+    showRunStartExpression,
   };
 };
