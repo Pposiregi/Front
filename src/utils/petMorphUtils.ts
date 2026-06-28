@@ -17,9 +17,9 @@ const SIBA_DOG_MAIN_TORSO_FILES: Record<SibaDogTorsoMuscleLevel, string> = {
 };
 
 const BODY_FAT_TORSO_THRESHOLDS = {
-  male: { lv3Max: 17, lv2Max: 24 },
-  female: { lv3Max: 24, lv2Max: 31 },
-  neutral: { lv3Max: 20, lv2Max: 28 },
+  male: { lv3Max: 10, lv2Max: 14 },
+  female: { lv3Max: 16, lv2Max: 22 },
+  neutral: { lv3Max: 13, lv2Max: 18 },
 } as const;
 
 /**
