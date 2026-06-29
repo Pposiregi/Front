@@ -139,10 +139,9 @@ export default function ProfileImageModal({
       setUploading(true);
       await updateUserProfile({ profileImageKey: selectedKey });
       const history = await getProfileImageHistory();
-      const current = history.find((item) => item.isCurrent);
-      if (current) {
-        dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
-      }
+      setUploadHistory(history);
+      const user = await getUser();
+      dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       handleClose();
     } catch (e) {
       console.warn('[ProfileImage] 저장 실패:', e);

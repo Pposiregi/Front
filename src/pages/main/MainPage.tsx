@@ -148,16 +148,10 @@ export const MainPage = () => {
     []
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
-  const [trans, setTrans] = useState(false); // 미션 완료 트리거
   /** 미션 목록 모달을 연다. */
   const handleOpenMission = () => setShowMissionModal(true);
   /** 미션 모달을 닫고 필요하면 펫 완료 연출을 재생한다. */
   const handleCloseMission = () => {
-    // 모달 닫힐 때 강아지 웃음 트리거
-    if (trans) {
-      changePetState(PetStates.HAPPY, { duration: 1500 });
-      setTrans(false); // 초기화
-    }
     setShowMissionModal(false);
   };
 
@@ -1259,9 +1253,9 @@ export const MainPage = () => {
             missions={missionApiItems}
             onComplete={() => {
               refreshMissions(); // 기존 미션 새로고침
+              changePetState(PetStates.HAPPY, { duration: 1500 });
               handleCloseMission();
               showMissionCompleteExpression();
-              setTrans(true);
             }}
           />
           <RunningSummaryModal
