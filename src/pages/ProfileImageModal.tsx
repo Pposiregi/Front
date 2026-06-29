@@ -41,12 +41,10 @@ const SECRET_TAP_REQUIRED = 5;
 const TAP_TIMEOUT = 2000;
 
 const extractImageKey = (imageUrlOrKey: string): string => {
-  try {
-    const url = new URL(imageUrlOrKey);
-    return url.pathname.replace(/^\/+/, '');
-  } catch {
-    return imageUrlOrKey;
-  }
+  const pathMatch = imageUrlOrKey.match(
+    /^[a-z][a-z\d+.-]*:\/\/[^/]+\/?([^?#]*)/i
+  );
+  return pathMatch ? pathMatch[1] : imageUrlOrKey;
 };
 
 export default function ProfileImageModal({
