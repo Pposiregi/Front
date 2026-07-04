@@ -81,8 +81,30 @@
   },
   "overrides": {
     "@isaacs/brace-expansion": "5.0.1",
+    "@grpc/grpc-js": "1.9.16",
+    "@react-native-community/cli-server-api": {
+      "ws": "6.2.4"
+    },
+    "@react-native/dev-middleware": {
+      "ws": "6.2.4"
+    },
+    "form-data": "4.0.6",
     "follow-redirects": "1.16.0",
-    "protobufjs": "7.5.7",
+    "js-yaml": "4.3.0",
+    "launch-editor": "2.14.1",
+    "metro": {
+      "ws": "7.5.11"
+    },
+    "protobufjs": "7.6.4",
+    "qs": "6.15.3",
+    "react-devtools-core": {
+      "ws": "7.5.11"
+    },
+    "react-native": {
+      "ws": "6.2.4"
+    },
+    "shell-quote": "1.9.0",
+    "tmp": "0.2.7",
     "@xmldom/xmldom": "0.8.13",
     "uuid": "14.0.0",
     "fast-xml-parser": "5.7.0"

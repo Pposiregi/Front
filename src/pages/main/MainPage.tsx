@@ -34,6 +34,7 @@ import { Colors } from '@styles/theme';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
+import { getSibaDogMainTorsoFileByPbf } from '@utils/petMorphUtils';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
 import { createBodyHistory, getBodyHistoryByDate } from '@api/bodyHistoryApi';
 import useHealthSteps from '@hooks/useHealthSteps';
@@ -147,16 +148,10 @@ export const MainPage = () => {
     []
   );
   const [showMissionModal, setShowMissionModal] = useState(false);
-  const [trans, setTrans] = useState(false); // 미션 완료 트리거
   /** 미션 목록 모달을 연다. */
   const handleOpenMission = () => setShowMissionModal(true);
   /** 미션 모달을 닫고 필요하면 펫 완료 연출을 재생한다. */
   const handleCloseMission = () => {
-    // 모달 닫힐 때 강아지 웃음 트리거
-    if (trans) {
-      changePetState(PetStates.HAPPY, { duration: 1500 });
-      setTrans(false); // 초기화
-    }
     setShowMissionModal(false);
   };
 
@@ -517,12 +512,24 @@ export const MainPage = () => {
     mainPetTemplateId,
     petRenderSize: PET_RENDER_SIZE,
   });
+  const mainPartFileOverrides = useMemo(
+    () =>
+      mainPetTemplateId === 'sibadog_v1'
+        ? {
+            torso: getSibaDogMainTorsoFileByPbf(effectivePbf, userGender),
+          }
+        : undefined,
+    [effectivePbf, mainPetTemplateId, userGender]
+  );
   const {
     expressionOverlays: petExpressionOverlays,
     petPanHandlers,
     resetPetExpression,
+    showMissionCompleteExpression,
     showPetPressExpression,
     showRunCompleteExpression,
+    showRunFailureExpression,
+    showRunStartExpression,
   } = usePetExpression(selectedPetType);
 
   /** 펫을 터치했을 때 HAPPY 상태 전환을 트리거한다. */
@@ -628,13 +635,19 @@ export const MainPage = () => {
       }
       setEndFailureCount(0);
     } catch (err: any) {
+      showRunFailureExpression();
       setEndFailureCount((prev) => prev + 1);
       Alert.alert(
         '러닝 종료 실패',
         err?.message ?? '러닝 종료 중 문제가 발생했어요.'
       );
     }
-  }, [appendTodayRunSeconds, endSession, showRunCompleteExpression]);
+  }, [
+    appendTodayRunSeconds,
+    endSession,
+    showRunCompleteExpression,
+    showRunFailureExpression,
+  ]);
 
   const handleSetDevPreviewPbf = useCallback((value: number) => {
     setDevPreviewPbf(clampDevPbf(value));
@@ -700,6 +713,7 @@ export const MainPage = () => {
         }
         setEndFailureCount(0);
       } catch (err: any) {
+        showRunFailureExpression();
         const message = err?.message ?? '러닝 종료 중 문제가 발생했어요.';
         const nextFailureCount = endFailureCount + 1;
         setEndFailureCount(nextFailureCount);
@@ -736,6 +750,7 @@ export const MainPage = () => {
     endFailureCount,
     isTracking,
     showRunCompleteExpression,
+    showRunFailureExpression,
   ]);
 
   /**
@@ -810,8 +825,10 @@ export const MainPage = () => {
           }
           await startRunningNotification();
           await logRunningStart();
+          showRunStartExpression();
           setEndFailureCount(0);
         } catch (err: any) {
+          showRunFailureExpression();
           Alert.alert(
             '러닝 시작 실패',
             err?.message ?? '러닝 시작 중 문제가 발생했어요.'
@@ -841,7 +858,14 @@ export const MainPage = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, scaleAnim, opacityAnim, startSession]);
+  }, [
+    countdown,
+    opacityAnim,
+    scaleAnim,
+    showRunFailureExpression,
+    showRunStartExpression,
+    startSession,
+  ]);
 
   /**
    * 미션 새로고침.
@@ -1164,6 +1188,7 @@ export const MainPage = () => {
                 size={runPetRenderSize}
                 templateId={runPetTemplateId}
                 partTransforms={runPartTransforms}
+                expressionOverlays={petExpressionOverlays}
                 style={[
                   styles.running_pet,
                   {
@@ -1228,7 +1253,9 @@ export const MainPage = () => {
             missions={missionApiItems}
             onComplete={() => {
               refreshMissions(); // 기존 미션 새로고침
-              setTrans(true);
+              changePetState(PetStates.HAPPY, { duration: 1500 });
+              handleCloseMission();
+              showMissionCompleteExpression();
             }}
           />
           <RunningSummaryModal
@@ -1252,6 +1279,7 @@ export const MainPage = () => {
                 size={PET_RENDER_SIZE}
                 templateId={mainPetTemplateId}
                 partTransforms={idlePartTransforms}
+                partFileOverrides={mainPartFileOverrides}
                 expressionOverlays={petExpressionOverlays}
                 style={[
                   styles.petImage,

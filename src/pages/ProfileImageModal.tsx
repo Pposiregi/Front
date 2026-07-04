@@ -40,13 +40,11 @@ type Props = {
 const SECRET_TAP_REQUIRED = 5;
 const TAP_TIMEOUT = 2000;
 
-const S3_ORIGIN = 'https://slimpet-bucket.s3.ap-northeast-2.amazonaws.com/';
-
-const extractImageKey = (s3Url: string): string => {
-  if (s3Url.startsWith(S3_ORIGIN)) {
-    return s3Url.slice(S3_ORIGIN.length).split('?')[0];
-  }
-  return s3Url;
+const extractImageKey = (imageUrlOrKey: string): string => {
+  const pathMatch = imageUrlOrKey.match(
+    /^[a-z][a-z\d+.-]*:\/\/[^/]+\/?([^?#]*)/i
+  );
+  return pathMatch ? pathMatch[1] : imageUrlOrKey;
 };
 
 export default function ProfileImageModal({
@@ -55,7 +53,6 @@ export default function ProfileImageModal({
   currentImageUrl,
 }: Props) {
   const dispatch = useDispatch();
-  const [selectedUrl, setSelectedUrl] = useState(currentImageUrl);
   const [selectedKey, setSelectedKey] = useState(() =>
     extractImageKey(currentImageUrl)
   );
@@ -77,7 +74,6 @@ export default function ProfileImageModal({
 
   useEffect(() => {
     if (visible) {
-      setSelectedUrl(currentImageUrl);
       setSelectedKey(extractImageKey(currentImageUrl));
       setTapCount(0);
       setLastTapTime(null);
@@ -88,7 +84,6 @@ export default function ProfileImageModal({
           const current = history.find((item) => item.isCurrent);
           if (current) {
             setSelectedKey(current.imageKey);
-            setSelectedUrl(current.presignedUrl);
           }
         })
         .catch((e) => {
@@ -105,7 +100,6 @@ export default function ProfileImageModal({
 
   const handleAvatarPress = (url: string) => {
     const key = extractImageKey(url);
-    setSelectedUrl(url);
     setSelectedKey(key);
 
     if (secretUnlocked || url !== SECRET_TARGET_URL) return;
@@ -143,10 +137,9 @@ export default function ProfileImageModal({
       setUploading(true);
       await updateUserProfile({ profileImageKey: selectedKey });
       const history = await getProfileImageHistory();
-      const current = history.find((item) => item.isCurrent);
-      if (current) {
-        dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
-      }
+      setUploadHistory(history);
+      const user = await getUser();
+      dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       handleClose();
     } catch (e) {
       console.warn('[ProfileImage] 저장 실패:', e);
@@ -182,7 +175,7 @@ export default function ProfileImageModal({
     try {
       setUploading(true);
       console.log('[ProfileImage] 갤러리 업로드 시작');
-      const { uploadUrl, imageKey } = await requestProfileImageUpload();
+      const { uploadUrl } = await requestProfileImageUpload();
       await uploadPhoto(uploadUrl, {
         uri: pendingAsset.uri,
         mimeType: pendingAsset.type ?? 'image/jpeg',
@@ -202,7 +195,6 @@ export default function ProfileImageModal({
 
   const handleHistorySelect = (item: ProfileImageHistoryItem) => {
     setSelectedKey(item.imageKey);
-    setSelectedUrl(item.presignedUrl);
   };
 
   const handleHistoryImageError = async () => {
