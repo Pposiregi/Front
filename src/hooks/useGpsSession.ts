@@ -7,7 +7,10 @@ import {
 } from '@hooks/useRouteTracking';
 import { useNativeStepCounter } from '@hooks/useNativeStepCounter';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
-import { getDistanceMeters } from '@utils/distance';
+import {
+  calculateTotalDistanceMeters,
+  calculateTotalSlopeDistanceMeters,
+} from '@utils/distance';
 import type {
   GpsEndRequest,
   GpsEndResponse,
@@ -69,16 +72,6 @@ const isRetryableNetworkError = (error: unknown): boolean => {
     return true;
   }
   return maybe?.request != null && maybe?.response == null;
-};
-
-/** 좌표 경로 전체 길이를 미터 단위로 계산한다. */
-const calculateTotalDistanceMeters = (path: LatLng[]): number => {
-  if (path.length < 2) return 0;
-  let total = 0;
-  for (let i = 1; i < path.length; i += 1) {
-    total += getDistanceMeters(path[i - 1], path[i]);
-  }
-  return total;
 };
 
 /**
@@ -362,7 +355,11 @@ export const useGpsSession = (): UseGpsSessionResult => {
         0,
         endTime.getTime() - startTimeValue.getTime()
       );
-      const distance = calculateTotalDistanceMeters(pathSnapshot);
+      const horizontalDistance = calculateTotalDistanceMeters(pathSnapshot);
+      const distance =
+        trackPointsSnapshot.length >= 2
+          ? calculateTotalSlopeDistanceMeters(trackPointsSnapshot)
+          : horizontalDistance;
       // backend 기준 단위(m/s)로 요약 속도를 관리한다.
       const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
       // 센서 실측값 우선, 미지원 기기에서는 GPS 기반 추정값으로 fallback한다.
@@ -376,6 +373,8 @@ export const useGpsSession = (): UseGpsSessionResult => {
       if (__DEV__) {
         console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
           distanceMeters: distance,
+          horizontalDistanceMeters: horizontalDistance,
+          slopeDistanceDeltaMeters: distance - horizontalDistance,
           avgSpeedMps,
           sensorSteps,
           stepLengthMeters: estimatedStepLengthMeters,
