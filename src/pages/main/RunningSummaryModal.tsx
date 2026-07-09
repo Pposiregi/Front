@@ -9,6 +9,7 @@ type RunningSummaryModalProps = {
   distanceMeters: number;
   stepCount: number;
   avgSpeedMps: number;
+  strideLength: number;
 };
 
 /** 평균 속도를 km/h로 변환한다. */
@@ -25,11 +26,17 @@ const formatPacePerKm = (mps: number) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} /km`;
 };
 
-/** 미터 단위 거리를 요약 모달용 문자열로 포맷한다. */
+/** 미터 단위 거리를 1km 이상이면 km, 미만이면 m로 포맷한다. */
 const formatDistanceMeters = (meters: number) => {
-  // 요약 모달은 러닝 종료 직후 원본 거리(m)를 그대로 노출한다.
   if (!Number.isFinite(meters) || meters < 0) return '-';
-  return `${meters.toFixed(2)} m`;
+  if (meters >= 1000) return `${(meters / 1000).toFixed(2)} km`;
+  return `${Math.round(meters)} m`;
+};
+
+/** 보폭(m)을 cm 단위 문자열로 포맷한다. */
+const formatStride = (meters: number) => {
+  if (!Number.isFinite(meters) || meters <= 0) return '-';
+  return `${Math.round(meters * 100)} cm`;
 };
 
 /** 러닝 종료 직후 핵심 요약 수치를 보여주는 모달이다. */
@@ -40,6 +47,7 @@ const RunningSummaryModal = ({
   distanceMeters,
   stepCount,
   avgSpeedMps,
+  strideLength,
 }: RunningSummaryModalProps) => {
   return (
     <Modal
@@ -83,6 +91,11 @@ const RunningSummaryModal = ({
                     : '-'}
                 </Text>
               </View>
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>평균 보폭</Text>
+              <Text style={styles.summaryValue}>{formatStride(strideLength)}</Text>
             </View>
           </View>
           <TouchableOpacity

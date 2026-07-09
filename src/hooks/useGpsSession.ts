@@ -121,6 +121,7 @@ export type GpsSessionSummary = {
   stepCount: number;
   distanceMeters: number;
   avgSpeedMps: number;
+  strideLength: number;
 };
 
 export type GpsSessionEndResult = {
@@ -362,17 +363,31 @@ export const useGpsSession = (): UseGpsSessionResult => {
         0,
         endTime.getTime() - startTimeValue.getTime()
       );
-      const distance = calculateTotalDistanceMeters(pathSnapshot);
-      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
-      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
+      const gpsDistance = calculateTotalDistanceMeters(pathSnapshot);
       // 센서 실측값 우선, 미지원 기기에서는 GPS 기반 추정값으로 fallback한다.
       const sensorSteps = liveStepsRef.current;
+
+      // GPS 신호 불량 시 걸음수 기반 추정 거리로 보정한다.
+      const stepBasedDistance =
+        sensorSteps > 0 ? sensorSteps * EASY_RUNNING_STEP_LENGTH_METERS : 0;
+      const distance =
+        stepBasedDistance > 0 && gpsDistance < stepBasedDistance * 0.5
+          ? stepBasedDistance
+          : gpsDistance;
+
+      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
+      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
       const estimatedStepLengthMeters =
         getEstimatedRunningStepLengthMeters(avgSpeedMps);
       const stepCount =
         sensorSteps > 0
           ? sensorSteps
           : Math.max(0, Math.round(distance / estimatedStepLengthMeters));
+      // 실측 걸음수가 있으면 실제 평균 보폭을, 없으면 속도 추정값을 사용한다.
+      const strideLength =
+        sensorSteps > 0 && distance > 0
+          ? distance / sensorSteps
+          : estimatedStepLengthMeters;
       if (__DEV__) {
         console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
           distanceMeters: distance,
@@ -393,6 +408,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
         stepCount,
         distanceMeters: distance,
         avgSpeedMps,
+        strideLength,
       };
 
       clearLogTimer();
