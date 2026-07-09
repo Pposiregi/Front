@@ -1283,7 +1283,6 @@ export const MainPage = () => {
             distanceMeters={runSummary?.distanceMeters ?? 0}
             stepCount={runSummary?.stepCount ?? 0}
             avgSpeedMps={runSummary?.avgSpeedMps ?? 0}
-            strideLength={runSummary?.strideLength ?? 0}
           />
           <View
             style={styles.pet}
