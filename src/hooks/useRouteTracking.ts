@@ -35,6 +35,7 @@ export type RouteTrackPoint = LatLng & {
   recordedAt: string;
   speed?: number;
   altitude?: number;
+  accuracy?: number;
 };
 
 /**
@@ -134,12 +135,14 @@ export const useRouteTracking = () => {
       longitude,
       speed,
       altitude,
+      accuracy,
       timestamp,
     }: {
       latitude: number;
       longitude: number;
       speed?: number | null;
       altitude?: number | null;
+      accuracy?: number | null;
       timestamp?: number;
     }) => {
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -153,6 +156,10 @@ export const useRouteTracking = () => {
       const safeAltitude = Number.isFinite(altitude)
         ? Number(altitude)
         : undefined;
+      const safeAccuracy =
+        Number.isFinite(accuracy) && (accuracy ?? 0) >= 0
+          ? Number(accuracy)
+          : undefined;
       const recordedAt = new Date(
         Number.isFinite(timestamp) ? Number(timestamp) : Date.now()
       ).toISOString();
@@ -165,6 +172,7 @@ export const useRouteTracking = () => {
           recordedAt,
           speed: safeSpeed,
           altitude: safeAltitude,
+          accuracy: safeAccuracy,
         };
         const lastPoint = prev.path[prev.path.length - 1];
 
@@ -210,6 +218,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });
       },
@@ -262,6 +271,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });
       },
