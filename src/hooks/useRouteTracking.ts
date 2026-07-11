@@ -20,9 +20,9 @@ const DEFAULT_REGION: MapRegion = {
 // 추적 시 카메라가 유지할 확대 수준 (약 400m 너비)
 const TRACKING_REGION_DELTA = 0.004;
 // 장시간 러닝에서 좌표 배열과 렌더링 비용이 과도하게 커지지 않도록 샘플을 절제한다.
-const WATCH_DISTANCE_FILTER_METERS = 5;
+const WATCH_DISTANCE_FILTER_METERS = 1;
 // GPS 튐과 제자리 샘플 누적을 방지하기 위한 최소 이동 거리
-const MIN_POINT_DISTANCE_METERS = 3;
+const MIN_POINT_DISTANCE_METERS = 1;
 
 type TrackingState = {
   isTracking: boolean;
@@ -35,6 +35,7 @@ export type RouteTrackPoint = LatLng & {
   recordedAt: string;
   speed?: number;
   altitude?: number;
+  accuracy?: number;
 };
 
 /**
@@ -134,12 +135,14 @@ export const useRouteTracking = () => {
       longitude,
       speed,
       altitude,
+      accuracy,
       timestamp,
     }: {
       latitude: number;
       longitude: number;
       speed?: number | null;
       altitude?: number | null;
+      accuracy?: number | null;
       timestamp?: number;
     }) => {
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -153,6 +156,10 @@ export const useRouteTracking = () => {
       const safeAltitude = Number.isFinite(altitude)
         ? Number(altitude)
         : undefined;
+      const safeAccuracy =
+        Number.isFinite(accuracy) && (accuracy ?? 0) >= 0
+          ? Number(accuracy)
+          : undefined;
       const recordedAt = new Date(
         Number.isFinite(timestamp) ? Number(timestamp) : Date.now()
       ).toISOString();
@@ -165,6 +172,7 @@ export const useRouteTracking = () => {
           recordedAt,
           speed: safeSpeed,
           altitude: safeAltitude,
+          accuracy: safeAccuracy,
         };
         const lastPoint = prev.path[prev.path.length - 1];
 
@@ -210,6 +218,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });
       },
@@ -262,6 +271,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });
       },

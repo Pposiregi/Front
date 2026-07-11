@@ -226,9 +226,11 @@ const SocialLoginPage = () => {
               내가 건강해지면 펫도 건강해져요,{'\n'}귀여운 펫을 지금 만나요!
             </Text>
           </View>
-          <Pressable style={styles.kakaoButton} onPress={handleReset}>
-            <Text style={styles.text}>앱 초기화 (테스트용)</Text>
-          </Pressable>
+          {__DEV__ && (
+            <Pressable style={styles.kakaoButton} onPress={handleReset}>
+              <Text style={styles.text}>앱 초기화 (테스트용)</Text>
+            </Pressable>
+          )}
           <Pressable
             style={styles.kakaoButton}
             onPress={() => handleLogin(signInWithKakao)}

@@ -33,6 +33,7 @@ import { SCREEN_WIDTH } from '@styles/dimensions';
 import { Colors } from '@styles/theme';
 import MapView from 'react-native-maps';
 import useGpsSession, { type GpsSessionSummary } from '@hooks/useGpsSession';
+import { getDistanceMeters } from '@utils/distance';
 import { formatDateKey, formatDateLabel } from '@utils/dateUtil';
 import { getSibaDogMainTorsoFileByPbf } from '@utils/petMorphUtils';
 import type { BodyHistoryFormValues } from 'types/bodyHistory';
@@ -253,16 +254,37 @@ export const MainPage = () => {
   const [runningElapsedSec, setRunningElapsedSec] = useState(0);
   const [, setTodayRunAccumulatedSec] = useState(0);
 
-  // 최근 3개 trackPoint의 speed(m/s) 평균으로 현재 페이스 계산
+  // 최근 5개 trackPoint의 실제 이동 거리/시간으로 현재 페이스 계산
+  // GPS speed 값 대신 좌표 간 거리+타임스탬프를 사용해 신호 불안정 시 정확도를 높인다.
   const livePaceMinPerKm = useMemo(() => {
-    const recent = trackPoints.slice(-3);
-    const speeds = recent
-      .map((p) => p.speed)
-      .filter((s): s is number => s != null && s > 0.5); // 정지(0.5m/s 미만) 제외
-    if (speeds.length === 0) return null;
-    const avgSpeedMps = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-    return 1000 / avgSpeedMps / 60; // min/km
+    if (trackPoints.length < 2) return null;
+    const recent = trackPoints.slice(-5);
+    if (recent.length < 2) return null;
+    let totalDist = 0;
+    for (let i = 1; i < recent.length; i++) {
+      totalDist += getDistanceMeters(
+        { latitude: recent[i - 1].latitude, longitude: recent[i - 1].longitude },
+        { latitude: recent[i].latitude, longitude: recent[i].longitude }
+      );
+    }
+    const durationMs =
+      new Date(recent[recent.length - 1].recordedAt).getTime() -
+      new Date(recent[0].recordedAt).getTime();
+    if (durationMs <= 0 || totalDist < 1) return null;
+    const speedMps = (totalDist / durationMs) * 1000;
+    if (speedMps < 0.5) return null; // 정지(0.5m/s 미만) 제외
+    return 1000 / speedMps / 60; // min/km
   }, [trackPoints]);
+
+  // path 좌표 누적으로 실시간 거리를 계산한다.
+  const liveDistanceMeters = useMemo(() => {
+    if (path.length < 2) return 0;
+    let total = 0;
+    for (let i = 1; i < path.length; i++) {
+      total += getDistanceMeters(path[i - 1], path[i]);
+    }
+    return total;
+  }, [path]);
   const runBgProgress = useRef(new Animated.Value(0)).current;
   const runSwirlProgress = useRef(new Animated.Value(0)).current;
 
@@ -1054,6 +1076,27 @@ export const MainPage = () => {
       >
         {isTracking ? (
           <View style={styles.runningStatPanel}>
+            <View style={styles.runningStatPanelItem}>
+              <Text style={styles.runningStatPanelLabel} numberOfLines={1}>
+                거리
+              </Text>
+              <View style={styles.runningStatPanelValueRow}>
+                <Text
+                  style={styles.runningStatPanelValue}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.78}
+                >
+                  {liveDistanceMeters < 1000
+                    ? `${Math.round(liveDistanceMeters)}`
+                    : `${(liveDistanceMeters / 1000).toFixed(2)}`}
+                </Text>
+                <Text style={styles.runningStatPanelUnit}>
+                  {liveDistanceMeters < 1000 ? 'm' : 'km'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.runningStatPanelDivider} />
             <View style={styles.runningStatPanelItem}>
               <Text style={styles.runningStatPanelLabel} numberOfLines={1}>
                 페이스
