@@ -41,12 +41,10 @@ const SECRET_TAP_REQUIRED = 5;
 const TAP_TIMEOUT = 2000;
 
 const extractImageKey = (imageUrlOrKey: string): string => {
-  try {
-    const url = new URL(imageUrlOrKey);
-    return url.pathname.replace(/^\/+/, '');
-  } catch {
-    return imageUrlOrKey;
-  }
+  const pathMatch = imageUrlOrKey.match(
+    /^[a-z][a-z\d+.-]*:\/\/[^/]+\/?([^?#]*)/i
+  );
+  return pathMatch ? pathMatch[1] : imageUrlOrKey;
 };
 
 export default function ProfileImageModal({
@@ -139,10 +137,9 @@ export default function ProfileImageModal({
       setUploading(true);
       await updateUserProfile({ profileImageKey: selectedKey });
       const history = await getProfileImageHistory();
-      const current = history.find((item) => item.isCurrent);
-      if (current) {
-        dispatch(userSlice.actions.updateProfileImageUrl(current.presignedUrl));
-      }
+      setUploadHistory(history);
+      const user = await getUser();
+      dispatch(userSlice.actions.updateProfileImageUrl(user.profileImageUrl));
       handleClose();
     } catch (e) {
       console.warn('[ProfileImage] 저장 실패:', e);

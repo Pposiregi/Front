@@ -23,6 +23,8 @@ const SESSION_START_KEY = 'slimpet:gps:startTime';
 const LOG_FLUSH_MAX_ATTEMPTS = 3;
 const END_API_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 600;
+// 이 값(m)보다 GPS 평균 오차 반경이 크면 "GPS 신호 불량"으로 간주한다.
+const ACCURACY_BAD_THRESHOLD_METERS = 30;
 const MIN_RUNNING_STEP_LENGTH_METERS = 0.78;
 const EASY_RUNNING_STEP_LENGTH_METERS = 0.85;
 const STEADY_RUNNING_STEP_LENGTH_METERS = 0.92;
@@ -72,6 +74,15 @@ const isRetryableNetworkError = (error: unknown): boolean => {
     return true;
   }
   return maybe?.request != null && maybe?.response == null;
+};
+
+/** track point들의 평균 GPS 오차 반경(m)을 계산한다. 값이 없으면 null. */
+const calculateAverageAccuracy = (points: RouteTrackPoint[]): number | null => {
+  const values = points
+    .map((p) => p.accuracy)
+    .filter((v): v is number => Number.isFinite(v));
+  if (values.length === 0) return null;
+  return values.reduce((a, b) => a + b, 0) / values.length;
 };
 
 /**
@@ -356,14 +367,27 @@ export const useGpsSession = (): UseGpsSessionResult => {
         endTime.getTime() - startTimeValue.getTime()
       );
       const horizontalDistance = calculateTotalDistanceMeters(pathSnapshot);
-      const distance =
+      const gpsDistance =
         trackPointsSnapshot.length >= 2
           ? calculateTotalSlopeDistanceMeters(trackPointsSnapshot)
           : horizontalDistance;
-      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
-      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
       // 센서 실측값 우선, 미지원 기기에서는 GPS 기반 추정값으로 fallback한다.
       const sensorSteps = liveStepsRef.current;
+
+      // 걸음수는 흔들기 등으로도 오탐될 수 있어, "GPS 신호 자체가 나쁜지"는
+      // 걸음수와의 괴리가 아니라 실측 오차 반경(accuracy)으로 판단한다.
+      const avgAccuracy = calculateAverageAccuracy(trackPointsSnapshot);
+      const isGpsSignalBad =
+        avgAccuracy != null && avgAccuracy > ACCURACY_BAD_THRESHOLD_METERS;
+      const stepBasedDistance =
+        sensorSteps > 0 ? sensorSteps * EASY_RUNNING_STEP_LENGTH_METERS : 0;
+      const distance =
+        isGpsSignalBad && stepBasedDistance > 0
+          ? stepBasedDistance
+          : gpsDistance;
+
+      // backend 기준 단위(m/s)로 요약 속도를 관리한다.
+      const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
       const estimatedStepLengthMeters =
         getEstimatedRunningStepLengthMeters(avgSpeedMps);
       const stepCount =
@@ -374,7 +398,10 @@ export const useGpsSession = (): UseGpsSessionResult => {
         console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
           distanceMeters: distance,
           horizontalDistanceMeters: horizontalDistance,
-          slopeDistanceDeltaMeters: distance - horizontalDistance,
+          gpsDistance,
+          slopeDistanceDeltaMeters: gpsDistance - horizontalDistance,
+          avgAccuracy,
+          isGpsSignalBad,
           avgSpeedMps,
           sensorSteps,
           stepLengthMeters: estimatedStepLengthMeters,
@@ -424,6 +451,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
     clearPersistedSession,
     endGpsSessionWithRetry,
     flushAllPendingLogs,
+    liveStepsRef,
     path,
     trackPoints,
     startLogTimer,

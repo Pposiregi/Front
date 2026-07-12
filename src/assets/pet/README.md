@@ -35,9 +35,9 @@
 - `part`: part name (letters/numbers, `_` allowed)
   - avoid ending `part` names with direction tokens (e.g. `left`, `right`, `up`,
     `down`)
-  - this keeps filename parsing deterministic because the last token is reserved
-    for `direction`
-  - `direction`: required. use `none` when direction is not needed
+  - this keeps filename parsing deterministic because `direction` is the last
+    token in the required format, or the token before `_lv{n}` in variant files
+- `direction`: required. use `none` when direction is not needed
 
 ## Allowed Direction Values
 
