@@ -35,6 +35,7 @@ export type RouteTrackPoint = LatLng & {
   recordedAt: string;
   speed?: number;
   altitude?: number;
+  altitudeAccuracy?: number;
   accuracy?: number;
 };
 
@@ -135,6 +136,7 @@ export const useRouteTracking = () => {
       longitude,
       speed,
       altitude,
+      altitudeAccuracy,
       accuracy,
       timestamp,
     }: {
@@ -142,6 +144,7 @@ export const useRouteTracking = () => {
       longitude: number;
       speed?: number | null;
       altitude?: number | null;
+      altitudeAccuracy?: number | null;
       accuracy?: number | null;
       timestamp?: number;
     }) => {
@@ -150,12 +153,15 @@ export const useRouteTracking = () => {
         return;
       }
 
-      const safeSpeed = Number.isFinite(speed) && (speed ?? 0) >= 0
-        ? Number(speed)
-        : undefined;
+      const safeSpeed =
+        Number.isFinite(speed) && (speed ?? 0) >= 0 ? Number(speed) : undefined;
       const safeAltitude = Number.isFinite(altitude)
         ? Number(altitude)
         : undefined;
+      const safeAltitudeAccuracy =
+        Number.isFinite(altitudeAccuracy) && (altitudeAccuracy ?? 0) >= 0
+          ? Number(altitudeAccuracy)
+          : undefined;
       const safeAccuracy =
         Number.isFinite(accuracy) && (accuracy ?? 0) >= 0
           ? Number(accuracy)
@@ -172,6 +178,7 @@ export const useRouteTracking = () => {
           recordedAt,
           speed: safeSpeed,
           altitude: safeAltitude,
+          altitudeAccuracy: safeAltitudeAccuracy,
           accuracy: safeAccuracy,
         };
         const lastPoint = prev.path[prev.path.length - 1];
@@ -218,6 +225,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          altitudeAccuracy: position.coords.altitudeAccuracy,
           accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });
@@ -271,6 +279,7 @@ export const useRouteTracking = () => {
           longitude: position.coords.longitude,
           speed: position.coords.speed,
           altitude: position.coords.altitude,
+          altitudeAccuracy: position.coords.altitudeAccuracy,
           accuracy: position.coords.accuracy,
           timestamp: position.timestamp,
         });

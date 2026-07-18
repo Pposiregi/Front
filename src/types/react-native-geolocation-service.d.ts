@@ -5,6 +5,7 @@ declare module 'react-native-geolocation-service' {
       longitude: number;
       accuracy: number;
       altitude?: number | null;
+      altitudeAccuracy?: number | null;
       heading?: number | null;
       speed?: number | null;
     };

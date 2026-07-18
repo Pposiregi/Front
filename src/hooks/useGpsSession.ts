@@ -7,7 +7,10 @@ import {
 } from '@hooks/useRouteTracking';
 import { useNativeStepCounter } from '@hooks/useNativeStepCounter';
 import { startGpsSession, logGps, endGpsSession } from '@api/gpsApi';
-import { getDistanceMeters } from '@utils/distance';
+import {
+  calculateTotalDistanceMeters,
+  calculateTotalSlopeDistanceMeters,
+} from '@utils/distance';
 import type {
   GpsEndRequest,
   GpsEndResponse,
@@ -80,16 +83,6 @@ const calculateAverageAccuracy = (points: RouteTrackPoint[]): number | null => {
     .filter((v): v is number => Number.isFinite(v));
   if (values.length === 0) return null;
   return values.reduce((a, b) => a + b, 0) / values.length;
-};
-
-/** 좌표 경로 전체 길이를 미터 단위로 계산한다. */
-const calculateTotalDistanceMeters = (path: LatLng[]): number => {
-  if (path.length < 2) return 0;
-  let total = 0;
-  for (let i = 1; i < path.length; i += 1) {
-    total += getDistanceMeters(path[i - 1], path[i]);
-  }
-  return total;
 };
 
 /**
@@ -373,7 +366,11 @@ export const useGpsSession = (): UseGpsSessionResult => {
         0,
         endTime.getTime() - startTimeValue.getTime()
       );
-      const gpsDistance = calculateTotalDistanceMeters(pathSnapshot);
+      const horizontalDistance = calculateTotalDistanceMeters(pathSnapshot);
+      const gpsDistance =
+        trackPointsSnapshot.length >= 2
+          ? calculateTotalSlopeDistanceMeters(trackPointsSnapshot)
+          : horizontalDistance;
       // 센서 실측값 우선, 미지원 기기에서는 GPS 기반 추정값으로 fallback한다.
       const sensorSteps = liveStepsRef.current;
 
@@ -385,7 +382,9 @@ export const useGpsSession = (): UseGpsSessionResult => {
       const stepBasedDistance =
         sensorSteps > 0 ? sensorSteps * EASY_RUNNING_STEP_LENGTH_METERS : 0;
       const distance =
-        isGpsSignalBad && stepBasedDistance > 0 ? stepBasedDistance : gpsDistance;
+        isGpsSignalBad && stepBasedDistance > 0
+          ? stepBasedDistance
+          : gpsDistance;
 
       // backend 기준 단위(m/s)로 요약 속도를 관리한다.
       const avgSpeedMps = durationMs > 0 ? (distance / durationMs) * 1000 : 0;
@@ -398,7 +397,9 @@ export const useGpsSession = (): UseGpsSessionResult => {
       if (__DEV__) {
         console.log('>>>[RUNNING][RUN] 세션 자체 걸음 수 계산', {
           distanceMeters: distance,
+          horizontalDistanceMeters: horizontalDistance,
           gpsDistance,
+          slopeDistanceDeltaMeters: gpsDistance - horizontalDistance,
           avgAccuracy,
           isGpsSignalBad,
           avgSpeedMps,
@@ -450,6 +451,7 @@ export const useGpsSession = (): UseGpsSessionResult => {
     clearPersistedSession,
     endGpsSessionWithRetry,
     flushAllPendingLogs,
+    liveStepsRef,
     path,
     trackPoints,
     startLogTimer,
